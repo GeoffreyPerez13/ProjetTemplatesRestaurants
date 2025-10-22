@@ -1,18 +1,75 @@
-# Fichiers sensibles
-/config/cron_secrets.php
-/config/config.php
-/config/database.php
+# ============================================================
+# 🧠 Projet : Templates Restaurants
+# Auteur : Geoffrey Perez
+# Description : Fichier .gitignore pour projet PHP MVC
+# ============================================================
 
-# Dossiers à ignorer
+# --- Fichiers sensibles (⚠️ à ne jamais versionner)
+config/config.php
+config/database.php
+config/cron_secrets.php
+config/cron_verification.php
+
+# --- Fichiers temporaires ou logs
+*.log
+logs/
+tmp/
+cache/
+session/
+error_log
+
+# --- Dossiers de dépendances
 /vendor/
 node_modules/
-.idea/
-.vscode/
-logs/
-uploads/
-public/assets/tmp/
-public/assets/*.log
 
-# Fichiers système
+# --- Fichiers système ou IDE
 .DS_Store
 Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# --- Sauvegardes locales
+*.bak
+*.old
+*.save
+
+# --- Environnements locaux
+.env
+.env.local
+.env.*.local
+
+# --- Uploads et fichiers générés par l'utilisateur
+public/assets/uploads/
+public/assets/tmp/
+public/assets/images/tmp/
+public/uploads/
+uploads/
+
+# --- Sauvegardes de base de données
+*.sql
+*.sql.gz
+*.sqlite
+*.db
+
+# --- Fichiers générés ou compilés
+*.zip
+*.tar
+*.gz
+*.rar
+
+# --- Configuration serveur / apache
+.htaccess~
+.htpasswd
+apache2.conf
+nginx.conf
+
+# --- Exclusions spécifiques à ton projet
+# Tu peux ajuster selon ce que tu veux garder visible sur GitHub
+# Exemple : garder le logo de base mais ignorer ceux uploadés
+public/assets/logo*.png
+
+# --- Notes personnelles
+notes.txt
+todo.txt
+private/
