@@ -1,0 +1,10 @@
+# Utiliser la réécriture d'URL
+RewriteEngine On
+
+# Ne pas rediriger les fichiers ou dossiers physiques (CSS, JS, images…)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Sinon, rediriger toutes les autres requêtes vers index.php
+RewriteRule ^ index.php [QSA,L]

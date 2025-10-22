@@ -1,0 +1,18 @@
+# Activer le moteur de réécriture
+RewriteEngine On
+
+# Définir le répertoire de base (utile si ton site n'est pas à la racine du domaine)
+RewriteBase /
+
+# Empêcher l'accès direct aux fichiers sensibles
+<FilesMatch "(\.htaccess|config\.php)">
+    Require all denied
+</FilesMatch>
+
+# Rediriger toutes les requêtes vers index.php si le fichier ou dossier n'existe pas
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?page=$1 [QSA,L]
+
+# Optionnel : désactiver l'affichage des indexes de dossier
+Options -Indexes

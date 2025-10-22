@@ -1,0 +1,18 @@
+# Fichiers sensibles
+/config/cron_secrets.php
+/config/config.php
+/config/database.php
+
+# Dossiers à ignorer
+/vendor/
+node_modules/
+.idea/
+.vscode/
+logs/
+uploads/
+public/assets/tmp/
+public/assets/*.log
+
+# Fichiers système
+.DS_Store
+Thumbs.db
