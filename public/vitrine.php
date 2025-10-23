@@ -10,8 +10,10 @@ require __DIR__ . '/../partials/header.php';
 $categoryModel = new Category($pdo);
 $dishModel = new Dish($pdo);
 
-$categories = $categoryModel->getAll(); // méthode à créer si nécessaire
+// Récupère toutes les catégories
+$categories = $categoryModel->getAll();
 foreach ($categories as &$cat) {
+    // Ajoute les plats associés à chaque catégorie
     $cat['plats'] = $dishModel->getAllByCategory($cat['id']);
 }
 ?>
@@ -31,6 +33,8 @@ foreach ($categories as &$cat) {
         <div class="bloc">
             <div class="texte">
                 <h2><?= htmlspecialchars($cat['name']) ?></h2>
+
+                <!-- Liste des plats de la catégorie -->
                 <?php if (!empty($cat['plats'])): ?>
                     <ul>
                         <?php foreach ($cat['plats'] as $plat): ?>
@@ -41,6 +45,8 @@ foreach ($categories as &$cat) {
                     <p>Aucun plat disponible pour cette catégorie.</p>
                 <?php endif; ?>
             </div>
+
+            <!-- Image placeholder pour la catégorie -->
             <div class="image">
                 <img src="assets/placeholder.jpg" alt="<?= htmlspecialchars($cat['name']) ?>">
             </div>
@@ -59,6 +65,7 @@ foreach ($categories as &$cat) {
             <p><strong>Horaires :</strong> Lun-Dim 12h - 22h</p>
         </div>
         <div>
+            <!-- Intégration Google Maps -->
             <iframe src="https://www.google.com/maps/embed?pb=!1m18..."></iframe>
         </div>
     </div>

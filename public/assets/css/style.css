@@ -1,67 +1,69 @@
 /* ==================== BASE ==================== */
+/* Réinitialisation globale des marges et paddings */
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  box-sizing: border-box; /* Inclut padding et border dans la largeur */
 }
 
 body {
-  font-family: 'Poppins', sans-serif;
-  color: #333;
-  background-color: #fff;
-  scroll-behavior: smooth;
+  font-family: 'Poppins', sans-serif; /* Police moderne */
+  color: #333;                        /* Couleur du texte */
+  background-color: #fff;             /* Fond blanc */
+  scroll-behavior: smooth;            /* Smooth scroll pour les ancres */
 }
 
 /* ==================== HEADER ==================== */
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: flex;                       /* Flexbox pour alignement */
+  justify-content: space-between;      /* Espacement entre logo et menu */
+  align-items: center;                 /* Centré verticalement */
   padding: 15px 50px;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  position: sticky;
+  background: rgba(255, 255, 255, 0.95); /* Fond semi-transparent */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Ombre légère */
+  position: sticky;                    /* Fixe en haut au scroll */
   top: 0;
-  z-index: 1000;
+  z-index: 1000;                       /* Toujours au-dessus du contenu */
 }
 
 .logo img {
-  height: 50px;
+  height: 50px;                        /* Taille du logo */
 }
 
 .menu a {
-  margin-left: 30px;
-  text-decoration: none;
+  margin-left: 30px;                   /* Espacement entre liens */
+  text-decoration: none;               /* Pas de soulignement */
   color: #333;
-  font-weight: 500;
-  transition: color 0.3s;
+  font-weight: 500;                    /* Semi-bold */
+  transition: color 0.3s;              /* Transition couleur au hover */
 }
 
 .menu a:hover {
-  color: #b71c1c;
+  color: #b71c1c;                     /* Rouge foncé au survol */
 }
 
 /* ==================== ACCUEIL ==================== */
 .accueil {
-  height: 100vh;
+  height: 100vh;                       /* Pleine hauteur écran */
   background: url('assets/restaurant-bg.jpg') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: white;
+  color: white;                        /* Texte blanc sur image */
   position: relative;
 }
 
+/* Overlay sombre sur l'image */
 .accueil::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);      /* Transparence noire */
 }
 
 .accueil-content {
-  position: relative;
+  position: relative;                   /* Pour rester au-dessus de l'overlay */
   z-index: 1;
 }
 
@@ -75,24 +77,25 @@ body {
   margin-bottom: 30px;
 }
 
+/* Bouton principal accueil */
 .accueil button {
-  background-color: #b71c1c;
+  background-color: #b71c1c;           /* Rouge foncé */
   color: white;
   border: none;
   padding: 12px 30px;
-  border-radius: 25px;
+  border-radius: 25px;                 /* Bouton arrondi */
   cursor: pointer;
   font-size: 1rem;
   transition: background 0.3s;
 }
 
 .accueil button:hover {
-  background-color: #d32f2f;
+  background-color: #d32f2f;           /* Rouge vif au hover */
 }
 
 /* ==================== CARTE ==================== */
 .carte {
-  padding: 80px 10%;
+  padding: 80px 10%;                    /* Padding vertical et horizontal */
 }
 
 .bloc {
@@ -100,15 +103,16 @@ body {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 80px;
-  gap: 40px;
+  gap: 40px;                            /* Espace entre texte et image */
 }
 
+/* Bloc inversé pour alternance texte/image */
 .bloc.inverse {
   flex-direction: row-reverse;
 }
 
 .bloc .texte {
-  flex: 1;
+  flex: 1;                               /* Prend la moitié de l’espace */
 }
 
 .bloc .texte h2 {
@@ -118,8 +122,8 @@ body {
 }
 
 .bloc .texte ul {
-  list-style: none;
-  line-height: 2;
+  list-style: none;                     /* Pas de puces */
+  line-height: 2;                       /* Espacement vertical entre plats */
   font-size: 1.1rem;
 }
 
@@ -128,27 +132,27 @@ body {
 }
 
 .bloc .image img {
-  width: 100%;
+  width: 100%;                          /* S’adapte au bloc */
   border-radius: 15px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 /* ==================== CONTACT ==================== */
 .contact {
-  background-color: #f7f7f7;
+  background-color: #f7f7f7;            /* Fond gris clair */
   padding: 80px 10%;
 }
 
 .contact-container {
   display: flex;
-  flex-wrap: wrap;
-  gap: 40px;
+  flex-wrap: wrap;                       /* Responsive flex */
+  gap: 40px;                             /* Espacement entre colonnes */
   justify-content: space-between;
 }
 
 .contact-container > div {
-  flex: 1;
-  min-width: 280px;
+  flex: 1;                               /* Chaque colonne prend 1 part */
+  min-width: 280px;                      /* Minimum largeur pour mobile */
 }
 
 .contact h2 {
@@ -181,28 +185,29 @@ footer {
   margin: 0 8px;
 }
 
+/* Réseaux sociaux (ex: images) */
 .socials img {
   width: 24px;
   margin: 10px 5px;
-  filter: invert(100%);
+  filter: invert(100%);                  /* Pour que les icônes ressortent sur fond sombre */
   transition: opacity 0.3s;
 }
 
 .socials img:hover {
-  opacity: 0.7;
+  opacity: 0.7;                           /* Légère transparence au hover */
 }
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
   .bloc {
-    flex-direction: column;
+    flex-direction: column;               /* Texte/image empilés */
   }
 
   .menu {
-    display: none;
+    display: none;                        /* Menu masqué sur petit écran */
   }
 
   .accueil h1 {
-    font-size: 2.5rem;
+    font-size: 2.5rem;                    /* Titre plus petit */
   }
 }

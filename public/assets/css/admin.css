@@ -1,71 +1,73 @@
 /* ---------- BODY & CONTAINERS ---------- */
 body {
-  font-family: Arial, sans-serif;
-  background: #fafafa;
-  color: #333;
-  padding: 40px;
-  margin: 0;
+  font-family: Arial, sans-serif; /* Police générale */
+  background: #fafafa;           /* Couleur de fond */
+  color: #333;                    /* Couleur du texte */
+  padding: 40px;                  /* Espacement interne global */
+  margin: 0;                      /* Supprime marge par défaut */
 }
 
 h1, h2, h3 {
-  color: #b71c1c;
-  margin-bottom: 20px;
+  color: #b71c1c;                /* Couleur rouge foncé pour titres */
+  margin-bottom: 20px;            /* Espace sous les titres */
 }
 
+/* Containers généraux : login, dashboard, formulaires, blocs catégories */
 .login-container, .dashboard, form, .category-block {
-  background: white;
-  border-radius: 10px;
-  padding: 30px;
-  max-width: 600px;
-  margin: 0 auto 20px auto;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  background: white;             /* Fond blanc */
+  border-radius: 10px;           /* Coins arrondis */
+  padding: 30px;                 /* Padding interne */
+  max-width: 600px;              /* Largeur max */
+  margin: 0 auto 20px auto;      /* Centré horizontalement et marge inférieure */
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Ombre légère */
 }
 
 /* ---------- INPUTS & TEXTAREAS ---------- */
 input, textarea {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-sizing: border-box;
+  width: 100%;                  /* Remplit le container */
+  padding: 10px;                
+  margin: 8px 0 15px;           
+  border: 1px solid #ccc;       
+  border-radius: 5px;           
+  box-sizing: border-box;       /* Inclut padding et border dans la largeur */
 }
 
 textarea {
-  resize: vertical;
+  resize: vertical;             /* Seule la hauteur peut être modifiée */
 }
 
 /* ---------- BUTTONS ---------- */
 button, .btn {
-  background-color: #b71c1c;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-  transition: 0.3s;
+  background-color: #b71c1c;    /* Rouge principal */
+  color: white;                 
+  border: none;                 
+  padding: 10px 20px;           
+  border-radius: 5px;           
+  cursor: pointer;              
+  text-decoration: none;        
+  display: inline-block;        
+  transition: 0.3s;             /* Effet de transition sur hover */
 }
 
 button:hover, .btn:hover {
-  background-color: #d32f2f;
+  background-color: #d32f2f;    /* Rouge plus clair au survol */
 }
 
+/* Boutons danger */
 .btn.danger {
-  background-color: #444;
+  background-color: #444;       /* Gris foncé */
 }
 
 .btn.danger:hover {
-  background-color: #666;
+  background-color: #666;       /* Gris plus clair au hover */
 }
 
-/* Bouton de retour spécifique */
+/* Bouton "Retour" spécifique */
 .btn-back {
   display: inline-block;
   margin-bottom: 20px;
   padding: 8px 12px;
-  background: #3498db;
+  background: #3498db;          /* Bleu */
   color: white;
   text-decoration: none;
   border-radius: 4px;
@@ -73,44 +75,49 @@ button:hover, .btn:hover {
 }
 
 .btn-back:hover {
-  background: #2980b9;
+  background: #2980b9;          /* Bleu plus foncé au hover */
 }
 
 /* ---------- MESSAGES ---------- */
 .error {
-  color: red;
-  font-weight: bold;
+  color: red;                    
+  font-weight: bold;            
 }
 
 .success {
-  color: green;
-  font-weight: bold;
+  color: green;                  
+  font-weight: bold;            
+  text-align: center;            /* Centré */
+  padding: 10px;
+  margin-bottom: 15px;
+  background-color: #d4edda;    /* Vert pâle */
+  border-radius: 4px;
 }
 
 /* ---------- CATÉGORIES & PLATS ---------- */
 .category-block {
-  border: 1px solid #ccc;
-  padding: 15px;
-  border-radius: 6px;
-  margin-bottom: 20px;
+  border: 1px solid #ccc;       /* Bordure grise */
+  padding: 15px;                
+  border-radius: 6px;           
+  margin-bottom: 20px;          
 }
 
 .category-block strong {
-  display: block;
-  font-size: 1.1em;
-  margin-bottom: 10px;
+  display: block;               
+  font-size: 1.1em;            
+  margin-bottom: 10px;         
 }
 
 .category-block ul {
-  list-style: none;
-  padding-left: 0;
+  list-style: none;             
+  padding-left: 0;              
 }
 
 .category-block ul li {
-  margin-bottom: 5px;
+  margin-bottom: 5px;           
 }
 
-/* Inline forms for dish editing/deleting */
+/* Inline forms pour modifier/supprimer les plats */
 .category-block form {
   margin: 0;
   display: inline-block;
@@ -118,11 +125,12 @@ button:hover, .btn:hover {
 
 .category-block input[type="text"],
 .category-block input[type="number"] {
-  width: auto;
+  width: auto;                  
   display: inline-block;
-  margin-right: 5px;
+  margin-right: 5px;            
 }
 
+/* ---------- PASSWORD RESET ---------- */
 .password-reset {
     margin-top: 15px;
     text-align: center;
@@ -138,6 +146,7 @@ button:hover, .btn:hover {
     text-decoration: underline;
 }
 
+/* Reset password container */
 .reset-password-container {
     max-width: 400px;
     margin: 50px auto;
@@ -179,15 +188,7 @@ button:hover, .btn:hover {
     text-decoration: underline;
 }
 
-.success {
-    color: #28a745;
-    text-align: center;
-    padding: 10px;
-    margin-bottom: 15px;
-    background-color: #d4edda;
-    border-radius: 4px;
-}
-
+/* ---------- REGISTER ---------- */
 .register-container {
     max-width: 400px;
     margin: 50px auto;
@@ -222,31 +223,21 @@ button:hover, .btn:hover {
     background: #0056b3;
 }
 
-.success {
-    color: #28a745;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 4px;
-    text-align: center;
-}
-
-/* Responsive */
+/* ---------- RESPONSIVE ---------- */
 @media (max-width: 600px) {
   .login-container, .dashboard, form, .category-block {
-    padding: 20px;
+    padding: 20px; /* Padding réduit sur mobile */
   }
 
   .category-block input[type="text"],
   .category-block input[type="number"] {
     display: block;
-    width: 100%;
+    width: 100%; /* Champs en pleine largeur */
     margin-bottom: 8px;
   }
 
   .category-block form button {
     display: block;
-    margin-top: 5px;
+    margin-top: 5px; /* Boutons sur nouvelle ligne */
   }
 }

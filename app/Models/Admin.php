@@ -1,30 +1,43 @@
 <?php
+// Classe Admin : gère la logique des administrateurs et des invitations
 class Admin
 {
+    // Connexion PDO à la base de données
     private $pdo;
 
+    // Propriétés publiques représentant un administrateur
     public $id;
     public $username;
     public $password;
     public $role;
     public $restaurant_name;
 
+    // Constructeur : initialise la connexion PDO
     public function __construct($pdo)
     {
         $this->pdo = $pdo;
     }
 
+    // --- INVITATIONS ---
+
+    // Crée une invitation pour un nouvel administrateur
+    // Envoie ensuite un mail avec le lien d'inscription
     public function createInvitation($email, $restaurantName, $token)
     {
+        // Date d'expiration du lien = +24 heures
         $expiry = date('Y-m-d H:i:s', strtotime('+24 hours'));
 
         try {
+            // Insertion de l'invitation en base
             $sql = "INSERT INTO invitations (email, restaurant_name, token, expiry) VALUES (?, ?, ?, ?)";
             $stmt = $this->pdo->prepare($sql);
             $result = $stmt->execute([$email, $restaurantName, $token, $expiry]);
 
             if ($result) {
+                // Génération du lien d'inscription
                 $inviteLink = "http://" . $_SERVER['HTTP_HOST'] . "?page=register&token=" . $token;
+
+                // Préparation du mail
                 $to = $email;
                 $subject = "Invitation à créer votre compte restaurant";
                 $message = "Bonjour,\n\n";
@@ -32,6 +45,7 @@ class Admin
                 $message .= "Cliquez sur ce lien : " . $inviteLink;
                 $headers = "From: no-reply@votrerestaurant.com";
 
+                // Envoi du mail
                 return mail($to, $subject, $message, $headers);
             }
 
@@ -41,6 +55,7 @@ class Admin
         }
     }
 
+    // Récupère une invitation valide non utilisée par token
     public function getInvitation($token)
     {
         $sql = "SELECT * FROM invitations WHERE token = ? AND used = 0";
@@ -50,12 +65,15 @@ class Admin
         return $result;
     }
 
+    // --- GESTION DES COMPTES ---
+
+    // Crée un compte administrateur à partir d'une invitation
     public function createAccount($invitation, $username, $password)
     {
         try {
             $this->pdo->beginTransaction();
 
-            // Vérification si le username existe déjà
+            // Vérifie si le username existe déjà
             $stmt = $this->pdo->prepare("SELECT id FROM admins WHERE username = ?");
             $stmt->execute([$username]);
             if ($stmt->fetch()) {
@@ -81,7 +99,7 @@ class Admin
                 throw new Exception("Erreur lors de l'insertion dans la table admins");
             }
 
-            // Mise à jour de l'invitation
+            // Marquer l'invitation comme utilisée
             $sql = "UPDATE invitations SET used = 1 WHERE id = ?";
             $stmt = $this->pdo->prepare($sql);
             $success = $stmt->execute([$invitation->id]);
@@ -99,6 +117,8 @@ class Admin
             return false;
         }
     }
+
+    // --- RECHERCHES / LOGIN ---
 
     // Trouver un admin par username
     public function findByUsername($username)
@@ -126,13 +146,13 @@ class Admin
         return null;
     }
 
-    // Vérifier le mot de passe
+    // Vérifie si le mot de passe fourni correspond au hash stocké
     public function verifyPassword($password)
     {
         return password_verify($password, $this->password);
     }
 
-    // Login centralisé
+    // Login : retourne l'admin si les identifiants sont corrects
     public function login($username, $password)
     {
         $admin = $this->findByUsername($username);
@@ -142,7 +162,7 @@ class Admin
         return null;
     }
 
-    // Créer un nouvel admin (SUPER_ADMIN ou ADMIN)
+    // Création d’un nouvel admin (SUPER_ADMIN ou ADMIN)
     public function create($username, $password, $role, $restaurant_name)
     {
         $hash = password_hash($password, PASSWORD_DEFAULT);
@@ -158,6 +178,7 @@ class Admin
         return $this;
     }
 
+    // Remplit les propriétés de l'objet à partir d'un tableau de données
     private function fill($data)
     {
         $this->id = $data['id'];
@@ -167,10 +188,14 @@ class Admin
         $this->restaurant_name = $data['restaurant_name'];
     }
 
+    // --- RÉINITIALISATION DE MOT DE PASSE ---
+
+    // Demande de réinitialisation : génère un token et envoie le lien par mail
     public function requestPasswordReset($email)
     {
         error_log("[DEBUG] Tentative de réinitialisation pour email: " . $email);
 
+        // Vérifie que l'email existe
         $sql = "SELECT id FROM admins WHERE email = ?";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([$email]);
@@ -181,17 +206,21 @@ class Admin
             return false;
         }
 
+        // Génération du token et date d'expiration
         $token = bin2hex(random_bytes(32));
         $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
+        // Mise à jour en base du token et de l'expiration
         $sql = "UPDATE admins SET reset_token = ?, reset_token_expiry = ? WHERE email = ?";
         $stmt = $this->pdo->prepare($sql);
         $ok = $stmt->execute([$token, $expiry, $email]);
 
         if ($ok) {
+            // Génération du lien de réinitialisation
             $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "?page=reset-password&token=" . $token;
             error_log("[DEBUG] Lien de réinitialisation généré: " . $resetLink);
 
+            // Envoi du mail
             $subject = "Réinitialisation de votre mot de passe";
             $message = "Cliquez sur ce lien pour réinitialiser votre mot de passe : " . $resetLink;
             $headers = "From: no-reply@votrerestaurant.com";
@@ -206,6 +235,7 @@ class Admin
         return false;
     }
 
+    // Réinitialisation du mot de passe avec le token
     public function resetPassword($token, $newPassword)
     {
         $sql = "SELECT id, reset_token_expiry FROM admins WHERE reset_token = ?";
@@ -213,17 +243,14 @@ class Admin
         $stmt->execute([$token]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$row) {
-            return false;
-        }
-
+        // Vérifie que le token est valide et non expiré
+        if (!$row) return false;
         $expiry = $row['reset_token_expiry'] ?? null;
-        if (empty($expiry) || strtotime($expiry) < time()) {
-            return false;
-        }
+        if (empty($expiry) || strtotime($expiry) < time()) return false;
 
         $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
 
+        // Met à jour le mot de passe et supprime le token
         $this->pdo->beginTransaction();
         try {
             $sql = "UPDATE admins SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE id = ?";

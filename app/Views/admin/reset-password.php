@@ -5,16 +5,16 @@ require __DIR__ . '/../partials/header.php';
 <div class="reset-password-container">
     <h2>Réinitialisation du mot de passe</h2>
 
+    <!-- Messages d’erreur ou succès -->
     <?php if (!empty($error)): ?>
         <p class="error"><?= htmlspecialchars($error) ?></p>
     <?php endif; ?>
-
     <?php if (!empty($success)): ?>
         <p class="success"><?= htmlspecialchars($success) ?></p>
     <?php endif; ?>
 
     <?php if (empty($token)): ?>
-        <!-- Étape 1 : Demande d'email -->
+        <!-- Étape 1 : Demande d’email pour recevoir le lien -->
         <form method="post" action="?page=reset-password">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">
             <p>Entrez votre adresse email pour recevoir un lien de réinitialisation.</p>
@@ -22,10 +22,11 @@ require __DIR__ . '/../partials/header.php';
             <button type="submit" class="btn">Envoyer le lien</button>
         </form>
     <?php else: ?>
-        <!-- Étape 2 : Nouveau mot de passe -->
+        <!-- Étape 2 : Saisie du nouveau mot de passe -->
         <form method="post" action="?page=reset-password">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">
             <input type="hidden" name="token" value="<?= htmlspecialchars($token ?? '') ?>">
+
             <input type="password" name="new_password" placeholder="Nouveau mot de passe" required>
             <input type="password" name="confirm_password" placeholder="Confirmer le mot de passe" required>
             <button type="submit" class="btn">Réinitialiser le mot de passe</button>
