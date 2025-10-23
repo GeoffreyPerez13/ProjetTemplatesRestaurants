@@ -1,4 +1,9 @@
 <?php
+ini_set('SMTP', 'localhost');
+ini_set('smtp_port', 1025);
+// Activé pour le développement
+define('DEV_SHOW_LINK', true);
+
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../app/Controllers/AdminController.php';
 require_once __DIR__ . '/../app/Controllers/CarteController.php';
@@ -14,6 +19,14 @@ if (isset($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true && !i
 $page = $_GET['page'] ?? 'login';
 
 switch ($page) {
+    case 'send-invitation':
+        $adminController = new AdminController($pdo);
+        $adminController->sendInvitation();
+        break;
+    case 'register':
+        $adminController = new AdminController($pdo);
+        $adminController->register();
+        break;
     case 'login':
         $controller = new AdminController($pdo);
         $controller->login();
@@ -42,6 +55,11 @@ switch ($page) {
     case 'logout':
         $controller = new AdminController($pdo);
         $controller->logout();
+        break;
+
+    case 'reset-password':
+        $adminController = new AdminController($pdo);
+        $adminController->resetPassword();
         break;
 
     default:

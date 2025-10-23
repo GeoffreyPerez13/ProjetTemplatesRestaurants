@@ -62,11 +62,15 @@ Fichier `.htaccess` dans `data/` :
 </FilesMatch>
 
 Options -Indexes
+```
+
+---
 
 5️⃣ Configuration du VirtualHost dans WampServer
 
 Ajout du VirtualHost templatesrestaurants.local :
 
+```apache
 <VirtualHost *:80>
     ServerName templatesrestaurants.local
     DocumentRoot "C:/Users/galaxy/TemplatesRestaurants"
@@ -76,15 +80,16 @@ Ajout du VirtualHost templatesrestaurants.local :
         Require all granted
     </Directory>
 </VirtualHost>
-
+```
 
 Ajout de la ligne dans le fichier hosts :
 
 127.0.0.1   templatesrestaurants.local
 
-
 Pourquoi :
 Permet de lancer le site depuis n’importe quel dossier Windows, sans le déplacer dans www, et de créer une URL locale propre.
+
+---
 
 6️⃣ Adaptation des chemins
 
@@ -92,12 +97,15 @@ Tous les chemins CSS, JS, assets et JSON pointent directement à la racine du pr
 
 Exemple :
 
+```html
 <link rel="stylesheet" href="style.css">
 <img src="assets/logo.png">
-
+```
 
 Pourquoi :
 Permet au site de fonctionner directement sans sous-dossiers supplémentaires.
+
+---
 
 7️⃣ Test en localhost
 
