@@ -7,8 +7,6 @@ require __DIR__ . '/../partials/header.php';
 <!-- Bouton retour vers le dashboard -->
 <a class="btn-back" href="?page=dashboard">← Retour au dashboard</a>
 
-<h2>Modifier le contact</h2>
-
 <!-- Affichage d'un message de succès si mise à jour réussie -->
 <?php if (!empty($message)): ?>
     <p class="success"><?= htmlspecialchars($message) ?></p>
@@ -16,6 +14,8 @@ require __DIR__ . '/../partials/header.php';
 
 <!-- Formulaire pour modifier les informations de contact -->
 <form method="post">
+    <h2>Modifier le contact</h2>
+    
     <input type="text" name="telephone" value="<?= htmlspecialchars($contact['telephone']) ?>" placeholder="Téléphone" required>
     <input type="email" name="email" value="<?= htmlspecialchars($contact['email']) ?>" placeholder="Email" required>
     <input type="text" name="adresse" value="<?= htmlspecialchars($contact['adresse']) ?>" placeholder="Adresse" required>

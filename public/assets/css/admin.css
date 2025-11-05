@@ -1,73 +1,74 @@
-/* ---------- BODY & CONTAINERS ---------- */
+/* ==================== BODY & CONTAINERS ==================== */
 body {
   font-family: Arial, sans-serif; /* Police générale */
-  background: #fafafa;           /* Couleur de fond */
-  color: #333;                    /* Couleur du texte */
-  padding: 40px;                  /* Espacement interne global */
-  margin: 0;                      /* Supprime marge par défaut */
+  background: #fafafa;            /* Couleur de fond */
+  color: #333;                     /* Couleur du texte */
+  padding: 40px;                   /* Espacement interne global */
+  margin: 0;                       /* Supprime marge par défaut */
 }
 
 h1, h2, h3 {
-  color: #b71c1c;                /* Couleur rouge foncé pour titres */
-  margin-bottom: 20px;            /* Espace sous les titres */
+  color: #b71c1c;                 /* Couleur rouge foncé pour titres */
+  margin-bottom: 20px;             /* Espace sous les titres */
 }
 
-/* Containers généraux : login, dashboard, formulaires, blocs catégories */
-.login-container, .dashboard, form, .category-block {
-  background: white;             /* Fond blanc */
-  border-radius: 10px;           /* Coins arrondis */
-  padding: 30px;                 /* Padding interne */
-  max-width: 600px;              /* Largeur max */
-  margin: 0 auto 20px auto;      /* Centré horizontalement et marge inférieure */
+.login-container,
+.dashboard,
+form,
+.category-block {
+  background: white;               /* Fond blanc */
+  border-radius: 10px;             /* Coins arrondis */
+  padding: 30px;                   /* Padding interne */
+  max-width: 600px;                /* Largeur max */
+  margin: 0 auto 20px auto;        /* Centré horizontalement et marge inférieure */
   box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Ombre légère */
 }
 
-/* ---------- INPUTS & TEXTAREAS ---------- */
+/* ==================== INPUTS & TEXTAREAS ==================== */
 input, textarea {
-  width: 100%;                  /* Remplit le container */
-  padding: 10px;                
-  margin: 8px 0 15px;           
-  border: 1px solid #ccc;       
-  border-radius: 5px;           
-  box-sizing: border-box;       /* Inclut padding et border dans la largeur */
+  width: 100%;                     /* Remplit le container */
+  padding: 10px;
+  margin: 8px 0 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;          /* Inclut padding et border dans la largeur */
 }
 
 textarea {
-  resize: vertical;             /* Seule la hauteur peut être modifiée */
+  resize: vertical;                /* Seule la hauteur peut être modifiée */
 }
 
-/* ---------- BUTTONS ---------- */
+/* ==================== BUTTONS ==================== */
 button, .btn {
-  background-color: #b71c1c;    /* Rouge principal */
-  color: white;                 
-  border: none;                 
-  padding: 10px 20px;           
-  border-radius: 5px;           
-  cursor: pointer;              
-  text-decoration: none;        
-  display: inline-block;        
-  transition: 0.3s;             /* Effet de transition sur hover */
+  background-color: #b71c1c;       /* Rouge principal */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: 0.3s;                /* Effet de transition sur hover */
 }
 
-button:hover, .btn:hover {
-  background-color: #d32f2f;    /* Rouge plus clair au survol */
+button:hover,
+.btn:hover {
+  background-color: #d32f2f;       /* Rouge plus clair au survol */
 }
 
-/* Boutons danger */
 .btn.danger {
-  background-color: #444;       /* Gris foncé */
+  background-color: #444;          /* Gris foncé */
 }
 
 .btn.danger:hover {
-  background-color: #666;       /* Gris plus clair au hover */
+  background-color: #666;          /* Gris plus clair au hover */
 }
 
-/* Bouton "Retour" spécifique */
 .btn-back {
   display: inline-block;
   margin-bottom: 20px;
   padding: 8px 12px;
-  background: #3498db;          /* Bleu */
+  background: #3498db;             /* Bleu */
   color: white;
   text-decoration: none;
   border-radius: 4px;
@@ -75,46 +76,80 @@ button:hover, .btn:hover {
 }
 
 .btn-back:hover {
-  background: #2980b9;          /* Bleu plus foncé au hover */
+  background: #2980b9;             /* Bleu plus foncé au hover */
 }
 
-/* ---------- MESSAGES ---------- */
+/* ==================== MESSAGES ==================== */
 .error {
-  color: red;                    
-  font-weight: bold;            
+  color: red;
+  font-weight: bold;
 }
 
 .success {
-  color: green;                  
-  font-weight: bold;            
-  text-align: center;            /* Centré */
+  color: green;
+  font-weight: bold;
+  text-align: center;               /* Centré */
   padding: 10px;
   margin-bottom: 15px;
-  background-color: #d4edda;    /* Vert pâle */
+  background-color: #d4edda;       /* Vert pâle */
   border-radius: 4px;
 }
 
-/* ---------- CATÉGORIES & PLATS ---------- */
+/* ==================== CATEGORY BLOCKS & PLATS ==================== */
 .category-block {
-  border: 1px solid #ccc;       /* Bordure grise */
-  padding: 15px;                
-  border-radius: 6px;           
-  margin-bottom: 20px;          
+  border: 1px solid #ccc;           /* Bordure grise */
+  padding: 20px;                    
+  border-radius: 8px;               
+  margin-bottom: 25px;              
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
 }
 
 .category-block strong {
-  display: block;               
-  font-size: 1.1em;            
-  margin-bottom: 10px;         
+  display: block;
+  font-size: 1.1em;
+  margin-bottom: 10px;
 }
 
-.category-block ul {
-  list-style: none;             
-  padding-left: 0;              
+.dish-list {
+  list-style: none;
+  padding-left: 0;
 }
 
-.category-block ul li {
-  margin-bottom: 5px;           
+.dish-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.dish-list li form.inline-form {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.new-dish-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+.new-dish-form input[type="text"],
+.new-dish-form input[type="number"],
+.dish-list input[type="text"],
+.dish-list input[type="number"] {
+  width: auto;
+  flex: 1;
 }
 
 /* Inline forms pour modifier/supprimer les plats */
@@ -125,105 +160,206 @@ button:hover, .btn:hover {
 
 .category-block input[type="text"],
 .category-block input[type="number"] {
-  width: auto;                  
+  width: 40%;
   display: inline-block;
-  margin-right: 5px;            
+  margin-right: 5px;
 }
 
-/* ---------- PASSWORD RESET ---------- */
+/* Conteneur global pour l'édition de la carte */
+.edit-carte-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* Bloc Ajouter une catégorie (plus petit) */
+.new-category-block {
+    flex: 1 1 250px;   /* largeur min 250px, flex grow si possible */
+    max-width: 300px;  /* bloc un peu plus petit */
+}
+
+/* Grille des catégories existantes */
+.categories-grid {
+    display: flex;
+    flex-wrap: wrap;       /* passe sur la ligne suivante si nécessaire */
+    gap: 20px;
+    flex: 3 1 600px;       /* occupe le reste de l'espace */
+}
+
+/* Chaque catégorie garde ses styles existants */
+.category-block {
+    flex: 1 1 250px;      /* min-width 250px, s'ajuste si possible */
+    box-sizing: border-box;
+}
+
+.input-euro {
+    position: relative;
+    display: inline-block; /* pour rester inline avec les autres champs si besoin */
+}
+
+.input-euro input {
+    padding-right: 25px; /* espace pour le symbole € */
+    box-sizing: border-box;
+}
+
+.input-euro .euro-symbol {
+    position: relative;
+    pointer-events: none; /* le symbole n’interfère pas avec la saisie */
+    color: #333;
+    font-weight: bold;
+}
+
+/* ==================== DASHBOARD ==================== */
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 60vh;                /* Permet de pousser les boutons bas */
+}
+
+.dashboard-top-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;         /* Centre horizontalement */
+  gap: 15px;                       /* Espace entre les boutons */
+  margin: 30px 0;
+}
+
+.dashboard-bottom {
+  display: flex;
+  justify-content: space-between;  /* Un à gauche, un à droite */
+  align-items: center;
+  margin-top: 40px;
+}
+
+.dashboard-bottom .btn.left {
+  align-self: flex-start;
+}
+
+.dashboard-bottom .btn.right {
+  align-self: flex-end;
+}
+
+.dashboard-main-buttons {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: auto;             /* Pousse le footer en bas */
+  justify-content: center;
+}
+
+.dashboard-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.dashboard-footer .btn {
+  min-width: 180px;
+}
+
+.invitation-btn {
+  order: 1;
+}
+
+.logout-btn {
+  order: 2;
+}
+
+/* ==================== PASSWORD RESET ==================== */
 .password-reset {
-    margin-top: 15px;
-    text-align: center;
+  margin-top: 15px;
+  text-align: center;
 }
 
 .password-reset a {
-    color: #666;
-    text-decoration: none;
-    font-size: 0.9em;
+  color: #666;
+  text-decoration: none;
+  font-size: 0.9em;
 }
 
 .password-reset a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
-/* Reset password container */
 .reset-password-container {
-    max-width: 400px;
-    margin: 50px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .reset-password-container h2 {
-    text-align: center;
-    margin-bottom: 20px;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 .reset-password-container form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .reset-password-container input {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 .back-to-login {
-    margin-top: 20px;
-    text-align: center;
+  margin-top: 20px;
+  text-align: center;
 }
 
 .back-to-login a {
-    color: #666;
-    text-decoration: none;
-    font-size: 0.9em;
+  color: #666;
+  text-decoration: none;
+  font-size: 0.9em;
 }
 
 .back-to-login a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
-/* ---------- REGISTER ---------- */
+/* ==================== REGISTER ==================== */
 .register-container {
-    max-width: 400px;
-    margin: 50px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .register-container form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .register-container input {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 .register-container button {
-    padding: 10px;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+  padding: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .register-container button:hover {
-    background: #0056b3;
+  background: #0056b3;
 }
 
-/* ---------- RESPONSIVE ---------- */
+/* ==================== RESPONSIVE ==================== */
 @media (max-width: 600px) {
   .login-container, .dashboard, form, .category-block {
     padding: 20px; /* Padding réduit sur mobile */
@@ -240,4 +376,47 @@ button:hover, .btn:hover {
     display: block;
     margin-top: 5px; /* Boutons sur nouvelle ligne */
   }
+
+  .dashboard-main-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard-footer {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .dashboard-footer .btn {
+    width: 100%;
+  }
+
+  .category-header,
+  .new-dish-form,
+  .dish-list li form.inline-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dish-list input,
+  .new-dish-form input {
+    width: 100%;
+  }
+
+  .dish-list button,
+  .new-dish-form button {
+    width: 100%;
+  }
+
+  .edit-carte-container {
+        flex-direction: column;
+    }
+    
+    .new-category-block,
+    .categories-grid,
+    .category-block {
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
 }

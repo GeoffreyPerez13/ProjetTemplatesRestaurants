@@ -3,8 +3,6 @@ $title = "Envoyer une invitation";
 require __DIR__ . '/../partials/header.php';
 ?>
 <div class="container">
-    <h2>Envoyer une invitation</h2>
-
     <!-- Affichage des erreurs -->
     <?php if (!empty($error)): ?>
         <div class="error">
@@ -25,8 +23,12 @@ require __DIR__ . '/../partials/header.php';
         </div>
     <?php endif; ?>
 
+<!-- Bouton retour vers le dashboard -->
+<a class="btn-back" href="?page=dashboard">← Retour au dashboard</a>
+
     <!-- Formulaire pour envoyer une invitation à un restaurant -->
     <form method="post">
+        <h2>Envoyer une invitation</h2>
         <!-- CSRF token pour sécuriser le formulaire -->
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">
 

@@ -11,18 +11,21 @@ require __DIR__ . '/../partials/header.php';
     <!-- Affichage du nom de l'admin connecté -->
     <p>Bienvenue <?= htmlspecialchars($admin_name) ?> !</p>
 
-    <!-- Liens rapides pour modifier la carte, contact et logo -->
-    <a href="?page=edit-carte" class="btn">Modifier la carte</a>
-    <a href="?page=edit-contact" class="btn">Modifier le contact</a>
-    <a href="?page=edit-logo" class="btn">Modifier le logo</a>
+    <!-- Regroupe les 3 premiers boutons -->
+    <div class="dashboard-top-buttons">
+        <a href="?page=edit-carte" class="btn">Modifier la carte</a>
+        <a href="?page=edit-contact" class="btn">Modifier le contact</a>
+        <a href="?page=edit-logo" class="btn">Modifier le logo</a>
+    </div>
 
-    <!-- Option uniquement visible pour le SUPER_ADMIN -->
-    <?php if ($role === 'SUPER_ADMIN'): ?>
-        <a href="?page=send-invitation" class="btn">Envoyer un lien de création de compte</a>
-    <?php endif; ?>
+    <!-- Zone du bas pour les boutons d’action -->
+    <div class="dashboard-bottom">
+        <?php if ($role === 'SUPER_ADMIN'): ?>
+            <a href="?page=send-invitation" class="btn left">Envoyer un lien de création de compte</a>
+        <?php endif; ?>
 
-    <!-- Bouton de déconnexion -->
-    <a href="?page=logout" class="btn danger">Se déconnecter</a>
+        <a href="?page=logout" class="btn danger right">Se déconnecter</a>
+    </div>
 </div>
 
 <?php
