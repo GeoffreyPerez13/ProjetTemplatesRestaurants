@@ -10,6 +10,7 @@ class Dish
     public $category_id;
     public $name;
     public $price;
+    public $description; // AJOUT DE LA PROPRIÉTÉ DESCRIPTION
 
     // Constructeur : initialise la connexion PDO
     public function __construct($pdo)
@@ -18,29 +19,30 @@ class Dish
     }
 
     // --- Création d'un plat ---
-    public function create($category_id, $name, $price)
+    public function create($category_id, $name, $price, $description = '') // AJOUT DU PARAMÈTRE DESCRIPTION
     {
         $price = floatval($price); // S'assure que le prix est bien un float
         $stmt = $this->pdo->prepare(
-            "INSERT INTO plats (category_id, name, price) VALUES (?, ?, ?)"
+            "INSERT INTO plats (category_id, name, price, description) VALUES (?, ?, ?, ?)" // AJOUT DE LA COLONNE DESCRIPTION
         );
-        $stmt->execute([$category_id, $name, $price]);
+        $stmt->execute([$category_id, $name, $price, $description]);
 
         // Remplit les propriétés de l'objet avec les valeurs du nouveau plat
         $this->id = $this->pdo->lastInsertId();
         $this->category_id = $category_id;
         $this->name = $name;
         $this->price = $price;
+        $this->description = $description; // AJOUT
 
         return $this;
     }
 
     // --- Mise à jour d'un plat ---
-    public function update($id, $name, $price)
+    public function update($id, $name, $price, $description = '') // AJOUT DU PARAMÈTRE DESCRIPTION
     {
         $price = floatval($price); // S'assure que le prix est un float
-        $stmt = $this->pdo->prepare("UPDATE plats SET name = ?, price = ? WHERE id = ?");
-        return $stmt->execute([$name, $price, $id]);
+        $stmt = $this->pdo->prepare("UPDATE plats SET name = ?, price = ?, description = ? WHERE id = ?"); // AJOUT DE LA COLONNE DESCRIPTION
+        return $stmt->execute([$name, $price, $description, $id]);
     }
 
     // --- Suppression d'un plat ---
@@ -151,6 +153,26 @@ class Dish
     public function setPrice($price)
     {
         $this->price = $price;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of description
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set the value of description
+     *
+     * @return  self
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
 
         return $this;
     }

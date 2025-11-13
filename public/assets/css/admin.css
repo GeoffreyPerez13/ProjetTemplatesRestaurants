@@ -1,46 +1,47 @@
 /* ==================== BODY & CONTAINERS ==================== */
 body {
-  font-family: Arial, sans-serif; /* Police générale */
-  background: #fafafa;            /* Couleur de fond */
-  color: #333;                     /* Couleur du texte */
-  padding: 40px;                   /* Espacement interne global */
-  margin: 0;                       /* Supprime marge par défaut */
+  font-family: Arial, sans-serif;
+  background: #fafafa;
+  color: #333;
+  padding: 40px;
+  margin: 0;
 }
 
 h1, h2, h3 {
-  color: #b71c1c;                 /* Couleur rouge foncé pour titres */
-  margin-bottom: 20px;             /* Espace sous les titres */
+  color: #b71c1c;
+  margin-bottom: 20px;
 }
 
 .login-container,
 .dashboard,
 form,
 .category-block {
-  background: white;               /* Fond blanc */
-  border-radius: 10px;             /* Coins arrondis */
-  padding: 30px;                   /* Padding interne */
-  max-width: 600px;                /* Largeur max */
-  margin: 0 auto 20px auto;        /* Centré horizontalement et marge inférieure */
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Ombre légère */
+  background: white;
+  border-radius: 10px;
+  padding: 30px;
+  max-width: 600px;
+  margin: 0 auto 20px auto;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* ==================== INPUTS & TEXTAREAS ==================== */
-input, textarea {
-  width: 100%;                     /* Remplit le container */
+input,
+textarea {
+  width: 100%;
   padding: 10px;
   margin: 8px 0 15px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  box-sizing: border-box;          /* Inclut padding et border dans la largeur */
+  box-sizing: border-box;
 }
 
 textarea {
-  resize: vertical;                /* Seule la hauteur peut être modifiée */
+  resize: vertical;
+  min-height: 80px;
 }
 
 /* ==================== BUTTONS ==================== */
 button, .btn {
-  background-color: #b71c1c;       /* Rouge principal */
   color: white;
   border: none;
   padding: 10px 20px;
@@ -48,27 +49,41 @@ button, .btn {
   cursor: pointer;
   text-decoration: none;
   display: inline-block;
-  transition: 0.3s;                /* Effet de transition sur hover */
+  transition: 0.3s;
 }
 
-button:hover,
+/* BOUTON MODIFICATION (BLEU) */
+.btn {
+  background-color: #3498db;
+}
+
 .btn:hover {
-  background-color: #d32f2f;       /* Rouge plus clair au survol */
+  background-color: #2980b9;
 }
 
+/* BOUTON AJOUT (VERT) */
+.btn.success {
+  background-color: #27ae60;
+}
+
+.btn.success:hover {
+  background-color: #219a52;
+}
+
+/* BOUTON SUPPRESSION (ROUGE) */
 .btn.danger {
-  background-color: #444;          /* Gris foncé */
+  background-color: #e74c3c;
 }
 
 .btn.danger:hover {
-  background-color: #666;          /* Gris plus clair au hover */
+  background-color: #c0392b;
 }
 
 .btn-back {
   display: inline-block;
   margin-bottom: 20px;
   padding: 8px 12px;
-  background: #3498db;             /* Bleu */
+  background: #3498db;
   color: white;
   text-decoration: none;
   border-radius: 4px;
@@ -76,7 +91,7 @@ button:hover,
 }
 
 .btn-back:hover {
-  background: #2980b9;             /* Bleu plus foncé au hover */
+  background: #2980b9;
 }
 
 /* ==================== MESSAGES ==================== */
@@ -88,19 +103,22 @@ button:hover,
 .success {
   color: green;
   font-weight: bold;
-  text-align: center;               /* Centré */
+  text-align: center;
   padding: 10px;
-  margin-bottom: 15px;
-  background-color: #d4edda;       /* Vert pâle */
+  margin: auto auto 15px 0;
+  background-color: #d4edda;
   border-radius: 4px;
+  width: 30%;
 }
 
 /* ==================== CATEGORY BLOCKS & PLATS ==================== */
 .category-block {
-  border: 1px solid #ccc;           /* Bordure grise */
-  padding: 20px;                    
-  border-radius: 8px;               
-  margin-bottom: 25px;              
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  flex: 1 1 250px;
+  box-sizing: border-box;
 }
 
 .category-header {
@@ -127,6 +145,45 @@ button:hover,
   gap: 10px;
   align-items: center;
   margin-bottom: 10px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 5px;
+}
+
+/* Conteneur pour l'édition des plats */
+.dish-edit-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.dish-edit-container .edit-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: 1;
+}
+
+.dish-edit-container .edit-form input[type="text"] {
+  margin: 0;
+}
+
+.dish-edit-container .edit-form input[name="dish_name"] {
+  flex: 1;
+  min-width: 120px;
+}
+
+.dish-edit-container .edit-form .price-input {
+  width: 80px;
+  flex: none;
+}
+
+.dish-edit-container .edit-form button,
+.dish-edit-container .delete-form button {
+  white-space: nowrap;
+  flex: none;
 }
 
 .dish-list li form.inline-form {
@@ -134,14 +191,63 @@ button:hover,
   gap: 5px;
   flex-wrap: wrap;
   align-items: center;
+  padding: 15px;
 }
 
+/* FORMULAIRE D'AJOUT DE PLAT AVEC DESCRIPTION */
 .new-dish-form {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
   margin-bottom: 15px;
+}
+
+.new-dish-form .form-row {
+  display: flex;
+  gap: 10px;
   align-items: center;
+  flex-wrap: nowrap;
+}
+
+.new-dish-form input[type="text"] {
+  flex: 1;
+  min-width: 120px;
+  margin: 0;
+}
+
+.new-dish-form .input-euro {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: none;
+  width: 120px;
+}
+
+.new-dish-form .input-euro input {
+  padding-right: 25px;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+}
+
+.new-dish-form .input-euro .euro-symbol {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+  color: #333;
+  font-weight: bold;
+}
+
+.new-dish-form button {
+  white-space: nowrap;
+  flex: none;
+  margin: 0;
+  align-self: flex-start;
+}
+
+.new-dish-form textarea {
+  margin: 0;
+  min-height: 80px;
 }
 
 .new-dish-form input[type="text"],
@@ -152,10 +258,8 @@ button:hover,
   flex: 1;
 }
 
-/* Inline forms pour modifier/supprimer les plats */
 .category-block form {
   margin: 0;
-  display: inline-block;
 }
 
 .category-block input[type="text"],
@@ -167,67 +271,123 @@ button:hover,
 
 /* Conteneur global pour l'édition de la carte */
 .edit-carte-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
 }
 
-/* Bloc Ajouter une catégorie (plus petit) */
+/* Bloc Ajouter une catégorie */
 .new-category-block {
-    flex: 1 1 250px;   /* largeur min 250px, flex grow si possible */
-    max-width: 300px;  /* bloc un peu plus petit */
+  flex: 1 1 250px;
+  max-width: 300px;
 }
 
 /* Grille des catégories existantes */
 .categories-grid {
-    display: flex;
-    flex-wrap: wrap;       /* passe sur la ligne suivante si nécessaire */
-    gap: 20px;
-    flex: 3 1 600px;       /* occupe le reste de l'espace */
-}
-
-/* Chaque catégorie garde ses styles existants */
-.category-block {
-    flex: 1 1 250px;      /* min-width 250px, s'ajuste si possible */
-    box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  flex: 3 1 600px;
 }
 
 .input-euro {
-    position: relative;
-    display: inline-block; /* pour rester inline avec les autres champs si besoin */
+  position: relative;
+  display: inline-block;
 }
 
 .input-euro input {
-    padding-right: 25px; /* espace pour le symbole € */
-    box-sizing: border-box;
+  padding-right: 25px;
+  box-sizing: border-box;
 }
 
 .input-euro .euro-symbol {
-    position: relative;
-    pointer-events: none; /* le symbole n’interfère pas avec la saisie */
-    color: #333;
-    font-weight: bold;
+  position: relative;
+  pointer-events: none;
+  color: #333;
+  font-weight: bold;
+}
+
+/* ==================== CARTE PREVIEW GRID ==================== */
+.carte-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 25px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.category-preview {
+  background: white;
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+.category-title {
+  color: #b71c1c;
+  border-bottom: 2px solid #b71c1c;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 1.3em;
+}
+
+.dishes-table {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dish-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.dish-row:last-child {
+  border-bottom: none;
+}
+
+.dish-name {
+  font-weight: 500;
+  color: #333;
+  flex: 1;
+}
+
+.dish-price {
+  font-weight: bold;
+  color: #b71c1c;
+  margin-left: 15px;
+}
+
+.no-dishes {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 20px 0;
 }
 
 /* ==================== DASHBOARD ==================== */
 .dashboard {
   display: flex;
   flex-direction: column;
-  min-height: 60vh;                /* Permet de pousser les boutons bas */
 }
 
 .dashboard-top-buttons {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;         /* Centre horizontalement */
-  gap: 15px;                       /* Espace entre les boutons */
+  justify-content: center;
+  gap: 15px;
   margin: 30px 0;
 }
 
 .dashboard-bottom {
   display: flex;
-  justify-content: space-between;  /* Un à gauche, un à droite */
+  justify-content: space-between;
   align-items: center;
   margin-top: 40px;
 }
@@ -244,7 +404,7 @@ button:hover,
   display: flex;
   gap: 15px;
   flex-wrap: wrap;
-  margin-bottom: auto;             /* Pousse le footer en bas */
+  margin-bottom: auto;
   justify-content: center;
 }
 
@@ -289,7 +449,7 @@ button:hover,
   padding: 20px;
   background: #fff;
   border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .reset-password-container h2 {
@@ -331,7 +491,7 @@ button:hover,
   padding: 20px;
   background: #fff;
   border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .register-container form {
@@ -361,20 +521,27 @@ button:hover,
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 600px) {
-  .login-container, .dashboard, form, .category-block {
-    padding: 20px; /* Padding réduit sur mobile */
+  body {
+    padding: 20px;
+  }
+
+  .login-container,
+  .dashboard,
+  form,
+  .category-block {
+    padding: 20px;
   }
 
   .category-block input[type="text"],
   .category-block input[type="number"] {
     display: block;
-    width: 100%; /* Champs en pleine largeur */
+    width: 100%;
     margin-bottom: 8px;
   }
 
   .category-block form button {
     display: block;
-    margin-top: 5px; /* Boutons sur nouvelle ligne */
+    margin-top: 5px;
   }
 
   .dashboard-main-buttons {
@@ -410,13 +577,84 @@ button:hover,
   }
 
   .edit-carte-container {
-        flex-direction: column;
-    }
-    
-    .new-category-block,
-    .categories-grid,
-    .category-block {
-        flex: 1 1 100%;
-        max-width: 100%;
-    }
+    flex-direction: column;
+  }
+
+  .new-category-block,
+  .categories-grid,
+  .category-block {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .carte-preview-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 0 15px;
+  }
+  
+  .category-preview {
+    padding: 15px;
+  }
+
+  .dish-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .dish-price {
+    align-self: flex-end;
+    margin-left: 0;
+  }
+
+  /* Responsive pour l'édition des plats */
+  .dish-list li {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dish-edit-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .dish-edit-container .edit-form {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .dish-edit-container .edit-form input[name="dish_name"],
+  .dish-edit-container .edit-form .price-input {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .dish-edit-container .edit-form button,
+  .dish-edit-container .delete-form button {
+    width: 100%;
+  }
+
+  /* Responsive pour le formulaire d'ajout de plat */
+  .new-dish-form .form-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .new-dish-form .input-euro {
+    width: 100%;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 1024px) {
+  .carte-preview-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1025px) {
+  .carte-preview-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }

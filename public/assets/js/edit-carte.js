@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (deleteCategory || deleteDish) {
                 e.preventDefault(); // on bloque temporairement l'envoi du formulaire
-                const type = deleteCategory ? "cette catégorie" : "ce plat";
+                const type = deleteCategory ? "cette catégorie" : "cet élément";
                 // Définition du type pour le message SweetAlert
 
                 Swal.fire({

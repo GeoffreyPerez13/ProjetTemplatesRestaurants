@@ -50,30 +50,31 @@ class CarteController extends BaseController
             $message = "Catégorie supprimée.";
         }
 
-        // --- AJOUT D’UN PLAT ---
-        // On utilise isset car la clé 'new_dish' peut exister même si vide (selon le formulaire)
+        // --- AJOUT D'UN PLAT ---
         if (isset($_POST['new_dish'])) {
             // Récupération et conversion des valeurs saisies
             $category_id = (int)$_POST['category_id']; // ID de la catégorie liée
             $name = trim($_POST['dish_name']);          // Nom du plat
             $price = floatval($_POST['dish_price']);    // Prix du plat
+            $description = trim($_POST['dish_description'] ?? ''); // DESCRIPTION (avec valeur par défaut)
 
             // Création du plat dans la base
-            $dishModel->create($category_id, $name, $price);
+            $dishModel->create($category_id, $name, $price, $description);
 
             // Message de confirmation
             $message = "Plat ajouté.";
         }
 
-        // --- MODIFICATION D’UN PLAT ---
+        // --- MODIFICATION D'UN PLAT ---
         if (isset($_POST['edit_dish'])) {
             // Récupération des données du plat à modifier
             $dish_id = (int)$_POST['dish_id'];
             $name = trim($_POST['dish_name']);
             $price = floatval($_POST['dish_price']);
+            $description = trim($_POST['dish_description'] ?? ''); // DESCRIPTION (avec valeur par défaut)
 
             // Mise à jour du plat dans la base
-            $dishModel->update($dish_id, $name, $price);
+            $dishModel->update($dish_id, $name, $price, $description);
 
             // Message de confirmation
             $message = "Plat modifié.";
@@ -103,6 +104,33 @@ class CarteController extends BaseController
         $this->render('admin/edit-carte', [
             'categories' => $categories,
             'message' => $message
+        ]);
+    }
+
+    // Page d'aperçu de la carte (lecture seule)
+    public function view()
+    {
+        // Vérifie que l'administrateur est bien connecté
+        $this->requireLogin();
+
+        // Récupère l'ID de l'admin connecté depuis la session
+        $admin_id = $_SESSION['admin_id'];
+
+        // Instancie les modèles nécessaires
+        $categoryModel = new Category($this->pdo);
+        $dishModel = new Dish($this->pdo);
+
+        // Récupère toutes les catégories de l'admin
+        $categories = $categoryModel->getAllByAdmin($admin_id);
+
+        // Pour chaque catégorie, on récupère les plats associés
+        foreach ($categories as &$cat) {
+            $cat['plats'] = $dishModel->getAllByCategory($cat['id']);
+        }
+
+        // Rend la vue "view-carte" en passant les catégories
+        $this->render('admin/view-carte', [
+            'categories' => $categories
         ]);
     }
 }

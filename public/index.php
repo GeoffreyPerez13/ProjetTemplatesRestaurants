@@ -45,6 +45,11 @@ switch ($page) {
         $controller->edit();  // Gestion de la carte (catégories + plats)
         break;
 
+    case 'view-carte':
+        $controller = new CarteController($pdo);
+        $controller->view();  // Affichage de la carte (catégories + plats) 
+        break;
+
     case 'edit-contact':
         $controller = new ContactController($pdo);
         $controller->edit();  // Gestion des informations de contact

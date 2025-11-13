@@ -33,31 +33,42 @@ require __DIR__ . '/../partials/header.php';
                     <button type="submit" class="btn danger">Supprimer catégorie</button>
                 </form>
 
+                <h3>Ajouter</h3>
                 <form method="post" class="new-dish-form">
                     <input type="hidden" name="category_id" value="<?= $cat['id'] ?>">
-                    <input type="text" name="dish_name" placeholder="Nom du plat" required>
-                    <div class="input-euro">
-                        <input type="number" step="0.01" name="dish_price" placeholder="Prix" required>
-                        <span class="euro-symbol">€</span>
+                    <div class="form-row">
+                        <input type="text" name="dish_name" placeholder="Nom du plat" required>
+                        <div class="input-euro">
+                            <input type="number" step="0.01" name="dish_price" placeholder="Prix" required>
+                            <span class="euro-symbol">€</span>
+                        </div>
                     </div>
+                    <textarea name="dish_description" placeholder="Description du plat (optionnel)"></textarea>
                     <button type="submit" name="new_dish" class="btn">Ajouter plat</button>
                 </form>
 
                 <?php $plats = $cat['plats'] ?? []; ?>
                 <?php if ($plats): ?>
                     <ul class="dish-list">
+                        <h3>Modifier</h3>
                         <?php foreach ($plats as $plat): ?>
                             <li>
-                                <form method="post" class="inline-form">
-                                    <input type="hidden" name="dish_id" value="<?= $plat['id'] ?>">
-                                    <input type="text" name="dish_name" value="<?= htmlspecialchars($plat['name']) ?>" required>
-                                    <input type="text" name="dish_price" value="<?= htmlspecialchars($plat['price']) ?>" required>
-                                    <button type="submit" name="edit_dish" class="btn">Modifier</button>
-                                </form>
-                                <form method="post" class="inline-form">
-                                    <input type="hidden" name="delete_dish" value="<?= $plat['id'] ?>">
-                                    <button type="submit" class="btn danger">Supprimer</button>
-                                </form>
+                                <div class="dish-edit-container">
+                                    <form method="post" class="inline-form edit-form">
+                                        <input type="hidden" name="dish_id" value="<?= $plat['id'] ?>">
+                                        <input type="text" name="dish_name" value="<?= htmlspecialchars($plat['name']) ?>"
+                                            placeholder="Nom du plat" required>
+                                        <input type="text" name="dish_price" value="<?= htmlspecialchars($plat['price']) ?>"
+                                            placeholder="Prix" required class="price-input">
+                                        <textarea name="dish_description" placeholder="Description du plat (optionnel)"
+                                            class="description-input"><?= htmlspecialchars($plat['description'] ?? '') ?></textarea>
+                                        <button type="submit" name="edit_dish" class="btn">Modifier</button>
+                                    </form>
+                                    <form method="post" class="inline-form delete-form">
+                                        <input type="hidden" name="delete_dish" value="<?= $plat['id'] ?>">
+                                        <button type="submit" class="btn danger">Supprimer</button>
+                                    </form>
+                                </div>
                             </li>
                         <?php endforeach; ?>
                     </ul>
@@ -72,4 +83,3 @@ require __DIR__ . '/../partials/header.php';
 
 <?php
 require __DIR__ . '/../partials/footer.php';
-?>
