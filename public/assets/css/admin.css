@@ -7,7 +7,9 @@ body {
   margin: 0;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   color: #b71c1c;
   margin-bottom: 20px;
 }
@@ -41,7 +43,8 @@ textarea {
 }
 
 /* ==================== BUTTONS ==================== */
-button, .btn {
+button,
+.btn {
   color: white;
   border: none;
   padding: 10px 20px;
@@ -101,14 +104,11 @@ button, .btn {
 }
 
 .success {
-  color: green;
-  font-weight: bold;
   text-align: center;
   padding: 10px;
   margin: auto auto 15px 0;
   background-color: #d4edda;
   border-radius: 4px;
-  width: 30%;
 }
 
 /* ==================== CATEGORY BLOCKS & PLATS ==================== */
@@ -308,6 +308,60 @@ button, .btn {
   font-weight: bold;
 }
 
+/* ==================== IMAGES ==================== */
+.image-preview {
+  max-width: 150px;
+  max-height: 150px;
+  border-radius: 8px;
+  margin: 10px 0;
+  border: 2px solid #eee;
+  object-fit: cover;
+}
+
+.image-upload-container {
+  margin: 15px 0;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.image-upload-container label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+.image-upload-container input[type="file"] {
+  margin: 8px 0;
+  padding: 8px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.image-upload-container small {
+  color: #666;
+  font-size: 0.85em;
+}
+
+.current-image {
+  margin: 15px 0;
+  padding: 10px;
+  background: #f0f8ff;
+  border-radius: 5px;
+  border-left: 4px solid #3498db;
+}
+
+.current-image label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
 /* ==================== CARTE PREVIEW GRID ==================== */
 .carte-preview-grid {
   display: grid;
@@ -337,31 +391,64 @@ button, .btn {
 .dishes-table {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 15px;
 }
 
 .dish-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
+  flex-direction: column;
+  padding: 15px;
   border-bottom: 1px solid #eee;
+  background: #f9f9f9;
+  border-radius: 8px;
 }
 
 .dish-row:last-child {
   border-bottom: none;
 }
 
+/* Ligne principale avec nom, prix et image */
+.dish-main-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 8px;
+}
+
 .dish-name {
   font-weight: 500;
   color: #333;
   flex: 1;
+  font-size: 1.1em;
 }
 
 .dish-price {
   font-weight: bold;
   color: #b71c1c;
-  margin-left: 15px;
+  font-size: 1.1em;
+  white-space: nowrap;
+}
+
+/* Image du plat */
+.dish-preview-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid #ddd;
+  flex-shrink: 0;
+}
+
+/* Description en dessous */
+.dish-description {
+  color: #666;
+  font-size: 0.9em;
+  margin: 0;
+  padding-top: 8px;
+  border-top: 1px dashed #ddd;
+  font-style: italic;
+  line-height: 1.4;
 }
 
 .no-dishes {
@@ -369,6 +456,16 @@ button, .btn {
   color: #666;
   font-style: italic;
   padding: 20px 0;
+}
+
+/* Image de catégorie */
+.category-preview-image {
+  width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  object-fit: cover;
+  border: 2px solid #b71c1c;
 }
 
 /* ==================== DASHBOARD ==================== */
@@ -380,9 +477,7 @@ button, .btn {
 .dashboard-top-buttons {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   gap: 15px;
-  margin: 30px 0;
 }
 
 .dashboard-bottom {
@@ -592,20 +687,35 @@ button, .btn {
     gap: 20px;
     padding: 0 15px;
   }
-  
+
   .category-preview {
     padding: 15px;
   }
 
-  .dish-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
+  /* Responsive pour l'aperçu des plats */
+  .dish-main-info {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .dish-name {
+    order: 1;
+    flex: 1 1 100%;
   }
 
   .dish-price {
-    align-self: flex-end;
-    margin-left: 0;
+    order: 2;
+  }
+
+  .dish-preview-image {
+    order: 3;
+    width: 50px;
+    height: 50px;
+  }
+
+  .dish-description {
+    order: 4;
+    margin-top: 8px;
   }
 
   /* Responsive pour l'édition des plats */
@@ -644,6 +754,11 @@ button, .btn {
 
   .new-dish-form .input-euro {
     width: 100%;
+  }
+
+  /* Responsive pour les images */
+  .image-preview {
+    max-width: 100%;
   }
 }
 

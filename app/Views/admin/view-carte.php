@@ -13,15 +13,30 @@ require __DIR__ . '/../partials/header.php';
     <div class="carte-preview-grid">
         <?php foreach ($categories as $cat): ?>
             <div class="category-preview">
+                <!-- Image de la catégorie -->
+                <?php if (!empty($cat['image'])): ?>
+                    <img src="/<?= htmlspecialchars($cat['image']) ?>" alt="<?= htmlspecialchars($cat['name']) ?>" class="category-preview-image">
+                <?php endif; ?>
+
                 <h2 class="category-title"><?= htmlspecialchars($cat['name']) ?></h2>
-                
+
                 <?php $plats = $cat['plats'] ?? []; ?>
                 <?php if (!empty($plats)): ?>
                     <div class="dishes-table">
                         <?php foreach ($plats as $plat): ?>
                             <div class="dish-row">
-                                <span class="dish-name"><?= htmlspecialchars($plat['name']) ?></span>
-                                <span class="dish-price"><?= htmlspecialchars($plat['price']) ?> €</span>
+                                <div class="dish-main-info">
+                                    <span class="dish-name"><?= htmlspecialchars($plat['name']) ?></span>
+                                    <span class="dish-price"><?= number_format($plat['price'], 2, ',', ' ') ?> €</span>
+                                    <!-- Image du plat à droite du prix -->
+                                    <?php if (!empty($plat['image'])): ?>
+                                        <img src="/<?= htmlspecialchars($plat['image']) ?>" alt="<?= htmlspecialchars($plat['name']) ?>" class="dish-preview-image">
+                                    <?php endif; ?>
+                                </div>
+                                <!-- Description en dessous -->
+                                <?php if (!empty($plat['description'])): ?>
+                                    <p class="dish-description"><?= htmlspecialchars($plat['description']) ?></p>
+                                <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -34,5 +49,4 @@ require __DIR__ . '/../partials/header.php';
 <?php endif; ?>
 
 <?php
-// Inclusion du footer commun
 require __DIR__ . '/../partials/footer.php';

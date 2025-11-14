@@ -11,12 +11,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (deleteCategory || deleteDish) {
                 e.preventDefault(); // on bloque temporairement l'envoi du formulaire
-                const type = deleteCategory ? "cette catégorie" : "cet élément";
-                // Définition du type pour le message SweetAlert
+                
+                let itemName = "";
+                let type = "";
+                let warningMessage = "";
+
+                if (deleteCategory) {
+                    // Pour les catégories, on récupère le nom depuis le strong parent
+                    const categoryBlock = form.closest('.category-block');
+                    const categoryNameElement = categoryBlock.querySelector('strong');
+                    itemName = categoryNameElement ? categoryNameElement.textContent.trim() : "cette catégorie";
+                    type = "la catégorie";
+                    
+                    // Vérifier s'il y a des plats dans cette catégorie
+                    const dishList = categoryBlock.querySelector('.dish-list');
+                    const hasPlats = dishList && dishList.querySelector('li');
+                    
+                    if (hasPlats) {
+                        warningMessage = "\n\n⚠️ Attention, tous les plats associés seront également supprimés !";
+                    }
+                } else if (deleteDish) {
+                    // Pour les plats, on récupère le nom depuis le champ d'édition
+                    const dishEditContainer = form.closest('.dish-edit-container');
+                    const dishNameInput = dishEditContainer.querySelector('input[name="dish_name"]');
+                    itemName = dishNameInput ? dishNameInput.value.trim() : "cet élément";
+                    type = "le plat";
+                }
 
                 Swal.fire({
                     title: "Confirmer la suppression",
-                    text: `Voulez-vous vraiment supprimer ${type} ?`,
+                    text: `Voulez-vous vraiment supprimer ${type} "${itemName}" ?${warningMessage}`,
                     icon: "warning",
                     showCancelButton: true,
                     confirmButtonColor: "#d33",

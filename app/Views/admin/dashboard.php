@@ -14,9 +14,9 @@ require __DIR__ . '/../partials/header.php';
     <!-- Regroupe les 3 premiers boutons -->
     <div class="dashboard-top-buttons">
         <a href="?page=edit-carte" class="btn">Modifier la carte</a>
-        <a href="?page=view-carte" class="btn">Aperçu de la carte</a>
         <a href="?page=edit-contact" class="btn">Modifier le contact</a>
         <a href="?page=edit-logo" class="btn">Modifier le logo</a>
+        <a href="?page=view-carte" class="btn success">Aperçu de la carte</a>
     </div>
 
     <!-- Zone du bas pour les boutons d’action -->

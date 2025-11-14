@@ -25,13 +25,60 @@ class Category
         );
         $stmt->execute([$admin_id, $name, $image]);
 
-        // Met à jour les propriétés de l'objet avec la catégorie créée
         $this->id = $this->pdo->lastInsertId();
         $this->admin_id = $admin_id;
         $this->name = $name;
         $this->image = $image;
 
         return $this;
+    }
+
+    // --- Upload d'image pour catégorie ---
+    public function uploadImage($file)
+    {
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            throw new Exception('Erreur lors du téléchargement de l\'image');
+        }
+
+        // Validation du type de fichier
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+
+        if (!in_array($mimeType, $allowedTypes)) {
+            throw new Exception('Type de fichier non autorisé. Formats acceptés: JPEG, PNG, GIF, WebP');
+        }
+
+        // Validation de la taille (max 2MB)
+        if ($file['size'] > 2 * 1024 * 1024) {
+            throw new Exception('L\'image ne doit pas dépasser 2MB');
+        }
+
+        // Génération d'un nom unique
+        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = uniqid('cat_') . '.' . $extension;
+        $uploadPath = __DIR__ . '/../../public/uploads/categories/' . $filename;
+
+        // Création du dossier si nécessaire
+        $uploadDir = dirname($uploadPath);
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        if (!move_uploaded_file($file['tmp_name'], $uploadPath)) {
+            throw new Exception('Erreur lors de l\'enregistrement de l\'image');
+        }
+
+        return 'uploads/categories/' . $filename;
+    }
+
+    // --- Suppression d'image ---
+    public function deleteImage($imagePath)
+    {
+        if ($imagePath && file_exists(__DIR__ . '/../../public/' . $imagePath)) {
+            unlink(__DIR__ . '/../../public/' . $imagePath);
+        }
     }
 
     // --- Mise à jour d'une catégorie ---

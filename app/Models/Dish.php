@@ -10,7 +10,8 @@ class Dish
     public $category_id;
     public $name;
     public $price;
-    public $description; // AJOUT DE LA PROPRIÉTÉ DESCRIPTION
+    public $description;
+    public $image;
 
     // Constructeur : initialise la connexion PDO
     public function __construct($pdo)
@@ -19,30 +20,91 @@ class Dish
     }
 
     // --- Création d'un plat ---
-    public function create($category_id, $name, $price, $description = '') // AJOUT DU PARAMÈTRE DESCRIPTION
+    public function create($category_id, $name, $price, $description = '', $image = null)
     {
-        $price = floatval($price); // S'assure que le prix est bien un float
+        $price = floatval($price);
         $stmt = $this->pdo->prepare(
-            "INSERT INTO plats (category_id, name, price, description) VALUES (?, ?, ?, ?)" // AJOUT DE LA COLONNE DESCRIPTION
+            "INSERT INTO plats (category_id, name, price, description, image) VALUES (?, ?, ?, ?, ?)"
         );
-        $stmt->execute([$category_id, $name, $price, $description]);
+        $stmt->execute([$category_id, $name, $price, $description, $image]);
 
-        // Remplit les propriétés de l'objet avec les valeurs du nouveau plat
         $this->id = $this->pdo->lastInsertId();
         $this->category_id = $category_id;
         $this->name = $name;
         $this->price = $price;
-        $this->description = $description; // AJOUT
+        $this->description = $description;
+        $this->image = $image;
 
         return $this;
     }
 
     // --- Mise à jour d'un plat ---
-    public function update($id, $name, $price, $description = '') // AJOUT DU PARAMÈTRE DESCRIPTION
+    public function update($id, $name, $price, $description = '', $image = null)
     {
-        $price = floatval($price); // S'assure que le prix est un float
-        $stmt = $this->pdo->prepare("UPDATE plats SET name = ?, price = ?, description = ? WHERE id = ?"); // AJOUT DE LA COLONNE DESCRIPTION
-        return $stmt->execute([$name, $price, $description, $id]);
+        $price = floatval($price);
+
+        // Construction dynamique de la requête
+        $sql = "UPDATE plats SET name = ?, price = ?, description = ?";
+        $params = [$name, $price, $description];
+
+        if ($image !== null) {
+            $sql .= ", image = ?";
+            $params[] = $image;
+        }
+
+        $sql .= " WHERE id = ?";
+        $params[] = $id;
+
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute($params);
+    }
+
+    // --- Upload d'image pour plat ---
+    public function uploadImage($file)
+    {
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            throw new Exception('Erreur lors du téléchargement de l\'image');
+        }
+
+        // Validation du type de fichier
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+
+        if (!in_array($mimeType, $allowedTypes)) {
+            throw new Exception('Type de fichier non autorisé. Formats acceptés: JPEG, PNG, GIF, WebP');
+        }
+
+        // Validation de la taille (max 2MB)
+        if ($file['size'] > 2 * 1024 * 1024) {
+            throw new Exception('L\'image ne doit pas dépasser 2MB');
+        }
+
+        // Génération d'un nom unique
+        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = uniqid('dish_') . '.' . $extension;
+        $uploadPath = __DIR__ . '/../../public/uploads/dishes/' . $filename;
+
+        // Création du dossier si nécessaire
+        $uploadDir = dirname($uploadPath);
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        if (!move_uploaded_file($file['tmp_name'], $uploadPath)) {
+            throw new Exception('Erreur lors de l\'enregistrement de l\'image');
+        }
+
+        return 'uploads/dishes/' . $filename;
+    }
+
+    // --- Suppression d'image ---
+    public function deleteImage($imagePath)
+    {
+        if ($imagePath && file_exists(__DIR__ . '/../../public/' . $imagePath)) {
+            unlink(__DIR__ . '/../../public/' . $imagePath);
+        }
     }
 
     // --- Suppression d'un plat ---

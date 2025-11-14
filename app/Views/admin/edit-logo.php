@@ -19,7 +19,7 @@ require __DIR__ . '/../partials/header.php';
     <h2>Changer le logo</h2>
     
     <input type="file" name="logo" accept="image/*" required>
-    <button type="submit" class="btn">Uploader</button>
+    <button type="submit" class="btn success">Uploader</button>
 </form>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>
