@@ -1,0 +1,99 @@
+/* ==================== PLATS ==================== */
+.dish-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.dish-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 5px;
+}
+
+.dish-edit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.dish-edit-container .edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.dish-edit-container .edit-form input[type="text"] {
+  margin: 0;
+}
+
+.new-dish-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.new-dish-form .form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.new-dish-form input[type="text"] {
+  min-width: auto;
+  margin: 0;
+}
+
+.new-dish-form button {
+  align-self: center;
+}
+
+.no-dishes {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 20px 0;
+}
+
+/* ==================== RESPONSIVE DISHES ==================== */
+@media (min-width: 601px) {
+  .dish-list li {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .dish-edit-container {
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .dish-edit-container .edit-form {
+    flex-direction: row;
+    flex: 1;
+  }
+
+  .dish-edit-container .edit-form input[name="dish_name"] {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .dish-edit-container .edit-form .price-input {
+    width: 80px;
+    flex: none;
+  }
+
+  .new-dish-form .form-row {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+}

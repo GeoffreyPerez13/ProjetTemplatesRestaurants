@@ -1,0 +1,194 @@
+/* ==================== AUTHENTIFICATION ==================== */
+.password-reset {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.password-reset a {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.9em;
+}
+
+.password-reset a:hover {
+  text-decoration: underline;
+}
+
+.back-to-login {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.back-to-login a {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.9em;
+}
+
+.back-to-login a:hover {
+  text-decoration: underline;
+}
+
+/* ==================== PASSWORD INPUT GROUP ==================== */
+.password-input-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  margin: 8px 0 15px;
+  position: relative;
+}
+
+.password-input-wrapper {
+  flex: 1;
+  display: flex;
+}
+
+.password-input-with-toggle {
+  width: 100%;
+  padding-right: 15px;
+  box-sizing: border-box;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: none;
+  margin: 0;
+  /* Réinitialiser les styles généraux d'input */
+  padding: 10px !important;
+  border: 1px solid #ccc !important;
+  border-radius: 5px 0 0 5px !important;
+  height: auto !important;
+}
+
+.password-toggle-btn {
+  background: none;
+  border: 1px solid #ccc;
+  border-left: none;
+  cursor: pointer;
+  padding: 0 15px;
+  color: #666;
+  font-size: 16px;
+  border-radius: 0 5px 5px 0;
+  transition: all 0.2s ease;
+  min-width: 45px;
+  background-color: #f9f9f9;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Réinitialiser les styles généraux de button */
+  width: auto !important;
+  height: auto !important;
+  line-height: normal !important;
+}
+
+.password-toggle-btn:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.password-toggle-btn:focus {
+  outline: 2px solid #3498db;
+  outline-offset: -1px;
+  background-color: #e8f4fc;
+  z-index: 10;
+}
+
+.password-toggle-btn:active {
+  background-color: #e0e0e0;
+  transform: scale(0.98);
+}
+
+.password-toggle-btn i {
+  font-size: 1.1em;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+/* Quand le mot de passe est visible */
+.password-toggle-btn.showing {
+  color: #3498db;
+  background-color: #e8f4fc;
+}
+
+.password-toggle-btn.showing:hover {
+  background-color: #d8ebf9;
+}
+
+/* Pour les écrans très petits */
+@media (max-width: 480px) {
+  .password-toggle-btn {
+    padding: 0 12px;
+    min-width: 40px;
+  }
+  
+  .password-toggle-btn i {
+    font-size: 1em;
+  }
+}
+
+/* Animation pour le changement d'icône */
+.password-toggle-btn i {
+  transition: transform 0.3s ease;
+}
+
+.password-toggle-btn:active i {
+  transform: scale(0.9);
+}
+
+/* IMPORTANT: Surcharger les styles généraux d'input pour le groupe mot de passe */
+.password-input-group .password-input-with-toggle {
+  margin: 0 !important;
+  border-right: none !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  flex: 1;
+}
+
+/* S'assurer que le bouton a la bonne hauteur */
+.password-input-group .password-input-with-toggle,
+.password-input-group .password-toggle-btn {
+  height: 42px;
+  box-sizing: border-box;
+}
+
+/* Correction pour l'alignement vertical */
+.password-input-group {
+  align-items: center;
+}
+
+/* Éviter les conflits avec les styles généraux de bouton */
+.password-input-group .password-toggle-btn {
+  margin-top: 0 !important;
+  width: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 15px !important;
+}
+
+/* Styles spécifiques pour le formulaire de login */
+.login-container form {
+  display: flex;
+  flex-direction: column;
+}
+
+.login-container .password-input-group {
+  display: flex;
+  align-items: center;
+}
+
+.login-container .password-input-with-toggle {
+  flex: 1;
+  min-width: 0; /* Important pour flex */
+}
+
+.login-container .password-toggle-btn {
+  flex-shrink: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

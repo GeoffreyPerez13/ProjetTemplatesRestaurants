@@ -1,69 +1,67 @@
 /* ==================== BASE ==================== */
-/* Réinitialisation globale des marges et paddings */
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box; /* Inclut padding et border dans la largeur */
+  box-sizing: border-box;
 }
 
 body {
-  font-family: 'Poppins', sans-serif; /* Police moderne */
-  color: #333;                        /* Couleur du texte */
-  background-color: #fff;             /* Fond blanc */
-  scroll-behavior: smooth;            /* Smooth scroll pour les ancres */
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+  background-color: #fff;
+  scroll-behavior: smooth;
 }
 
 /* ==================== HEADER ==================== */
 .header {
-  display: flex;                       /* Flexbox pour alignement */
-  justify-content: space-between;      /* Espacement entre logo et menu */
-  align-items: center;                 /* Centré verticalement */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 15px 50px;
-  background: rgba(255, 255, 255, 0.95); /* Fond semi-transparent */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Ombre légère */
-  position: sticky;                    /* Fixe en haut au scroll */
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  position: sticky;
   top: 0;
-  z-index: 1000;                       /* Toujours au-dessus du contenu */
+  z-index: 1000;
 }
 
 .logo img {
-  height: 50px;                        /* Taille du logo */
+  height: 50px;
 }
 
 .menu a {
-  margin-left: 30px;                   /* Espacement entre liens */
-  text-decoration: none;               /* Pas de soulignement */
+  margin-left: 30px;
+  text-decoration: none;
   color: #333;
-  font-weight: 500;                    /* Semi-bold */
-  transition: color 0.3s;              /* Transition couleur au hover */
+  font-weight: 500;
+  transition: color 0.3s;
 }
 
 .menu a:hover {
-  color: #b71c1c;                     /* Rouge foncé au survol */
+  color: #b71c1c;
 }
 
 /* ==================== ACCUEIL ==================== */
 .accueil {
-  height: 100vh;                       /* Pleine hauteur écran */
+  height: 100vh;
   background: url('assets/restaurant-bg.jpg') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: white;                        /* Texte blanc sur image */
+  color: white;
   position: relative;
 }
 
-/* Overlay sombre sur l'image */
 .accueil::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);      /* Transparence noire */
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .accueil-content {
-  position: relative;                   /* Pour rester au-dessus de l'overlay */
+  position: relative;
   z-index: 1;
 }
 
@@ -77,25 +75,24 @@ body {
   margin-bottom: 30px;
 }
 
-/* Bouton principal accueil */
 .accueil button {
-  background-color: #b71c1c;           /* Rouge foncé */
+  background-color: #b71c1c;
   color: white;
   border: none;
   padding: 12px 30px;
-  border-radius: 25px;                 /* Bouton arrondi */
+  border-radius: 25px;
   cursor: pointer;
   font-size: 1rem;
   transition: background 0.3s;
 }
 
 .accueil button:hover {
-  background-color: #d32f2f;           /* Rouge vif au hover */
+  background-color: #d32f2f;
 }
 
 /* ==================== CARTE ==================== */
 .carte {
-  padding: 80px 10%;                    /* Padding vertical et horizontal */
+  padding: 80px 10%;
 }
 
 .bloc {
@@ -103,27 +100,25 @@ body {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 80px;
-  gap: 40px;                            /* Espace entre texte et image */
+  gap: 40px;
 }
 
-/* Bloc inversé pour alternance texte/image */
 .bloc.inverse {
   flex-direction: row-reverse;
 }
 
 .bloc .texte {
-  flex: 1;                               /* Prend la moitié de l’espace */
+  flex: 1;
 }
 
 .bloc .texte h2 {
   font-size: 2rem;
   margin-bottom: 20px;
-  color: #b71c1c;
 }
 
 .bloc .texte ul {
-  list-style: none;                     /* Pas de puces */
-  line-height: 2;                       /* Espacement vertical entre plats */
+  list-style: none;
+  line-height: 2;
   font-size: 1.1rem;
 }
 
@@ -132,31 +127,30 @@ body {
 }
 
 .bloc .image img {
-  width: 100%;                          /* S’adapte au bloc */
+  width: 100%;
   border-radius: 15px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 /* ==================== CONTACT ==================== */
 .contact {
-  background-color: #f7f7f7;            /* Fond gris clair */
+  background-color: #f7f7f7;
   padding: 80px 10%;
 }
 
 .contact-container {
   display: flex;
-  flex-wrap: wrap;                       /* Responsive flex */
-  gap: 40px;                             /* Espacement entre colonnes */
+  flex-wrap: wrap;
+  gap: 40px;
   justify-content: space-between;
 }
 
 .contact-container > div {
-  flex: 1;                               /* Chaque colonne prend 1 part */
-  min-width: 280px;                      /* Minimum largeur pour mobile */
+  flex: 1;
+  min-width: 280px;
 }
 
 .contact h2 {
-  color: #b71c1c;
   margin-bottom: 15px;
 }
 
@@ -185,29 +179,35 @@ footer {
   margin: 0 8px;
 }
 
-/* Réseaux sociaux (ex: images) */
 .socials img {
   width: 24px;
   margin: 10px 5px;
-  filter: invert(100%);                  /* Pour que les icônes ressortent sur fond sombre */
+  filter: invert(100%);
   transition: opacity 0.3s;
 }
 
 .socials img:hover {
-  opacity: 0.7;                           /* Légère transparence au hover */
+  opacity: 0.7;
+}
+
+/* ==================== COULEURS COMMUNES ==================== */
+h1, h2, h3,
+.bloc .texte h2,
+.contact h2 {
+  color: #b71c1c;
 }
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
   .bloc {
-    flex-direction: column;               /* Texte/image empilés */
+    flex-direction: column;
   }
 
   .menu {
-    display: none;                        /* Menu masqué sur petit écran */
+    display: none;
   }
 
   .accueil h1 {
-    font-size: 2.5rem;                    /* Titre plus petit */
+    font-size: 2.5rem;
   }
 }

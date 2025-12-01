@@ -1,0 +1,78 @@
+/* ==================== CATEGORIES ==================== */
+.category-block {
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+}
+
+.category-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.category-block strong {
+  display: block;
+  font-size: 1.1em;
+  margin-bottom: 10px;
+}
+
+.edit-carte-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.categories-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+/* ==================== RESPONSIVE CATEGORIES ==================== */
+@media (min-width: 601px) {
+  .category-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .edit-carte-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .categories-grid {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .category-block {
+    flex: 1 1 calc(50% - 10px);
+  }
+}
+
+@media (min-width: 1025px) {
+  .edit-carte-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .new-category-block {
+    flex: 1 1 250px;
+    max-width: 300px;
+  }
+
+  .categories-grid {
+    flex: 3 1 600px;
+  }
+
+  .category-block {
+    flex: 1 1 250px;
+  }
+}
