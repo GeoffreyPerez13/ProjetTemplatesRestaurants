@@ -1,0 +1,225 @@
+/* ==================== ACCORDÉON ==================== */
+
+/* En-tête de catégorie avec contrôles */
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.category-header strong {
+  font-size: 1.3em;
+  color: #333;
+  margin: 0;
+}
+
+/* Contrôles d'accordéon par catégorie */
+.category-accordion-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.category-accordion-controls .btn.small {
+  padding: 6px 12px;
+  font-size: 0.85em;
+  background-color: #f8f9fa;
+  color: #666;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s ease;
+}
+
+.category-accordion-controls .btn.small:hover {
+  background-color: #e9ecef;
+  color: #333;
+  border-color: #ced4da;
+}
+
+.category-accordion-controls .btn.small i {
+  margin-right: 5px;
+  font-size: 0.9em;
+}
+
+/* En-tête d'accordéon */
+.accordion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 12px 0;
+  margin: 15px 0;
+  border-bottom: 2px solid #eee;
+}
+
+.accordion-header h3 {
+  margin: 0;
+  color: #b71c1c;
+  font-size: 1.2em;
+}
+
+/* Bouton toggle */
+.accordion-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  font-size: 1.2em;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.accordion-toggle:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.accordion-toggle:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+}
+
+/* Contenu d'accordéon */
+.accordion-content {
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+}
+
+.accordion-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.accordion-content.expanded {
+  max-height: 5000px;
+  opacity: 1;
+  padding: 15px 0;
+}
+
+/* Animation pour l'icône */
+.accordion-toggle i {
+  transition: transform 0.3s ease;
+}
+
+.accordion-toggle i.rotated {
+  transform: rotate(180deg);
+}
+
+/* Sections individuelles de plat */
+.dish-accordion-item {
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+}
+
+.dish-accordion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: #f9f9f9;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  transition: background 0.2s ease;
+}
+
+.dish-accordion-header:hover {
+  background: #f0f0f0;
+}
+
+.dish-accordion-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1em;
+  font-weight: 500;
+}
+
+.dish-accordion-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  font-size: 1em;
+  padding: 5px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.dish-accordion-toggle:hover {
+  background-color: #e9e9e9;
+  color: #333;
+}
+
+.dish-accordion-content {
+  background: white;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.dish-accordion-content[style*="display: none"] {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  .category-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .category-accordion-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  
+  .category-accordion-controls .btn.small {
+    flex: 1;
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 600px) {
+  .category-accordion-controls {
+    flex-wrap: wrap;
+  }
+  
+  .category-accordion-controls .btn.small {
+    min-width: calc(50% - 4px);
+  }
+  
+  .dish-accordion-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .dish-accordion-header h4 {
+    width: 100%;
+  }
+  
+  .dish-accordion-toggle {
+    align-self: flex-end;
+  }
+}
+
+/* Animation smooth */
+.accordion-content,
+.dish-accordion-content {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Effet au survol des en-têtes */
+.accordion-header:hover {
+  background-color: #f8f8f8;
+}

@@ -1,6 +1,6 @@
 <?php
 $title = "Connexion Admin";
-$scripts = ["js/auth.js"]; // Ajouter cette ligne
+$scripts = ["js/sections/auth.js"]; // Ajouter cette ligne
 require __DIR__ . '/../partials/header.php';
 ?>
 <div class="login-container">

@@ -1,0 +1,205 @@
+/* ==================== DISHES ==================== */
+
+/* Liste des plats */
+.dish-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 20px;
+}
+
+.dish-list > h3 {
+  color: #b71c1c;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.dish-list li {
+  margin-bottom: 25px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.dish-list li:not(:last-child) {
+  border-bottom: 1px dashed #eee;
+  padding-bottom: 25px;
+}
+
+/* Container principal d'édition de plat */
+.dish-edit-container {
+  width: 100%;
+}
+
+/* Formulaire d'édition de plat */
+.dish-edit-container .edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  margin: 0;
+}
+
+.new-dish-form {
+  border: 1px solid #eee;
+}
+
+/* Ligne nom + prix */
+.dish-name-price-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Inputs d'édition */
+.dish-edit-container .edit-form input,
+.dish-edit-container .edit-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 1em;
+  margin: 0;
+}
+
+.dish-edit-container .edit-form textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+/* Image actuelle du plat */
+.dish-current-image-container {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #3498db;
+  margin: 0;
+}
+
+.dish-current-image-container label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #2c3e50;
+  font-size: 0.95em;
+}
+
+.dish-image-preview {
+  max-width: 200px;
+  max-height: 150px;
+  border-radius: 6px;
+  border: 2px solid #ddd;
+  object-fit: cover;
+  margin-top: 5px;
+}
+
+/* Container pour l'upload d'image */
+.dish-edit-container .image-upload-container {
+  margin: 0;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+/* Boutons pour l'image */
+.dish-image-buttons-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+
+.dish-remove-image-btn {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background 0.3s;
+  text-align: center;
+}
+
+.dish-remove-image-btn:hover {
+  background-color: #c0392b;
+}
+
+/* Bouton Supprimer le plat */
+.dish-edit-container .inline-form {
+  margin-top: 15px;
+  text-align: left;
+}
+
+.dish-edit-container .inline-form .btn.danger {
+  width: 100%;
+}
+
+/* Message aucun plat */
+.no-dishes {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 20px 0;
+  background: #f9f9f9;
+  border-radius: 5px;
+  margin: 15px 0;
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+/* Tablet et desktop */
+@media (min-width: 601px) {
+  /* Ligne nom + prix */
+  .dish-name-price-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .dish-edit-container .edit-form input[name="dish_name"] {
+    flex: 2;
+    min-width: 200px;
+  }
+  
+  .dish-edit-container .edit-form .price-input {
+    flex: 1;
+    min-width: 120px;
+    max-width: 150px;
+  }
+  
+  /* Boutons image */
+  .dish-image-buttons-row {
+    flex-direction: row;
+    gap: 10px;
+  }
+  
+  .dish-image-buttons-row .btn,
+  .dish-remove-image-btn {
+    flex: 1;
+  }
+  
+  /* Bouton Supprimer le plat */
+  .dish-edit-container .inline-form .btn.danger {
+    width: auto;
+    min-width: 200px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .dish-list li {
+    padding: 15px;
+  }
+  
+  .dish-image-preview {
+    max-width: 150px;
+    max-height: 120px;
+  }
+}

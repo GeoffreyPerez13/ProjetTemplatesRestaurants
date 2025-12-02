@@ -84,20 +84,25 @@ class Category
     // --- Mise à jour d'une catégorie ---
     public function update($id, $name, $image = null)
     {
-        $sql = "UPDATE categories SET name = ?";
-        $params = [$name];
-
-        // Si une image est fournie, on l'ajoute à la requête
-        if ($image !== null) {
-            $sql .= ", image = ?";
-            $params[] = $image;
+        if ($image === '') {
+            // Supprimer l'image (mettre à NULL en base)
+            $stmt = $this->pdo->prepare(
+                "UPDATE categories SET name = ?, image = NULL WHERE id = ?"
+            );
+            return $stmt->execute([$name, $id]);
+        } elseif ($image !== null) {
+            // Mettre à jour avec nouvelle image
+            $stmt = $this->pdo->prepare(
+                "UPDATE categories SET name = ?, image = ? WHERE id = ?"
+            );
+            return $stmt->execute([$name, $image, $id]);
+        } else {
+            // Garder l'image existante, juste changer le nom
+            $stmt = $this->pdo->prepare(
+                "UPDATE categories SET name = ? WHERE id = ?"
+            );
+            return $stmt->execute([$name, $id]);
         }
-
-        $sql .= " WHERE id = ?";
-        $params[] = $id;
-
-        $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute($params);
     }
 
     // --- Récupérer toutes les catégories d'un admin (back-office) ---
@@ -108,6 +113,35 @@ class Category
         );
         $stmt->execute([$admin_id]);
         return $stmt->fetchAll(); // Retourne un tableau associatif
+    }
+
+    // --- Récupérer une catégorie par son ID ---
+    public function getById($id, $admin_id = null)
+    {
+        if ($admin_id) {
+            // Vérifie que la catégorie appartient à l'admin spécifié
+            $stmt = $this->pdo->prepare(
+                "SELECT * FROM categories WHERE id = ? AND admin_id = ?"
+            );
+            $stmt->execute([$id, $admin_id]);
+        } else {
+            // Récupère la catégorie sans vérification d'admin
+            $stmt = $this->pdo->prepare("SELECT * FROM categories WHERE id = ?");
+            $stmt->execute([$id]);
+        }
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($result) {
+            $this->id = $result['id'];
+            $this->admin_id = $result['admin_id'];
+            $this->name = $result['name'];
+            $this->image = $result['image'];
+
+            return $result; // Retourne le tableau associatif
+        }
+
+        return null;
     }
 
     // --- Suppression d'une catégorie ---
