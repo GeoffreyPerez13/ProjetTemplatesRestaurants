@@ -14,22 +14,35 @@ document.addEventListener("DOMContentLoaded", function () {
     // Initialiser les images cliquables
     function initLightbox() {
         // Sélectionner toutes les images qui doivent être cliquables
-        images = Array.from(document.querySelectorAll(".image-preview, .dish-image-preview"));
+        // Images de la page edit-card.php
+        const editImages = Array.from(document.querySelectorAll(".image-preview, .dish-image-preview"));
+        
+        // Images de la page view-card.php
+        const viewImages = Array.from(document.querySelectorAll(".category-preview-image, .dish-preview-image"));
+        
+        // Combiner toutes les images
+        images = [...editImages, ...viewImages];
         
         images.forEach((img, index) => {
-            img.addEventListener("click", function (e) {
-                e.stopPropagation();
-                openLightbox(index);
-            });
-            
-            // Ajouter un indicateur visuel (optionnel)
-            img.style.cursor = "zoom-in";
-            img.title = "Cliquez pour agrandir";
+            // Éviter d'ajouter plusieurs fois le même event listener
+            if (!img.hasAttribute('data-lightbox-initialized')) {
+                img.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    openLightbox(index);
+                });
+                
+                // Ajouter un indicateur visuel (optionnel)
+                img.style.cursor = "zoom-in";
+                img.title = "Cliquez pour agrandir";
+                img.setAttribute('data-lightbox-initialized', 'true');
+            }
         });
     }
 
     // Ouvrir le lightbox
     function openLightbox(index) {
+        if (images.length === 0) return;
+        
         currentIndex = index;
         updateLightboxImage();
         lightbox.classList.add("active");
@@ -48,7 +61,10 @@ document.addEventListener("DOMContentLoaded", function () {
         
         const img = images[currentIndex];
         lightboxImg.src = img.src;
-        lightboxCaption.textContent = img.alt || "Image";
+        
+        // Utiliser data-caption si présent, sinon utiliser alt
+        const caption = img.getAttribute('data-caption') || img.alt || "Image";
+        lightboxCaption.textContent = caption;
     }
 
     // Navigation
@@ -102,14 +118,18 @@ document.addEventListener("DOMContentLoaded", function () {
     // Initialiser le lightbox
     initLightbox();
     
-    // Réinitialiser le lightbox quand le DOM est mis à jour (si vous avez du contenu dynamique)
+    // Réinitialiser le lightbox quand le DOM est mis à jour
     const observer = new MutationObserver(function (mutations) {
+        let shouldReinit = false;
         mutations.forEach(function (mutation) {
             if (mutation.addedNodes.length) {
-                // Petit délai pour laisser le temps aux nouvelles images de se charger
-                setTimeout(initLightbox, 100);
+                shouldReinit = true;
             }
         });
+        if (shouldReinit) {
+            // Petit délai pour laisser le temps aux nouvelles images de se charger
+            setTimeout(initLightbox, 100);
+        }
     });
     
     observer.observe(document.body, { childList: true, subtree: true });

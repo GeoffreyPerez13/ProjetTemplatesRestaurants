@@ -4,6 +4,7 @@
 /* CSS de base */
 @import url('admin/basis/base.css');
 @import url('admin/basis/buttons.css');
+@import url('admin/basis/components-selector-mode.css');
 
 /* CSS des formulaires */
 @import url('admin/forms/forms.css');

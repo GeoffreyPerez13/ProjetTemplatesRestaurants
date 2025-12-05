@@ -19,7 +19,7 @@
   margin-bottom: 10px;
 }
 
-.edit-carte-container {
+.edit-card-container {
   display: flex;
   flex-direction: column;
 }
@@ -44,7 +44,7 @@
     align-items: center;
   }
 
-  .edit-carte-container {
+  .edit-card-container {
     display: flex;
     flex-direction: column;
   }
@@ -63,7 +63,7 @@
 }
 
 @media (min-width: 1025px) {
-  .edit-carte-container {
+  .edit-card-container {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: flex-start;

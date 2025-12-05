@@ -8,8 +8,8 @@ require_once __DIR__ . '/../Models/Category.php';   // Catégories de plats
 require_once __DIR__ . '/../Models/Dish.php';       // Plats
 require_once __DIR__ . '/../Models/Contact.php';    // Informations de contact
 
-// Définition du contrôleur VitrineController : gère l’affichage public de la vitrine du restaurant
-class VitrineController extends BaseController
+// Définition du contrôleur DisplayController : gère l’affichage public de la vitrine du restaurant
+class DisplayController extends BaseController
 {
     // Constructeur : transmet la connexion PDO au parent
     public function __construct($pdo) {

@@ -5,7 +5,7 @@ define('DEV_SHOW_LINK', true);   // Constante dev pour afficher les liens direct
 
 require_once __DIR__ . '/../config.php';  // Chargement config PDO, constantes...
 require_once __DIR__ . '/../app/Controllers/AdminController.php';
-require_once __DIR__ . '/../app/Controllers/CarteController.php';
+require_once __DIR__ . '/../app/Controllers/CardController.php';
 require_once __DIR__ . '/../app/Controllers/ContactController.php';
 require_once __DIR__ . '/../app/Controllers/LogoController.php';
 
@@ -40,13 +40,13 @@ switch ($page) {
         $controller->dashboard();  // Tableau de bord admin
         break;
 
-    case 'edit-carte':
-        $controller = new CarteController($pdo);
+    case 'edit-card':
+        $controller = new CardController($pdo);
         $controller->edit();  // Gestion de la carte (catégories + plats)
         break;
 
-    case 'view-carte':
-        $controller = new CarteController($pdo);
+    case 'view-card':
+        $controller = new CardController($pdo);
         $controller->view();  // Affichage de la carte (catégories + plats) 
         break;
 
@@ -72,8 +72,8 @@ switch ($page) {
 
     case 'vitrine':
         $slug = $_GET['slug'] ?? null;
-        $vitrineController = new VitrineController($pdo);
-        $vitrineController->show($slug);  // Affichage de la vitrine publique du restaurant
+        $displayController = new DisplayController($pdo);
+        $displayController->show($slug);  // Affichage de la vitrine publique du restaurant
         break;
 
     default:

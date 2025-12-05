@@ -67,6 +67,7 @@
   order: 2;
 }
 
+/* Image du plat - rendue cliquable */
 .dish-preview-image {
   width: 50px;
   height: 50px;
@@ -75,6 +76,33 @@
   border: 2px solid #ddd;
   flex-shrink: 0;
   order: 3;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+  position: relative;
+}
+
+.dish-preview-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(183, 28, 28, 0.2);
+  border-color: #b71c1c;
+}
+
+/* Image de la catégorie - rendue cliquable */
+.category-preview-image {
+  width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  object-fit: cover;
+  border: 2px solid #b71c1c;
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  position: relative;
+}
+
+.category-preview-image:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(183, 28, 28, 0.3);
 }
 
 .dish-description {
@@ -89,13 +117,46 @@
   margin-top: 8px;
 }
 
-.category-preview-image {
-  width: 100%;
-  max-height: 200px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  object-fit: cover;
-  border: 2px solid #b71c1c;
+/* Icône de loupe sur les images cliquables (uniquement pour preview) */
+.category-preview-image.lightbox-image,
+.dish-preview-image.lightbox-image {
+  position: relative;
+}
+
+.category-preview-image.lightbox-image::after,
+.dish-preview-image.lightbox-image::after {
+  content: "🔍";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(183, 28, 28, 0.7);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.category-preview-image.lightbox-image::after {
+  width: 24px;
+  height: 24px;
+}
+
+.dish-preview-image.lightbox-image::after {
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+  top: 2px;
+  right: 2px;
+}
+
+.category-preview-image.lightbox-image:hover::after,
+.dish-preview-image.lightbox-image:hover::after {
+  opacity: 1;
 }
 
 /* ==================== RESPONSIVE PREVIEW ==================== */
@@ -113,6 +174,7 @@
   .dish-main-info {
     flex-wrap: nowrap;
     gap: 15px;
+    align-items: center;
   }
 
   .dish-name {

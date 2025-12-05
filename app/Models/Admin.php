@@ -118,6 +118,20 @@ class Admin
         }
     }
 
+    public function getCarteMode($adminId)
+    {
+        $stmt = $this->pdo->prepare("SELECT carte_mode FROM admins WHERE id = ?");
+        $stmt->execute([$adminId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['carte_mode'] ?? 'editable';
+    }
+
+    public function updateCarteMode($adminId, $mode)
+    {
+        $stmt = $this->pdo->prepare("UPDATE admins SET carte_mode = ? WHERE id = ?");
+        return $stmt->execute([$mode, $adminId]);
+    }
+
     // --- RECHERCHES / LOGIN ---
 
     // Trouver un admin par username
