@@ -49,7 +49,6 @@
   align-items: center;
   cursor: pointer;
   padding: 12px 0;
-  margin: 15px 0;
   border-bottom: 2px solid #eee;
 }
 
@@ -177,12 +176,12 @@
     align-items: flex-start;
     gap: 10px;
   }
-  
+
   .category-accordion-controls {
     width: 100%;
     justify-content: flex-start;
   }
-  
+
   .category-accordion-controls .btn.small {
     flex: 1;
     min-width: 120px;
@@ -193,21 +192,21 @@
   .category-accordion-controls {
     flex-wrap: wrap;
   }
-  
+
   .category-accordion-controls .btn.small {
     min-width: calc(50% - 4px);
   }
-  
+
   .dish-accordion-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
-  
+
   .dish-accordion-header h4 {
     width: 100%;
   }
-  
+
   .dish-accordion-toggle {
     align-self: flex-end;
   }

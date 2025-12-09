@@ -9,7 +9,6 @@
 }
 
 .image-upload-container {
-  margin: 15px 0;
   padding: 15px;
   background: #f9f9f9;
   border-radius: 5px;
@@ -38,7 +37,6 @@
 }
 
 .current-image {
-  margin: 15px 0;
   padding: 10px;
   background: #f0f8ff;
   border-radius: 5px;

@@ -149,7 +149,6 @@
   padding: 20px 0;
   background: #f9f9f9;
   border-radius: 5px;
-  margin: 15px 0;
 }
 
 /* ==================== RESPONSIVE ==================== */
@@ -162,29 +161,29 @@
     align-items: center;
     gap: 15px;
   }
-  
+
   .dish-edit-container .edit-form input[name="dish_name"] {
     flex: 2;
     min-width: 200px;
   }
-  
+
   .dish-edit-container .edit-form .price-input {
     flex: 1;
     min-width: 120px;
     max-width: 150px;
   }
-  
+
   /* Boutons image */
   .dish-image-buttons-row {
     flex-direction: row;
     gap: 10px;
   }
-  
+
   .dish-image-buttons-row .btn,
   .dish-remove-image-btn {
     flex: 1;
   }
-  
+
   /* Bouton Supprimer le plat */
   .dish-edit-container .inline-form .btn.danger {
     width: auto;
@@ -197,7 +196,7 @@
   .dish-list li {
     padding: 15px;
   }
-  
+
   .dish-image-preview {
     max-width: 150px;
     max-height: 120px;

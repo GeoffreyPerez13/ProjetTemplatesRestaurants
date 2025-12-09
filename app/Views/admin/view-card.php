@@ -29,7 +29,7 @@ require __DIR__ . '/../partials/header.php';
         <div class="empty-state">
             <i class="fas fa-utensils"></i>
             <p class="success">Aucune catégorie pour le moment.</p>
-            <a href="?page=edit-carte" class="btn primary">
+            <a href="?page=edit-card" class="btn primary">
                 <i class="fas fa-plus"></i> Créer votre première catégorie
             </a>
         </div>

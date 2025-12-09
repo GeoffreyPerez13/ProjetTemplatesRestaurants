@@ -2,21 +2,23 @@
 /* Ce fichier importe tous les modules CSS pour l'interface d'administration */
 
 /* CSS de base */
-@import url('admin/basis/base.css');
-@import url('admin/basis/buttons.css');
-@import url('admin/basis/components-selector-mode.css');
+@import url("admin/basis/base.css");
+@import url("admin/basis/buttons.css");
+@import url("admin/basis/components-selector-mode.css");
 
 /* CSS des formulaires */
-@import url('admin/forms/forms.css');
-@import url('admin/forms/categories.css');
-@import url('admin/forms/dishes.css');
-@import url('admin/forms/images.css');
+@import url("admin/forms/forms.css");
+@import url("admin/forms/categories.css");
+@import url("admin/forms/dishes.css");
+@import url("admin/forms/images.css");
 
 /* CSS des différentes sections admin */
-@import url('admin/sections/preview.css');
-@import url('admin/sections/dashboard.css');
-@import url('admin/sections/auth.css');
+@import url("admin/sections/preview.css");
+@import url("admin/sections/dashboard.css");
+@import url("admin/sections/auth.css");
+/* Section edit-card*/
+@import url("admin/sections/edit-card/mode-selector.css");
 
 /* Effets visuels */
-@import url('admin/effects/accordion.css');
-@import url('admin/effects/lightbox.css');
+@import url("admin/effects/accordion.css");
+@import url("admin/effects/lightbox.css");

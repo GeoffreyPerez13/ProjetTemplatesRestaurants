@@ -47,6 +47,9 @@ class CardController extends BaseController
             unset($_SESSION['error_message']);
         }
 
+        // Récupérer l'ancre de l'URL pour le scroll
+        $anchor = $_GET['anchor'] ?? '';
+
         // Préparer les données selon le mode
         if ($currentMode === 'editable') {
             // Récupération de toutes les catégories de l'admin
@@ -56,22 +59,24 @@ class CardController extends BaseController
             foreach ($categories as &$cat) {
                 $cat['plats'] = $dishModel->getAllByCategory($cat['id']);
             }
-            
+
             $data = [
                 'currentMode' => $currentMode,
                 'categories' => $categories,
                 'message' => $message,
-                'error_message' => $error_message
+                'error_message' => $error_message,
+                'anchor' => $anchor  // Passer l'ancre à la vue
             ];
         } else {
             // Mode images
             $carteImages = $carteImageModel->getAllByAdmin($admin_id);
-            
+
             $data = [
                 'currentMode' => $currentMode,
                 'carteImages' => $carteImages,
                 'message' => $message,
-                'error_message' => $error_message
+                'error_message' => $error_message,
+                'anchor' => $anchor  // Passer l'ancre à la vue
             ];
         }
 
@@ -83,30 +88,36 @@ class CardController extends BaseController
     private function handlePostActions($categoryModel, $dishModel, $carteImageModel, $adminModel, $admin_id, $currentMode)
     {
         try {
+            // Récupérer l'ancre à partir du POST, sinon utiliser une valeur par défaut
+            $anchor = $_POST['anchor'] ?? '';
+
             // --- CHANGEMENT DE MODE ---
             if (isset($_POST['change_mode'])) {
                 $newMode = $_POST['carte_mode'];
                 if (in_array($newMode, ['editable', 'images'])) {
                     $adminModel->updateCarteMode($admin_id, $newMode);
                     $_SESSION['success_message'] = "Mode de carte changé avec succès";
+
+                    // Toujours revenir au sélecteur de mode après changement
+                    $anchor = 'mode-selector';
                 }
             }
-            
+
             // Si on est en mode images, gérer les actions spécifiques
             elseif ($currentMode === 'images') {
                 // --- UPLOAD D'IMAGES DE CARTE ---
-                if (isset($_FILES['carte_images']) && !empty($_FILES['carte_images']['name'][0])) {
+                if (isset($_FILES['card_images']) && !empty($_FILES['card_images']['name'][0])) {
                     $uploadedCount = 0;
-                    
-                    foreach ($_FILES['carte_images']['tmp_name'] as $index => $tmpName) {
-                        if ($_FILES['carte_images']['error'][$index] === UPLOAD_ERR_OK) {
+
+                    foreach ($_FILES['card_images']['tmp_name'] as $index => $tmpName) {
+                        if ($_FILES['card_images']['error'][$index] === UPLOAD_ERR_OK) {
                             $file = [
-                                'name' => $_FILES['carte_images']['name'][$index],
+                                'name' => $_FILES['card_images']['name'][$index],
                                 'tmp_name' => $tmpName,
-                                'size' => $_FILES['carte_images']['size'][$index],
-                                'error' => $_FILES['carte_images']['error'][$index]
+                                'size' => $_FILES['card_images']['size'][$index],
+                                'error' => $_FILES['card_images']['error'][$index]
                             ];
-                            
+
                             try {
                                 $filename = $carteImageModel->uploadImage($file);
                                 $carteImageModel->add($admin_id, $filename, $file['name']);
@@ -116,33 +127,48 @@ class CardController extends BaseController
                             }
                         }
                     }
-                    
+
                     if ($uploadedCount > 0) {
                         $_SESSION['success_message'] = "$uploadedCount image(s) ajoutée(s) avec succès";
                     }
+
+                    // Si pas d'ancre spécifique, revenir à la section d'upload
+                    if (empty($anchor)) {
+                        $anchor = 'upload-images';
+                    }
                 }
-                
+
                 // --- SUPPRESSION D'IMAGE DE CARTE ---
                 elseif (isset($_POST['delete_image'])) {
                     $imageId = (int)$_POST['image_id'];
                     $image = $carteImageModel->getById($imageId, $admin_id);
-                    
+
                     if ($image) {
                         // Supprimer le fichier physique
                         $carteImageModel->deleteImageFile($image['filename']);
                         // Supprimer de la base de données
                         $carteImageModel->delete($imageId, $admin_id);
                         $_SESSION['success_message'] = "Image supprimée avec succès";
+
+                        // Si pas d'ancre spécifique, revenir à la liste des images
+                        if (empty($anchor)) {
+                            $anchor = 'images-list';
+                        }
                     }
                 }
-                
+
                 // --- RÉORDONNEMENT DES IMAGES ---
                 elseif (isset($_POST['reorder_images'])) {
                     $carteImageModel->reorderImages($admin_id);
                     $_SESSION['success_message'] = "Ordre des images mis à jour";
+
+                    // Si pas d'ancre spécifique, revenir à la liste des images
+                    if (empty($anchor)) {
+                        $anchor = 'images-list';
+                    }
                 }
             }
-            
+
             // Si on est en mode éditable, gérer les actions existantes
             else {
                 // --- AJOUT D'UNE CATÉGORIE ---
@@ -157,6 +183,11 @@ class CardController extends BaseController
 
                     $categoryModel->create($admin_id, $name, $imagePath);
                     $_SESSION['success_message'] = "Catégorie ajoutée avec succès.";
+
+                    // Si pas d'ancre spécifique, revenir à la section nouvelle catégorie
+                    if (empty($anchor)) {
+                        $anchor = 'new-category';
+                    }
                 }
 
                 // --- MODIFICATION D'UNE CATÉGORIE ---
@@ -187,10 +218,16 @@ class CardController extends BaseController
                         } else {
                             $_SESSION['success_message'] = "Catégorie modifié avec succès.";
                         }
+
+                        // Si pas d'ancre spécifique, revenir à la catégorie modifiée
+                        if (empty($anchor)) {
+                            $anchor = 'category-' . $category_id;
+                        }
                     } else {
                         $_SESSION['error_message'] = "Le nom de la catégorie est requis.";
                     }
                 }
+
                 // --- SUPPRESSION DE L'IMAGE DE LA CATÉGORIE ---
                 elseif (isset($_POST['remove_category_image'])) {
                     $category_id = (int)$_POST['remove_category_image'];
@@ -206,6 +243,11 @@ class CardController extends BaseController
                         $categoryModel->update($category_id, $category['name'], '');
 
                         $_SESSION['success_message'] = "Image de la catégorie supprimée avec succès.";
+
+                        // Si pas d'ancre spécifique, revenir à la catégorie
+                        if (empty($anchor)) {
+                            $anchor = 'category-' . $category_id;
+                        }
                     } else {
                         $_SESSION['error_message'] = "Cette catégorie n'a pas d'image à supprimer.";
                     }
@@ -226,6 +268,11 @@ class CardController extends BaseController
 
                     $categoryModel->delete($categoryId, $admin_id);
                     $_SESSION['success_message'] = "Catégorie supprimée avec succès.";
+
+                    // Si pas d'ancre spécifique, revenir à la grille des catégories
+                    if (empty($anchor)) {
+                        $anchor = 'categories-grid';
+                    }
                 }
 
                 // --- AJOUT D'UN PLAT ---
@@ -243,11 +290,17 @@ class CardController extends BaseController
 
                     $dishModel->create($category_id, $name, $price, $description, $imagePath);
                     $_SESSION['success_message'] = "Plat ajouté avec succès.";
+
+                    // Si pas d'ancre spécifique, revenir à la catégorie
+                    if (empty($anchor)) {
+                        $anchor = 'category-' . $category_id;
+                    }
                 }
 
                 // --- MODIFICATION D'UN PLAT ---
                 elseif (isset($_POST['edit_dish'])) {
                     $dish_id = (int)$_POST['dish_id'];
+                    $current_category_id = (int)($_POST['current_category_id'] ?? 0);
                     $name = trim($_POST['dish_name']);
                     $price = floatval($_POST['dish_price']);
                     $description = trim($_POST['dish_description'] ?? '');
@@ -266,11 +319,43 @@ class CardController extends BaseController
 
                     $dishModel->update($dish_id, $name, $price, $description, $imagePath);
                     $_SESSION['success_message'] = "Plat modifié avec succès.";
+
+                    // Si pas d'ancre spécifique, revenir à la catégorie
+                    if (empty($anchor)) {
+                        $anchor = 'category-' . $current_category_id;
+                    }
+                }
+
+                // --- SUPPRESSION DE L'IMAGE D'UN PLAT ---
+                elseif (isset($_POST['remove_dish_image'])) {
+                    $dish_id = (int)$_POST['remove_dish_image'];
+                    $current_category_id = (int)($_POST['current_category_id'] ?? 0);
+
+                    // Récupérer le plat pour supprimer son image
+                    $existingDish = $this->getDishById($dishModel, $dish_id);
+
+                    if ($existingDish && !empty($existingDish['image'])) {
+                        // Supprimer l'image du serveur
+                        $dishModel->deleteImage($existingDish['image']);
+
+                        // Mettre à jour le plat en base (image = NULL)
+                        $dishModel->update($dish_id, $existingDish['name'], $existingDish['price'], $existingDish['description'], '');
+
+                        $_SESSION['success_message'] = "Image du plat supprimée avec succès.";
+
+                        // Si pas d'ancre spécifique, revenir à la catégorie
+                        if (empty($anchor)) {
+                            $anchor = 'category-' . $current_category_id;
+                        }
+                    } else {
+                        $_SESSION['error_message'] = "Ce plat n'a pas d'image à supprimer.";
+                    }
                 }
 
                 // --- SUPPRESSION D'UN PLAT ---
                 elseif (isset($_POST['delete_dish'])) {
                     $dishId = (int)$_POST['delete_dish'];
+                    $current_category_id = (int)($_POST['current_category_id'] ?? 0);
 
                     // Récupérer l'image avant suppression pour la supprimer du serveur
                     $existingDish = $this->getDishById($dishModel, $dishId);
@@ -280,14 +365,24 @@ class CardController extends BaseController
 
                     $dishModel->delete($dishId);
                     $_SESSION['success_message'] = "Plat supprimé avec succès.";
+
+                    // Si pas d'ancre spécifique, revenir à la catégorie
+                    if (empty($anchor)) {
+                        $anchor = 'category-' . $current_category_id;
+                    }
                 }
             }
         } catch (Exception $e) {
             $_SESSION['error_message'] = "Erreur : " . $e->getMessage();
         }
 
-        // Redirection après toute action POST
-        header('Location: ?page=edit-card');
+        // Redirection après toute action POST avec l'ancre
+        $redirectUrl = '?page=edit-card';
+        if (!empty($anchor)) {
+            $redirectUrl .= '&anchor=' . urlencode($anchor);
+        }
+
+        header('Location: ' . $redirectUrl);
         exit;
     }
 
@@ -329,7 +424,7 @@ class CardController extends BaseController
         } else {
             // Mode images
             $carteImages = $carteImageModel->getAllByAdmin($admin_id);
-            
+
             $data = [
                 'currentMode' => $currentMode,
                 'carteImages' => $carteImages

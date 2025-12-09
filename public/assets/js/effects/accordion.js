@@ -1,6 +1,9 @@
 document.addEventListener("DOMContentLoaded", function () {
     // Gestion des accordéons principaux
-    document.querySelectorAll(".accordion-toggle").forEach(toggle => {
+    document.querySelectorAll(".accordion-header").forEach(header => {
+        const toggle = header.querySelector(".accordion-toggle");
+        if (!toggle) return;
+        
         const targetId = toggle.getAttribute("data-target");
         const target = document.getElementById(targetId);
         
@@ -9,13 +12,27 @@ document.addEventListener("DOMContentLoaded", function () {
         // État initial : tous les accordéons sont ouverts
         target.classList.add("expanded");
         
-        toggle.addEventListener("click", function () {
+        // Ajouter l'événement de clic sur tout le header
+        header.addEventListener("click", function (e) {
+            // Ne pas déclencher si on clique sur un lien, un bouton ou un input à l'intérieur du header
+            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') {
+                return;
+            }
+            toggleAccordion(target, toggle);
+        });
+        
+        // Garder aussi l'événement sur le bouton pour la compatibilité
+        toggle.addEventListener("click", function (e) {
+            e.stopPropagation(); // Empêche le double déclenchement
             toggleAccordion(target, toggle);
         });
     });
     
     // Gestion des accordéons individuels de plats
-    document.querySelectorAll(".dish-accordion-toggle").forEach(toggle => {
+    document.querySelectorAll(".dish-accordion-header").forEach(header => {
+        const toggle = header.querySelector(".dish-accordion-toggle");
+        if (!toggle) return;
+        
         const targetId = toggle.getAttribute("data-target");
         const target = document.getElementById(targetId);
         
@@ -24,7 +41,18 @@ document.addEventListener("DOMContentLoaded", function () {
         // État initial : tous les plats sont ouverts
         target.style.display = "block";
         
-        toggle.addEventListener("click", function () {
+        // Ajouter l'événement de clic sur tout le header du plat
+        header.addEventListener("click", function (e) {
+            // Ne pas déclencher si on clique sur un lien, un bouton ou un input à l'intérieur du header
+            if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') {
+                return;
+            }
+            toggleDishAccordion(target, toggle);
+        });
+        
+        // Garder aussi l'événement sur le bouton
+        toggle.addEventListener("click", function (e) {
+            e.stopPropagation(); // Empêche le double déclenchement
             toggleDishAccordion(target, toggle);
         });
     });

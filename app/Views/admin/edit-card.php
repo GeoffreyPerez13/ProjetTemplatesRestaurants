@@ -1,46 +1,19 @@
 <?php
 $title = "Modifier la carte";
-$scripts = ["js/sections/edit-card.js", "js/effects/accordion.js", "js/effects/lightbox.js"];
+$scripts = ["js/sections/edit-card/edit-card.js", "js/sections/edit-card/images-mode.js", "js/effects/accordion.js", "js/effects/lightbox.js"];
 
 // Ajouter le script pour le mode images si nécessaire
 if ($currentMode === 'images') {
     $scripts[] = "js/sections/images-mode.js";
 }
 
+// Déterminer l'ancre à utiliser pour la redirection
+$anchor = $_GET['anchor'] ?? '';
+
 require __DIR__ . '/../partials/header.php';
 ?>
 
 <a class="btn-back" href="?page=dashboard">← Retour au dashboard</a>
-
-<!-- Sélecteur de mode -->
-<div class="mode-selector-container">
-    <h2>Mode d'affichage de la carte</h2>
-    <form method="post" class="mode-selector-form">
-        <div class="mode-options">
-            <label class="mode-option">
-                <input type="radio" name="carte_mode" value="editable" 
-                       <?= $currentMode === 'editable' ? 'checked' : '' ?>>
-                <div class="mode-card">
-                    <i class="fas fa-edit"></i>
-                    <h3>Mode Éditable</h3>
-                    <p>Créez et modifiez des catégories et plats détaillés</p>
-                </div>
-            </label>
-            
-            <label class="mode-option">
-                <input type="radio" name="carte_mode" value="images" 
-                       <?= $currentMode === 'images' ? 'checked' : '' ?>>
-                <div class="mode-card">
-                    <i class="fas fa-images"></i>
-                    <h3>Mode Images</h3>
-                    <p>Téléchargez des images de votre carte existante (PDF, JPG, etc.)</p>
-                </div>
-            </label>
-        </div>
-        
-        <button type="submit" name="change_mode" class="btn primary">Changer de mode</button>
-    </form>
-</div>
 
 <?php if (!empty($message)): ?>
     <p class="message-success"><?= htmlspecialchars($message) ?></p>
@@ -50,45 +23,94 @@ require __DIR__ . '/../partials/header.php';
     <p class="message-error"><?= htmlspecialchars($error_message) ?></p>
 <?php endif; ?>
 
+<!-- Sélecteur de mode (accordéon) -->
+<div class="accordion-section mode-selector-accordion" id="mode-selector">
+    <div class="accordion-header">
+        <h2>Mode d'affichage de la carte</h2>
+        <button type="button" class="accordion-toggle" data-target="mode-selector-content">
+            <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+
+    <div id="mode-selector-content" class="accordion-content expanded">
+        <form method="post" class="mode-selector-form">
+            <input type="hidden" name="anchor" value="mode-selector">
+
+            <div class="mode-options">
+                <label class="mode-option">
+                    <input type="radio" name="carte_mode" value="editable"
+                        <?= $currentMode === 'editable' ? 'checked' : '' ?>>
+                    <div class="mode-card">
+                        <i class="fas fa-edit"></i>
+                        <h3>Mode Éditable</h3>
+                        <p>Créez et modifiez des catégories et plats détaillés</p>
+                    </div>
+                </label>
+
+                <label class="mode-option">
+                    <input type="radio" name="carte_mode" value="images"
+                        <?= $currentMode === 'images' ? 'checked' : '' ?>>
+                    <div class="mode-card">
+                        <i class="fas fa-images"></i>
+                        <h3>Mode Images</h3>
+                        <p>Téléchargez des images de votre carte existante (PDF, JPG, etc.)</p>
+                    </div>
+                </label>
+            </div>
+
+            <button type="submit" name="change_mode" class="btn primary">Changer de mode</button>
+        </form>
+    </div>
+</div>
+
 <?php if ($currentMode === 'editable'): ?>
     <!-- ==================== MODE ÉDITABLE ==================== -->
     <div class="edit-carte-container">
 
-        <!-- Bloc Ajouter une catégorie -->
-        <div class="new-category-block">
-            <form method="post" enctype="multipart/form-data">
-                <h2>Modifier la carte</h2>
-                <h3>Ajouter une catégorie</h3>
-                <input type="text" name="new_category" placeholder="Nom de la catégorie" required>
+        <!-- Bloc Ajouter une catégorie (accordéon) -->
+        <div class="accordion-section new-category-accordion" id="new-category">
+            <div class="accordion-header">
+                <h2>Ajouter une nouvelle catégorie</h2>
+                <button type="button" class="accordion-toggle" data-target="new-category-content">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
 
-                <div class="image-upload-container">
-                    <label for="category_image">Image de la catégorie (optionnel) :</label>
-                    <input type="file" name="category_image" id="category_image" accept="image/jpeg, image/png, image/gif, image/webp">
-                    <small>Formats acceptés: JPEG, PNG, GIF, WebP (max 2MB)</small>
-                </div>
+            <div id="new-category-content" class="accordion-content expanded">
+                <form method="post" enctype="multipart/form-data" class="new-category-form">
+                    <input type="hidden" name="anchor" value="new-category">
 
-                <button type="submit" class="btn success">Ajouter</button>
-            </form>
+                    <input type="text" name="new_category" placeholder="Nom de la catégorie" required>
+
+                    <div class="image-upload-container">
+                        <label for="category_image">Image de la catégorie (optionnel) :</label>
+                        <input type="file" name="category_image" id="category_image" accept="image/jpeg, image/png, image/gif, image/webp">
+                        <small>Formats acceptés: JPEG, PNG, GIF, WebP (max 2MB)</small>
+                    </div>
+
+                    <button type="submit" class="btn success">Ajouter la catégorie</button>
+                </form>
+            </div>
         </div>
 
         <!-- Bloc catégories existantes -->
         <div class="categories-grid">
             <?php foreach ($categories as $cat): ?>
-                <div class="category-block">
+                <div class="category-block" id="category-<?= $cat['id'] ?>">
                     <!-- Affichage de l'image de la catégorie -->
                     <?php if (!empty($cat['image'])): ?>
                         <div class="current-image">
                             <label>Image actuelle :</label>
-                            <img src="/<?= htmlspecialchars($cat['image']) ?>" 
-                                 alt="<?= htmlspecialchars($cat['name']) ?>" 
-                                 class="image-preview lightbox-image"
-                                 data-caption="<?= htmlspecialchars($cat['name']) ?>">
+                            <img src="/<?= htmlspecialchars($cat['image']) ?>"
+                                alt="<?= htmlspecialchars($cat['name']) ?>"
+                                class="image-preview lightbox-image"
+                                data-caption="<?= htmlspecialchars($cat['name']) ?>">
                         </div>
                     <?php endif; ?>
 
                     <div class="category-header">
                         <strong><?= htmlspecialchars($cat['name']) ?></strong>
-                        
+
                         <!-- Contrôles d'accordéon pour cette catégorie -->
                         <div class="category-accordion-controls">
                             <button type="button" class="btn small expand-category" data-category-id="<?= $cat['id'] ?>">
@@ -112,6 +134,7 @@ require __DIR__ . '/../partials/header.php';
                         <div id="edit-category-<?= $cat['id'] ?>" class="accordion-content expanded">
                             <form method="post" class="edit-category-form" enctype="multipart/form-data">
                                 <input type="hidden" name="category_id" value="<?= $cat['id'] ?>">
+                                <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
 
                                 <input type="text" name="edit_category_name" value="<?= htmlspecialchars($cat['name']) ?>"
                                     placeholder="Nom de la catégorie" required>
@@ -140,6 +163,7 @@ require __DIR__ . '/../partials/header.php';
                             <!-- Formulaire pour supprimer la catégorie -->
                             <form method="post" class="inline-form">
                                 <input type="hidden" name="delete_category" value="<?= $cat['id'] ?>">
+                                <input type="hidden" name="anchor" value="categories-grid">
                                 <button type="submit" class="btn danger">Supprimer catégorie</button>
                             </form>
                         </div>
@@ -157,6 +181,7 @@ require __DIR__ . '/../partials/header.php';
                         <div id="add-dish-<?= $cat['id'] ?>" class="accordion-content expanded">
                             <form method="post" class="new-dish-form" enctype="multipart/form-data">
                                 <input type="hidden" name="category_id" value="<?= $cat['id'] ?>">
+                                <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
 
                                 <div class="form-row">
                                     <input type="text" name="dish_name" placeholder="Nom du plat" required>
@@ -197,9 +222,9 @@ require __DIR__ . '/../partials/header.php';
                                             <!-- En-tête du plat (accordéon) -->
                                             <div class="dish-accordion-header">
                                                 <h4><?= htmlspecialchars($plat['name']) ?> - <?= htmlspecialchars($plat['price']) ?>€</h4>
-                                                <button type="button" class="dish-accordion-toggle" 
-                                                        data-target="dish-<?= $plat['id'] ?>" 
-                                                        data-category="<?= $cat['id'] ?>">
+                                                <button type="button" class="dish-accordion-toggle"
+                                                    data-target="dish-<?= $plat['id'] ?>"
+                                                    data-category="<?= $cat['id'] ?>">
                                                     <i class="fas fa-chevron-down"></i>
                                                 </button>
                                             </div>
@@ -210,6 +235,7 @@ require __DIR__ . '/../partials/header.php';
                                                     <form method="post" class="inline-form edit-form" enctype="multipart/form-data">
                                                         <input type="hidden" name="dish_id" value="<?= $plat['id'] ?>">
                                                         <input type="hidden" name="current_category_id" value="<?= $cat['id'] ?>">
+                                                        <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
 
                                                         <!-- Nom + Prix -->
                                                         <div class="dish-name-price-row">
@@ -263,6 +289,7 @@ require __DIR__ . '/../partials/header.php';
                                                     <!-- Bouton Supprimer le plat -->
                                                     <form method="post" class="inline-form">
                                                         <input type="hidden" name="delete_dish" value="<?= $plat['id'] ?>">
+                                                        <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
                                                         <button type="submit" class="btn danger">Supprimer le plat</button>
                                                     </form>
                                                 </div>
@@ -283,91 +310,145 @@ require __DIR__ . '/../partials/header.php';
 <?php else: ?>
     <!-- ==================== MODE IMAGES ==================== -->
     <div class="images-mode-container">
-        <h2>Gérer les images de la carte</h2>
-        
-        <!-- Upload d'images -->
-        <div class="upload-images-block">
-            <form method="post" enctype="multipart/form-data" class="upload-form">
-                <h3>Ajouter des images</h3>
-                <div class="upload-area" id="uploadArea">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>Glissez-déposez vos images ici ou cliquez pour sélectionner</p>
-                    <input type="file" name="carte_images[]" id="carte_images" 
-                           multiple accept="image/*,.pdf" 
-                           style="display: none;">
-                    <button type="button" class="btn" onclick="document.getElementById('carte_images').click()">
-                        Choisir des fichiers
-                    </button>
-                    <div id="fileList"></div>
-                </div>
-                
-                <div class="upload-info">
-                    <p><small>Formats acceptés : JPG, PNG, GIF, WebP, PDF</small></p>
-                    <p><small>Taille maximale par fichier : 5MB</small></p>
-                </div>
-                
-                <button type="submit" name="upload_images" class="btn success">
-                    <i class="fas fa-upload"></i> Télécharger les images
+
+        <!-- Upload d'images (accordéon) -->
+        <div class="accordion-section upload-images-accordion" id="upload-images">
+            <div class="accordion-header">
+                <h2>Ajouter des images à la carte</h2>
+                <button type="button" class="accordion-toggle" data-target="upload-images-content">
+                    <i class="fas fa-chevron-down"></i>
                 </button>
-            </form>
-        </div>
-        
-        <!-- Liste des images existantes -->
-        <div class="images-list-container">
-            <h3>Images de la carte</h3>
-            
-            <?php if (empty($carteImages)): ?>
-                <p class="no-images">Aucune image téléchargée. Ajoutez vos premières images ci-dessus.</p>
-            <?php else: ?>
-                <div class="images-grid">
-                    <?php foreach ($carteImages as $image): ?>
-                        <div class="image-card" data-image-id="<?= $image['id'] ?>">
-                            <div class="image-preview-container">
-                                <?php if (pathinfo($image['filename'], PATHINFO_EXTENSION) === 'pdf'): ?>
-                                    <div class="pdf-preview">
-                                        <i class="fas fa-file-pdf"></i>
-                                        <span>PDF</span>
-                                    </div>
-                                <?php else: ?>
-                                    <img src="/<?= htmlspecialchars($image['filename']) ?>" 
-                                         alt="<?= htmlspecialchars($image['original_name']) ?>"
-                                         class="carte-image-preview lightbox-image"
-                                         data-caption="<?= htmlspecialchars($image['original_name']) ?>">
-                                <?php endif; ?>
-                            </div>
-                            
-                            <div class="image-info">
-                                <p class="image-name"><?= htmlspecialchars($image['original_name']) ?></p>
-                                <p class="image-date">Ajouté le <?= date('d/m/Y', strtotime($image['created_at'])) ?></p>
-                            </div>
-                            
-                            <div class="image-actions">
-                                <a href="/<?= htmlspecialchars($image['filename']) ?>" 
-                                   target="_blank" 
-                                   class="btn small">
-                                    <i class="fas fa-eye"></i> Voir
-                                </a>
-                                
-                                <form method="post" class="inline-form">
-                                    <input type="hidden" name="image_id" value="<?= $image['id'] ?>">
-                                    <button type="submit" name="delete_image" class="btn small danger">
-                                        <i class="fas fa-trash"></i> Supprimer
-                                    </button>
-                                </form>
-                            </div>
+            </div>
+
+            <div id="upload-images-content" class="accordion-content expanded">
+                <form method="post" enctype="multipart/form-data" class="upload-form">
+                    <input type="hidden" name="anchor" value="upload-images">
+
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Glissez-déposez vos images ici ou cliquez pour sélectionner</p>
+                        <input type="file" name="card_images[]" id="card_images"
+                            multiple accept="image/*,.pdf"
+                            style="display: none;">
+                        <button type="button" class="btn" onclick="document.getElementById('card_images').click()">
+                            Choisir des fichiers
+                        </button>
+                        <div id="fileList" class="file-list"></div>
+
+                        <!-- Prévisualisation des images -->
+                        <div id="imagePreview" class="image-preview-grid"></div>
+
+                        <!-- Compteur d'images -->
+                        <div id="imageCounter" class="image-counter">
+                            <span id="selectedCount">0</span> image(s) sélectionnée(s)
                         </div>
-                    <?php endforeach; ?>
-                </div>
-                
-                <form method="post" class="reorder-form">
-                    <button type="submit" name="reorder_images" class="btn">
-                        <i class="fas fa-sort"></i> Réorganiser l'ordre d'affichage
+                    </div>
+
+                    <div class="upload-info">
+                        <p><small>Formats acceptés : JPG, PNG, GIF, WebP, PDF</small></p>
+                        <p><small>Taille maximale par fichier : 5MB</small></p>
+                    </div>
+
+                    <button type="submit" name="upload_images" class="btn success" id="uploadButton" disabled>
+                        <i class="fas fa-upload"></i> Télécharger les images (<span id="uploadCount">0</span>)
+                    </button>
+
+                    <button type="button" class="btn danger" id="clearSelection" style="display: none;">
+                        <i class="fas fa-times"></i> Annuler la sélection
                     </button>
                 </form>
-            <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Liste des images existantes (accordéon) -->
+        <div class="accordion-section images-list-accordion" id="images-list">
+            <div class="accordion-header">
+                <h2>Images de la carte (<?= !empty($carteImages) ? count($carteImages) : '0' ?>)</h2>
+                <button type="button" class="accordion-toggle" data-target="images-list-content">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+
+            <div id="images-list-content" class="accordion-content expanded">
+                <?php if (empty($carteImages)): ?>
+                    <p class="no-images">Aucune image téléchargée. Ajoutez vos premières images ci-dessus.</p>
+                <?php else: ?>
+                    <div class="images-grid">
+                        <?php foreach ($carteImages as $image): ?>
+                            <div class="image-card" data-image-id="<?= $image['id'] ?>">
+                                <div class="image-preview-container">
+                                    <?php if (pathinfo($image['filename'], PATHINFO_EXTENSION) === 'pdf'): ?>
+                                        <div class="pdf-preview">
+                                            <i class="fas fa-file-pdf"></i>
+                                            <span>PDF</span>
+                                        </div>
+                                    <?php else: ?>
+                                        <img src="/<?= htmlspecialchars($image['filename']) ?>"
+                                            alt="<?= htmlspecialchars($image['original_name']) ?>"
+                                            class="carte-image-preview lightbox-image"
+                                            data-caption="<?= htmlspecialchars($image['original_name']) ?>">
+                                    <?php endif; ?>
+                                </div>
+
+                                <div class="image-info">
+                                    <p class="image-name"><?= htmlspecialchars($image['original_name']) ?></p>
+                                    <p class="image-date">Ajouté le <?= date('d/m/Y', strtotime($image['created_at'])) ?></p>
+                                </div>
+
+                                <div class="image-actions">
+                                    <a href="/<?= htmlspecialchars($image['filename']) ?>"
+                                        target="_blank"
+                                        class="btn small see-btn">
+                                        <i class="fas fa-eye"></i> Voir
+                                    </a>
+
+                                    <form method="post" class="inline-form delete-form">
+                                        <input type="hidden" name="image_id" value="<?= $image['id'] ?>">
+                                        <input type="hidden" name="anchor" value="images-list">
+                                        <button type="submit" name="delete_image" class="btn small danger delete-btn">
+                                            <i class="fas fa-trash"></i> Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <form method="post" class="reorder-form">
+                        <input type="hidden" name="anchor" value="images-list">
+                        <button type="submit" name="reorder_images" class="btn">
+                            <i class="fas fa-sort"></i> Réorganiser l'ordre d'affichage
+                        </button>
+                    </form>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 <?php endif; ?>
+
+<script>
+    // Script pour gérer le scroll vers l'ancre après chargement de la page
+    document.addEventListener('DOMContentLoaded', function() {
+        <?php if ($anchor): ?>
+            // Petit délai pour s'assurer que tout est chargé
+            setTimeout(function() {
+                const element = document.getElementById('<?= htmlspecialchars($anchor) ?>');
+                if (element) {
+                    // Scroll vers l'élément
+                    element.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+
+                    // Ouvrir l'accordéon si nécessaire
+                    const accordionHeader = element.closest('.accordion-section')?.querySelector('.accordion-header');
+                    if (accordionHeader) {
+                        accordionHeader.click();
+                    }
+                }
+            }, 300);
+        <?php endif; ?>
+    });
+</script>
 
 <?php
 require __DIR__ . '/../partials/footer.php';
