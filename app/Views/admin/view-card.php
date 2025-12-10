@@ -1,6 +1,6 @@
 <?php
 $title = "Aperçu de la carte";
-$scripts = ["js/effects/lightbox.js"];
+$scripts = ["js/effects/lightbox.js", "js/sections/view-card/view-card-lightbox.js"];
 
 // Si en mode images et qu'il y a des PDF, ajouter un script PDF viewer optionnel
 if ($currentMode === 'images' && !empty($carteImages)) {
@@ -25,6 +25,11 @@ require __DIR__ . '/../partials/header.php';
 
 <?php if ($currentMode === 'editable'): ?>
     <!-- Mode éditable -->
+    <div class="mode-indicator">
+        <i class="fas fa-edit"></i>
+        <span>Mode Éditable activé</span>
+    </div>
+
     <?php if (empty($categories)): ?>
         <div class="empty-state">
             <i class="fas fa-utensils"></i>

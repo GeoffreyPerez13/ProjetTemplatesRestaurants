@@ -409,7 +409,7 @@ require __DIR__ . '/../partials/header.php';
                                         <input type="hidden" name="image_id" value="<?= $image['id'] ?>">
                                         <input type="hidden" name="anchor" value="images-list">
                                         <button type="submit" name="delete_image" class="btn danger">
-                                            <i class="fas fa-trash"></i> Supprimer
+                                            Supprimer
                                         </button>
                                     </form>
                                 </div>

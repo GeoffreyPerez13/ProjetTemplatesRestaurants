@@ -6,6 +6,10 @@
 @import url("admin/basis/buttons.css");
 @import url("admin/basis/components-selector-mode.css");
 
+/* Effets visuels */
+@import url("admin/effects/accordion.css");
+@import url("admin/effects/lightbox.css");
+
 /* CSS des formulaires */
 @import url("admin/forms/forms.css");
 @import url("admin/forms/categories.css");
@@ -13,13 +17,16 @@
 @import url("admin/forms/images.css");
 
 /* CSS des différentes sections admin */
-@import url("admin/sections/preview/preview.css"); /* Section preview */
-@import url("admin/sections/dashboard/dashboard.css"); /* Section dashboard */
-@import url("admin/sections/login/auth.css"); /* Section login */
+/* Section dashboard */
+@import url("admin/sections/dashboard/dashboard.css");
 
-@import url("admin/sections/edit-card/mode-selector.css"); /* Section edit-card */
-@import url("admin/sections/edit-card/drag-and-drop.css"); /* Section edit-card */
+/* Section edit-card */
+@import url("admin/sections/edit-card/edit-card.css");
+@import url("admin/sections/edit-card/drag-and-drop.css");
 
-/* Effets visuels */
-@import url("admin/effects/accordion.css");
-@import url("admin/effects/lightbox.css");
+/* Section login */
+@import url("admin/sections/login/login.css");
+
+/* Section view-card */
+@import url("admin/sections/view-card/view-card.css");
+@import url("admin/sections/view-card/view-card-lightbox.css");

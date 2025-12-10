@@ -152,6 +152,11 @@
       ".carte-image-preview",
       ".category-preview-image",
       ".dish-preview-image",
+      ".carte-full-image",
+      "img.category-preview-image",
+      "img.dish-preview-image",
+      "img.carte-full-image",
+      ".image-container img",
       '[data-lightbox="true"]',
     ];
 
