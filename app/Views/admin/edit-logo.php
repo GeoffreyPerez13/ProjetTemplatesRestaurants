@@ -4,7 +4,7 @@ require __DIR__ . '/../partials/header.php';
 ?>
 
 <!-- Bouton retour vers le dashboard -->
-<a class="btn-back" href="?page=dashboard">← Retour au dashboard</a>
+<a class="btn-back" href="?page=dashboard">Retour au dashboard</a>
 
 <!-- Affichage des messages de succès ou d'erreur -->
 <?php if (!empty($message)): ?>
@@ -17,7 +17,7 @@ require __DIR__ . '/../partials/header.php';
 <!-- Formulaire pour uploader un nouveau logo -->
 <form method="post" enctype="multipart/form-data">
     <h2>Changer le logo</h2>
-    
+
     <input type="file" name="logo" accept="image/*" required>
     <button type="submit" class="btn success">Uploader</button>
 </form>

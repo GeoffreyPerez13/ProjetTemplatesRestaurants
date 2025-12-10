@@ -1,11 +1,6 @@
 <?php
 $title = "Modifier la carte";
-$scripts = ["js/sections/edit-card/edit-card.js", "js/sections/edit-card/images-mode.js", "js/effects/accordion.js", "js/effects/lightbox.js"];
-
-// Ajouter le script pour le mode images si nécessaire
-if ($currentMode === 'images') {
-    $scripts[] = "js/sections/images-mode.js";
-}
+$scripts = ["js/sections/edit-card/edit-card.js", "js/sections/edit-card/images-mode.js", "js/sections/edit-card/drag-and-drop.js", "js/effects/accordion.js", "js/effects/lightbox.js"];
 
 // Déterminer l'ancre à utiliser pour la redirection
 $anchor = $_GET['anchor'] ?? '';
@@ -13,7 +8,17 @@ $anchor = $_GET['anchor'] ?? '';
 require __DIR__ . '/../partials/header.php';
 ?>
 
-<a class="btn-back" href="?page=dashboard">← Retour au dashboard</a>
+<a class="btn-back" href="?page=dashboard">Retour au dashboard</a>
+
+<!-- Boutons de contrôle généraux pour tous les accordéons -->
+<div class="global-accordion-controls">
+    <button type="button" id="expand-all-accordions" class="btn">
+        <i class="fas fa-expand-alt"></i> Tout ouvrir
+    </button>
+    <button type="button" id="collapse-all-accordions" class="btn">
+        <i class="fas fa-compress-alt"></i> Tout fermer
+    </button>
+</div>
 
 <?php if (!empty($message)): ?>
     <p class="message-success"><?= htmlspecialchars($message) ?></p>
@@ -373,9 +378,12 @@ require __DIR__ . '/../partials/header.php';
                 <?php if (empty($carteImages)): ?>
                     <p class="no-images">Aucune image téléchargée. Ajoutez vos premières images ci-dessus.</p>
                 <?php else: ?>
-                    <div class="images-grid">
-                        <?php foreach ($carteImages as $image): ?>
+                    <!-- Grille d'images avec système de réorganisation -->
+                    <div class="images-grid" id="sortable-images">
+                        <?php foreach ($carteImages as $index => $image): ?>
                             <div class="image-card" data-image-id="<?= $image['id'] ?>">
+                                <input type="hidden" name="image_order[]" value="<?= $image['id'] ?>">
+
                                 <div class="image-preview-container">
                                     <?php if (pathinfo($image['filename'], PATHINFO_EXTENSION) === 'pdf'): ?>
                                         <div class="pdf-preview">
@@ -393,32 +401,55 @@ require __DIR__ . '/../partials/header.php';
                                 <div class="image-info">
                                     <p class="image-name"><?= htmlspecialchars($image['original_name']) ?></p>
                                     <p class="image-date">Ajouté le <?= date('d/m/Y', strtotime($image['created_at'])) ?></p>
+                                    <p class="image-position">Position: <span class="position-number"><?= $index + 1 ?></span></p>
                                 </div>
 
                                 <div class="image-actions">
-                                    <a href="/<?= htmlspecialchars($image['filename']) ?>"
-                                        target="_blank"
-                                        class="btn small see-btn">
-                                        <i class="fas fa-eye"></i> Voir
-                                    </a>
-
-                                    <form method="post" class="inline-form delete-form">
+                                    <form method="post" class="inline-form">
                                         <input type="hidden" name="image_id" value="<?= $image['id'] ?>">
                                         <input type="hidden" name="anchor" value="images-list">
-                                        <button type="submit" name="delete_image" class="btn small danger delete-btn">
+                                        <button type="submit" name="delete_image" class="btn danger">
                                             <i class="fas fa-trash"></i> Supprimer
                                         </button>
                                     </form>
+                                </div>
+
+                                <!-- Contrôles de réorganisation (cachés par défaut) -->
+                                <div class="reorder-controls" style="display: none;">
+                                    <button type="button" class="btn small move-up" <?= $index === 0 ? 'disabled' : '' ?>>
+                                        <i class="fas fa-arrow-up"></i> Monter
+                                    </button>
+                                    <button type="button" class="btn small move-down" <?= $index === count($carteImages) - 1 ? 'disabled' : '' ?>>
+                                        <i class="fas fa-arrow-down"></i> Descendre
+                                    </button>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
 
-                    <form method="post" class="reorder-form">
+                    <!-- Formulaire de réorganisation -->
+                    <form method="post" id="reorder-form" class="reorder-form">
                         <input type="hidden" name="anchor" value="images-list">
-                        <button type="submit" name="reorder_images" class="btn">
-                            <i class="fas fa-sort"></i> Réorganiser l'ordre d'affichage
-                        </button>
+                        <input type="hidden" name="new_order" id="new-order-input">
+
+                        <div class="reorder-actions">
+                            <button type="button" id="start-reorder-btn" class="btn">
+                                <i class="fas fa-sort"></i> Réorganiser l'ordre d'affichage
+                            </button>
+
+                            <div id="reorder-buttons" style="display: none;">
+                                <button type="button" id="save-order-btn" class="btn success">
+                                    <i class="fas fa-save"></i> Enregistrer le nouvel ordre
+                                </button>
+                                <button type="button" id="cancel-order-btn" class="btn danger">
+                                    <i class="fas fa-times"></i> Annuler
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="reorder-instructions" class="reorder-instructions" style="display: none;">
+                            <p><i class="fas fa-info-circle"></i> Utilisez les boutons "Monter" et "Descendre" sous chaque image pour réorganiser. Cliquez sur "Enregistrer" pour valider.</p>
+                        </div>
                     </form>
                 <?php endif; ?>
             </div>
@@ -426,29 +457,6 @@ require __DIR__ . '/../partials/header.php';
     </div>
 <?php endif; ?>
 
-<script>
-    // Script pour gérer le scroll vers l'ancre après chargement de la page
-    document.addEventListener('DOMContentLoaded', function() {
-        <?php if ($anchor): ?>
-            // Petit délai pour s'assurer que tout est chargé
-            setTimeout(function() {
-                const element = document.getElementById('<?= htmlspecialchars($anchor) ?>');
-                if (element) {
-                    // Scroll vers l'élément
-                    element.scrollIntoView({
-                        behavior: 'smooth'
-                    });
-
-                    // Ouvrir l'accordéon si nécessaire
-                    const accordionHeader = element.closest('.accordion-section')?.querySelector('.accordion-header');
-                    if (accordionHeader) {
-                        accordionHeader.click();
-                    }
-                }
-            }, 300);
-        <?php endif; ?>
-    });
-</script>
-
 <?php
 require __DIR__ . '/../partials/footer.php';
+?>

@@ -37,20 +37,44 @@ button,
   background-color: #c0392b;
 }
 
+/* ==================== BOUTON RETOUR FIXE ==================== */
 .btn-back {
-  display: inline-block;
-  margin-bottom: 20px;
-  padding: 8px 12px;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
   background: #3498db;
   color: white;
   text-decoration: none;
-  border-radius: 4px;
-  transition: background 0.3s;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  border: none;
+  transition: all 0.3s ease;
   width: auto;
 }
 
 .btn-back:hover {
   background: #2980b9;
+  color: white;
+  text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.btn-back:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.btn-back::before {
+  content: "←";
+  margin-right: 8px;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 /* ==================== RESPONSIVE BOUTONS ==================== */
@@ -58,5 +82,37 @@ button,
   button,
   .btn {
     width: auto;
+  }
+
+  .btn-back {
+    top: 25px;
+    left: 30px;
+    padding: 12px 24px;
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .btn-back {
+    top: 30px;
+    left: 40px;
+    padding: 14px 28px;
+    font-size: 16px;
+  }
+}
+
+/* Pour les très petits écrans (téléphones) */
+@media (max-width: 600px) {
+  .btn-back {
+    top: 15px;
+    left: 15px;
+    padding: 8px 16px;
+    font-size: 13px;
+    box-shadow: 0 3px 8px rgba(183, 28, 28, 0.25);
+  }
+
+  .btn-back::before {
+    font-size: 14px;
+    margin-right: 6px;
   }
 }

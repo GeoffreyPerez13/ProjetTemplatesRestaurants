@@ -1,8 +1,16 @@
 # Utiliser la réécriture d'URL
 RewriteEngine On
 
-# Ne pas rediriger les fichiers ou dossiers physiques (CSS, JS, images…)
-RewriteCond %{REQUEST_FILENAME} -f [OR]
+# OPTION A : Si vos fichiers sont dans /public/ ou /assets/
+# Laisser Apache servir directement tous les fichiers qui existent
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+
+# OPTION B : Si OPTION A ne fonctionne pas, spécifier les extensions
+# RewriteCond %{REQUEST_URI} \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|pdf|mp4|webm)$ [NC]
+# RewriteRule ^ - [L]
+
+# Ne pas rediriger les dossiers existants
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 

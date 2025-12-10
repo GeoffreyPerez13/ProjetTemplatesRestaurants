@@ -13,11 +13,12 @@
 @import url("admin/forms/images.css");
 
 /* CSS des différentes sections admin */
-@import url("admin/sections/preview.css");
-@import url("admin/sections/dashboard.css");
-@import url("admin/sections/auth.css");
-/* Section edit-card*/
-@import url("admin/sections/edit-card/mode-selector.css");
+@import url("admin/sections/preview/preview.css"); /* Section preview */
+@import url("admin/sections/dashboard/dashboard.css"); /* Section dashboard */
+@import url("admin/sections/login/auth.css"); /* Section login */
+
+@import url("admin/sections/edit-card/mode-selector.css"); /* Section edit-card */
+@import url("admin/sections/edit-card/drag-and-drop.css"); /* Section edit-card */
 
 /* Effets visuels */
 @import url("admin/effects/accordion.css");

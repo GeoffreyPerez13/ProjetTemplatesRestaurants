@@ -1,0 +1,366 @@
+/* drag-and-drop.css - Styles pour la réorganisation des images */
+
+/* ==================== MODE RÉORGANISATION ==================== */
+.reorder-mode .image-card {
+  cursor: grab !important;
+  border: 2px dashed #3498db !important;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  position: relative;
+  user-select: none; /* Empêcher la sélection de texte pendant le drag */
+}
+
+.reorder-mode .image-card:active {
+  cursor: grabbing !important;
+}
+
+/* Style spécial pendant le drag */
+.reorder-mode .image-card.sortable-chosen {
+  cursor: grabbing !important;
+  transform: rotate(1deg) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
+  z-index: 1000;
+}
+
+/* Feedback visuel au survol */
+.reorder-mode .image-card:hover {
+  border-color: #2980b9 !important;
+  background-color: #f0f7ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+}
+
+/* Garder le drag-handle pour le feedback visuel, mais il ne sera pas utilisé comme handle */
+.drag-handle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: #7f8c8d;
+  font-size: 18px;
+  cursor: move;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  pointer-events: none; /* Ne pas intercepter les clics */
+}
+
+.drag-handle:hover {
+  color: #3498db;
+  background: rgba(52, 152, 219, 0.15);
+  border-color: #3498db;
+  transform: scale(1.05);
+}
+
+/* États pendant le drag & drop */
+.sortable-ghost {
+  opacity: 0.4;
+  background-color: #e8f4fc !important;
+  border-color: #2980b9 !important;
+}
+
+.sortable-chosen {
+  background-color: #f0f7ff !important;
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+}
+
+.sortable-drag {
+  opacity: 0.8;
+  z-index: 1000 !important;
+}
+
+.images-grid.dragging .image-card:not(.sortable-chosen) {
+  transition: transform 0.3s ease;
+}
+
+/* Instructions de réorganisation */
+.reorder-instructions {
+  background-color: #e8f4fc;
+  border-left: 4px solid #3498db;
+  padding: 15px 20px;
+  margin: 20px 0;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.1);
+}
+
+.reorder-instructions i {
+  color: #3498db;
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+/* Contrôles de réorganisation (boutons monter/descendre) */
+.reorder-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: center;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+  background: #f9f9f9;
+  border-radius: 0 0 8px 8px;
+}
+
+.reorder-controls .btn.small {
+  padding: 8px 15px;
+  font-size: 13px;
+  min-width: 100px;
+}
+
+.reorder-controls .btn.small i {
+  margin-right: 5px;
+}
+
+.reorder-controls .btn.small:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.reorder-controls .btn.small:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Indicateur de position */
+.image-position {
+  font-size: 13px;
+  color: #666;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  gap: 5px;
+}
+
+.position-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 28px;
+  font-weight: bold;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+}
+
+/* Actions de réorganisation */
+.reorder-actions {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 2px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+#reorder-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+/* Boutons spécifiques */
+#start-reorder-btn {
+  border: none;
+  padding: 12px 25px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+#start-reorder-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(108, 92, 231, 0.3);
+}
+
+#save-order-btn {
+  border: none;
+  padding: 12px 25px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+#save-order-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 184, 148, 0.3);
+}
+
+#cancel-order-btn {
+  border: none;
+  padding: 12px 25px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+#cancel-order-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(225, 112, 85, 0.3);
+}
+
+/* Animations */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(52, 152, 219, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+  }
+}
+
+.reorder-mode .image-card:first-child {
+  animation: pulse 2s infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .reorder-controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .reorder-controls .btn.small {
+    width: 100%;
+  }
+
+  #reorder-buttons {
+    flex-direction: column;
+  }
+
+  #reorder-buttons .btn {
+    width: 100%;
+  }
+
+  .drag-handle {
+    padding: 6px;
+    font-size: 16px;
+  }
+}
+
+/* État de chargement */
+.reorder-loading {
+  position: relative;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.reorder-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 30px;
+  height: 30px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+/* Feedback visuel */
+.reorder-feedback {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #2ecc71;
+  color: white;
+  padding: 15px 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+  z-index: 10000;
+  animation: slideIn 0.5s ease;
+  display: none;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.reorder-feedback.error {
+  background: #e74c3c;
+  box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.reorder-feedback.warning {
+  background: #f39c12;
+  box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+}
+
+/* Styles ajoutés pour le drag sur toute la carte */
+.reorder-mode .image-card * {
+  pointer-events: none;
+}
+
+/* Sauf pour les boutons de contrôle et d'actions */
+.reorder-mode .image-card .reorder-controls *,
+.reorder-mode .image-card .image-actions * {
+  pointer-events: auto;
+}
+
+/* Indicateur que l'élément est draggable */
+.reorder-mode .image-card::after {
+  content: "Glissez pour réorganiser";
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11px;
+  color: #3498db;
+  opacity: 0;
+  transition: opacity 0.3s ease, bottom 0.3s ease;
+  pointer-events: none;
+}
+
+.reorder-mode .image-card:hover::after {
+  opacity: 0.8;
+  bottom: -25px;
+}
+
+/* Pour mobile: ajustements tactiles */
+@media (max-width: 768px) {
+  .reorder-mode .image-card {
+    touch-action: pan-y;
+  }
+
+  .reorder-mode .image-card.sortable-chosen {
+    transform: scale(1.02);
+  }
+
+  .reorder-mode .image-card::after {
+    font-size: 10px;
+    bottom: -18px;
+  }
+}

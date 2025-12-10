@@ -19,7 +19,7 @@ if ($currentMode === 'images' && !empty($carteImages)) {
 require __DIR__ . '/../partials/header.php';
 ?>
 
-<a class="btn-back" href="?page=dashboard">← Retour au dashboard</a>
+<a class="btn-back" href="?page=dashboard">Retour au dashboard</a>
 
 <h1>Aperçu de la carte du restaurant</h1>
 
@@ -40,10 +40,10 @@ require __DIR__ . '/../partials/header.php';
                     <!-- Image de la catégorie -->
                     <?php if (!empty($cat['image'])): ?>
                         <div class="category-image-container">
-                            <img src="/<?= htmlspecialchars($cat['image']) ?>" 
-                                 alt="<?= htmlspecialchars($cat['name']) ?>" 
-                                 class="category-preview-image lightbox-image"
-                                 data-caption="<?= htmlspecialchars($cat['name']) ?>">
+                            <img src="/<?= htmlspecialchars($cat['image']) ?>"
+                                alt="<?= htmlspecialchars($cat['name']) ?>"
+                                class="category-preview-image lightbox-image"
+                                data-caption="<?= htmlspecialchars($cat['name']) ?>">
                         </div>
                     <?php endif; ?>
 
@@ -60,10 +60,10 @@ require __DIR__ . '/../partials/header.php';
                                         <!-- Image du plat à droite du prix -->
                                         <?php if (!empty($plat['image'])): ?>
                                             <div class="dish-image-container">
-                                                <img src="/<?= htmlspecialchars($plat['image']) ?>" 
-                                                     alt="<?= htmlspecialchars($plat['name']) ?> - <?= number_format($plat['price'], 2, ',', ' ') ?> €" 
-                                                     class="dish-preview-image lightbox-image"
-                                                     data-caption="<?= htmlspecialchars($plat['name']) ?> - <?= number_format($plat['price'], 2, ',', ' ') ?> €">
+                                                <img src="/<?= htmlspecialchars($plat['image']) ?>"
+                                                    alt="<?= htmlspecialchars($plat['name']) ?> - <?= number_format($plat['price'], 2, ',', ' ') ?> €"
+                                                    class="dish-preview-image lightbox-image"
+                                                    data-caption="<?= htmlspecialchars($plat['name']) ?> - <?= number_format($plat['price'], 2, ',', ' ') ?> €">
                                             </div>
                                         <?php endif; ?>
                                     </div>
@@ -91,7 +91,7 @@ require __DIR__ . '/../partials/header.php';
             <i class="fas fa-images"></i>
             <span>Mode Images activé</span>
         </div>
-        
+
         <?php if (empty($carteImages)): ?>
             <div class="empty-state">
                 <i class="fas fa-image"></i>
@@ -103,7 +103,7 @@ require __DIR__ . '/../partials/header.php';
         <?php else: ?>
             <div class="images-info">
                 <p><?= count($carteImages) ?> image(s) disponible(s)</p>
-                <?php 
+                <?php
                 $pdfCount = 0;
                 $imageCount = 0;
                 foreach ($carteImages as $image) {
@@ -124,7 +124,7 @@ require __DIR__ . '/../partials/header.php';
                     </p>
                 <?php endif; ?>
             </div>
-            
+
             <div class="carte-images-gallery">
                 <?php foreach ($carteImages as $image): ?>
                     <div class="carte-image-item" data-image-type="<?= pathinfo($image['filename'], PATHINFO_EXTENSION) === 'pdf' ? 'pdf' : 'image' ?>">
@@ -134,34 +134,34 @@ require __DIR__ . '/../partials/header.php';
                                     <i class="fas fa-file-pdf"></i>
                                     <span>Document PDF</span>
                                 </div>
-                                <embed src="/<?= htmlspecialchars($image['filename']) ?>#toolbar=0&navpanes=0&scrollbar=0" 
-                                       type="application/pdf" 
-                                       width="100%" 
-                                       height="500px">
+                                <embed src="/<?= htmlspecialchars($image['filename']) ?>#toolbar=0&navpanes=0&scrollbar=0"
+                                    type="application/pdf"
+                                    width="100%"
+                                    height="500px">
                                 <div class="pdf-actions">
-                                    <a href="/<?= htmlspecialchars($image['filename']) ?>" 
-                                       target="_blank" 
-                                       class="btn small">
+                                    <a href="/<?= htmlspecialchars($image['filename']) ?>"
+                                        target="_blank"
+                                        class="btn small">
                                         <i class="fas fa-expand-alt"></i> Ouvrir en plein écran
                                     </a>
-                                    <a href="/<?= htmlspecialchars($image['filename']) ?>" 
-                                       download 
-                                       class="btn small success">
+                                    <a href="/<?= htmlspecialchars($image['filename']) ?>"
+                                        download
+                                        class="btn small success">
                                         <i class="fas fa-download"></i> Télécharger
                                     </a>
                                 </div>
                             </div>
                         <?php else: ?>
                             <div class="image-container">
-                                <img src="/<?= htmlspecialchars($image['filename']) ?>" 
-                                     alt="<?= htmlspecialchars($image['original_name']) ?>"
-                                     class="carte-full-image lightbox-image"
-                                     data-caption="<?= htmlspecialchars($image['original_name']) ?>"
-                                     loading="lazy">
+                                <img src="/<?= htmlspecialchars($image['filename']) ?>"
+                                    alt="<?= htmlspecialchars($image['original_name']) ?>"
+                                    class="carte-full-image lightbox-image"
+                                    data-caption="<?= htmlspecialchars($image['original_name']) ?>"
+                                    loading="lazy">
                                 <div class="image-overlay">
-                                    <button class="btn-view-full" 
-                                            data-src="/<?= htmlspecialchars($image['filename']) ?>"
-                                            data-caption="<?= htmlspecialchars($image['original_name']) ?>">
+                                    <button class="btn-view-full"
+                                        data-src="/<?= htmlspecialchars($image['filename']) ?>"
+                                        data-caption="<?= htmlspecialchars($image['original_name']) ?>">
                                         <i class="fas fa-search-plus"></i> Agrandir
                                     </button>
                                 </div>
@@ -174,7 +174,7 @@ require __DIR__ . '/../partials/header.php';
                             <p class="image-meta">
                                 <small>
                                     <i class="far fa-calendar"></i> Ajouté le <?= date('d/m/Y', strtotime($image['created_at'])) ?>
-                                    <?php 
+                                    <?php
                                     $extension = pathinfo($image['filename'], PATHINFO_EXTENSION);
                                     $fileTypes = [
                                         'pdf' => '<i class="fas fa-file-pdf"></i> PDF',
@@ -184,7 +184,7 @@ require __DIR__ . '/../partials/header.php';
                                         'gif' => '<i class="fas fa-image"></i> GIF',
                                         'webp' => '<i class="fas fa-image"></i> WebP'
                                     ];
-                                    if (isset($fileTypes[$extension])): 
+                                    if (isset($fileTypes[$extension])):
                                     ?>
                                         &nbsp;|&nbsp; <?= $fileTypes[$extension] ?>
                                     <?php endif; ?>
@@ -194,10 +194,10 @@ require __DIR__ . '/../partials/header.php';
                     </div>
                 <?php endforeach; ?>
             </div>
-            
+
             <div class="viewer-controls">
                 <p class="viewer-note">
-                    <i class="fas fa-info-circle"></i> 
+                    <i class="fas fa-info-circle"></i>
                     Cliquez sur une image pour l'agrandir. Les PDF peuvent être visualisés directement ou téléchargés.
                 </p>
             </div>

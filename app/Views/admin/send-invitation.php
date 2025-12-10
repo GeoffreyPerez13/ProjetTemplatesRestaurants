@@ -23,8 +23,8 @@ require __DIR__ . '/../partials/header.php';
         </div>
     <?php endif; ?>
 
-<!-- Bouton retour vers le dashboard -->
-<a class="btn-back" href="?page=dashboard">← Retour au dashboard</a>
+    <!-- Bouton retour vers le dashboard -->
+    <a class="btn-back" href="?page=dashboard">Retour au dashboard</a>
 
     <!-- Formulaire pour envoyer une invitation à un restaurant -->
     <form method="post">

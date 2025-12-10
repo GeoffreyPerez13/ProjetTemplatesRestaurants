@@ -1,5 +1,44 @@
 /* ==================== ACCORDÉON ==================== */
 
+/* Styles pour les contrôles d'accordéon généraux */
+.global-accordion-controls {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+  padding: 10px 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.global-accordion-controls .btn.small {
+  padding: 8px 15px;
+  font-size: 13px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #495057;
+}
+
+.global-accordion-controls .btn.small:hover {
+  background-color: #e9ecef;
+  border-color: #ced4da;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.global-accordion-controls .btn.small i {
+  margin-right: 5px;
+}
+
+/* Style spécifique pour les boutons Tout ouvrir/Tout fermer */
+#expand-all-accordions,
+#collapse-all-accordions {
+  color: white;
+}
+
+#expand-all-accordions:hover,
+#collapse-all-accordions:hover {
+  background: #2980b9;
+}
+
 /* En-tête de catégorie avec contrôles */
 .category-header {
   display: flex;
@@ -171,6 +210,16 @@
 /* ==================== RESPONSIVE ==================== */
 
 @media (max-width: 768px) {
+  .global-accordion-controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .global-accordion-controls .btn.small {
+    width: 100%;
+    justify-content: center;
+  }
+
   .category-header {
     flex-direction: column;
     align-items: flex-start;

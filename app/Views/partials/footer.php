@@ -11,12 +11,6 @@
     </div>
 </div>
 
-<!-- Inclusion des scripts JavaScript -->
-<?php if (!empty($scripts)): ?>
-    <?php foreach ($scripts as $script): ?>
-        <script src="<?= htmlspecialchars($script) ?>" defer></script>
-    <?php endforeach; ?>
-<?php endif; ?>
-
 </body>
+
 </html>

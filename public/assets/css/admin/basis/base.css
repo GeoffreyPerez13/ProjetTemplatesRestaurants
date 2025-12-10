@@ -9,9 +9,12 @@ body {
   color: #333;
   padding: 20px;
   margin: 0;
+  padding-top: 70px;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   color: #b71c1c;
   margin-bottom: 20px;
 }
@@ -56,6 +59,7 @@ form,
 @media (min-width: 601px) {
   body {
     padding: 30px;
+    padding-top: 80px;
   }
 
   .login-container,
@@ -72,6 +76,7 @@ form,
 @media (min-width: 1025px) {
   body {
     padding: 40px;
+    padding-top: 90px;
   }
 
   .login-container,
@@ -79,5 +84,12 @@ form,
   form,
   .category-block {
     padding: 30px;
+  }
+}
+
+/* Pour les très petits écrans (téléphones) */
+@media (max-width: 600px) {
+  body {
+    padding-top: 60px;
   }
 }
