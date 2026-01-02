@@ -15,7 +15,7 @@ Il est conçu pour fonctionner avec **WampServer** ou **XAMPP** sous Windows.
 ## Étapes effectuées et explications
 
 ### 1. Migration vers une architecture MVC-like
-- Remplacement de l'ancienne structure par un système de routage centralisé via `index.php`
+- Système de routage centralisé via `index.php`
 - Création d'un dossier `pages/` contenant toutes les pages de l'application
 - Implémentation d'un contrôleur frontal gérant les accès sécurisés
 
@@ -39,7 +39,7 @@ Deux modes d'opération :
 - **Mode Images** : galerie d'images/PDF uploadés
 
 **Pourquoi :**  
-Offre plus de flexibilité que le système JSON précédent, avec de meilleures performances et une gestion plus robuste.
+Offre plus de flexibilité, avec de meilleures performances et une gestion plus robuste.
 
 ---
 
