@@ -82,3 +82,8 @@ Le projet supporte deux configurations selon l'environnement.
 ```text
 http://templatesrestaurants.local/admin/login.php
 http://localhost/phpmyadmin
+
+#### Environnement domicile (port 80)
+```text
+http://templatesrestaurants.local/admin/login.php
+http://localhost/phpmyadmin
