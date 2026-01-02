@@ -1,163 +1,244 @@
-# TemplatesRestaurants - Site vitrine dynamique pour restaurants
+TemplatesRestaurants - Système d'administration de carte pour restaurants
+Description
+Ce projet est une application web complète permettant aux restaurateurs de gérer et présenter leur carte en ligne avec deux modes de fonctionnement distincts : un mode éditable pour créer et organiser catégories/plats, et un mode images pour afficher des cartes scannées ou conçues.
 
-## Description
+Le système inclut un panneau d'administration sécurisé, une base de données MySQL, et une interface responsive adaptée à tous les appareils. Il est conçu pour fonctionner avec WampServer ou XAMPP sur Windows.
 
-Ce projet permet de créer un site vitrine pour un restaurant avec un design simple, responsive et administrable.  
-Le contenu du site (nom du restaurant, carte, contact, horaires…) est dynamique et stocké dans un fichier JSON, modifiable via un panneau administrateur.
+Étapes effectuées et explications
+1️⃣ Migration vers une architecture MVC-like
+Remplacement de l'ancienne structure par un système de routage centralisé via index.php
 
-Le projet est conçu pour être utilisé avec **WampServer** sur Windows.
+Création d'un dossier pages/ contenant toutes les pages de l'application
 
----
+Implémentation d'un contrôleur frontal gérant les accès sécurisés
 
-## Étapes effectuées et explications
+Pourquoi :
+Permet une meilleure organisation du code, une sécurité renforcée et une maintenance facilitée.
 
-### 1️⃣ Création du site dynamique
+2️⃣ Système de gestion de contenu avancé
+Base de données MySQL avec 5 tables principales :
 
-- Remplacement du HTML statique par un `index.php` dynamique.  
-- Les informations du restaurant sont chargées depuis un fichier JSON (`data/content.json`) grâce à la fonction `loadContent()` de `config.php`.  
-- Les sections principales :  
-  - Header / menu horizontal  
-  - Accueil (nom, accroche, bouton “Découvrir la carte”)  
-  - La carte (Entrées, Plats, Desserts avec images et listes)  
-  - Contact (Localisation Google Maps, contact, horaires)  
-  - Footer (mentions légales, CGV, réseaux sociaux)  
+users : Gestion des administrateurs
 
-**Pourquoi :**  
-Permet au site d’être modifiable par le restaurateur sans toucher au code.
+categories : Catégories de la carte
 
----
+dishes : Plats avec prix et descriptions
 
-### 2️⃣ Création du panneau administrateur
+carte_images : Images/PDF du mode images
 
-- Dossier `admin/` avec login et pages pour modifier :  
-  - Carte du restaurant  
-  - Informations de contact  
-  - Logo et images éventuelles  
+mode : Configuration du mode d'affichage
 
-**Pourquoi :**  
-Pour que le restaurateur puisse mettre à jour son site facilement.
+Deux modes d'opération :
 
----
+Mode Éditable : Interface drag & drop pour organiser catégories et plats
 
-### 3️⃣ Gestion du contenu dynamique
+Mode Images : Galerie d'images/PDF uploadés
 
-- `config.php` contient :  
-  - `loadContent()` : charge le JSON et retourne un contenu par défaut si le fichier est vide ou corrompu.  
-  - `saveContent()` : sauvegarde le contenu modifié par l’admin dans le JSON.  
-  - `getDefaultContent()` : valeurs par défaut pour éviter qu’une erreur PHP bloque le site.  
+Pourquoi :
+Offre plus de flexibilité que le système JSON précédent, avec de meilleures performances et une gestion plus robuste.
 
-**Pourquoi :**  
-Assure la robustesse du site même si le JSON est absent ou mal formé.
+3️⃣ Panneau d'administration complet
+Interface organisée en sections :
 
----
+Dashboard : Vue d'ensemble et changement de mode
 
-### 4️⃣ Sécurisation des données
+Édition de carte : Gestion complète catégories/plats avec upload d'images
 
-Fichier `.htaccess` dans `data/` :
+Aperçu de carte : Visualisation selon le mode sélectionné
 
-```apache
-<FilesMatch "\.(json|txt)$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
+Gestion des comptes : Connexion, inscription, réinitialisation de mot de passe
 
-Options -Indexes
-```
+Système d'accordéons pour une navigation intuitive
 
----
+Lightbox intégrée pour visualiser les images en grand
 
-5️⃣ Configuration du VirtualHost dans WampServer
+Pourquoi :
+Fournit une expérience utilisateur professionnelle et intuitive pour les restaurateurs.
 
-Ajout du VirtualHost templatesrestaurants.local :
+4️⃣ Architecture CSS modulaire
+Organisation en dossiers thématiques :
 
-```apache
-<VirtualHost *:80>
-    ServerName templatesrestaurants.local
-    DocumentRoot "C:/Users/galaxy/TemplatesRestaurants"
-    <Directory "C:/Users/galaxy/TemplatesRestaurants/">
-        Options +Indexes +Includes +FollowSymLinks +MultiViews
-        AllowOverride All
-        Require all granted
-    </Directory>
+basis/ : Styles de base, boutons, composants
+
+effects/ : Animations, lightbox, accordéons
+
+forms/ : Styles de formulaires spécifiques
+
+sections/ : CSS par page/section
+
+Fichier principal admin.css qui importe tous les modules
+
+Pourquoi :
+Facilite la maintenance, permet la réutilisation de composants et améliore la performance.
+
+5️⃣ Configuration des environnements de développement
+Le projet supporte deux configurations d'URL selon l'environnement :
+
+🏢 Au travail (port 80 standard) :
+text
+http://templatesrestaurants.local/admin/login.php
+http://localhost/phpmyadmin
+🏠 À la maison (port 8080) :
+text
+http://templatesrestaurants.local:8080/?page=login
+http://localhost:8080/phpmyadmin
+Pourquoi cette différence :
+
+À la maison, le port 80 est souvent utilisé par d'autres services (Skype, IIS)
+
+Apache est configuré pour écouter sur le port 8080
+
+La structure d'URL a évolué vers un système de routage
+
+Fichiers modifiés pour cette configuration :
+
+hosts (C:\Windows\System32\drivers\etc\hosts) :
+
+text
+127.0.0.1    templatesrestaurants.local
+127.0.0.1    phpmyadmin.local
+httpd-vhosts.conf (Apache/conf/extra/) :
+
+apache
+<VirtualHost *:80>  <!-- Au travail -->
+<VirtualHost *:8080> <!-- À la maison -->
+  ServerName templatesrestaurants.local
+  DocumentRoot "C:/xampp/htdocs/templates-restaurants"
+  <Directory "C:/xampp/htdocs/templates-restaurants">
+      Options Indexes FollowSymLinks
+      AllowOverride All
+      Require all granted
+  </Directory>
 </VirtualHost>
-```
+httpd.conf (Apache/conf/) :
 
-Ajout de la ligne dans le fichier hosts :
+apache
+# Au travail :
+Listen 80
+ServerName localhost:80
 
-127.0.0.1   templatesrestaurants.local
+# À la maison :
+Listen 8080
+ServerName localhost:8080
+6️⃣ Sécurité renforcée
+Hachage des mots de passe avec password_hash()
+
+Protection XSS : htmlspecialchars() sur toutes les sorties
+
+Requêtes préparées pour prévenir les injections SQL
+
+Validation des uploads : types MIME et tailles limitées
+
+Sessions sécurisées avec régénération d'ID
+
+Protection des dossiers sensibles via .htaccess
 
 Pourquoi :
-Permet de lancer le site depuis n’importe quel dossier Windows, sans le déplacer dans www, et de créer une URL locale propre.
+Assure la sécurité des données des restaurateurs et de leurs clients.
 
----
+7️⃣ Système de fichiers organisé
+text
+templates-restaurants/
+├── assets/
+│   ├── css/admin/          # CSS modulaire par fonctionnalité
+│   ├── js/effects/         # Scripts généraux
+│   └── uploads/            # Images uploadées (catégories, plats, carte)
+├── database/               # Structure SQL et données
+├── partials/               # En-tête et pied de page réutilisables
+├── pages/                  # Toutes les pages de l'application
+├── index.php               # Routeur principal
+├── config.php              # Configuration et fonctions utilitaires
+└── .htaccess               # Règles Apache
+Pourquoi :
+Structure claire qui sépare les responsabilités et facilite l'évolution du projet.
 
-6️⃣ Adaptation des chemins
+8️⃣ Fonctionnalités techniques avancées
+Drag & Drop : Réorganisation intuitive des catégories et plats
 
-Tous les chemins CSS, JS, assets et JSON pointent directement à la racine du projet.
+Lightbox personnalisée : Visualisation plein écran des images
 
-Exemple :
+Upload sécurisé : Support JPG, PNG, GIF, WebP, PDF (max 5MB)
 
-```html
-<link rel="stylesheet" href="style.css">
-<img src="assets/logo.png">
-```
+Responsive design : Adapté mobile, tablette et desktop
+
+Accordéons interactifs : Pour les sections dépliables
+
+Notifications : Messages de succès/erreur en temps réel
 
 Pourquoi :
-Permet au site de fonctionner directement sans sous-dossiers supplémentaires.
+Crée une expérience utilisateur moderne et professionnelle.
 
----
-
-7️⃣ Test en localhost
-
-Redémarrer WampServer.
-
-Accéder à :
-
+Test en local
+Au travail (port 80) :
+text
 http://templatesrestaurants.local/
 http://templatesrestaurants.local/admin/login.php
+À la maison (port 8080) :
+text
+http://templatesrestaurants.local:8080/
+http://templatesrestaurants.local:8080/?page=login
+Vérifications :
 
+Toutes les sections s'affichent correctement
 
-Vérifier que toutes les sections s’affichent correctement et que le contenu modifiable par admin se reflète immédiatement.
+Le mode éditable permet de créer/modifier catégories et plats
+
+Le mode images affiche correctement les fichiers uploadés
+
+La lightbox fonctionne sur toutes les images
+
+L'interface est responsive sur tous les appareils
 
 Résultat final
+Application web complète pour la gestion de carte de restaurant
 
-Site dynamique et administrable
+Deux modes d'opération adaptés à différents besoins
 
-Contenu sécurisé et sauvegardé dans JSON
+Interface administrateur intuitive et sécurisée
 
-VirtualHost configuré pour fonctionner depuis n’importe quel dossier
+Architecture modulaire facile à maintenir et étendre
 
-Possibilité d’ajouter plusieurs templates ultérieurement
+Configuration multi-environnement pour développement flexible
+
+Sécurité renforcée à tous les niveaux
 
 Démarrage rapide
+Prérequis :
+PHP 7.4+
 
-Vérifier que WampServer est installé et démarré.
+MySQL 5.7+
 
-Placer le dossier TemplatesRestaurants à l’emplacement choisi (ici C:/Users/galaxy/TemplatesRestaurants).
+WampServer ou XAMPP
 
-Vérifier que le VirtualHost templatesrestaurants.local est configuré et que le fichier hosts contient :
+Installation :
+Cloner le projet dans le dossier htdocs de WampServer/XAMPP
 
-127.0.0.1   templatesrestaurants.local
+Importer la base de données : database/database.sql
 
+Configurer config.php avec vos identifiants MySQL
 
-Redémarrer WampServer.
+Configurer les Virtual Hosts selon votre environnement
 
-Ouvrir dans le navigateur :
+Vérifier les permissions du dossier assets/uploads/
 
-http://templatesrestaurants.local/
+Redémarrer Apache et accéder à l'URL configurée
 
+Configuration des URLs :
+Si le port 80 est libre, utiliser la configuration standard
 
-Accéder au panneau administrateur :
+Si le port 80 est occupé, modifier Apache pour utiliser le port 8080
 
-http://templatesrestaurants.local/admin/login.php
+Adapter les URLs dans le navigateur en conséquence
 
+Notes importantes
+Migration réussie d'un système JSON simple vers une base de données relationnelle
 
-Modifier la carte, le contact ou le logo depuis l’admin pour voir les changements en direct.
+Évolution de l'architecture vers un pattern MVC-like pour une meilleure maintenabilité
 
-Notes
+Configuration flexible supportant différents environnements de développement
 
-Le projet est conçu pour PHP 8.x et WampServer 3.3.7 (64-bit).
+Code documenté en français avec une structure claire
 
-Les fichiers CSS, JS et images doivent rester à la racine et dans le dossier assets/ pour que le site fonctionne correctement.
+Sécurité prioritaire à chaque étape du développement
 
-Les prochaines évolutions peuvent inclure plusieurs templates ou un module de gestion des images directement depuis l’admin.
+Le projet est maintenant prêt pour une utilisation professionnelle ou pour des évolutions futures (export PDF, multi-langue, API, etc.).
