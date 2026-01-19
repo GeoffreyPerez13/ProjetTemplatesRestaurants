@@ -98,96 +98,43 @@ class CardController extends BaseController
                     $adminModel->updateCarteMode($admin_id, $newMode);
                     $_SESSION['success_message'] = "Mode de carte changé avec succès";
                     $anchor = 'mode-selector';
-                }
-            }
-
-            // Si on est en mode images
-            elseif ($currentMode === 'images') {
-                // --- UPLOAD D'IMAGES DE CARTE ---
-                if (isset($_FILES['card_images']) && !empty($_FILES['card_images']['name'][0])) {
-                    $uploadedCount = 0;
-
-                    foreach ($_FILES['card_images']['tmp_name'] as $index => $tmpName) {
-                        if ($_FILES['card_images']['error'][$index] === UPLOAD_ERR_OK) {
-                            $file = [
-                                'name' => $_FILES['card_images']['name'][$index],
-                                'tmp_name' => $tmpName,
-                                'size' => $_FILES['card_images']['size'][$index],
-                                'error' => $_FILES['card_images']['error'][$index]
-                            ];
-
-                            try {
-                                $filename = $carteImageModel->uploadImage($file);
-                                $carteImageModel->add($admin_id, $filename, $file['name']);
-                                $uploadedCount++;
-                            } catch (Exception $e) {
-                                $_SESSION['error_message'] = $e->getMessage();
-                            }
-                        }
-                    }
-
-                    if ($uploadedCount > 0) {
-                        $_SESSION['success_message'] = "$uploadedCount image(s) ajoutée(s) avec succès";
-                    }
-
-                    if (empty($anchor)) {
-                        $anchor = 'upload-images';
-                    }
-                }
-
-                // --- SUPPRESSION D'IMAGE DE CARTE ---
-                elseif (isset($_POST['delete_image'])) {
-                    $imageId = (int)$_POST['image_id'];
-                    $image = $carteImageModel->getById($imageId, $admin_id);
-
-                    if ($image) {
-                        $carteImageModel->deleteImageFile($image['filename']);
-                        $carteImageModel->delete($imageId, $admin_id);
-                        $_SESSION['success_message'] = "Image supprimée avec succès";
-
-                        if (empty($anchor)) {
-                            $anchor = 'images-list';
-                        }
-                    }
-                }
-
-                // --- RÉORDONNEMENT DES IMAGES (drag & drop) ---
-                elseif (isset($_POST['new_order']) && !empty($_POST['new_order'])) {
-                    $newOrder = json_decode($_POST['new_order'], true);
-
-                    if (is_array($newOrder) && !empty($newOrder)) {
-                        // Mettre à jour l'ordre dans la base de données
-                        $success = $carteImageModel->updateImageOrder($admin_id, $newOrder);
-
-                        if ($success) {
-                            $_SESSION['success_message'] = "L'ordre des images a été enregistré avec succès !";
-                        } else {
-                            $_SESSION['error_message'] = "Une erreur est survenue lors de l'enregistrement de l'ordre.";
-                        }
-                    } else {
-                        $_SESSION['error_message'] = "Erreur : données d'ordre invalides.";
-                    }
-
-                    if (empty($anchor)) {
-                        $anchor = 'images-list';
-                    }
-                }
-
-                // --- RÉORDONNEMENT AUTOMATIQUE DES IMAGES ---
-                elseif (isset($_POST['reorder_images'])) {
-                    $carteImageModel->reorderImages($admin_id);
-                    $_SESSION['success_message'] = "Les images ont été réorganisées par ordre alphabétique avec succès !";
-
-                    if (empty($anchor)) {
-                        $anchor = 'images-list';
-                    }
+                    $_SESSION['close_accordion'] = 'mode-selector-content';
                 }
             }
 
             // Si on est en mode éditable
             else {
+                // --- SUPPRESSION D'UNE CATÉGORIE ---
+                if (isset($_POST['delete_category'])) {
+                    $category_id = (int)$_POST['delete_category'];
+                    
+                    // Vérifier que la catégorie appartient bien à l'admin
+                    $category = $categoryModel->getById($category_id, $admin_id);
+                    
+                    if ($category) {
+                        try {
+                            // Supprimer l'image de la catégorie si elle existe
+                            if (!empty($category['image'])) {
+                                $categoryModel->deleteImage($category['image']);
+                            }
+                            
+                            // Supprimer la catégorie (la méthode delete() supprime aussi les plats)
+                            $categoryModel->delete($category_id, $admin_id);
+                            
+                            $_SESSION['success_message'] = "Catégorie et tous ses plats supprimés avec succès.";
+                            $anchor = 'categories-grid';
+                            $_SESSION['close_accordion'] = 'mode-selector-content';
+                            
+                        } catch (Exception $e) {
+                            $_SESSION['error_message'] = "Erreur lors de la suppression : " . $e->getMessage();
+                        }
+                    } else {
+                        $_SESSION['error_message'] = "Catégorie non trouvée ou vous n'avez pas les droits.";
+                    }
+                }
+
                 // --- AJOUT D'UNE CATÉGORIE ---
-                if (!empty($_POST['new_category'])) {
+                elseif (!empty($_POST['new_category'])) {
                     $name = trim($_POST['new_category']);
                     $imagePath = null;
 
@@ -196,11 +143,12 @@ class CardController extends BaseController
                     }
 
                     $categoryModel->create($admin_id, $name, $imagePath);
-                    $_SESSION['success_message'] = "Catégorie ajoutée avec succès.";
+                    $categoryId = $this->pdo->lastInsertId();
 
-                    if (empty($anchor)) {
-                        $anchor = 'new-category';
-                    }
+                    $_SESSION['success_message'] = "Catégorie ajoutée avec succès.";
+                    $anchor = 'category-' . $categoryId;
+                    $_SESSION['scroll_delay'] = 1000;
+                    $_SESSION['close_accordion'] = 'mode-selector-content';
                 }
 
                 // --- MODIFICATION D'UNE CATÉGORIE ---
@@ -210,9 +158,11 @@ class CardController extends BaseController
 
                     if ($category_id && $new_name) {
                         $imagePath = null;
+                        $hasNewImage = false;
 
                         if (isset($_FILES['edit_category_image']) && $_FILES['edit_category_image']['error'] === UPLOAD_ERR_OK) {
                             $imagePath = $categoryModel->uploadImage($_FILES['edit_category_image']);
+                            $hasNewImage = true;
 
                             $existingCategory = $this->getCategoryById($categoryModel, $category_id, $admin_id);
                             if ($existingCategory && !empty($existingCategory['image'])) {
@@ -221,18 +171,12 @@ class CardController extends BaseController
                         }
 
                         $categoryModel->update($category_id, $new_name, $imagePath);
+                        $_SESSION['success_message'] = "Catégorie modifiée avec succès.";
+                        $anchor = 'category-' . $category_id;
+                        $_SESSION['close_accordion'] = 'mode-selector-content';
 
-                        if ($imagePath) {
-                            $_SESSION['success_message'] = "Catégorie modifiée avec succès.";
-                        } else {
-                            $_SESSION['success_message'] = "Catégorie modifiée avec succès.";
-                        }
-
-                        if (empty($anchor)) {
-                            $anchor = 'category-' . $category_id;
-                        }
-                    } else {
-                        $_SESSION['error_message'] = "Le nom de la catégorie est requis.";
+                        // Fermer l'accordéon "Modifier la catégorie" après modification
+                        $_SESSION['close_accordion_secondary'] = 'edit-category-' . $category_id;
                     }
                 }
 
@@ -245,34 +189,12 @@ class CardController extends BaseController
                     if ($category && !empty($category['image'])) {
                         $categoryModel->deleteImage($category['image']);
                         $categoryModel->update($category_id, $category['name'], '');
-
                         $_SESSION['success_message'] = "Image de la catégorie supprimée avec succès.";
+                        $anchor = 'category-' . $category_id;
+                        $_SESSION['close_accordion'] = 'mode-selector-content';
 
-                        if (empty($anchor)) {
-                            $anchor = 'category-' . $category_id;
-                        }
-                    } else {
-                        $_SESSION['error_message'] = "Cette catégorie n'a pas d'image à supprimer.";
-                    }
-                }
-
-                // --- SUPPRESSION D'UNE CATÉGORIE ---
-                elseif (!empty($_POST['delete_category'])) {
-                    $categoryId = (int)$_POST['delete_category'];
-
-                    $categories = $categoryModel->getAllByAdmin($admin_id);
-                    foreach ($categories as $cat) {
-                        if ($cat['id'] == $categoryId && !empty($cat['image'])) {
-                            $categoryModel->deleteImage($cat['image']);
-                            break;
-                        }
-                    }
-
-                    $categoryModel->delete($categoryId, $admin_id);
-                    $_SESSION['success_message'] = "Catégorie supprimée avec succès.";
-
-                    if (empty($anchor)) {
-                        $anchor = 'categories-grid';
+                        // Fermer l'accordéon "Modifier la catégorie" après suppression
+                        $_SESSION['close_accordion_secondary'] = 'edit-category-' . $category_id;
                     }
                 }
 
@@ -288,12 +210,25 @@ class CardController extends BaseController
                         $imagePath = $dishModel->uploadImage($_FILES['dish_image']);
                     }
 
-                    $dishModel->create($category_id, $name, $price, $description, $imagePath);
+                    // La méthode create() retourne un objet Dish
+                    $dishObject = $dishModel->create($category_id, $name, $price, $description, $imagePath);
+                    
+                    // Récupérer l'ID du plat créé via la méthode getId()
+                    $dishId = $dishObject->getId();
+                    
                     $_SESSION['success_message'] = "Plat ajouté avec succès.";
 
-                    if (empty($anchor)) {
-                        $anchor = 'category-' . $category_id;
-                    }
+                    // Rediriger vers l'accordéon du plat (qui doit être fermé)
+                    $anchor = 'dish-' . $dishId;
+                    
+                    // Fermer le mode-selector
+                    $_SESSION['close_accordion'] = 'mode-selector-content';
+                    
+                    // Ouvrir "Modifier les plats" pour voir la liste
+                    $_SESSION['open_accordion'] = 'edit-dishes-' . $category_id;
+                    
+                    // FORCER la fermeture de l'accordéon du plat
+                    $_SESSION['close_dish_accordion'] = 'dish-' . $dishId;
                 }
 
                 // --- MODIFICATION D'UN PLAT ---
@@ -303,12 +238,18 @@ class CardController extends BaseController
                     $name = trim($_POST['dish_name']);
                     $price = floatval($_POST['dish_price']);
                     $description = trim($_POST['dish_description'] ?? '');
-                    $imagePath = null;
 
+                    // Récupérer le plat existant D'ABORD
+                    $existingDish = $this->getDishById($dishModel, $dish_id);
+
+                    // Par défaut, garder l'image existante
+                    $imagePath = $existingDish && !empty($existingDish['image']) ? $existingDish['image'] : null;
+
+                    // Vérifier si une nouvelle image est uploadée
                     if (isset($_FILES['dish_image']) && $_FILES['dish_image']['error'] === UPLOAD_ERR_OK) {
                         $imagePath = $dishModel->uploadImage($_FILES['dish_image']);
 
-                        $existingDish = $this->getDishById($dishModel, $dish_id);
+                        // Supprimer l'ancienne image si elle existe
                         if ($existingDish && !empty($existingDish['image'])) {
                             $dishModel->deleteImage($existingDish['image']);
                         }
@@ -316,10 +257,18 @@ class CardController extends BaseController
 
                     $dishModel->update($dish_id, $name, $price, $description, $imagePath);
                     $_SESSION['success_message'] = "Plat modifié avec succès.";
-
-                    if (empty($anchor)) {
-                        $anchor = 'category-' . $current_category_id;
-                    }
+                    
+                    // Rediriger vers l'accordéon du plat (fermé)
+                    $anchor = 'dish-' . $dish_id;
+                    
+                    // Fermer le mode-selector
+                    $_SESSION['close_accordion'] = 'mode-selector-content';
+                    
+                    // Fermer l'accordéon du plat modifié
+                    $_SESSION['close_dish_accordion'] = 'dish-' . $dish_id;
+                    
+                    // Ouvrir "Modifier les plats" pour voir la liste
+                    $_SESSION['open_accordion'] = 'edit-dishes-' . $current_category_id;
                 }
 
                 // --- SUPPRESSION DE L'IMAGE D'UN PLAT ---
@@ -327,20 +276,37 @@ class CardController extends BaseController
                     $dish_id = (int)$_POST['remove_dish_image'];
                     $current_category_id = (int)($_POST['current_category_id'] ?? 0);
 
-                    $existingDish = $this->getDishById($dishModel, $dish_id);
-
-                    if ($existingDish && !empty($existingDish['image'])) {
-                        $dishModel->deleteImage($existingDish['image']);
-                        $dishModel->update($dish_id, $existingDish['name'], $existingDish['price'], $existingDish['description'], '');
-
-                        $_SESSION['success_message'] = "Image du plat supprimée avec succès.";
-
-                        if (empty($anchor)) {
-                            $anchor = 'category-' . $current_category_id;
+                    // Récupérer le plat AVANT de le modifier
+                    $stmt = $this->pdo->prepare("SELECT * FROM plats WHERE id = ?");
+                    $stmt->execute([$dish_id]);
+                    $existingDish = $stmt->fetch(PDO::FETCH_ASSOC);
+                    
+                    if ($existingDish) {
+                        if (!empty($existingDish['image'])) {
+                            // 1. D'abord supprimer le fichier physique
+                            $dishModel->deleteImage($existingDish['image']);
+                            
+                            // 2. Ensuite mettre à jour la base de données avec image = NULL
+                            $dishModel->update(
+                                $dish_id, 
+                                $existingDish['name'], 
+                                $existingDish['price'], 
+                                $existingDish['description'], 
+                                null
+                            );
+                            
+                            $_SESSION['success_message'] = "Image du plat supprimée avec succès.";
+                        } else {
+                            $_SESSION['error_message'] = "Ce plat n'a pas d'image à supprimer.";
                         }
                     } else {
-                        $_SESSION['error_message'] = "Ce plat n'a pas d'image à supprimer.";
+                        $_SESSION['error_message'] = "Plat non trouvé.";
                     }
+                    
+                    $anchor = 'dish-' . $dish_id;
+                    $_SESSION['close_accordion'] = 'mode-selector-content';
+                    $_SESSION['close_dish_accordion'] = 'dish-' . $dish_id;
+                    $_SESSION['open_accordion'] = 'edit-dishes-' . $current_category_id;
                 }
 
                 // --- SUPPRESSION D'UN PLAT ---
@@ -355,10 +321,11 @@ class CardController extends BaseController
 
                     $dishModel->delete($dishId);
                     $_SESSION['success_message'] = "Plat supprimé avec succès.";
+                    $anchor = 'category-' . $current_category_id;
+                    $_SESSION['close_accordion'] = 'mode-selector-content';
 
-                    if (empty($anchor)) {
-                        $anchor = 'category-' . $current_category_id;
-                    }
+                    // Ouvrir "Modifier les plats" pour voir la liste mise à jour
+                    $_SESSION['open_accordion'] = 'edit-dishes-' . $current_category_id;
                 }
             }
         } catch (Exception $e) {
@@ -373,6 +340,14 @@ class CardController extends BaseController
 
         header('Location: ' . $redirectUrl);
         exit;
+    }
+
+    private function getDishByIdDirect($dishModel, $dish_id)
+    {
+        // Requête directe à la base de données
+        $stmt = $this->pdo->prepare("SELECT * FROM plats WHERE id = ?");
+        $stmt->execute([$dish_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     // Page d'aperçu de la carte

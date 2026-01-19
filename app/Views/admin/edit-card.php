@@ -1,12 +1,59 @@
 <?php
 $title = "Modifier la carte";
-$scripts = ["js/sections/edit-card/edit-card.js", "js/sections/edit-card/images-mode.js", "js/sections/edit-card/drag-and-drop.js", "js/effects/accordion.js", "js/effects/lightbox.js"];
+$scripts = [
+    "js/effects/accordion.js",
+    "js/sections/edit-card/edit-card.js",
+    "js/effects/lightbox.js"
+];
 
-// Déterminer l'ancre à utiliser pour la redirection
-$anchor = $_GET['anchor'] ?? '';
+if ($currentMode === 'images') {
+    $scripts[] = "js/sections/edit-card/images-mode.js";
+    $scripts[] = "js/sections/edit-card/drag-and-drop.js";
+}
+
+// Récupérer les paramètres de session pour le scroll
+$scrollDelay = $_SESSION['scroll_delay'] ?? 1000;
+$closeAccordion = $_SESSION['close_accordion'] ?? '';
+$closeAccordionSecondary = $_SESSION['close_accordion_secondary'] ?? '';
+$closeCategoryAccordions = $_SESSION['close_category_accordions'] ?? '';
+$closeOtherAccordions = $_SESSION['close_other_accordions'] ?? '';
+$keepOpen = $_SESSION['keep_open'] ?? '';
+$openAccordion = $_SESSION['open_accordion'] ?? '';
+$closeAllDishes = $_SESSION['close_all_dishes'] ?? '';
+$closeDishAccordion = $_SESSION['close_dish_accordion'] ?? '';
+
+// Nettoyer les variables de session après les avoir lues
+unset(
+    $_SESSION['scroll_delay'],
+    $_SESSION['close_accordion'],
+    $_SESSION['close_accordion_secondary'],
+    $_SESSION['close_category_accordions'],
+    $_SESSION['close_other_accordions'],
+    $_SESSION['keep_open'],
+    $_SESSION['open_accordion'],
+    $_SESSION['close_all_dishes'],
+    $_SESSION['close_dish_accordion']
+);
 
 require __DIR__ . '/../partials/header.php';
 ?>
+
+<!-- Script pour passer les paramètres au JavaScript -->
+<script>
+    // Variables disponibles pour edit-card.js
+    window.scrollParams = {
+        anchor: '<?= htmlspecialchars($anchor ?? '') ?>',
+        scrollDelay: <?= (int)$scrollDelay ?>,
+        closeAccordion: '<?= htmlspecialchars($closeAccordion) ?>',
+        closeAccordionSecondary: '<?= htmlspecialchars($closeAccordionSecondary) ?>',
+        closeCategoryAccordions: '<?= htmlspecialchars($closeCategoryAccordions) ?>',
+        closeOtherAccordions: '<?= htmlspecialchars($closeOtherAccordions) ?>',
+        keepOpen: '<?= htmlspecialchars($keepOpen) ?>',
+        openAccordion: '<?= htmlspecialchars($openAccordion) ?>',
+        closeAllDishes: '<?= htmlspecialchars($closeAllDishes) ?>',
+        closeDishAccordion: '<?= htmlspecialchars($closeDishAccordion) ?>'
+    };
+</script>
 
 <a class="btn-back" href="?page=dashboard">Retour au dashboard</a>
 
@@ -81,7 +128,7 @@ require __DIR__ . '/../partials/header.php';
                 </button>
             </div>
 
-            <div id="new-category-content" class="accordion-content expanded">
+            <div id="new-category-content" class="accordion-content collapsed">
                 <form method="post" enctype="multipart/form-data" class="new-category-form">
                     <input type="hidden" name="anchor" value="new-category">
 
@@ -136,7 +183,7 @@ require __DIR__ . '/../partials/header.php';
                             </button>
                         </div>
 
-                        <div id="edit-category-<?= $cat['id'] ?>" class="accordion-content expanded">
+                        <div id="edit-category-<?= $cat['id'] ?>" class="accordion-content collapsed">
                             <form method="post" class="edit-category-form" enctype="multipart/form-data">
                                 <input type="hidden" name="category_id" value="<?= $cat['id'] ?>">
                                 <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
@@ -157,7 +204,7 @@ require __DIR__ . '/../partials/header.php';
                                     <button type="submit" name="edit_category" class="btn">Modifier catégorie</button>
 
                                     <?php if (!empty($cat['image'])): ?>
-                                        <button type="submit" name="remove_category_image" value="<?= $cat['id'] ?>"
+                                        <button type="button" name="remove_category_image" value="<?= $cat['id'] ?>"
                                             class="btn danger">
                                             Supprimer l'image
                                         </button>
@@ -165,7 +212,7 @@ require __DIR__ . '/../partials/header.php';
                                 </div>
                             </form>
 
-                            <!-- Formulaire pour supprimer la catégorie -->
+                            <!-- Formulaire pour supprimer la catégorie (DANS L'ACCORDÉON) -->
                             <form method="post" class="inline-form">
                                 <input type="hidden" name="delete_category" value="<?= $cat['id'] ?>">
                                 <input type="hidden" name="anchor" value="categories-grid">
@@ -183,7 +230,7 @@ require __DIR__ . '/../partials/header.php';
                             </button>
                         </div>
 
-                        <div id="add-dish-<?= $cat['id'] ?>" class="accordion-content expanded">
+                        <div id="add-dish-<?= $cat['id'] ?>" class="accordion-content collapsed">
                             <form method="post" class="new-dish-form" enctype="multipart/form-data">
                                 <input type="hidden" name="category_id" value="<?= $cat['id'] ?>">
                                 <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
@@ -220,7 +267,7 @@ require __DIR__ . '/../partials/header.php';
                                 </button>
                             </div>
 
-                            <div id="edit-dishes-<?= $cat['id'] ?>" class="accordion-content expanded">
+                            <div id="edit-dishes-<?= $cat['id'] ?>" class="accordion-content collapsed">
                                 <ul class="dish-list">
                                     <?php foreach ($plats as $plat): ?>
                                         <li class="dish-accordion-item">
@@ -283,7 +330,7 @@ require __DIR__ . '/../partials/header.php';
                                                             <button type="submit" name="edit_dish" class="btn">Modifier le plat</button>
 
                                                             <?php if (!empty($plat['image'])): ?>
-                                                                <button type="submit" name="remove_dish_image" value="<?= $plat['id'] ?>"
+                                                                <button type="button" name="remove_dish_image" value="<?= $plat['id'] ?>"
                                                                     class="dish-remove-image-btn">
                                                                     Supprimer l'image
                                                                 </button>
@@ -294,8 +341,9 @@ require __DIR__ . '/../partials/header.php';
                                                     <!-- Bouton Supprimer le plat -->
                                                     <form method="post" class="inline-form">
                                                         <input type="hidden" name="delete_dish" value="<?= $plat['id'] ?>">
-                                                        <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
-                                                        <button type="submit" class="btn danger">Supprimer le plat</button>
+                                                        <input type="hidden" name="current_category_id" value="<?= $cat['id'] ?>">
+                                                        <input type="hidden" name="anchor" value="delete-dish-btn-<?= $plat['id'] ?>">
+                                                        <button type="submit" class="btn danger" id="delete-dish-btn-<?= $plat['id'] ?>">Supprimer le plat</button>
                                                     </form>
                                                 </div>
                                             </div>
@@ -459,4 +507,3 @@ require __DIR__ . '/../partials/header.php';
 
 <?php
 require __DIR__ . '/../partials/footer.php';
-?>

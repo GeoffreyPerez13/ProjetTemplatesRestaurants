@@ -48,15 +48,21 @@ class Dish
         $params = [$name, $price, $description];
 
         if ($image !== null) {
+            // Si on a une nouvelle image
             $sql .= ", image = ?";
             $params[] = $image;
+        } else {
+            // Si on veut supprimer l'image (image = NULL)
+            $sql .= ", image = NULL";
         }
 
         $sql .= " WHERE id = ?";
         $params[] = $id;
 
         $stmt = $this->pdo->prepare($sql);
-        return $stmt->execute($params);
+        $result = $stmt->execute($params);
+        
+        return $result;
     }
 
     // --- Upload d'image pour plat ---
@@ -102,9 +108,27 @@ class Dish
     // --- Suppression d'image ---
     public function deleteImage($imagePath)
     {
-        if ($imagePath && file_exists(__DIR__ . '/../../public/' . $imagePath)) {
-            unlink(__DIR__ . '/../../public/' . $imagePath);
+        if ($imagePath) {
+            // Plusieurs chemins possibles à tester
+            $pathsToTry = [
+                __DIR__ . '/../../public/' . $imagePath,
+                __DIR__ . '/../../public/' . ltrim($imagePath, '/'),
+                $_SERVER['DOCUMENT_ROOT'] . '/' . ltrim($imagePath, '/'),
+                $_SERVER['DOCUMENT_ROOT'] . $imagePath
+            ];
+            
+            foreach ($pathsToTry as $path) {
+                if (file_exists($path)) {
+                    if (unlink($path)) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
         }
+        
+        return false;
     }
 
     // --- Suppression d'un plat ---
