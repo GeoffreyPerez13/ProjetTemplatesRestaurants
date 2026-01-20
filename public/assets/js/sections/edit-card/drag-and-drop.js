@@ -1,605 +1,414 @@
-// drag-and-drop.js - Gestion du drag & drop pour les images de carte
-(function() {
-    'use strict';
-    
-    // Configuration
-    const CONFIG = {
-        animationDuration: 200,
-        dragHandleClass: 'drag-handle',
-        ghostClass: 'sortable-ghost',
-        chosenClass: 'sortable-chosen',
-        dragClass: 'sortable-drag',
-        scrollSensitivity: 60,
-        scrollSpeed: 20
-    };
-    
-    // Variables d'état
-    let isReorderMode = false;
-    let sortableInstance = null;
-    let imagesGrid = null;
-    let startReorderBtn = null;
-    let saveOrderBtn = null;
-    let cancelOrderBtn = null;
-    let reorderButtons = null;
-    let reorderInstructions = null;
-    let newOrderInput = null;
-    let originalOrder = [];
-    
-    /**
-     * Initialisation principale
-     */
-    function init() {
-        console.log('drag-and-drop.js: Initialisation...');
+    // drag-and-drop.js - Gestion simplifiée du réordonnancement des images
+    (function() {
+        'use strict';
         
-        // Vérifier si nous sommes en mode images
-        if (!isImagesMode()) {
-            console.log('Mode images non actif, arrêt de l\'initialisation');
-            return;
-        }
+        // Variables d'état
+        let isReorderMode = false;
         
-        // Initialiser les éléments DOM
-        initializeElements();
-        
-        // Vérifier que les éléments requis existent
-        if (!validateRequiredElements()) {
-            console.warn('Éléments de réorganisation non trouvés');
-            return;
-        }
-        
-        // Sauvegarder l'ordre original
-        originalOrder = getCurrentOrder();
-        
-        // Configurer les événements
-        setupEventListeners();
-        
-        console.log('Module de drag & drop prêt');
-    }
-    
-    /**
-     * Vérifie si on est en mode images
-     */
-    function isImagesMode() {
-        return document.querySelector('.images-mode-container') !== null;
-    }
-    
-    /**
-     * Initialise les références aux éléments DOM
-     */
-    function initializeElements() {
-        imagesGrid = document.getElementById('sortable-images');
-        startReorderBtn = document.getElementById('start-reorder-btn');
-        saveOrderBtn = document.getElementById('save-order-btn');
-        cancelOrderBtn = document.getElementById('cancel-order-btn');
-        reorderButtons = document.getElementById('reorder-buttons');
-        reorderInstructions = document.getElementById('reorder-instructions');
-        newOrderInput = document.getElementById('new-order-input');
-    }
-    
-    /**
-     * Vérifie que les éléments requis existent
-     */
-    function validateRequiredElements() {
-        return imagesGrid && startReorderBtn;
-    }
-    
-    /**
-     * Configure tous les écouteurs d'événements
-     */
-    function setupEventListeners() {
-        // Événement principal pour démarrer le réordre
-        startReorderBtn.addEventListener('click', enableReorderMode);
-        
-        // Événements pour les boutons de contrôle
-        if (saveOrderBtn) {
-            saveOrderBtn.addEventListener('click', saveNewOrder);
-        }
-        
-        if (cancelOrderBtn) {
-            cancelOrderBtn.addEventListener('click', cancelReorder);
-        }
-        
-        // Événement pour les fenêtres modales de confirmation
-        document.addEventListener('click', handleModalConflicts);
-    }
-    
-    /**
-     * Gère les conflits avec les modales
-     */
-    function handleModalConflicts(e) {
-        // Si une modale est ouverte, désactiver temporairement le drag & drop
-        if (document.querySelector('.modal-open') || 
-            document.querySelector('.swal2-container')) {
-            if (sortableInstance) {
-                sortableInstance.option('disabled', true);
+        /**
+         * Initialisation principale
+         */
+        function init() {
+            console.log('drag-and-drop.js: Initialisation...');
+            
+            // Vérifier si nous sommes en mode images
+            if (!isImagesMode()) {
+                console.log('Mode images non actif, arrêt de l\'initialisation');
+                return;
             }
-        }
-    }
-    
-    /**
-     * Active le mode de réorganisation
-     */
-    function enableReorderMode() {
-        if (isReorderMode) return;
-        
-        isReorderMode = true;
-        
-        // Afficher l'interface de réorganisation
-        showReorderInterface();
-        
-        // Activer le drag & drop
-        enableDragAndDrop();
-        
-        // Mettre à jour les numéros de position
-        updatePositionNumbers();
-        
-        // Afficher un message
-        showFeedback(
-            'Mode réorganisation activé. Glissez-déposez les images pour les réorganiser.',
-            'info'
-        );
-    }
-    
-    /**
-     * Affiche l'interface de réorganisation
-     */
-    function showReorderInterface() {
-        // Cacher le bouton de départ
-        startReorderBtn.style.display = 'none';
-        
-        // Afficher les boutons de contrôle
-        if (reorderButtons) {
-            reorderButtons.style.display = 'flex';
+            
+            // Configurer les événements
+            setupEventListeners();
+            
+            console.log('Module de réorganisation d\'images prêt');
         }
         
-        // Afficher les instructions
-        if (reorderInstructions) {
-            reorderInstructions.style.display = 'block';
+        /**
+         * Vérifie si on est en mode images
+         */
+        function isImagesMode() {
+            return document.querySelector('.images-mode-container') !== null;
         }
         
-        // Ajouter la classe de style
-        imagesGrid.classList.add('reorder-mode');
-        
-        // Ajouter les handles visuels
-        addVisualDragHandles();
-    }
-    
-    /**
-     * Ajoute les handles visuels de drag
-     */
-    function addVisualDragHandles() {
-        const imageCards = imagesGrid.querySelectorAll('.image-card');
-        
-        imageCards.forEach(card => {
-            if (!card.querySelector('.drag-handle')) {
-                const dragHandle = document.createElement('div');
-                dragHandle.className = 'drag-handle';
-                dragHandle.innerHTML = '<i class="fas fa-grip-vertical"></i>';
-                dragHandle.title = 'Glisser pour réorganiser';
-                card.appendChild(dragHandle);
+        /**
+         * Configure tous les écouteurs d'événements
+         */
+        function setupEventListeners() {
+            const startReorderBtn = document.getElementById('start-reorder-btn');
+            const saveOrderBtn = document.getElementById('save-order-btn');
+            const cancelOrderBtn = document.getElementById('cancel-order-btn');
+            
+            if (startReorderBtn) {
+                startReorderBtn.addEventListener('click', enableReorderMode);
             }
-        });
-    }
-    
-    /**
-     * Active le drag & drop avec Sortable.js
-     */
-    function enableDragAndDrop() {
-        // Vérifier que Sortable.js est disponible
-        if (typeof Sortable === 'undefined') {
-            console.error('Sortable.js n\'est pas chargé');
-            showFeedback('Erreur: Bibliothèque de drag & drop non chargée', 'error');
-            return;
+            
+            if (saveOrderBtn) {
+                saveOrderBtn.addEventListener('click', saveNewOrder);
+            }
+            
+            if (cancelOrderBtn) {
+                cancelOrderBtn.addEventListener('click', cancelReorder);
+            }
+            
+            // Gérer les boutons de déplacement
+            document.addEventListener('click', function(e) {
+                // Bouton "Monter"
+                if (e.target.closest('.move-up')) {
+                    e.preventDefault();
+                    const button = e.target.closest('.move-up');
+                    const imageCard = button.closest('.image-card');
+                    if (imageCard) {
+                        moveImageUp(imageCard);
+                    }
+                }
+                
+                // Bouton "Descendre"
+                if (e.target.closest('.move-down')) {
+                    e.preventDefault();
+                    const button = e.target.closest('.move-down');
+                    const imageCard = button.closest('.image-card');
+                    if (imageCard) {
+                        moveImageDown(imageCard);
+                    }
+                }
+            });
         }
         
-        // Détruire l'instance précédente si elle existe
-        if (sortableInstance) {
-            sortableInstance.destroy();
+        /**
+         * Active le mode de réorganisation
+         */
+        function enableReorderMode() {
+            if (isReorderMode) return;
+            
+            isReorderMode = true;
+            
+            // Afficher l'interface de réorganisation
+            showReorderInterface();
+            
+            // Mettre à jour les numéros de position
+            updatePositionNumbers();
+            
+            showFeedback('Mode réorganisation activé. Utilisez les boutons "Monter" et "Descendre" pour réorganiser.', 'info');
         }
         
-        // Créer une nouvelle instance
-        sortableInstance = Sortable.create(imagesGrid, {
-            animation: CONFIG.animationDuration,
-            ghostClass: CONFIG.ghostClass,
-            chosenClass: CONFIG.chosenClass,
-            dragClass: CONFIG.dragClass,
-            handle: '.drag-handle',
-            draggable: '.image-card',
-            scroll: true,
-            scrollSensitivity: CONFIG.scrollSensitivity,
-            scrollSpeed: CONFIG.scrollSpeed,
+        /**
+         * Affiche l'interface de réorganisation
+         */
+        function showReorderInterface() {
+            const startReorderBtn = document.getElementById('start-reorder-btn');
+            const reorderButtons = document.getElementById('reorder-buttons');
+            const reorderInstructions = document.getElementById('reorder-instructions');
+            const imagesGrid = document.getElementById('sortable-images');
             
-            // Exclusion des éléments interactifs
-            filter: '.image-actions, .btn, button, a, .lightbox-trigger',
-            preventOnFilter: true,
+            if (startReorderBtn) {
+                startReorderBtn.style.display = 'none';
+            }
             
-            // Support mobile
-            delay: 100,
-            delayOnTouchOnly: true,
-            touchStartThreshold: 5,
+            if (reorderButtons) {
+                reorderButtons.style.display = 'flex';
+            }
             
-            // Événements
-            onStart: function(evt) {
-                imagesGrid.classList.add('dragging');
-                evt.item.style.cursor = 'grabbing';
-                const imageName = getImageName(evt.item);
-                showFeedback(`Déplacement de "${imageName}"`, 'info');
-            },
+            if (reorderInstructions) {
+                reorderInstructions.style.display = 'block';
+            }
             
-            onEnd: function(evt) {
-                imagesGrid.classList.remove('dragging');
-                evt.item.style.cursor = '';
+            if (imagesGrid) {
+                imagesGrid.classList.add('reorder-mode');
+            }
+            
+            // Afficher les contrôles de réorganisation
+            document.querySelectorAll('.reorder-controls').forEach(controls => {
+                controls.style.display = 'block';
+            });
+            
+            // Mettre à jour l'état des boutons
+            updateMoveButtonsState();
+        }
+        
+        /**
+         * Met à jour les numéros de position
+         */
+        function updatePositionNumbers() {
+            const imageCards = document.querySelectorAll('.image-card');
+            
+            imageCards.forEach((card, index) => {
+                const positionSpan = card.querySelector('.position-number');
+                if (positionSpan) {
+                    positionSpan.textContent = index + 1;
+                }
+            });
+            
+            // Mettre à jour l'état des boutons après changement de position
+            updateMoveButtonsState();
+        }
+        
+        /**
+         * Met à jour l'état des boutons Monter/Descendre
+         */
+        function updateMoveButtonsState() {
+            const imageCards = document.querySelectorAll('.image-card');
+            const totalImages = imageCards.length;
+            
+            imageCards.forEach((card, index) => {
+                const moveUpBtn = card.querySelector('.move-up');
+                const moveDownBtn = card.querySelector('.move-down');
+                
+                if (moveUpBtn) {
+                    moveUpBtn.disabled = index === 0;
+                }
+                
+                if (moveDownBtn) {
+                    moveDownBtn.disabled = index === totalImages - 1;
+                }
+            });
+        }
+        
+        /**
+         * Monte une image
+         */
+        function moveImageUp(imageCard) {
+            const previousSibling = imageCard.previousElementSibling;
+            if (previousSibling && previousSibling.classList.contains('image-card')) {
+                const imagesGrid = imageCard.parentElement;
+                imagesGrid.insertBefore(imageCard, previousSibling);
+                
+                // Mettre à jour les numéros
                 updatePositionNumbers();
                 updateOrderInput();
                 
-                const imageName = getImageName(evt.item);
-                const position = getItemPosition(evt.item) + 1;
+                // Feedback
+                const imageName = imageCard.querySelector('.image-name')?.textContent || 'Image';
+                const position = Array.from(imagesGrid.children).indexOf(imageCard) + 1;
                 showFeedback(`"${imageName}" déplacé à la position ${position}`, 'success');
-            },
-            
-            onSort: function(evt) {
-                // Déclencher un événement personnalisé
-                const event = new CustomEvent('imagesReordered', {
-                    detail: {
-                        order: getCurrentOrder(),
-                        oldIndex: evt.oldIndex,
-                        newIndex: evt.newIndex
-                    }
-                });
-                document.dispatchEvent(event);
             }
-        });
-    }
-    
-    /**
-     * Récupère le nom d'une image
-     */
-    function getImageName(card) {
-        const nameElement = card.querySelector('.image-name');
-        return nameElement ? nameElement.textContent.trim() : 'Image';
-    }
-    
-    /**
-     * Récupère la position d'un élément
-     */
-    function getItemPosition(item) {
-        const items = imagesGrid.querySelectorAll('.image-card');
-        return Array.from(items).indexOf(item);
-    }
-    
-    /**
-     * Récupère l'ordre actuel
-     */
-    function getCurrentOrder() {
-        const imageCards = imagesGrid.querySelectorAll('.image-card');
-        return Array.from(imageCards).map(card => 
-            card.getAttribute('data-image-id')
-        ).filter(id => id); // Filtrer les valeurs nulles
-    }
-    
-    /**
-     * Met à jour les numéros de position
-     */
-    function updatePositionNumbers() {
-        const imageCards = imagesGrid.querySelectorAll('.image-card');
+        }
         
-        imageCards.forEach((card, index) => {
-            let positionSpan = card.querySelector('.position-number');
-            
-            if (!positionSpan) {
-                positionSpan = document.createElement('span');
-                positionSpan.className = 'position-number';
-                const header = card.querySelector('.image-card-header');
-                if (header) {
-                    header.appendChild(positionSpan);
+        /**
+         * Descend une image
+         */
+        function moveImageDown(imageCard) {
+            const nextSibling = imageCard.nextElementSibling;
+            if (nextSibling && nextSibling.classList.contains('image-card')) {
+                const imagesGrid = imageCard.parentElement;
+                const nextNextSibling = nextSibling.nextElementSibling;
+                
+                if (nextNextSibling) {
+                    imagesGrid.insertBefore(imageCard, nextNextSibling);
+                } else {
+                    imagesGrid.appendChild(imageCard);
                 }
+                
+                // Mettre à jour les numéros
+                updatePositionNumbers();
+                updateOrderInput();
+                
+                // Feedback
+                const imageName = imageCard.querySelector('.image-name')?.textContent || 'Image';
+                const position = Array.from(imagesGrid.children).indexOf(imageCard) + 1;
+                showFeedback(`"${imageName}" déplacé à la position ${position}`, 'success');
             }
-            
-            positionSpan.textContent = index + 1;
-            positionSpan.title = `Position ${index + 1} sur ${imageCards.length}`;
-        });
-    }
-    
-    /**
-     * Met à jour l'input hidden avec le nouvel ordre
-     */
-    function updateOrderInput() {
-        const newOrder = getCurrentOrder();
+        }
         
-        if (newOrderInput) {
+        /**
+         * Met à jour l'input hidden avec le nouvel ordre
+         */
+        function updateOrderInput() {
+            const newOrderInput = document.getElementById('new-order-input');
+            if (!newOrderInput) return;
+            
+            const imageCards = document.querySelectorAll('.image-card');
+            const newOrder = Array.from(imageCards).map(card => 
+                card.getAttribute('data-image-id')
+            ).filter(id => id);
+            
             newOrderInput.value = JSON.stringify(newOrder);
         }
         
-        // Mettre à jour le formulaire de réorganisation alphabétique
-        const reorderForm = document.getElementById('reorder-images-form');
-        if (reorderForm && reorderForm.querySelector('input[name="new_order"]')) {
-            reorderForm.querySelector('input[name="new_order"]').value = JSON.stringify(newOrder);
-        }
-    }
-    
-    /**
-     * Désactive le mode de réorganisation
-     */
-    function disableReorderMode() {
-        if (!isReorderMode) return;
-        
-        isReorderMode = false;
-        
-        // Cacher l'interface de réorganisation
-        hideReorderInterface();
-        
-        // Désactiver le drag & drop
-        disableDragAndDrop();
-        
-        // Restaurer l'ordre original
-        restoreOriginalOrder();
-        
-        showFeedback('Réorganisation annulée', 'warning');
-    }
-    
-    /**
-     * Cache l'interface de réorganisation
-     */
-    function hideReorderInterface() {
-        // Afficher le bouton de départ
-        startReorderBtn.style.display = 'inline-block';
-        
-        // Cacher les boutons de contrôle
-        if (reorderButtons) {
-            reorderButtons.style.display = 'none';
+        /**
+         * Désactive le mode de réorganisation
+         */
+        function disableReorderMode() {
+            if (!isReorderMode) return;
+            
+            isReorderMode = false;
+            
+            // Cacher l'interface de réorganisation
+            hideReorderInterface();
+            
+            showFeedback('Réorganisation annulée', 'warning');
         }
         
-        // Cacher les instructions
-        if (reorderInstructions) {
-            reorderInstructions.style.display = 'none';
-        }
-        
-        // Retirer les classes de style
-        imagesGrid.classList.remove('reorder-mode');
-        imagesGrid.classList.remove('dragging');
-        
-        // Retirer les handles
-        const dragHandles = imagesGrid.querySelectorAll('.drag-handle');
-        dragHandles.forEach(handle => handle.remove());
-    }
-    
-    /**
-     * Désactive le drag & drop
-     */
-    function disableDragAndDrop() {
-        if (sortableInstance) {
-            sortableInstance.destroy();
-            sortableInstance = null;
-        }
-    }
-    
-    /**
-     * Restaure l'ordre original
-     */
-    function restoreOriginalOrder() {
-        const fragment = document.createDocumentFragment();
-        
-        originalOrder.forEach(id => {
-            const card = imagesGrid.querySelector(`[data-image-id="${id}"]`);
-            if (card) {
-                fragment.appendChild(card);
+        /**
+         * Cache l'interface de réorganisation
+         */
+        function hideReorderInterface() {
+            const startReorderBtn = document.getElementById('start-reorder-btn');
+            const reorderButtons = document.getElementById('reorder-buttons');
+            const reorderInstructions = document.getElementById('reorder-instructions');
+            const imagesGrid = document.getElementById('sortable-images');
+            
+            if (startReorderBtn) {
+                startReorderBtn.style.display = 'inline-block';
             }
-        });
-        
-        // Vider et reconstruire la grille
-        while (imagesGrid.firstChild) {
-            imagesGrid.removeChild(imagesGrid.firstChild);
-        }
-        imagesGrid.appendChild(fragment);
-        
-        updatePositionNumbers();
-    }
-    
-    /**
-     * Annule la réorganisation
-     */
-    function cancelReorder() {
-        if (typeof Swal === 'undefined') {
-            if (confirm('Annuler la réorganisation ? Les modifications non enregistrées seront perdues.')) {
-                disableReorderMode();
+            
+            if (reorderButtons) {
+                reorderButtons.style.display = 'none';
             }
-            return;
+            
+            if (reorderInstructions) {
+                reorderInstructions.style.display = 'none';
+            }
+            
+            if (imagesGrid) {
+                imagesGrid.classList.remove('reorder-mode');
+            }
+            
+            // Cacher les contrôles de réorganisation
+            document.querySelectorAll('.reorder-controls').forEach(controls => {
+                controls.style.display = 'none';
+            });
         }
         
-        Swal.fire({
-            title: 'Annuler la réorganisation ?',
-            html: 'Les modifications non enregistrées seront perdues.<br><br>' +
-                  '<small class="text-muted">L\'ordre original sera restauré.</small>',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Oui, annuler',
-            cancelButtonText: 'Continuer',
-            backdrop: true,
-            allowOutsideClick: false
-        }).then(result => {
-            if (result.isConfirmed) {
-                disableReorderMode();
-            }
-        });
-    }
-    
-    /**
-     * Sauvegarde le nouvel ordre
-     */
-    function saveNewOrder() {
-        const newOrder = getCurrentOrder();
-        
-        // Vérifier si l'ordre a changé
-        const hasChanged = JSON.stringify(newOrder) !== JSON.stringify(originalOrder);
-        
-        if (!hasChanged) {
+        /**
+         * Annule la réorganisation
+         */
+        function cancelReorder() {
             if (typeof Swal === 'undefined') {
-                alert('L\'ordre des images n\'a pas été modifié.');
+                if (confirm('Annuler la réorganisation ? Les modifications non enregistrées seront perdues.')) {
+                    disableReorderMode();
+                }
                 return;
             }
             
             Swal.fire({
-                title: 'Aucun changement',
-                text: 'L\'ordre des images n\'a pas été modifié.',
-                icon: 'info',
-                confirmButtonText: 'OK'
-            });
-            return;
-        }
-        
-        // Demander confirmation
-        if (typeof Swal === 'undefined') {
-            if (confirm('Voulez-vous enregistrer le nouvel ordre des images ?')) {
-                submitOrderForm();
-            }
-            return;
-        }
-        
-        Swal.fire({
-            title: 'Confirmer la réorganisation',
-            html: 'Voulez-vous enregistrer le nouvel ordre des images ?<br><br>' +
-                  '<small class="text-muted">Les images seront affichées dans cet ordre sur la vitrine.</small>',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: '<i class="fas fa-save"></i> Enregistrer',
-            cancelButtonText: 'Annuler',
-            backdrop: true,
-            allowOutsideClick: false
-        }).then(result => {
-            if (result.isConfirmed) {
-                submitOrderForm();
-            }
-        });
-    }
-    
-    /**
-     * Soumet le formulaire avec le nouvel ordre
-     */
-    function submitOrderForm() {
-        // Afficher un loader
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                title: 'Enregistrement en cours...',
-                text: 'Veuillez patienter',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
+                title: 'Annuler la réorganisation ?',
+                text: 'Les modifications non enregistrées seront perdues.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Oui, annuler',
+                cancelButtonText: 'Continuer',
+                backdrop: true,
+                allowOutsideClick: false
+            }).then(result => {
+                if (result.isConfirmed) {
+                    disableReorderMode();
                 }
             });
         }
         
-        // Mettre à jour l'input
-        updateOrderInput();
+        /**
+         * Sauvegarde le nouvel ordre
+         */
+        function saveNewOrder() {
+            const newOrderInput = document.getElementById('new-order-input');
+            if (!newOrderInput || !newOrderInput.value) {
+                showFeedback('Aucun changement détecté', 'warning');
+                return;
+            }
+            
+            // Demander confirmation
+            if (typeof Swal === 'undefined') {
+                if (confirm('Voulez-vous enregistrer le nouvel ordre des images ?')) {
+                    submitOrderForm();
+                }
+                return;
+            }
+            
+            Swal.fire({
+                title: 'Confirmer la réorganisation',
+                text: 'Voulez-vous enregistrer le nouvel ordre des images ?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Enregistrer',
+                cancelButtonText: 'Annuler',
+                backdrop: true,
+                allowOutsideClick: false
+            }).then(result => {
+                if (result.isConfirmed) {
+                    submitOrderForm();
+                }
+            });
+        }
         
-        // Trouver et soumettre le formulaire
-        const form = document.getElementById('reorder-form');
-        if (form) {
-            // Ajouter un champ anchor pour le scroll
-            const anchorInput = document.createElement('input');
-            anchorInput.type = 'hidden';
-            anchorInput.name = 'anchor';
-            anchorInput.value = 'images-list';
-            form.appendChild(anchorInput);
+        /**
+         * Soumet le formulaire avec le nouvel ordre
+         */
+        function submitOrderForm() {
+            const form = document.getElementById('reorder-form');
+            if (!form) {
+                console.error('Formulaire de réorganisation non trouvé');
+                showFeedback('Erreur: Formulaire non trouvé', 'error');
+                return;
+            }
+            
+            // Afficher un loader
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Enregistrement en cours...',
+                    text: 'Veuillez patienter',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            }
             
             // Soumettre après un court délai
             setTimeout(() => {
                 form.submit();
             }, 500);
-        } else {
-            console.error('Formulaire de réorganisation non trouvé');
+        }
+        
+        /**
+         * Affiche un feedback à l'utilisateur
+         */
+        function showFeedback(message, type = 'info') {
+            // Créer ou récupérer l'élément de feedback
+            let feedbackEl = document.getElementById('reorder-feedback');
             
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    title: 'Erreur',
-                    text: 'Impossible de trouver le formulaire de réorganisation',
-                    icon: 'error'
-                });
+            if (!feedbackEl) {
+                feedbackEl = document.createElement('div');
+                feedbackEl.id = 'reorder-feedback';
+                feedbackEl.className = 'reorder-feedback';
+                
+                // Ajouter après le bouton de démarrage
+                const startReorderBtn = document.getElementById('start-reorder-btn');
+                const reorderActions = startReorderBtn?.parentElement;
+                if (reorderActions) {
+                    reorderActions.insertBefore(feedbackEl, startReorderBtn.nextSibling);
+                }
             }
-        }
-    }
-    
-    /**
-     * Affiche un feedback à l'utilisateur
-     */
-    function showFeedback(message, type = 'info') {
-        // Créer ou récupérer l'élément de feedback
-        let feedbackEl = document.getElementById('reorder-feedback');
-        
-        if (!feedbackEl) {
-            feedbackEl = document.createElement('div');
-            feedbackEl.id = 'reorder-feedback';
-            feedbackEl.className = 'reorder-feedback';
             
-            // Ajouter au début du conteneur d'images
-            const container = imagesGrid.parentElement;
-            if (container) {
-                container.insertBefore(feedbackEl, container.firstChild);
-            }
+            // Mettre à jour le contenu et le style
+            feedbackEl.textContent = message;
+            feedbackEl.className = `reorder-feedback ${type}`;
+            feedbackEl.style.display = 'block';
+            
+            // Masquer après 3 secondes
+            setTimeout(() => {
+                feedbackEl.style.display = 'none';
+            }, 3000);
         }
         
-        // Mettre à jour le contenu et le style
-        feedbackEl.textContent = message;
-        feedbackEl.className = `reorder-feedback ${type}`;
-        feedbackEl.style.display = 'block';
+        /**
+         * API publique
+         */
+        window.ImageReorder = {
+            init: init,
+            enable: enableReorderMode,
+            disable: disableReorderMode,
+            save: saveNewOrder,
+            cancel: cancelReorder,
+            isReorderMode: () => isReorderMode
+        };
         
-        // Masquer après 3 secondes
-        setTimeout(() => {
-            feedbackEl.style.display = 'none';
-        }, 3000);
-    }
-    
-    /**
-     * Réinitialise le module (après AJAX ou rafraîchissement)
-     */
-    function refresh() {
-        // Réinitialiser les références
-        initializeElements();
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(init, 100);
+        });
         
-        // Sauvegarder le nouvel ordre original
-        originalOrder = getCurrentOrder();
-        
-        // Réinitialiser l'état
-        isReorderMode = false;
-        
-        // Réappliquer les styles si nécessaire
-        if (imagesGrid && imagesGrid.classList.contains('reorder-mode')) {
-            imagesGrid.classList.remove('reorder-mode');
-        }
-        
-        // Réinitialiser les boutons
-        if (startReorderBtn) {
-            startReorderBtn.style.display = 'inline-block';
-        }
-        
-        if (reorderButtons) {
-            reorderButtons.style.display = 'none';
-        }
-        
-        console.log('Module de drag & drop rafraîchi');
-    }
-    
-    /**
-     * API publique
-     */
-    window.ImageReorder = {
-        init: init,
-        enable: enableReorderMode,
-        disable: disableReorderMode,
-        save: saveNewOrder,
-        cancel: cancelReorder,
-        refresh: refresh,
-        getCurrentOrder: getCurrentOrder,
-        getOriginalOrder: () => originalOrder,
-        isReorderMode: () => isReorderMode
-    };
-    
-    // Initialisation
-    document.addEventListener('DOMContentLoaded', function() {
-        // Petit délai pour s'assurer que tout est chargé
-        setTimeout(init, 100);
-    });
-    
-})();
+    })();

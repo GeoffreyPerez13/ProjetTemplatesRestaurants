@@ -213,6 +213,7 @@ class CardImage
             throw new Exception("Erreur lors du téléchargement du fichier");
         }
 
+        // Retourner le chemin relatif (sans le point de départ)
         return $targetPath;
     }
 

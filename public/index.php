@@ -3,11 +3,14 @@ ini_set('SMTP', 'localhost');   // Pour l'envoi de mails en dev
 ini_set('smtp_port', 1025);     // Port du serveur SMTP local (ex : MailHog)
 define('DEV_SHOW_LINK', true);   // Constante dev pour afficher les liens directs
 
-require_once __DIR__ . '/../config.php';  // Chargement config PDO, constantes...
+require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../app/Controllers/AdminController.php';
 require_once __DIR__ . '/../app/Controllers/CardController.php';
 require_once __DIR__ . '/../app/Controllers/ContactController.php';
 require_once __DIR__ . '/../app/Controllers/LogoController.php';
+require_once __DIR__ . '/../app/Helpers/FormHelper.php';
+require_once __DIR__ . '/../app/Helpers/Validator.php';
+require_once __DIR__ . '/../app/Helpers/old.php';
 
 // Si l'admin est déjà connecté, redirection automatique vers le dashboard
 if (isset($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true && !isset($_GET['page'])) {

@@ -15,8 +15,7 @@
 
 .category-block strong {
   display: block;
-  font-size: 1.1em;
-  margin-bottom: 10px;
+  font-size: 1.5em;
 }
 
 .edit-card-container {
@@ -42,6 +41,7 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    margin-top: 15px;
   }
 
   .edit-card-container {

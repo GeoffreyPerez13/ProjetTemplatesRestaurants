@@ -6,8 +6,6 @@
    * Initialisation principale
    */
   function init() {
-    console.log("Accordions: Initialisation...");
-
     // Fermer tous les accordéons sauf le premier au démarrage
     closeAllExceptFirst();
 
@@ -22,8 +20,6 @@
 
     // Contrôles généraux (tout ouvrir/tout fermer)
     setupGlobalControls();
-
-    console.log("Accordions: Initialisation terminée");
   }
 
   /**
@@ -173,8 +169,6 @@
    * Ouvre tous les accordéons
    */
   function expandAllAccordions() {
-    console.log("Ouvrir tous les accordéons");
-
     // Ouvrir tous les accordéons principaux
     document
       .querySelectorAll(".accordion-content.collapsed")
@@ -194,8 +188,6 @@
    * Ferme tous les accordéons
    */
   function collapseAllAccordions() {
-    console.log("Fermer tous les accordéons");
-
     // Fermer tous les accordéons principaux (INCLUS le mode-selector)
     document
       .querySelectorAll(".accordion-content.expanded")

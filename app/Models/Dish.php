@@ -61,7 +61,7 @@ class Dish
 
         $stmt = $this->pdo->prepare($sql);
         $result = $stmt->execute($params);
-        
+
         return $result;
     }
 
@@ -74,9 +74,17 @@ class Dish
 
         // Validation du type de fichier
         $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+        // Méthode sans finfo_close() dépréciée
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $file['tmp_name']);
-        finfo_close($finfo);
+        try {
+            $mimeType = finfo_file($finfo, $file['tmp_name']);
+        } finally {
+            // Assure la fermeture même en cas d'exception
+            if (is_resource($finfo)) {
+                finfo_close($finfo);
+            }
+        }
 
         if (!in_array($mimeType, $allowedTypes)) {
             throw new Exception('Type de fichier non autorisé. Formats acceptés: JPEG, PNG, GIF, WebP');
@@ -116,7 +124,7 @@ class Dish
                 $_SERVER['DOCUMENT_ROOT'] . '/' . ltrim($imagePath, '/'),
                 $_SERVER['DOCUMENT_ROOT'] . $imagePath
             ];
-            
+
             foreach ($pathsToTry as $path) {
                 if (file_exists($path)) {
                     if (unlink($path)) {
@@ -127,7 +135,7 @@ class Dish
                 }
             }
         }
-        
+
         return false;
     }
 

@@ -3,7 +3,7 @@
 
   // Configuration
   const CONFIG = {
-    scrollDelay: 500,
+    scrollDelay: 3500, // 3,5 secondes par défaut (comme dans PHP)
     animationDuration: 300,
   };
 
@@ -19,10 +19,16 @@
       return;
     }
 
-    // ==================== SCROLL VERS L'ANCRE ====================
-    const anchor = getUrlParameter("anchor");
+    // ==================== RÉCUPÉRATION DES PARAMÈTRES ====================
+    const scrollParams = window.scrollParams || {};
+
+    // Récupérer l'ancre depuis les paramètres ou l'URL
+    const anchor = scrollParams.anchor || getUrlParameter("anchor");
     if (anchor) {
-      handleAnchorScroll(anchor, CONFIG.scrollDelay);
+      handleAnchorScroll(
+        anchor,
+        scrollParams.scrollDelay || CONFIG.scrollDelay,
+      );
     }
 
     // ==================== GESTION DES MESSAGES ====================
@@ -32,7 +38,7 @@
     setupDeleteConfirmations();
 
     // ==================== GESTION DES ACCORDÉONS APRÈS ACTIONS ====================
-    handleAccordionActions();
+    handleAccordionActions(scrollParams);
 
     // ==================== CONFIGURATION SPÉCIFIQUE AU MODE ====================
     const isImagesMode =
@@ -41,6 +47,13 @@
     if (isImagesMode) {
       // ==================== CONFIRMATION DE SUPPRESSION D'IMAGES ====================
       setupImageDeleteConfirmations();
+
+      // ==================== INITIALISATION DU DRAG & DROP ====================
+      setTimeout(() => {
+        if (window.ImageReorder) {
+          window.ImageReorder.init();
+        }
+      }, 200);
     } else {
       // ==================== VALIDATION DES PRIX ====================
       setupPriceValidation();
@@ -104,85 +117,54 @@
   /**
    * Gère les actions sur les accordéons après soumission
    */
-  function handleAccordionActions() {
-    // Fermer l'accordéon spécifié
-    const closeAccordionId =
-      getUrlParameter("close_accordion") || window.scrollParams?.closeAccordion;
-    if (closeAccordionId) {
+  function handleAccordionActions(scrollParams) {
+    // Fermer l'accordéon principal
+    if (scrollParams.closeAccordion) {
       setTimeout(() => {
         if (window.AccordionManager) {
-          window.AccordionManager.closeAccordion(closeAccordionId);
+          window.AccordionManager.closeAccordion(scrollParams.closeAccordion);
         } else {
-          closeAccordion(closeAccordionId);
+          closeAccordion(scrollParams.closeAccordion);
         }
       }, 500);
     }
 
-    // Ouvrir l'accordéon spécifié
-    const openAccordionId =
-      getUrlParameter("open_accordion") || window.scrollParams?.openAccordion;
-    if (openAccordionId) {
+    // Fermer l'accordéon secondaire
+    if (scrollParams.closeAccordionSecondary) {
       setTimeout(() => {
         if (window.AccordionManager) {
-          window.AccordionManager.openAccordion(openAccordionId);
+          window.AccordionManager.closeAccordion(
+            scrollParams.closeAccordionSecondary,
+          );
         } else {
-          openAccordion(openAccordionId);
+          closeAccordion(scrollParams.closeAccordionSecondary);
         }
       }, 600);
     }
 
-    // Fermer tous les plats d'une catégorie
-    const closeAllDishesId =
-      getUrlParameter("close_all_dishes") ||
-      window.scrollParams?.closeAllDishes;
-    if (closeAllDishesId) {
+    // Ouvrir l'accordéon spécifié
+    if (scrollParams.openAccordion) {
       setTimeout(() => {
-        closeAllDishesInCategory(closeAllDishesId);
+        if (window.AccordionManager) {
+          window.AccordionManager.openAccordion(scrollParams.openAccordion);
+        } else {
+          openAccordion(scrollParams.openAccordion);
+        }
       }, 700);
     }
 
     // Fermer l'accordéon spécifique d'un plat
-    const closeDishAccordionId =
-      getUrlParameter("close_dish_accordion") ||
-      window.scrollParams?.closeDishAccordion;
-    if (closeDishAccordionId) {
+    if (scrollParams.closeDishAccordion) {
       setTimeout(() => {
         if (window.AccordionManager) {
-          window.AccordionManager.closeDishAccordion(closeDishAccordionId);
+          window.AccordionManager.closeDishAccordion(
+            scrollParams.closeDishAccordion,
+          );
+        } else {
+          closeDishAccordion(scrollParams.closeDishAccordion);
         }
       }, 800);
     }
-
-    // Fermer l'accordéon secondaire
-    const closeAccordionSecondaryId =
-      getUrlParameter("close_accordion_secondary") ||
-      window.scrollParams?.closeAccordionSecondary;
-    if (closeAccordionSecondaryId) {
-      setTimeout(() => {
-        if (window.AccordionManager) {
-          window.AccordionManager.closeAccordion(closeAccordionSecondaryId);
-        }
-      }, 700);
-    }
-  }
-
-  /**
-   * Ferme tous les plats d'une catégorie
-   */
-  function closeAllDishesInCategory(categoryId) {
-    document
-      .querySelectorAll(
-        `.dish-accordion-content[data-category="${categoryId}"]`,
-      )
-      .forEach((dishSection) => {
-        if (dishSection.classList.contains("expanded")) {
-          if (window.AccordionManager) {
-            window.AccordionManager.closeDishAccordion(dishSection.id);
-          } else {
-            closeDishAccordion(dishSection.id);
-          }
-        }
-      });
   }
 
   /**
@@ -194,7 +176,8 @@
     );
 
     messages.forEach((message) => {
-      // Auto-dismiss après 5 secondes
+      // Auto-dismiss après le délai configuré ou 3,5 secondes par défaut
+      const scrollDelay = window.scrollParams?.scrollDelay || 3500;
       setTimeout(() => {
         message.style.opacity = "0";
         message.style.transition = "opacity 0.5s ease";
@@ -204,7 +187,7 @@
             message.parentNode.removeChild(message);
           }
         }, 500);
-      }, 5000); // 5 secondes
+      }, scrollDelay);
     });
   }
 
@@ -212,131 +195,23 @@
    * Configure les confirmations de suppression pour catégories, plats et images
    */
   function setupDeleteConfirmations() {
-    // ==================== 1. BOUTONS "SUPPRIMER L'IMAGE" DES PLATS ====================
+    // ==================== 1. FORMULAIRES DE SUPPRESSION D'IMAGE DE CATÉGORIE ====================
     document
-      .querySelectorAll('button[name="remove_dish_image"]')
+      .querySelectorAll('form.inline-form button[name="remove_category_image"]')
       .forEach((button) => {
         button.addEventListener("click", function (e) {
           e.preventDefault();
           e.stopPropagation();
 
-          // Trouver le formulaire et les données nécessaires
-          const form = this.closest("form.edit-form");
-          if (!form) {
-            return;
-          }
-
-          // Récupérer les données du plat
-          const dishId = form.querySelector('input[name="dish_id"]')?.value;
-          const categoryId = form.querySelector(
-            'input[name="current_category_id"]',
-          )?.value;
-          const dishName =
-            form.querySelector('input[name="dish_name"]')?.value?.trim() ||
-            "ce plat";
-
-          // Confirmation avec SweetAlert si disponible, sinon confirm() natif
-          if (typeof Swal !== "undefined") {
-            Swal.fire({
-              title: "Confirmer la suppression",
-              text: `Voulez-vous vraiment supprimer l'image du plat "${dishName}" ?`,
-              icon: "warning",
-              showCancelButton: true,
-              confirmButtonColor: "#d33",
-              cancelButtonColor: "#3085d6",
-              confirmButtonText: "Oui, supprimer",
-              cancelButtonText: "Annuler",
-              backdrop: true,
-              allowOutsideClick: false,
-            }).then((result) => {
-              if (result.isConfirmed) {
-                submitRemoveDishImage(dishId, categoryId, button.value);
-              }
-            });
-          } else {
-            if (
-              confirm(
-                `Voulez-vous vraiment supprimer l'image du plat "${dishName}" ?`,
-              )
-            ) {
-              submitRemoveDishImage(dishId, categoryId, button.value);
-            }
-          }
-        });
-
-        // Fonction pour soumettre la suppression d'image de plat
-        function submitRemoveDishImage(dishId, categoryId, buttonValue) {
-          // Créer un formulaire dynamique
-          const dynamicForm = document.createElement('form');
-          dynamicForm.method = 'POST';
-          dynamicForm.action = window.location.pathname + window.location.search;
-          dynamicForm.style.display = 'none';
-          
-          // Ajouter le paramètre page si nécessaire
-          const urlParams = new URLSearchParams(window.location.search);
-          const pageParam = urlParams.get('page');
-          if (pageParam) {
-              const pageInput = document.createElement('input');
-              pageInput.type = 'hidden';
-              pageInput.name = 'page';
-              pageInput.value = pageParam;
-              dynamicForm.appendChild(pageInput);
-          }
-          
-          // Ajouter tous les champs nécessaires
-          const fields = [
-              { name: 'remove_dish_image', value: buttonValue },
-              { name: 'dish_id', value: dishId },
-              { name: 'current_category_id', value: categoryId },
-              { name: 'anchor', value: `category-${categoryId}` }
-          ];
-          
-          fields.forEach(field => {
-              const input = document.createElement('input');
-              input.type = 'hidden';
-              input.name = field.name;
-              input.value = field.value;
-              dynamicForm.appendChild(input);
-          });
-          
-          // Ajouter le formulaire au DOM
-          document.body.appendChild(dynamicForm);
-          
-          // Soumettre le formulaire
-          try {
-              dynamicForm.submit();
-          } catch (error) {
-              // Essayer avec une redirection GET
-              const params = new URLSearchParams();
-              fields.forEach(field => {
-                  params.append(field.name, field.value);
-              });
-              if (pageParam) params.append('page', pageParam);
-              
-              window.location.href = `${window.location.pathname}?${params.toString()}`;
-          }
-        }
-      });
-
-    // ==================== 2. BOUTONS "SUPPRIMER L'IMAGE" DES CATÉGORIES ====================
-    document
-      .querySelectorAll('button[name="remove_category_image"]')
-      .forEach((button) => {
-        button.addEventListener("click", function (e) {
-          e.preventDefault();
-          e.stopPropagation();
-
-          const form = this.closest("form.edit-category-form");
+          const form = this.closest("form");
           if (!form) return;
 
-          const categoryId = form.querySelector(
-            'input[name="category_id"]',
-          )?.value;
+          const categoryBlock = form.closest(".category-block");
           const categoryName =
-            form
-              .querySelector('input[name="edit_category_name"]')
-              ?.value?.trim() || "cette catégorie";
+            categoryBlock?.querySelector("strong")?.textContent?.trim() ||
+            "cette catégorie";
 
+          // Confirmation avec SweetAlert si disponible, sinon confirm() natif
           if (typeof Swal !== "undefined") {
             Swal.fire({
               title: "Confirmer la suppression",
@@ -351,7 +226,8 @@
               allowOutsideClick: false,
             }).then((result) => {
               if (result.isConfirmed) {
-                submitRemoveCategoryImage(categoryId, button.value);
+                showLoading("Suppression en cours...");
+                setTimeout(() => form.submit(), 100);
               }
             });
           } else {
@@ -360,35 +236,57 @@
                 `Voulez-vous vraiment supprimer l'image de la catégorie "${categoryName}" ?`,
               )
             ) {
-              submitRemoveCategoryImage(categoryId, button.value);
+              form.submit();
             }
           }
         });
+      });
 
-        function submitRemoveCategoryImage(categoryId, buttonValue) {
-          const dynamicForm = document.createElement("form");
-          dynamicForm.method = "POST";
-          dynamicForm.action =
-            window.location.pathname + window.location.search;
-          dynamicForm.style.display = "none";
+    // ==================== 2. FORMULAIRES DE SUPPRESSION D'IMAGE DE PLAT ====================
+    document
+      .querySelectorAll('form.inline-form button[name="remove_dish_image"]')
+      .forEach((button) => {
+        button.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
 
-          const fields = [
-            { name: "remove_category_image", value: buttonValue },
-            { name: "category_id", value: categoryId },
-            { name: "anchor", value: `category-${categoryId}` },
-          ];
+          const form = this.closest("form");
+          if (!form) return;
 
-          fields.forEach((field) => {
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.name = field.name;
-            input.value = field.value;
-            dynamicForm.appendChild(input);
-          });
+          const dishContainer = form.closest(".dish-edit-container");
+          const dishName =
+            dishContainer
+              ?.querySelector('input[name="dish_name"]')
+              ?.value?.trim() || "ce plat";
 
-          document.body.appendChild(dynamicForm);
-          dynamicForm.submit();
-        }
+          if (typeof Swal !== "undefined") {
+            Swal.fire({
+              title: "Confirmer la suppression",
+              text: `Voulez-vous vraiment supprimer l'image du plat "${dishName}" ?`,
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#d33",
+              cancelButtonColor: "#3085d6",
+              confirmButtonText: "Oui, supprimer",
+              cancelButtonText: "Annuler",
+              backdrop: true,
+              allowOutsideClick: false,
+            }).then((result) => {
+              if (result.isConfirmed) {
+                showLoading("Suppression en cours...");
+                setTimeout(() => form.submit(), 100);
+              }
+            });
+          } else {
+            if (
+              confirm(
+                `Voulez-vous vraiment supprimer l'image du plat "${dishName}" ?`,
+              )
+            ) {
+              form.submit();
+            }
+          }
+        });
       });
 
     // ==================== 3. FORMULAIRES DE SUPPRESSION DE CATÉGORIES ====================
@@ -881,7 +779,19 @@
    * Ferme tous les plats d'une catégorie
    */
   window.closeAllDishesInCategory = function (categoryId) {
-    closeAllDishesInCategory(categoryId);
+    const categoryBlock = document.querySelector(`#category-${categoryId}`);
+    if (!categoryBlock) return;
+
+    categoryBlock
+      .querySelectorAll(".dish-accordion-content.expanded")
+      .forEach((content) => {
+        const toggleBtn = content.previousElementSibling?.querySelector(
+          ".dish-accordion-toggle",
+        );
+        if (toggleBtn && !content.classList.contains("collapsed")) {
+          toggleBtn.click();
+        }
+      });
   };
 
   /**

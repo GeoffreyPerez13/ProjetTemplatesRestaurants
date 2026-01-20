@@ -11,28 +11,18 @@ if ($currentMode === 'images') {
     $scripts[] = "js/sections/edit-card/drag-and-drop.js";
 }
 
-// Récupérer les paramètres de session pour le scroll
-$scrollDelay = $_SESSION['scroll_delay'] ?? 1000;
+// Récupérer les paramètres de session pour les accordéons
 $closeAccordion = $_SESSION['close_accordion'] ?? '';
 $closeAccordionSecondary = $_SESSION['close_accordion_secondary'] ?? '';
-$closeCategoryAccordions = $_SESSION['close_category_accordions'] ?? '';
-$closeOtherAccordions = $_SESSION['close_other_accordions'] ?? '';
-$keepOpen = $_SESSION['keep_open'] ?? '';
-$openAccordion = $_SESSION['open_accordion'] ?? '';
-$closeAllDishes = $_SESSION['close_all_dishes'] ?? '';
 $closeDishAccordion = $_SESSION['close_dish_accordion'] ?? '';
+$openAccordion = $_SESSION['open_accordion'] ?? '';
 
-// Nettoyer les variables de session après les avoir lues
+// Nettoyer les variables de session après lecture
 unset(
-    $_SESSION['scroll_delay'],
     $_SESSION['close_accordion'],
     $_SESSION['close_accordion_secondary'],
-    $_SESSION['close_category_accordions'],
-    $_SESSION['close_other_accordions'],
-    $_SESSION['keep_open'],
-    $_SESSION['open_accordion'],
-    $_SESSION['close_all_dishes'],
-    $_SESSION['close_dish_accordion']
+    $_SESSION['close_dish_accordion'],
+    $_SESSION['open_accordion']
 );
 
 require __DIR__ . '/../partials/header.php';
@@ -43,15 +33,11 @@ require __DIR__ . '/../partials/header.php';
     // Variables disponibles pour edit-card.js
     window.scrollParams = {
         anchor: '<?= htmlspecialchars($anchor ?? '') ?>',
-        scrollDelay: <?= (int)$scrollDelay ?>,
+        scrollDelay: <?= (int)($scroll_delay ?? 3500) ?>,
         closeAccordion: '<?= htmlspecialchars($closeAccordion) ?>',
         closeAccordionSecondary: '<?= htmlspecialchars($closeAccordionSecondary) ?>',
-        closeCategoryAccordions: '<?= htmlspecialchars($closeCategoryAccordions) ?>',
-        closeOtherAccordions: '<?= htmlspecialchars($closeOtherAccordions) ?>',
-        keepOpen: '<?= htmlspecialchars($keepOpen) ?>',
-        openAccordion: '<?= htmlspecialchars($openAccordion) ?>',
-        closeAllDishes: '<?= htmlspecialchars($closeAllDishes) ?>',
-        closeDishAccordion: '<?= htmlspecialchars($closeDishAccordion) ?>'
+        closeDishAccordion: '<?= htmlspecialchars($closeDishAccordion) ?>',
+        openAccordion: '<?= htmlspecialchars($openAccordion) ?>'
     };
 </script>
 
@@ -67,8 +53,9 @@ require __DIR__ . '/../partials/header.php';
     </button>
 </div>
 
-<?php if (!empty($message)): ?>
-    <p class="message-success"><?= htmlspecialchars($message) ?></p>
+<!-- Affichage des messages -->
+<?php if (!empty($success_message)): ?>
+    <p class="message-success"><?= htmlspecialchars($success_message) ?></p>
 <?php endif; ?>
 
 <?php if (!empty($error_message)): ?>
@@ -132,7 +119,14 @@ require __DIR__ . '/../partials/header.php';
                 <form method="post" enctype="multipart/form-data" class="new-category-form">
                     <input type="hidden" name="anchor" value="new-category">
 
-                    <input type="text" name="new_category" placeholder="Nom de la catégorie" required>
+                    <div class="form-group <?= isset($error_fields['new_category']) ? 'has-error' : '' ?>">
+                        <input type="text" name="new_category" placeholder="Nom de la catégorie" required
+                            value="<?= htmlspecialchars($old_input['new_category'] ?? '') ?>"
+                            class="<?= isset($error_fields['new_category']) ? 'error-field' : '' ?>">
+                        <?php if (isset($error_fields['new_category'])): ?>
+                            <div class="field-error-message">Le nom de la catégorie est requis (max 100 caractères)</div>
+                        <?php endif; ?>
+                    </div>
 
                     <div class="image-upload-container">
                         <label for="category_image">Image de la catégorie (optionnel) :</label>
@@ -188,8 +182,15 @@ require __DIR__ . '/../partials/header.php';
                                 <input type="hidden" name="category_id" value="<?= $cat['id'] ?>">
                                 <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
 
-                                <input type="text" name="edit_category_name" value="<?= htmlspecialchars($cat['name']) ?>"
-                                    placeholder="Nom de la catégorie" required>
+                                <div class="form-group <?= isset($error_fields['edit_category_name']) ? 'has-error' : '' ?>">
+                                    <input type="text" name="edit_category_name"
+                                        value="<?= htmlspecialchars($old_input['edit_category_name'] ?? $cat['name']) ?>"
+                                        placeholder="Nom de la catégorie" required
+                                        class="<?= isset($error_fields['edit_category_name']) ? 'error-field' : '' ?>">
+                                    <?php if (isset($error_fields['edit_category_name'])): ?>
+                                        <div class="field-error-message">Le nom de la catégorie est requis (max 100 caractères)</div>
+                                    <?php endif; ?>
+                                </div>
 
                                 <div class="image-upload-container">
                                     <label for="edit_category_image_<?= $cat['id'] ?>">
@@ -204,15 +205,18 @@ require __DIR__ . '/../partials/header.php';
                                     <button type="submit" name="edit_category" class="btn">Modifier catégorie</button>
 
                                     <?php if (!empty($cat['image'])): ?>
-                                        <button type="button" name="remove_category_image" value="<?= $cat['id'] ?>"
-                                            class="btn danger">
-                                            Supprimer l'image
-                                        </button>
+                                        <form method="post" class="inline-form">
+                                            <input type="hidden" name="remove_category_image" value="<?= $cat['id'] ?>">
+                                            <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
+                                            <button type="submit" class="btn danger">
+                                                Supprimer l'image
+                                            </button>
+                                        </form>
                                     <?php endif; ?>
                                 </div>
                             </form>
 
-                            <!-- Formulaire pour supprimer la catégorie (DANS L'ACCORDÉON) -->
+                            <!-- Formulaire pour supprimer la catégorie -->
                             <form method="post" class="inline-form">
                                 <input type="hidden" name="delete_category" value="<?= $cat['id'] ?>">
                                 <input type="hidden" name="anchor" value="categories-grid">
@@ -236,14 +240,35 @@ require __DIR__ . '/../partials/header.php';
                                 <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
 
                                 <div class="form-row">
-                                    <input type="text" name="dish_name" placeholder="Nom du plat" required>
-                                    <div class="input-euro">
-                                        <input type="number" step="0.01" name="dish_price" placeholder="Prix" required>
-                                        <span class="euro-symbol">€</span>
+                                    <div class="form-group <?= isset($error_fields['dish_name']) ? 'has-error' : '' ?>">
+                                        <input type="text" name="dish_name" placeholder="Nom du plat" required
+                                            value="<?= htmlspecialchars($old_input['dish_name'] ?? '') ?>"
+                                            class="<?= isset($error_fields['dish_name']) ? 'error-field' : '' ?>">
+                                        <?php if (isset($error_fields['dish_name'])): ?>
+                                            <div class="field-error-message">Le nom du plat est requis (max 100 caractères)</div>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <div class="form-group <?= isset($error_fields['dish_price']) ? 'has-error' : '' ?>">
+                                        <div class="input-euro <?= isset($error_fields['dish_price']) ? 'error-input-group' : '' ?>">
+                                            <input type="number" step="0.01" name="dish_price" placeholder="Prix" required
+                                                value="<?= htmlspecialchars($old_input['dish_price'] ?? '') ?>"
+                                                class="<?= isset($error_fields['dish_price']) ? 'error-field' : '' ?>">
+                                            <span class="euro-symbol">€</span>
+                                        </div>
+                                        <?php if (isset($error_fields['dish_price'])): ?>
+                                            <div class="field-error-message">Le prix doit être un nombre entre 0.01 et 999.99</div>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
 
-                                <textarea name="dish_description" placeholder="Description du plat (optionnel)"></textarea>
+                                <div class="form-group <?= isset($error_fields['dish_description']) ? 'has-error' : '' ?>">
+                                    <textarea name="dish_description" placeholder="Description du plat (optionnel)"
+                                        class="<?= isset($error_fields['dish_description']) ? 'error-field' : '' ?>"><?= htmlspecialchars($old_input['dish_description'] ?? '') ?></textarea>
+                                    <?php if (isset($error_fields['dish_description'])): ?>
+                                        <div class="field-error-message">La description ne doit pas dépasser 500 caractères</div>
+                                    <?php endif; ?>
+                                </div>
 
                                 <div class="image-upload-container">
                                     <label for="dish_image_<?= $cat['id'] ?>">Image du plat (optionnel) :</label>
@@ -287,23 +312,42 @@ require __DIR__ . '/../partials/header.php';
                                                     <form method="post" class="inline-form edit-form" enctype="multipart/form-data">
                                                         <input type="hidden" name="dish_id" value="<?= $plat['id'] ?>">
                                                         <input type="hidden" name="current_category_id" value="<?= $cat['id'] ?>">
-                                                        <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
+                                                        <input type="hidden" name="anchor" value="dish-<?= $plat['id'] ?>">
 
                                                         <!-- Nom + Prix -->
                                                         <div class="dish-name-price-row">
-                                                            <input type="text" name="dish_name" value="<?= htmlspecialchars($plat['name']) ?>"
-                                                                placeholder="Nom du plat" required>
+                                                            <div class="form-group <?= isset($error_fields['dish_name_' . $plat['id']]) ? 'has-error' : '' ?>">
+                                                                <input type="text" name="dish_name"
+                                                                    value="<?= htmlspecialchars($old_input['dish_name'] ?? $plat['name']) ?>"
+                                                                    placeholder="Nom du plat" required
+                                                                    class="<?= isset($error_fields['dish_name_' . $plat['id']]) ? 'error-field' : '' ?>">
+                                                                <?php if (isset($error_fields['dish_name_' . $plat['id']])): ?>
+                                                                    <div class="field-error-message">Le nom du plat est requis (max 100 caractères)</div>
+                                                                <?php endif; ?>
+                                                            </div>
 
-                                                            <div class="input-euro">
-                                                                <input type="text" name="dish_price" value="<?= htmlspecialchars($plat['price']) ?>"
-                                                                    placeholder="Prix" required class="price-input">
-                                                                <span class="euro-symbol">€</span>
+                                                            <div class="form-group <?= isset($error_fields['dish_price_' . $plat['id']]) ? 'has-error' : '' ?>">
+                                                                <div class="input-euro <?= isset($error_fields['dish_price_' . $plat['id']]) ? 'error-input-group' : '' ?>">
+                                                                    <input type="text" name="dish_price"
+                                                                        value="<?= htmlspecialchars($old_input['dish_price'] ?? $plat['price']) ?>"
+                                                                        placeholder="Prix" required
+                                                                        class="price-input <?= isset($error_fields['dish_price_' . $plat['id']]) ? 'error-field' : '' ?>">
+                                                                    <span class="euro-symbol">€</span>
+                                                                </div>
+                                                                <?php if (isset($error_fields['dish_price_' . $plat['id']])): ?>
+                                                                    <div class="field-error-message">Le prix doit être un nombre entre 0.01 et 999.99</div>
+                                                                <?php endif; ?>
                                                             </div>
                                                         </div>
 
                                                         <!-- Description -->
-                                                        <textarea name="dish_description" placeholder="Description du plat (optionnel)"
-                                                            class="description-input"><?= htmlspecialchars($plat['description'] ?? '') ?></textarea>
+                                                        <div class="form-group <?= isset($error_fields['dish_description_' . $plat['id']]) ? 'has-error' : '' ?>">
+                                                            <textarea name="dish_description" placeholder="Description du plat (optionnel)"
+                                                                class="description-input <?= isset($error_fields['dish_description_' . $plat['id']]) ? 'error-field' : '' ?>"><?= htmlspecialchars($old_input['dish_description'] ?? ($plat['description'] ?? '')) ?></textarea>
+                                                            <?php if (isset($error_fields['dish_description_' . $plat['id']])): ?>
+                                                                <div class="field-error-message">La description ne doit pas dépasser 500 caractères</div>
+                                                            <?php endif; ?>
+                                                        </div>
 
                                                         <!-- Section Image -->
                                                         <?php if (!empty($plat['image'])): ?>
@@ -330,10 +374,14 @@ require __DIR__ . '/../partials/header.php';
                                                             <button type="submit" name="edit_dish" class="btn">Modifier le plat</button>
 
                                                             <?php if (!empty($plat['image'])): ?>
-                                                                <button type="button" name="remove_dish_image" value="<?= $plat['id'] ?>"
-                                                                    class="dish-remove-image-btn">
-                                                                    Supprimer l'image
-                                                                </button>
+                                                                <form method="post" class="inline-form">
+                                                                    <input type="hidden" name="remove_dish_image" value="<?= $plat['id'] ?>">
+                                                                    <input type="hidden" name="current_category_id" value="<?= $cat['id'] ?>">
+                                                                    <input type="hidden" name="anchor" value="dish-<?= $plat['id'] ?>">
+                                                                    <button type="submit" class="btn danger">
+                                                                        Supprimer l'image
+                                                                    </button>
+                                                                </form>
                                                             <?php endif; ?>
                                                         </div>
                                                     </form>
@@ -342,8 +390,8 @@ require __DIR__ . '/../partials/header.php';
                                                     <form method="post" class="inline-form">
                                                         <input type="hidden" name="delete_dish" value="<?= $plat['id'] ?>">
                                                         <input type="hidden" name="current_category_id" value="<?= $cat['id'] ?>">
-                                                        <input type="hidden" name="anchor" value="delete-dish-btn-<?= $plat['id'] ?>">
-                                                        <button type="submit" class="btn danger" id="delete-dish-btn-<?= $plat['id'] ?>">Supprimer le plat</button>
+                                                        <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
+                                                        <button type="submit" class="btn danger">Supprimer le plat</button>
                                                     </form>
                                                 </div>
                                             </div>
@@ -381,8 +429,7 @@ require __DIR__ . '/../partials/header.php';
                         <i class="fas fa-cloud-upload-alt"></i>
                         <p>Glissez-déposez vos images ici ou cliquez pour sélectionner</p>
                         <input type="file" name="card_images[]" id="card_images"
-                            multiple accept="image/*,.pdf"
-                            style="display: none;">
+                            multiple accept="image/*,.pdf">
                         <button type="button" class="btn" onclick="document.getElementById('card_images').click()">
                             Choisir des fichiers
                         </button>
@@ -406,7 +453,7 @@ require __DIR__ . '/../partials/header.php';
                         <i class="fas fa-upload"></i> Télécharger les images (<span id="uploadCount">0</span>)
                     </button>
 
-                    <button type="button" class="btn danger" id="clearSelection" style="display: none;">
+                    <button type="button" class="btn danger" id="clearSelection">
                         <i class="fas fa-times"></i> Annuler la sélection
                     </button>
                 </form>
@@ -432,6 +479,11 @@ require __DIR__ . '/../partials/header.php';
                             <div class="image-card" data-image-id="<?= $image['id'] ?>">
                                 <input type="hidden" name="image_order[]" value="<?= $image['id'] ?>">
 
+                                <!-- Badge de position en haut à gauche -->
+                                <div class="position-badge">
+                                    <span class="position-number"><?= $index + 1 ?></span>
+                                </div>
+
                                 <div class="image-preview-container">
                                     <?php if (pathinfo($image['filename'], PATHINFO_EXTENSION) === 'pdf'): ?>
                                         <div class="pdf-preview">
@@ -449,7 +501,6 @@ require __DIR__ . '/../partials/header.php';
                                 <div class="image-info">
                                     <p class="image-name"><?= htmlspecialchars($image['original_name']) ?></p>
                                     <p class="image-date">Ajouté le <?= date('d/m/Y', strtotime($image['created_at'])) ?></p>
-                                    <p class="image-position">Position: <span class="position-number"><?= $index + 1 ?></span></p>
                                 </div>
 
                                 <div class="image-actions">
@@ -462,7 +513,7 @@ require __DIR__ . '/../partials/header.php';
                                     </form>
                                 </div>
 
-                                <!-- Contrôles de réorganisation (cachés par défaut) -->
+                                <!-- Contrôles de réorganisation -->
                                 <div class="reorder-controls" style="display: none;">
                                     <button type="button" class="btn small move-up" <?= $index === 0 ? 'disabled' : '' ?>>
                                         <i class="fas fa-arrow-up"></i> Monter
@@ -479,6 +530,7 @@ require __DIR__ . '/../partials/header.php';
                     <form method="post" id="reorder-form" class="reorder-form">
                         <input type="hidden" name="anchor" value="images-list">
                         <input type="hidden" name="new_order" id="new-order-input">
+                        <input type="hidden" name="update_image_order" value="1">
 
                         <div class="reorder-actions">
                             <button type="button" id="start-reorder-btn" class="btn">
@@ -486,7 +538,7 @@ require __DIR__ . '/../partials/header.php';
                             </button>
 
                             <div id="reorder-buttons" style="display: none;">
-                                <button type="button" id="save-order-btn" class="btn success">
+                                <button type="submit" id="save-order-btn" class="btn success">
                                     <i class="fas fa-save"></i> Enregistrer le nouvel ordre
                                 </button>
                                 <button type="button" id="cancel-order-btn" class="btn danger">
