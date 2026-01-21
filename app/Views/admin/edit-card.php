@@ -484,8 +484,13 @@ require __DIR__ . '/../partials/header.php';
                                     <span class="position-number"><?= $index + 1 ?></span>
                                 </div>
 
+                                <!-- Handle visuel pour le drag & drop (optionnel) -->
+                                <div class="drag-handle" title="Cliquez-glissez pour déplacer">
+                                    <i class="fas fa-arrows-alt"></i>
+                                </div>
+
                                 <div class="image-preview-container">
-                                    <?php if (pathinfo($image['filename'], PATHINFO_EXTENSION) === 'pdf'): ?>
+                                    <?php if (strtolower(pathinfo($image['filename'], PATHINFO_EXTENSION)) === 'pdf'): ?>
                                         <div class="pdf-preview">
                                             <i class="fas fa-file-pdf"></i>
                                             <span>PDF</span>
@@ -508,17 +513,22 @@ require __DIR__ . '/../partials/header.php';
                                         <input type="hidden" name="image_id" value="<?= $image['id'] ?>">
                                         <input type="hidden" name="anchor" value="images-list">
                                         <button type="submit" name="delete_image" class="btn danger">
-                                            Supprimer
+                                            <i class="fas fa-trash"></i> Supprimer
                                         </button>
                                     </form>
                                 </div>
 
                                 <!-- Contrôles de réorganisation -->
                                 <div class="reorder-controls" style="display: none;">
-                                    <button type="button" class="btn small move-up" <?= $index === 0 ? 'disabled' : '' ?>>
+                                    <!-- Bouton "Monter" - masqué pour la première image -->
+                                    <button type="button" class="btn small move-up <?= $index === 0 ? 'hidden' : '' ?>"
+                                        data-position="<?= $index + 1 ?>">
                                         <i class="fas fa-arrow-up"></i> Monter
                                     </button>
-                                    <button type="button" class="btn small move-down" <?= $index === count($carteImages) - 1 ? 'disabled' : '' ?>>
+                                    
+                                    <!-- Bouton "Descendre" - masqué pour la dernière image -->
+                                    <button type="button" class="btn small move-down <?= $index === count($carteImages) - 1 ? 'hidden' : '' ?>"
+                                        data-position="<?= $index + 1 ?>">
                                         <i class="fas fa-arrow-down"></i> Descendre
                                     </button>
                                 </div>
@@ -533,7 +543,7 @@ require __DIR__ . '/../partials/header.php';
                         <input type="hidden" name="update_image_order" value="1">
 
                         <div class="reorder-actions">
-                            <button type="button" id="start-reorder-btn" class="btn">
+                            <button type="button" id="start-reorder-btn" class="btn primary">
                                 <i class="fas fa-sort"></i> Réorganiser l'ordre d'affichage
                             </button>
 
@@ -548,7 +558,16 @@ require __DIR__ . '/../partials/header.php';
                         </div>
 
                         <div id="reorder-instructions" class="reorder-instructions" style="display: none;">
-                            <p><i class="fas fa-info-circle"></i> Utilisez les boutons "Monter" et "Descendre" sous chaque image pour réorganiser. Cliquez sur "Enregistrer" pour valider.</p>
+                            <p>
+                                <i class="fas fa-info-circle"></i> 
+                                Cliquez-glissez une image pour la déplacer, OU utilisez les boutons 
+                                <strong>"Monter"</strong> et <strong>"Descendre"</strong> sous chaque image. 
+                                Cliquez sur <strong>"Enregistrer"</strong> pour valider.
+                            </p>
+                            <p class="drag-hint">
+                                <i class="fas fa-hand-pointer"></i>
+                                <small>Astuce : Maintenez le clic sur une image et glissez-la pour changer sa position.</small>
+                            </p>
                         </div>
                     </form>
                 <?php endif; ?>

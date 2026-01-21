@@ -46,15 +46,28 @@ class CardImage
     }
 
     /**
-     * Supprime une image
+     * Supprime une image (méthode améliorée)
      */
     public function delete($id, $adminId)
     {
-        $stmt = $this->pdo->prepare("
+        try {
+            $stmt = $this->pdo->prepare("
             DELETE FROM card_images 
             WHERE id = ? AND admin_id = ?
         ");
-        return $stmt->execute([$id, $adminId]);
+
+            $stmt->execute([$id, $adminId]);
+
+            // Vérifier si une ligne a été affectée
+            $rowCount = $stmt->rowCount();
+
+            error_log("DEBUG CardImage::delete - Rows affected: $rowCount");
+
+            return $rowCount > 0;
+        } catch (Exception $e) {
+            error_log("Erreur suppression image BD: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -62,12 +75,25 @@ class CardImage
      */
     public function getById($id, $adminId)
     {
-        $stmt = $this->pdo->prepare("
+        try {
+            $stmt = $this->pdo->prepare("
             SELECT * FROM card_images 
             WHERE id = ? AND admin_id = ?
         ");
-        $stmt->execute([$id, $adminId]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+            $stmt->execute([$id, $adminId]);
+
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$result) {
+                error_log("Image non trouvée: id=$id, admin=$adminId");
+                return false;
+            }
+
+            return $result;
+        } catch (Exception $e) {
+            error_log("Erreur getById: " . $e->getMessage());
+            return false;
+        }
     }
 
     /**
