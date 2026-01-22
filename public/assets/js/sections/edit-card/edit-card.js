@@ -51,6 +51,8 @@
       // Appeler notre fonction simplifiée
       setupImageDeleteConfirmations();
 
+      setupImageDeletionConfirmations();
+
       // ==================== INITIALISATION DU DRAG & DROP ====================
       setTimeout(() => {
         if (window.ImageReorder) {
@@ -403,6 +405,82 @@
         Swal.showLoading();
       },
     });
+  }
+
+  /**
+   * Configure les confirmations de suppression d'images (mode images)
+   */
+  function setupImageDeletionConfirmations() {
+    console.log("Setting up image deletion confirmations...");
+
+    // Sélectionner tous les boutons de suppression d'image dans le mode images
+    const deleteButtons = document.querySelectorAll(
+      'form.inline-form button[name="delete_image"]',
+    );
+
+    deleteButtons.forEach((button) => {
+      // Supprimer l'ancien gestionnaire si existant
+      button.removeEventListener("click", handleImageDelete);
+
+      // Ajouter le nouveau gestionnaire
+      button.addEventListener("click", handleImageDelete);
+    });
+  }
+
+  /**
+   * Gestionnaire de suppression d'image
+   */
+  function handleImageDelete(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const form = this.closest("form");
+    if (!form) {
+      console.error("No form found for delete button");
+      return;
+    }
+
+    // Récupérer le nom de l'image
+    const imageCard = this.closest(".image-card");
+    const imageName =
+      imageCard.querySelector(".image-name")?.textContent?.trim() ||
+      "cette image";
+
+    // Vérifier si c'est un PDF
+    const isPDF = imageCard.querySelector(".pdf-preview") !== null;
+    const fileType = isPDF ? "PDF" : "image";
+
+    // Confirmation avec SweetAlert
+    if (typeof Swal !== "undefined") {
+      Swal.fire({
+        title: "Confirmer la suppression",
+        html: `Voulez-vous vraiment supprimer l'${fileType} <strong>"${imageName}"</strong> ?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Oui, supprimer",
+        cancelButtonText: "Annuler",
+        backdrop: true,
+        allowOutsideClick: false,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          showLoading("Suppression en cours...");
+
+          // Ajouter un petit délai pour que l'utilisateur voie le loader
+          setTimeout(() => {
+            form.submit();
+          }, 100);
+        }
+      });
+    } else {
+      // Fallback avec confirm() natif
+      if (
+        confirm(`Voulez-vous vraiment supprimer l'${fileType} "${imageName}" ?`)
+      ) {
+        form.submit();
+      }
+    }
   }
 
   /**

@@ -39,6 +39,12 @@ require __DIR__ . '/../partials/header.php';
         closeDishAccordion: '<?= htmlspecialchars($closeDishAccordion) ?>',
         openAccordion: '<?= htmlspecialchars($openAccordion) ?>'
     };
+
+    // FORCER l'ouverture de l'accordéon images si on vient d'une réorganisation
+    <?php if (isset($_POST['update_image_order']) && empty($error_message)): ?>
+        window.scrollParams.openAccordion = 'images-list-content';
+        window.scrollParams.closeAccordion = 'mode-selector-content';
+    <?php endif; ?>
 </script>
 
 <a class="btn-back" href="?page=dashboard">Retour au dashboard</a>
@@ -484,11 +490,6 @@ require __DIR__ . '/../partials/header.php';
                                     <span class="position-number"><?= $index + 1 ?></span>
                                 </div>
 
-                                <!-- Handle visuel pour le drag & drop (optionnel) -->
-                                <div class="drag-handle" title="Cliquez-glissez pour déplacer">
-                                    <i class="fas fa-arrows-alt"></i>
-                                </div>
-
                                 <div class="image-preview-container">
                                     <?php if (strtolower(pathinfo($image['filename'], PATHINFO_EXTENSION)) === 'pdf'): ?>
                                         <div class="pdf-preview">
@@ -525,7 +526,7 @@ require __DIR__ . '/../partials/header.php';
                                         data-position="<?= $index + 1 ?>">
                                         <i class="fas fa-arrow-up"></i> Monter
                                     </button>
-                                    
+
                                     <!-- Bouton "Descendre" - masqué pour la dernière image -->
                                     <button type="button" class="btn small move-down <?= $index === count($carteImages) - 1 ? 'hidden' : '' ?>"
                                         data-position="<?= $index + 1 ?>">
@@ -559,9 +560,9 @@ require __DIR__ . '/../partials/header.php';
 
                         <div id="reorder-instructions" class="reorder-instructions" style="display: none;">
                             <p>
-                                <i class="fas fa-info-circle"></i> 
-                                Cliquez-glissez une image pour la déplacer, OU utilisez les boutons 
-                                <strong>"Monter"</strong> et <strong>"Descendre"</strong> sous chaque image. 
+                                <i class="fas fa-info-circle"></i>
+                                Cliquez-glissez une image pour la déplacer, OU utilisez les boutons
+                                <strong>"Monter"</strong> et <strong>"Descendre"</strong> sous chaque image.
                                 Cliquez sur <strong>"Enregistrer"</strong> pour valider.
                             </p>
                             <p class="drag-hint">
