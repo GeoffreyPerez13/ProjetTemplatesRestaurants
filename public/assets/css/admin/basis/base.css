@@ -57,7 +57,6 @@ h3 {
 /* ==================== RESPONSIVE BASE ==================== */
 @media (min-width: 601px) {
   body {
-    padding: 30px;
     padding-top: 80px;
   }
 
@@ -76,13 +75,6 @@ h3 {
   body {
     padding: 40px;
     padding-top: 90px;
-  }
-
-  .login-container,
-  .dashboard,
-  form,
-  .category-block {
-    padding: 30px;
   }
 }
 

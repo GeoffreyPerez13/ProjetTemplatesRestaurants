@@ -136,6 +136,11 @@
   box-shadow: 0 8px 25px rgba(243, 156, 18, 0.3);
 }
 
+.reorder-feedback.info {
+  background: #3498db;
+  box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+}
+
 @keyframes slideIn {
   from {
     transform: translateX(100%);
@@ -203,7 +208,54 @@
   z-index: 1000 !important;
 }
 
-/* ==================== RESPONSIVE ==================== */
+/* ==================== DRAG SPECIFIC STYLES ==================== */
+.drag-clone-active {
+  transform: rotate(3deg) scale(1.02);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.drag-placeholder {
+  background: rgba(52, 152, 219, 0.1) !important;
+  border: 2px dashed #3498db !important;
+  border-radius: 12px;
+  margin: 10px 0;
+  transition: all 0.3s ease;
+  height: 100px;
+}
+
+.image-card.dragging {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.position-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #3498db;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  z-index: 2;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.image-card {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Responsive pour les contrôles de réorganisation */
 @media (max-width: 768px) {
   .reorder-controls {
     flex-direction: column;
@@ -240,5 +292,9 @@
     font-size: 16px;
     top: 10px;
     left: 10px;
+  }
+  
+  .drag-clone-active {
+    transform: rotate(2deg) scale(0.9);
   }
 }

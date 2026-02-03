@@ -289,7 +289,6 @@
 
 /* Image actions */
 .image-actions {
-  padding: 20px;
   display: flex;
   justify-content: center;
   background: #f8f9fa;
@@ -330,6 +329,7 @@
 
 /* ==================== FILE UPLOAD COMPONENTS ==================== */
 .file-list {
+  display: none;
   margin-top: 20px;
   max-height: 250px;
   overflow-y: auto;
@@ -439,7 +439,7 @@
   top: 8px;
   right: 8px;
   border: none;
-  background: rgba(231, 76, 60, 0.9);
+  background: none;
   color: white;
   width: 24px;
   height: 24px;
@@ -454,7 +454,7 @@
 }
 
 .preview-remove:hover {
-  background: #c0392b;
+  background: none;
   transform: scale(1.1);
 }
 

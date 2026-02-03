@@ -3,7 +3,8 @@ $title = "Modifier la carte";
 $scripts = [
     "js/effects/accordion.js",
     "js/sections/edit-card/edit-card.js",
-    "js/effects/lightbox.js"
+    "js/effects/lightbox.js",
+    "js/effects/scroll-buttons.js"
 ];
 
 if ($currentMode === 'images') {
@@ -48,6 +49,16 @@ require __DIR__ . '/../partials/header.php';
 </script>
 
 <a class="btn-back" href="?page=dashboard">Retour au dashboard</a>
+
+<!-- Boutons de navigation haut/bas (alignés à droite) -->
+<div class="page-navigation-buttons">
+    <button type="button" class="btn-navigation scroll-to-bottom" title="Aller en bas de la page">
+        <i class="fas fa-arrow-down"></i>
+    </button>
+    <button type="button" class="btn-navigation scroll-to-top" title="Aller en haut de la page">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+</div>
 
 <!-- Boutons de contrôle généraux pour tous les accordéons -->
 <div class="global-accordion-controls">
@@ -482,12 +493,18 @@ require __DIR__ . '/../partials/header.php';
                     <!-- Grille d'images avec système de réorganisation -->
                     <div class="images-grid" id="sortable-images">
                         <?php foreach ($carteImages as $index => $image): ?>
-                            <div class="image-card" data-image-id="<?= $image['id'] ?>">
-                                <input type="hidden" name="image_order[]" value="<?= $image['id'] ?>">
+                            <div class="image-card"
+                                data-image-id="<?= $image['id'] ?>"
+                                draggable="false"> <!-- Initialement false -->
 
                                 <!-- Badge de position en haut à gauche -->
                                 <div class="position-badge">
                                     <span class="position-number"><?= $index + 1 ?></span>
+                                </div>
+
+                                <!-- Poignée de drag (optionnelle mais recommandée) -->
+                                <div class="drag-handle" title="Glisser pour réorganiser" style="display: none;">
+                                    <i class="fas fa-grip-vertical"></i>
                                 </div>
 
                                 <div class="image-preview-container">
@@ -500,7 +517,8 @@ require __DIR__ . '/../partials/header.php';
                                         <img src="/<?= htmlspecialchars($image['filename']) ?>"
                                             alt="<?= htmlspecialchars($image['original_name']) ?>"
                                             class="carte-image-preview lightbox-image"
-                                            data-caption="<?= htmlspecialchars($image['original_name']) ?>">
+                                            data-caption="<?= htmlspecialchars($image['original_name']) ?>"
+                                            draggable="false"> <!-- Important : empêcher le drag natif de l'image -->
                                     <?php endif; ?>
                                 </div>
 
@@ -510,10 +528,12 @@ require __DIR__ . '/../partials/header.php';
                                 </div>
 
                                 <div class="image-actions">
-                                    <form method="post" class="inline-form">
+                                    <form method="post" class="inline-form delete-image-form">
                                         <input type="hidden" name="image_id" value="<?= $image['id'] ?>">
                                         <input type="hidden" name="anchor" value="images-list">
-                                        <button type="submit" name="delete_image" class="btn danger">
+                                        <button type="submit" name="delete_image" class="btn danger delete-image-btn"
+                                            data-image-id="<?= $image['id'] ?>"
+                                            data-image-name="<?= htmlspecialchars($image['original_name']) ?>">
                                             <i class="fas fa-trash"></i> Supprimer
                                         </button>
                                     </form>
@@ -521,18 +541,22 @@ require __DIR__ . '/../partials/header.php';
 
                                 <!-- Contrôles de réorganisation -->
                                 <div class="reorder-controls" style="display: none;">
-                                    <!-- Bouton "Monter" - masqué pour la première image -->
+                                    <!-- Bouton "Monter" -->
                                     <button type="button" class="btn small move-up <?= $index === 0 ? 'hidden' : '' ?>"
                                         data-position="<?= $index + 1 ?>">
                                         <i class="fas fa-arrow-up"></i> Monter
                                     </button>
 
-                                    <!-- Bouton "Descendre" - masqué pour la dernière image -->
+                                    <!-- Bouton "Descendre" -->
                                     <button type="button" class="btn small move-down <?= $index === count($carteImages) - 1 ? 'hidden' : '' ?>"
                                         data-position="<?= $index + 1 ?>">
                                         <i class="fas fa-arrow-down"></i> Descendre
                                     </button>
                                 </div>
+
+                                <!-- Indicateurs de zone de drop (optionnels) -->
+                                <div class="drop-zone-indicator top"></div>
+                                <div class="drop-zone-indicator bottom"></div>
                             </div>
                         <?php endforeach; ?>
                     </div>

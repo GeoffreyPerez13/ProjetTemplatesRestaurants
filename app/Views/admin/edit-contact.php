@@ -4,12 +4,25 @@ $title = "Modifier le contact";
 require __DIR__ . '/../partials/header.php';
 ?>
 
+<!-- Script pour passer les paramètres au JavaScript -->
+<script>
+    // Variables disponibles pour le JavaScript
+    window.scrollParams = {
+        anchor: '<?= htmlspecialchars($anchor ?? '') ?>',
+        scrollDelay: <?= (int)($scroll_delay ?? 3500) ?>
+    };
+</script>
+
 <!-- Bouton retour vers le dashboard -->
 <a class="btn-back" href="?page=dashboard">Retour au dashboard</a>
 
-<!-- Affichage d'un message de succès si mise à jour réussie -->
-<?php if (!empty($message)): ?>
-    <p class="success"><?= htmlspecialchars($message) ?></p>
+<!-- Affichage des messages - Même structure que edit-card.php -->
+<?php if (!empty($success_message)): ?>
+    <p class="message-success"><?= htmlspecialchars($success_message) ?></p>
+<?php endif; ?>
+
+<?php if (!empty($error_message)): ?>
+    <p class="message-error"><?= htmlspecialchars($error_message) ?></p>
 <?php endif; ?>
 
 <!-- Formulaire pour modifier les informations de contact -->

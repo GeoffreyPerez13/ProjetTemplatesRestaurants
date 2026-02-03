@@ -45,12 +45,7 @@
       document.querySelector(".images-mode-container") !== null;
 
     if (isImagesMode) {
-      // Désactiver SweetAlert TEMPORAIREMENT pour les suppressions
-      disableSweetAlertForDeletes();
-
-      // Appeler notre fonction simplifiée
-      setupImageDeleteConfirmations();
-
+      // Appeler notre fonction pour les confirmations de suppression
       setupImageDeletionConfirmations();
 
       // ==================== INITIALISATION DU DRAG & DROP ====================
@@ -411,20 +406,21 @@
    * Configure les confirmations de suppression d'images (mode images)
    */
   function setupImageDeletionConfirmations() {
-    console.log("Setting up image deletion confirmations...");
+    // Attendre un peu pour que le DOM soit complètement chargé
+    setTimeout(() => {
+      // Sélectionner tous les boutons de suppression d'image dans le mode images
+      const deleteButtons = document.querySelectorAll(
+        'form.inline-form button[name="delete_image"]',
+      );
 
-    // Sélectionner tous les boutons de suppression d'image dans le mode images
-    const deleteButtons = document.querySelectorAll(
-      'form.inline-form button[name="delete_image"]',
-    );
+      deleteButtons.forEach((button) => {
+        // Supprimer l'ancien gestionnaire si existant
+        button.removeEventListener("click", handleImageDelete);
 
-    deleteButtons.forEach((button) => {
-      // Supprimer l'ancien gestionnaire si existant
-      button.removeEventListener("click", handleImageDelete);
-
-      // Ajouter le nouveau gestionnaire
-      button.addEventListener("click", handleImageDelete);
-    });
+        // Ajouter le nouveau gestionnaire
+        button.addEventListener("click", handleImageDelete);
+      });
+    }, 500);
   }
 
   /**
@@ -436,7 +432,6 @@
 
     const form = this.closest("form");
     if (!form) {
-      console.error("No form found for delete button");
       return;
     }
 
@@ -480,102 +475,6 @@
       ) {
         form.submit();
       }
-    }
-  }
-
-  /**
-   * Configuration SIMPLIFIÉE des confirmations de suppression d'images
-   */
-  function setupImageDeleteConfirmations() {
-    console.log("=== SETUP IMAGE DELETE CONFIRMATIONS ===");
-
-    // Sélectionner tous les boutons de suppression d'image
-    const deleteButtons = document.querySelectorAll(".delete-image-btn");
-    console.log("Delete buttons found:", deleteButtons.length);
-
-    deleteButtons.forEach((button) => {
-      console.log("Setting up button:", button);
-
-      // Supprimer tous les événements existants
-      const newButton = button.cloneNode(true);
-      button.parentNode.replaceChild(newButton, button);
-
-      // Ajouter notre propre gestionnaire
-      newButton.addEventListener("click", function (e) {
-        console.log("=== DELETE BUTTON CLICKED ===");
-        e.preventDefault();
-        e.stopPropagation();
-
-        const form = this.closest("form");
-        if (!form) {
-          console.error("No form found!");
-          return;
-        }
-
-        const imageId = this.getAttribute("data-image-id");
-        const imageName = this.getAttribute("data-image-name");
-        const isPDF =
-          this.closest(".image-card").querySelector(".pdf-preview") !== null;
-        const fileType = isPDF ? "PDF" : "image";
-
-        console.log("Image ID:", imageId);
-        console.log("Image name:", imageName);
-        console.log("File type:", fileType);
-
-        // Confirmation SIMPLE sans SweetAlert
-        if (
-          confirm(
-            `Voulez-vous vraiment supprimer l'${fileType} "${imageName}" ?`,
-          )
-        ) {
-          console.log("User confirmed - submitting form");
-
-          // Ajouter un timestamp pour éviter le cache
-          const timestamp = Date.now();
-          const timestampInput = document.createElement("input");
-          timestampInput.type = "hidden";
-          timestampInput.name = "timestamp";
-          timestampInput.value = timestamp;
-          form.appendChild(timestampInput);
-
-          // Soumettre le formulaire
-          form.submit();
-        } else {
-          console.log("User cancelled");
-        }
-      });
-    });
-  }
-
-  /**
-   * Confirmation simple de suppression d'image
-   */
-  function confirmDeleteImage(form) {
-    const imageCard = form.closest(".image-card");
-    const imageName = imageCard.querySelector(".image-name").textContent.trim();
-    const isPDF = imageCard.querySelector(".pdf-preview") !== null;
-    const fileType = isPDF ? "PDF" : "image";
-
-    if (typeof Swal !== "undefined") {
-      Swal.fire({
-        title: "Confirmer la suppression",
-        html: `Voulez-vous vraiment supprimer l'${fileType} <strong>"${imageName}"</strong> ?`,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Oui, supprimer",
-        cancelButtonText: "Annuler",
-      }).then((result) => {
-        if (result.isConfirmed) {
-          form.submit();
-        }
-      });
-      return false; // Empêche la soumission immédiate
-    } else {
-      return confirm(
-        `Voulez-vous vraiment supprimer l'${fileType} "${imageName}" ?`,
-      );
     }
   }
 
@@ -911,7 +810,7 @@
    */
   window.refreshConfirmations = function () {
     setupDeleteConfirmations();
-    setupImageDeleteConfirmations();
+    setupImageDeletionConfirmations();
   };
 
   /**

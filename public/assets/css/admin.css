@@ -30,3 +30,6 @@
 /* Section view-card */
 @import url("admin/sections/view-card/view-card.css");
 @import url("admin/sections/view-card/view-card-lightbox.css");
+
+/* Section edit-logo */
+@import url("admin/sections/edit-logo/edit-logo.css");
