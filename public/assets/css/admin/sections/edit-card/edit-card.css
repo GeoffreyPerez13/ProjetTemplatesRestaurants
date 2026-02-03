@@ -198,7 +198,6 @@
 }
 
 .dish-accordion-item {
-  margin-bottom: 15px;
   border: 1px solid #e9ecef;
   border-radius: 8px;
   overflow: hidden;
@@ -232,7 +231,7 @@
 }
 
 .dish-accordion-content {
-  padding: 20px;
+  padding: 20px 0;
   display: none;
   width: 100%;
   box-sizing: border-box;
@@ -240,12 +239,12 @@
 
 .dish-edit-container {
   background: #f8f9fa;
-  padding: 20px;
   border-radius: 8px;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow: hidden; /* Empêche le débordement */
+  overflow: hidden;
+  padding-bottom: 20px;
 }
 
 /* ==================== FORMULAIRES ==================== */

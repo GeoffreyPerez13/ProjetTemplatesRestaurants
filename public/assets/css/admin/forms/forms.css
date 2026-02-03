@@ -207,7 +207,6 @@ input[type="number"] {
   flex-direction: column;
   gap: 10px;
   width: 100%;
-  margin-bottom: 15px;
 }
 
 /* Réglage pour les formulaires de plat */
