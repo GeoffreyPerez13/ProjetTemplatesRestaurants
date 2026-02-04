@@ -16,8 +16,6 @@ class AdminController extends BaseController
     public function __construct($pdo)
     {
         parent::__construct($pdo);
-        // Vous pouvez personnaliser le délai de scroll si besoin
-        // $this->setScrollDelay(4000);
     }
 
     /**
@@ -41,13 +39,13 @@ class AdminController extends BaseController
         // Étape 3: Traitement du formulaire si soumis
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
-                $this->addErrorMessage("Requête invalide (CSRF).");
+                $_SESSION['error_message'] = "Requête invalide (CSRF).";
             } else {
                 $email = trim($_POST['email'] ?? '');
                 $restaurantName = trim($_POST['restaurant_name'] ?? '');
 
                 if (empty($email) || empty($restaurantName)) {
-                    $this->addErrorMessage("Veuillez remplir tous les champs.");
+                    $_SESSION['error_message'] = "Veuillez remplir tous les champs.";
                 } else {
                     $adminModel = new Admin($this->pdo);
                     $token = bin2hex(random_bytes(32));
@@ -56,12 +54,12 @@ class AdminController extends BaseController
                         $inviteLink = "http://" . $_SERVER['HTTP_HOST'] . "?page=register&token=" . $token;
 
                         if (defined('DEV_SHOW_LINK') && DEV_SHOW_LINK === true) {
-                            $this->addSuccessMessage("L'invitation a été envoyée avec succès. Lien: " . $inviteLink);
+                            $_SESSION['success_message'] = "L'invitation a été envoyée avec succès. Lien: " . $inviteLink;
                         } else {
-                            $this->addSuccessMessage("L'invitation a été envoyée avec succès.");
+                            $_SESSION['success_message'] = "L'invitation a été envoyée avec succès.";
                         }
                     } else {
-                        $this->addErrorMessage("Erreur lors de la création de l'invitation.");
+                        $_SESSION['error_message'] = "Erreur lors de la création de l'invitation.";
                     }
                 }
             }
@@ -72,12 +70,18 @@ class AdminController extends BaseController
         }
 
         // Étape 4: Récupération des messages flash
-        $messages = $this->getFlashMessages();
+        $success_message = $_SESSION['success_message'] ?? null;
+        $error_message = $_SESSION['error_message'] ?? null;
+
+        // Nettoyer après récupération
+        unset($_SESSION['success_message'], $_SESSION['error_message']);
 
         // Étape 5: Affichage de la vue avec les données
-        $this->render('admin/send-invitation', array_merge($messages, [
+        $this->render('admin/send-invitation', [
+            'success_message' => $success_message,
+            'error_message' => $error_message,
             'csrf_token' => $this->getCsrfToken()
-        ]));
+        ]);
     }
 
     /**
@@ -90,6 +94,7 @@ class AdminController extends BaseController
         $token = $_GET['token'] ?? null;
 
         if (empty($token)) {
+            $_SESSION['error_message'] = "Token d'invitation manquant.";
             header('Location: ?page=login');
             exit;
         }
@@ -98,58 +103,76 @@ class AdminController extends BaseController
         $adminModel = new Admin($this->pdo);
         $invitation = $adminModel->getInvitation($token);
 
-        if (!$invitation || strtotime($invitation->expiry) < time()) {
-            $this->addErrorMessage("Ce lien d'invitation n'est plus valide.");
+        if (!$invitation) {
+            $_SESSION['error_message'] = "Lien d'invitation invalide ou introuvable.";
+            header('Location: ?page=login');
+            exit;
+        }
 
-            // Redirection avec message d'erreur
+        if (strtotime($invitation->expiry) < time()) {
+            $_SESSION['error_message'] = "Ce lien d'invitation a expiré.";
+            header('Location: ?page=login');
+            exit;
+        }
+
+        if ($invitation->used == 1) {
+            $_SESSION['error_message'] = "Ce lien d'invitation a déjà été utilisé.";
             header('Location: ?page=login');
             exit;
         }
 
         // Étape 3: Traitement du formulaire d'inscription si soumis
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
-                $this->addErrorMessage("Requête invalide (CSRF).");
-            } else {
-                $username = trim($_POST['username'] ?? '');
-                $password = trim($_POST['password'] ?? '');
-                $confirmPassword = trim($_POST['confirm_password'] ?? '');
+            $username = trim($_POST['username'] ?? '');
+            $password = trim($_POST['password'] ?? '');
+            $confirmPassword = trim($_POST['confirm_password'] ?? '');
+            $error = null;
 
-                if ($password !== $confirmPassword) {
-                    $this->addErrorMessage("Les mots de passe ne correspondent pas.");
-                } elseif (strlen($password) < 8) {
-                    $this->addErrorMessage("Le mot de passe doit contenir au moins 8 caractères.");
-                } else {
-                    if ($adminModel->createAccount($invitation, $username, $password)) {
-                        // Succès: redirection vers la page de login avec message de succès
-                        $this->addSuccessMessage("Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.");
-                        header('Location: ?page=login');
-                        exit;
-                    } else {
-                        $lastError = error_get_last();
-                        $errorMsg = "Erreur lors de la création du compte.";
-                        if ($lastError) {
-                            $errorMsg .= " Détails : " . $lastError['message'];
-                        }
-                        $this->addErrorMessage($errorMsg);
-                    }
-                }
+            // Validation
+            if (empty($username) || empty($password) || empty($confirmPassword)) {
+                $error = "Tous les champs sont obligatoires.";
+            } elseif ($password !== $confirmPassword) {
+                $error = "Les mots de passe ne correspondent pas.";
+            } elseif (strlen($password) < 8) {
+                $error = "Le mot de passe doit contenir au moins 8 caractères.";
+            } elseif (!preg_match('/[a-zA-Z]/', $password) || !preg_match('/\d/', $password)) {
+                $error = "Le mot de passe doit contenir au moins une lettre et un chiffre.";
             }
 
-            // Redirection pour éviter le rechargement du formulaire
-            header('Location: ?page=register&token=' . urlencode($token));
-            exit;
+            if ($error) {
+                // Stocker l'erreur dans la session
+                $_SESSION['error_message'] = $error;
+                header('Location: ?page=register&token=' . urlencode($token));
+                exit;
+            }
+
+            // Essayer de créer le compte
+            if ($adminModel->createAccount($invitation, $username, $password)) {
+                $_SESSION['success_message'] = "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.";
+                header('Location: ?page=login');
+                exit;
+            } else {
+                $_SESSION['error_message'] = "Erreur lors de la création du compte. Le nom d'utilisateur existe peut-être déjà.";
+                header('Location: ?page=register&token=' . urlencode($token));
+                exit;
+            }
         }
 
         // Étape 4: Récupération des messages flash
-        $messages = $this->getFlashMessages();
+        $success_message = $_SESSION['success_message'] ?? null;
+        $error_message = $_SESSION['error_message'] ?? null;
+
+        // Nettoyer les messages après les avoir récupérés
+        unset($_SESSION['success_message'], $_SESSION['error_message']);
 
         // Étape 5: Affichage du formulaire d'inscription
-        $this->render('admin/register', array_merge($messages, [
+        $this->render('admin/register', [
             'invitation' => $invitation,
-            'csrf_token' => $this->getCsrfToken(),
-            'token' => $token
-        ]));
+            'token' => $token,
+            'success_message' => $success_message,
+            'error_message' => $error_message,
+            'csrf_token' => $this->getCsrfToken()
+        ]);
     }
 
     /**
@@ -158,18 +181,16 @@ class AdminController extends BaseController
      */
     public function login()
     {
-        // Étape 1: Variables locales
+        // Récupérer les messages de session
+        $success_message = $_SESSION['success_message'] ?? null;
+        $error_message = $_SESSION['error_message'] ?? null;
+
+        // Nettoyer après récupération
+        unset($_SESSION['success_message'], $_SESSION['error_message']);
+
         $error = null;
-        $success = null;
 
-        // Étape 2: Vérifier si un message de succès vient d'être ajouté (après inscription)
-        // Vous pouvez garder cette partie si vous voulez récupérer les messages flash
-        $flashMessages = $this->getFlashMessages();
-        if ($flashMessages['success_message']) {
-            $success = $flashMessages['success_message'];
-        }
-
-        // Étape 3: Traitement du formulaire de connexion
+        // Traitement du formulaire
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = trim($_POST['username'] ?? '');
             $password = trim($_POST['password'] ?? '');
@@ -185,6 +206,7 @@ class AdminController extends BaseController
                     $_SESSION['admin_logged'] = true;
                     $_SESSION['admin_id'] = $user->id;
                     $_SESSION['admin_name'] = $user->restaurant_name;
+                    $_SESSION['username'] = $user->username;
 
                     // Redirection vers le dashboard
                     header('Location: ?page=dashboard');
@@ -195,10 +217,10 @@ class AdminController extends BaseController
             }
         }
 
-        // Étape 4: Affichage du formulaire de connexion
+        // Affichage
         $this->render('admin/login', [
-            'error_message' => $error,
-            'success_message' => $success
+            'error_message' => $error ?? $error_message,
+            'success_message' => $success_message
         ]);
     }
 
@@ -209,7 +231,7 @@ class AdminController extends BaseController
     public function logout()
     {
         // Message de déconnexion
-        $this->addSuccessMessage("Vous avez été déconnecté avec succès.");
+        $_SESSION['success_message'] = "Vous avez été déconnecté avec succès.";
 
         // Destruction de la session
         session_destroy();
@@ -228,22 +250,54 @@ class AdminController extends BaseController
         // Étape 1: Vérification de la connexion
         $this->requireLogin();
 
-        // Étape 2: Récupération des informations de session
-        $admin_name = $_SESSION['admin_name'] ?? '';
-
-        // Étape 3: Récupération des informations détaillées depuis la BD
+        // Étape 2: Récupération des informations détaillées depuis la BD
         $adminModel = new Admin($this->pdo);
         $admin = $adminModel->findById($_SESSION['admin_id']);
+
+        if (!$admin) {
+            $_SESSION['error_message'] = "Administrateur non trouvé.";
+            header('Location: ?page=login');
+            exit;
+        }
+
         $role = $admin->role ?? 'ADMIN';
+        $restaurant_name = $admin->restaurant_name ?? '';
+        $username = $admin->username ?? '';
+        $restaurant_id = $admin->restaurant_id ?? null;
+
+        // Étape 3: Récupération de la date de dernière modification du restaurant
+        $last_updated = null;
+        if ($restaurant_id) {
+            try {
+                $stmt = $this->pdo->prepare("SELECT updated_at FROM restaurants WHERE id = ?");
+                $stmt->execute([$restaurant_id]);
+                $restaurant = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($restaurant && $restaurant['updated_at']) {
+                    $last_updated = $restaurant['updated_at'];
+                }
+            } catch (Exception $e) {
+                error_log("Erreur récupération date mise à jour: " . $e->getMessage());
+            }
+        }
 
         // Étape 4: Récupération des messages flash
-        $messages = $this->getFlashMessages();
+        $success_message = $_SESSION['success_message'] ?? null;
+        $error_message = $_SESSION['error_message'] ?? null;
+
+        // Nettoyer après récupération
+        unset($_SESSION['success_message'], $_SESSION['error_message']);
 
         // Étape 5: Affichage du tableau de bord
-        $this->render('admin/dashboard', array_merge($messages, [
-            'admin_name' => $admin_name,
-            'role' => $role
-        ]));
+        $this->render('admin/dashboard', [
+            'success_message' => $success_message,
+            'error_message' => $error_message,
+            'restaurant_name' => $restaurant_name,
+            'username' => $username,
+            'role' => $role,
+            'last_updated' => $last_updated,
+            'restaurant_id' => $restaurant_id
+        ]);
     }
 
     /**
@@ -258,17 +312,19 @@ class AdminController extends BaseController
         // Étape 2: Traitement du formulaire
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
-                $this->addErrorMessage("Requête invalide (CSRF).");
+                $_SESSION['error_message'] = "Requête invalide (CSRF).";
             } else {
                 if (empty($token)) {
                     // CAS 1: Demande de réinitialisation
                     $email = trim($_POST['email'] ?? '');
 
                     if (empty($email)) {
-                        $this->addErrorMessage("Veuillez renseigner une adresse email.");
+                        $_SESSION['error_message'] = "Veuillez renseigner une adresse email.";
                     } else {
                         if ($adminModel->requestPasswordReset($email)) {
-                            $this->addSuccessMessage("Si cette adresse existe dans notre système, vous recevrez un email.");
+                            $_SESSION['success_message'] = "Si cette adresse existe dans notre système, vous recevrez un email.";
+                        } else {
+                            $_SESSION['error_message'] = "Erreur lors de l'envoi de l'email de réinitialisation.";
                         }
                     }
                 } else {
@@ -277,16 +333,16 @@ class AdminController extends BaseController
                     $confirmPassword = $_POST['confirm_password'] ?? '';
 
                     if ($newPassword !== $confirmPassword) {
-                        $this->addErrorMessage("Les mots de passe ne correspondent pas.");
+                        $_SESSION['error_message'] = "Les mots de passe ne correspondent pas.";
                     } elseif (strlen($newPassword) < 8) {
-                        $this->addErrorMessage("Le mot de passe doit contenir au moins 8 caractères.");
+                        $_SESSION['error_message'] = "Le mot de passe doit contenir au moins 8 caractères.";
                     } else {
                         if ($adminModel->resetPassword($token, $newPassword)) {
-                            $this->addSuccessMessage("Mot de passe mis à jour avec succès. Redirection vers la page de connexion...");
+                            $_SESSION['success_message'] = "Mot de passe mis à jour avec succès. Redirection vers la page de connexion...";
                             header("refresh:3;url=?page=login");
                             // Pas de exit ici car on veut afficher le message
                         } else {
-                            $this->addErrorMessage("Lien de réinitialisation invalide ou expiré.");
+                            $_SESSION['error_message'] = "Lien de réinitialisation invalide ou expiré.";
                         }
                     }
                 }
@@ -304,12 +360,18 @@ class AdminController extends BaseController
         }
 
         // Étape 3: Récupération des messages flash
-        $messages = $this->getFlashMessages();
+        $success_message = $_SESSION['success_message'] ?? null;
+        $error_message = $_SESSION['error_message'] ?? null;
+
+        // Nettoyer après récupération
+        unset($_SESSION['success_message'], $_SESSION['error_message']);
 
         // Étape 4: Affichage du formulaire approprié
-        $this->render('admin/reset-password', array_merge($messages, [
+        $this->render('admin/reset-password', [
+            'success_message' => $success_message,
+            'error_message' => $error_message,
             'token' => $token,
             'csrf_token' => $this->getCsrfToken()
-        ]));
+        ]);
     }
 }

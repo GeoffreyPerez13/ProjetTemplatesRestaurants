@@ -11,6 +11,7 @@ class Admin
     public $password;
     public $role;
     public $restaurant_name;
+    public $restaurant_id;
 
     // Constructeur : initialise la connexion PDO
     public function __construct($pdo)
@@ -21,36 +22,68 @@ class Admin
     // --- INVITATIONS ---
 
     // Crée une invitation pour un nouvel administrateur
-    // Envoie ensuite un mail avec le lien d'inscription
     public function createInvitation($email, $restaurantName, $token)
     {
         // Date d'expiration du lien = +24 heures
         $expiry = date('Y-m-d H:i:s', strtotime('+24 hours'));
 
         try {
-            // Insertion de l'invitation en base
-            $sql = "INSERT INTO invitations (email, restaurant_name, token, expiry) VALUES (?, ?, ?, ?)";
+            // Insertion de l'invitation en base (SANS restaurant_id)
+            $sql = "INSERT INTO invitations (email, restaurant_name, token, expiry) 
+                VALUES (?, ?, ?, ?)";
             $stmt = $this->pdo->prepare($sql);
             $result = $stmt->execute([$email, $restaurantName, $token, $expiry]);
 
             if ($result) {
                 // Génération du lien d'inscription
-                $inviteLink = "http://" . $_SERVER['HTTP_HOST'] . "?page=register&token=" . $token;
+                $inviteLink = "http://" . $_SERVER['HTTP_HOST'] . "/admin/?page=register&token=" . $token;
 
                 // Préparation du mail
                 $to = $email;
                 $subject = "Invitation à créer votre compte restaurant";
-                $message = "Bonjour,\n\n";
-                $message .= "Vous avez été invité à créer un compte pour votre restaurant.\n";
-                $message .= "Cliquez sur ce lien : " . $inviteLink;
-                $headers = "From: no-reply@votrerestaurant.com";
+
+                // Dans la méthode createInvitation(), modifiez la construction du lien :
+                $message = "
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Invitation à créer votre compte restaurant</title>
+                    </head>
+                    <body style='font-family: Arial, sans-serif; line-height: 1.6;'>
+                        <h2>Invitation Menumiam</h2>
+                        <p>Bonjour,</p>
+                        <p>Vous avez été invité à créer un compte pour gérer la carte en ligne de votre restaurant <strong>{$restaurantName}</strong> sur Menumiam.</p>
+                        <p>Cliquez sur le lien ci-dessous pour créer votre compte :</p>
+                        <p><code style='background-color: #f4f4f4; padding: 5px; border-radius: 3px;'>" . htmlspecialchars($inviteLink) . "</code></p>
+                        <p><strong>Attention :</strong> Ce lien expirera dans 24 heures.</p>
+                        <br>
+                        <p>Cordialement,<br>L'équipe Menumiam</p>
+                    </body>
+                    </html>
+                    ";
+
+                // En-têtes pour l'email HTML
+                $headers = "MIME-Version: 1.0" . "\r\n";
+                $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+                $headers .= "From: Menumiam <no-reply@menumiam.com>" . "\r\n";
+                $headers .= "Reply-To: no-reply@menumiam.com" . "\r\n";
 
                 // Envoi du mail
-                return mail($to, $subject, $message, $headers);
+                $mailResult = mail($to, $subject, $message, $headers);
+
+                // Log pour déboguer
+                error_log("[DEBUG] Envoi d'invitation:");
+                error_log("  - Email: $email");
+                error_log("  - Restaurant: $restaurantName");
+                error_log("  - Lien: $inviteLink");
+                error_log("  - Mail envoyé: " . ($mailResult ? "OUI" : "NON"));
+
+                return $mailResult;
             }
 
             return false;
         } catch (PDOException $e) {
+            error_log("[ERREUR] createInvitation: " . $e->getMessage());
             return false;
         }
     }
@@ -82,24 +115,38 @@ class Admin
                 return false;
             }
 
+            // 1. CRÉER LE RESTAURANT
+            $slug = $this->generateSlug($invitation->restaurant_name);
+
+            $stmt = $this->pdo->prepare("
+            INSERT INTO restaurants (name, slug, created_at, updated_at) 
+            VALUES (?, ?, NOW(), NOW())
+        ");
+            $stmt->execute([$invitation->restaurant_name, $slug]);
+            $restaurantId = $this->pdo->lastInsertId();
+
             // Hashage du mot de passe
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-            // Insertion du nouvel admin
-            $sql = "INSERT INTO admins (username, email, password, restaurant_name, role) VALUES (?, ?, ?, ?, 'ADMIN')";
+            // 2. CRÉER L'ADMIN avec l'ID du restaurant
+            $sql = "INSERT INTO admins (username, email, password, restaurant_name, restaurant_id, role) 
+                VALUES (?, ?, ?, ?, ?, 'ADMIN')";
             $stmt = $this->pdo->prepare($sql);
             $success = $stmt->execute([
                 $username,
                 $invitation->email,
                 $hashedPassword,
-                $invitation->restaurant_name
+                $invitation->restaurant_name,
+                $restaurantId  // ID du restaurant créé
             ]);
 
             if (!$success) {
                 throw new Exception("Erreur lors de l'insertion dans la table admins");
             }
 
-            // Marquer l'invitation comme utilisée
+            $adminId = $this->pdo->lastInsertId();
+
+            // 3. Marquer l'invitation comme utilisée
             $sql = "UPDATE invitations SET used = 1 WHERE id = ?";
             $stmt = $this->pdo->prepare($sql);
             $success = $stmt->execute([$invitation->id]);
@@ -109,6 +156,15 @@ class Admin
             }
 
             $this->pdo->commit();
+
+            // Log de succès
+            error_log("[DEBUG] Compte et restaurant créés avec succès:");
+            error_log("  - Admin ID: $adminId");
+            error_log("  - Username: $username");
+            error_log("  - Restaurant: " . $invitation->restaurant_name);
+            error_log("  - Restaurant ID créé: $restaurantId");
+            error_log("  - Slug: $slug");
+
             return true;
         } catch (Exception $e) {
             $this->pdo->rollBack();
@@ -116,6 +172,36 @@ class Admin
             error_log("Trace: " . $e->getTraceAsString());
             return false;
         }
+    }
+
+    // Ajoutez cette méthode pour générer un slug
+    private function generateSlug($name)
+    {
+        // Remplace les caractères spéciaux
+        $slug = strtolower($name);
+        $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
+        $slug = preg_replace('/\s+/', '-', $slug);
+        $slug = preg_replace('/-+/', '-', $slug);
+        $slug = trim($slug, '-');
+
+        // Vérifier si le slug existe déjà
+        $originalSlug = $slug;
+        $counter = 1;
+
+        while ($this->slugExists($slug)) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
+    // Vérifie si un slug existe déjà
+    private function slugExists($slug)
+    {
+        $stmt = $this->pdo->prepare("SELECT id FROM restaurants WHERE slug = ?");
+        $stmt->execute([$slug]);
+        return $stmt->fetch() !== false;
     }
 
     public function getCarteMode($adminId)
@@ -200,6 +286,7 @@ class Admin
         $this->password = $data['password'];
         $this->role = $data['role'];
         $this->restaurant_name = $data['restaurant_name'];
+        $this->restaurant_id = $data['restaurant_id'] ?? null; // Ajoutez cette ligne
     }
 
     // --- RÉINITIALISATION DE MOT DE PASSE ---
@@ -374,6 +461,26 @@ class Admin
     public function setRestaurant_name($restaurant_name)
     {
         $this->restaurant_name = $restaurant_name;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of restaurant_id
+     */
+    public function getRestaurant_id()
+    {
+        return $this->restaurant_id;
+    }
+
+    /**
+     * Set the value of restaurant_id
+     *
+     * @return  self
+     */
+    public function setRestaurant_id($restaurant_id)
+    {
+        $this->restaurant_id = $restaurant_id;
 
         return $this;
     }

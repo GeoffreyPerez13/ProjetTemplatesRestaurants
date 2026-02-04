@@ -5,6 +5,8 @@
 @import url("admin/basis/base.css");
 @import url("admin/basis/buttons.css");
 @import url("admin/basis/components-selector-mode.css");
+@import url("admin/basis/cookies.css");
+@import url("admin/basis/legals.css");
 
 /* Effets visuels */
 @import url("admin/effects/accordion.css");
@@ -29,6 +31,9 @@
 
 /* Section login */
 @import url("admin/sections/login/login.css");
+
+/* Section settings */
+@import url("admin/sections/settings/settings.css");
 
 /* Section view-card */
 @import url("admin/sections/view-card/view-card.css");

@@ -8,6 +8,8 @@ require_once __DIR__ . '/../app/Controllers/AdminController.php';
 require_once __DIR__ . '/../app/Controllers/CardController.php';
 require_once __DIR__ . '/../app/Controllers/ContactController.php';
 require_once __DIR__ . '/../app/Controllers/LogoController.php';
+require_once __DIR__ . '/../app/Controllers/LegalController.php';
+require_once __DIR__ . '/../app/Controllers/SettingsController.php';
 require_once __DIR__ . '/../app/Helpers/FormHelper.php';
 require_once __DIR__ . '/../app/Helpers/Validator.php';
 require_once __DIR__ . '/../app/Helpers/old.php';
@@ -32,7 +34,7 @@ switch ($page) {
         $adminController = new AdminController($pdo);
         $adminController->register();  // Formulaire de création de compte via invitation
         break;
-        
+
     case 'login':
         $controller = new AdminController($pdo);
         $controller->login();  // Page de connexion
@@ -63,6 +65,34 @@ switch ($page) {
         $controller->edit();  // Gestion du logo
         break;
 
+    case 'settings':
+        $controller = new SettingsController($pdo);
+        $action = $_GET['action'] ?? 'show';
+
+        if ($action === 'update-profile') {
+            $controller->updateProfile();
+        } elseif ($action === 'change-password') {
+            $controller->changePassword();
+        } else {
+            $controller->show();
+        }
+        break;
+
+    case 'save-option':
+        $controller = new SettingsController($pdo);
+        $controller->saveOption();
+        break;
+
+    case 'save-options-batch':
+        $controller = new SettingsController($pdo);
+        $controller->saveOptionsBatch();
+        break;
+
+    case 'get-options':
+        $controller = new SettingsController($pdo);
+        $controller->getOptions();
+        break;
+
     case 'logout':
         $controller = new AdminController($pdo);
         $controller->logout();  // Déconnexion
@@ -74,9 +104,15 @@ switch ($page) {
         break;
 
     case 'vitrine':
-        $slug = $_GET['slug'] ?? null;
-        $displayController = new DisplayController($pdo);
-        $displayController->show($slug);  // Affichage de la vitrine publique du restaurant
+        // $displayController = new DisplayController($pdo);
+        // $displayController->show($slug);
+        http_response_code(404);
+        echo "Page en construction";
+        break;
+
+    case 'legal':
+        $controller = new LegalController($pdo);
+        $controller->show();
         break;
 
     default:

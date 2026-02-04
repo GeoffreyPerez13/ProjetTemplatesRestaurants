@@ -161,6 +161,7 @@
 
 /* Éviter les conflits avec les styles généraux de bouton */
 .password-input-group .password-toggle-btn {
+  align-self: stretch;
   margin-top: 0 !important;
   width: auto !important;
   display: flex !important;

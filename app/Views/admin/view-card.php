@@ -35,7 +35,7 @@ require __DIR__ . '/../partials/header.php';
             <i class="fas fa-utensils"></i>
             <p class="success">Aucune catégorie pour le moment.</p>
             <a href="?page=edit-card" class="btn primary">
-                <i class="fas fa-plus"></i> Créer votre première catégorie
+                Créer votre première catégorie
             </a>
         </div>
     <?php else: ?>
