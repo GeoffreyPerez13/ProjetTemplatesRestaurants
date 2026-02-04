@@ -10,14 +10,36 @@ require_once __DIR__ . '/../Models/Category.php';
 require_once __DIR__ . '/../Models/Dish.php';
 require_once __DIR__ . '/../Models/CardImage.php';
 require_once __DIR__ . '/../Models/Admin.php';
+require_once __DIR__ . '/../Models/Restaurant.php'; // Ajouté
 require_once __DIR__ . '/../Helpers/Validator.php';
 
 class CardController extends BaseController
 {
+    private $restaurantModel; // Nouvelle propriété
+    
     public function __construct($pdo)
     {
         parent::__construct($pdo);
         $this->setScrollDelay(3500);
+        $this->restaurantModel = new Restaurant($pdo); // Initialisation
+    }
+
+    /**
+     * Met à jour le timestamp du restaurant
+     */
+    private function updateRestaurantTimestamp()
+    {
+        if (isset($_SESSION['admin_id'])) {
+            // Récupérer l'ID du restaurant associé à l'admin
+            $stmt = $this->pdo->prepare("SELECT restaurant_id FROM admins WHERE id = ?");
+            $stmt->execute([$_SESSION['admin_id']]);
+            $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($admin && isset($admin['restaurant_id'])) {
+                return $this->restaurantModel->updateTimestamp($admin['restaurant_id']);
+            }
+        }
+        return false;
     }
 
     /**
@@ -113,6 +135,10 @@ class CardController extends BaseController
 
         if (in_array($newMode, ['editable', 'images'])) {
             $adminModel->updateCarteMode($admin_id, $newMode);
+            
+            // Mettre à jour le timestamp
+            $this->updateRestaurantTimestamp();
+            
             $this->addSuccessMessage("Mode de carte changé avec succès", 'mode-selector');
             $_SESSION['close_accordion'] = 'mode-selector-content';
         }
@@ -247,6 +273,10 @@ class CardController extends BaseController
 
             if ($rowCount > 0) {
                 error_log("Image deleted successfully");
+                
+                // Mettre à jour le timestamp du restaurant
+                $this->updateRestaurantTimestamp();
+                
                 $this->addSuccessMessage("Image supprimée avec succès.", 'images-list');
 
                 // IMPORTANT : Configurer les accordéons après suppression
@@ -350,6 +380,9 @@ class CardController extends BaseController
             $categoryModel->create($admin_id, $name, $imagePath);
             $categoryId = $this->pdo->lastInsertId();
 
+            // Mettre à jour le timestamp du restaurant
+            $this->updateRestaurantTimestamp();
+            
             $this->addSuccessMessage("Catégorie ajoutée avec succès.", 'category-' . $categoryId);
             $_SESSION['close_accordion'] = 'mode-selector-content';
             $_SESSION['close_accordion_secondary'] = 'new-category-content';
@@ -398,6 +431,10 @@ class CardController extends BaseController
         // Mettre à jour
         try {
             $categoryModel->update($category_id, $new_name, $imagePath);
+            
+            // Mettre à jour le timestamp du restaurant
+            $this->updateRestaurantTimestamp();
+            
             $this->addSuccessMessage("Catégorie modifiée avec succès.", 'category-' . $category_id);
             $_SESSION['close_accordion'] = 'mode-selector-content';
             $_SESSION['close_accordion_secondary'] = 'edit-category-' . $category_id;
@@ -427,6 +464,10 @@ class CardController extends BaseController
 
                 // Supprimer la catégorie
                 $categoryModel->delete($category_id, $admin_id);
+                
+                // Mettre à jour le timestamp du restaurant
+                $this->updateRestaurantTimestamp();
+                
                 $this->addSuccessMessage("Catégorie et tous ses plats supprimés avec succès.", 'categories-grid');
                 $_SESSION['close_accordion'] = 'mode-selector-content';
             } else {
@@ -456,6 +497,9 @@ class CardController extends BaseController
                 // Mettre à jour la base
                 $categoryModel->update($category_id, $category['name'], '');
 
+                // Mettre à jour le timestamp du restaurant
+                $this->updateRestaurantTimestamp();
+                
                 $this->addSuccessMessage("Image de catégorie supprimée avec succès.", 'category-' . $category_id);
                 $_SESSION['close_accordion'] = 'mode-selector-content';
                 $_SESSION['close_accordion_secondary'] = 'edit-category-' . $category_id;
@@ -511,6 +555,9 @@ class CardController extends BaseController
             $dish = $dishModel->create($category_id, $name, (float)$price, $description, $imagePath);
             $dishId = $dish->getId();
 
+            // Mettre à jour le timestamp du restaurant
+            $this->updateRestaurantTimestamp();
+            
             $this->addSuccessMessage("Plat ajouté avec succès.", 'dish-' . $dishId);
             $_SESSION['close_accordion'] = 'mode-selector-content';
             $_SESSION['open_accordion'] = 'edit-dishes-' . $category_id;
@@ -580,6 +627,10 @@ class CardController extends BaseController
         // Mettre à jour
         try {
             $dishModel->update($dish_id, $name, (float)$price, $description, $imagePath);
+            
+            // Mettre à jour le timestamp du restaurant
+            $this->updateRestaurantTimestamp();
+            
             $this->addSuccessMessage("Plat modifié avec succès.", 'dish-' . $dish_id);
             $_SESSION['close_accordion'] = 'mode-selector-content';
             $_SESSION['close_dish_accordion'] = 'dish-' . $dish_id;
@@ -613,6 +664,10 @@ class CardController extends BaseController
 
                 // Supprimer le plat
                 $dishModel->delete($dish_id);
+                
+                // Mettre à jour le timestamp du restaurant
+                $this->updateRestaurantTimestamp();
+                
                 $this->addSuccessMessage("Plat supprimé avec succès.", 'category-' . $current_category_id);
                 $_SESSION['close_accordion'] = 'mode-selector-content';
                 $_SESSION['open_accordion'] = 'edit-dishes-' . $current_category_id;
@@ -647,6 +702,9 @@ class CardController extends BaseController
                 // Mettre à jour la base (image = NULL)
                 $dishModel->update($dish_id, $dish['name'], $dish['price'], $dish['description'], null);
 
+                // Mettre à jour le timestamp du restaurant
+                $this->updateRestaurantTimestamp();
+                
                 $this->addSuccessMessage("Image du plat supprimée avec succès.", 'dish-' . $dish_id);
                 $_SESSION['close_accordion'] = 'mode-selector-content';
                 $_SESSION['close_dish_accordion'] = 'dish-' . $dish_id;
@@ -706,6 +764,9 @@ class CardController extends BaseController
 
         // Messages de résultat
         if ($uploadCount > 0) {
+            // Mettre à jour le timestamp du restaurant
+            $this->updateRestaurantTimestamp();
+            
             $this->addSuccessMessage("$uploadCount image(s) téléchargée(s) avec succès.", 'upload-images');
             if ($errorCount > 0) {
                 $this->addErrorMessage("$errorCount image(s) n'ont pas pu être téléchargées.", 'upload-images');
@@ -734,6 +795,10 @@ class CardController extends BaseController
 
         try {
             $carteImageModel->updateImageOrder($admin_id, $orderArray);
+            
+            // Mettre à jour le timestamp du restaurant
+            $this->updateRestaurantTimestamp();
+            
             $this->addSuccessMessage("Ordre des images mis à jour avec succès.", 'images-list');
 
             // IMPORTANT : Garder l'accordéon "Images de la carte" ouvert

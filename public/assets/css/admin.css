@@ -24,12 +24,12 @@
 @import url("admin/sections/edit-card/edit-card.css");
 @import url("admin/sections/edit-card/drag-and-drop.css");
 
+/* Section edit-logo */
+@import url("admin/sections/edit-logo/edit-logo.css");
+
 /* Section login */
 @import url("admin/sections/login/login.css");
 
 /* Section view-card */
 @import url("admin/sections/view-card/view-card.css");
 @import url("admin/sections/view-card/view-card-lightbox.css");
-
-/* Section edit-logo */
-@import url("admin/sections/edit-logo/edit-logo.css");

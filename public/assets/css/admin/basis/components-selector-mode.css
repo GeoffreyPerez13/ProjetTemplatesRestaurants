@@ -420,7 +420,7 @@
   position: relative;
   width: 120px;
   height: 120px;
-  margin: 0 auto 10px;
+  margin: 0;
   border-radius: 10px;
   overflow: hidden;
   border: 2px solid #dee2e6;

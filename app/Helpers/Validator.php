@@ -1,5 +1,6 @@
 <?php
 
+/* Valide les données soumises par les formulaires selon des règles prédéfinies. */
 class Validator
 {
     private $data;

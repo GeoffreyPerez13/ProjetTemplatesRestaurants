@@ -34,7 +34,7 @@ require __DIR__ . '/../partials/header.php';
 
         <input type="email" name="email" placeholder="Email du restaurant" required>
         <input type="text" name="restaurant_name" placeholder="Nom du restaurant" required>
-        <button type="submit">Envoyer l'invitation</button>
+        <button type="submit" class="btn primary">Envoyer l'invitation</button>
     </form>
 </div>
 <?php require __DIR__ . '/../partials/footer.php'; ?>
