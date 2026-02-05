@@ -1,6 +1,9 @@
 <?php
 $title = $title ?? "Paramètres";
-$scripts = ["js/sections/settings/settings.js"];
+$scripts = [
+    "js/sections/settings/settings.js",
+    "js/effects/scroll-buttons.js"  // Ajout du script de scroll
+];
 
 require __DIR__ . '/../partials/header.php';
 
@@ -11,7 +14,51 @@ $last_card_update = !empty($user['last_card_update']) ? (new DateTime($user['las
 
 <a class="btn-back" href="?page=dashboard">Retour au dashboard</a>
 
+<!-- Boutons de navigation haut/bas -->
+<div class="page-navigation-buttons">
+    <button type="button" class="btn-navigation scroll-to-bottom" title="Aller en bas de la page">
+        <i class="fas fa-arrow-down"></i>
+    </button>
+    <button type="button" class="btn-navigation scroll-to-top" title="Aller en haut de la page">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+</div>
+
 <div class="settings-container" data-csrf-token="<?= htmlspecialchars($csrf_token ?? '') ?>">
+    
+    <!-- Menu déroulant pour mobile -->
+    <div class="settings-mobile-menu">
+        <button class="settings-mobile-toggle" aria-expanded="false" aria-controls="settings-mobile-content">
+            <span class="settings-menu-icon">☰</span>
+        </button>
+        
+        <div class="settings-mobile-content" id="settings-mobile-content">
+            <ul class="settings-mobile-list">
+                <li>
+                    <a href="?page=settings&section=profile" class="<?= $current_section === 'profile' ? 'active' : '' ?>">
+                        Profil utilisateur
+                    </a>
+                </li>
+                <li>
+                    <a href="?page=settings&section=password" class="<?= $current_section === 'password' ? 'active' : '' ?>">
+                        Mot de passe
+                    </a>
+                </li>
+                <li>
+                    <a href="?page=settings&section=account" class="<?= $current_section === 'account' ? 'active' : '' ?>">
+                        Informations du compte
+                    </a>
+                </li>
+                <li>
+                    <a href="?page=settings&section=options" class="<?= $current_section === 'options' ? 'active' : '' ?>">
+                        Options
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Sidebar pour desktop -->
     <div class="settings-sidebar">
         <h3>Paramètres</h3>
         <ul class="settings-menu">
@@ -33,7 +80,6 @@ $last_card_update = !empty($user['last_card_update']) ? (new DateTime($user['las
                     Informations du compte
                 </a>
             </li>
-            <!-- NOUVEAU LIEN POUR OPTIONS -->
             <li>
                 <a href="?page=settings&section=options"
                     class="<?= $current_section === 'options' ? 'active' : '' ?>">
@@ -58,7 +104,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new DateTime($user['las
         <?php if ($current_section === 'profile'): ?>
             <!-- Section Profil -->
             <div class="settings-section" id="profile-form">
-                <h2>Modifier le profil</h2>
+                <h2>Profil utilisateur</h2>
                 <form method="POST" action="?page=settings&action=update-profile">
                     <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
 
@@ -154,7 +200,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new DateTime($user['las
             </div>
 
         <?php elseif ($current_section === 'options'): ?>
-            <!-- NOUVELLE SECTION OPTIONS -->
+            <!-- Section Options -->
             <div class="settings-section" id="options-form">
                 <h2>Options du compte</h2>
                 <p class="section-description">Configurez les paramètres de votre compte et de votre site.</p>

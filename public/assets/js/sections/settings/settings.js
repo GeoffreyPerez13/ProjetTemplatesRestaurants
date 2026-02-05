@@ -1,4 +1,56 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // ==================== GESTION DU MENU MOBILE ====================
+    const menuToggle = document.querySelector('.settings-mobile-toggle');
+    const menuContent = document.getElementById('settings-mobile-content');
+    
+    if (menuToggle && menuContent) {
+        menuToggle.addEventListener('click', function() {
+            const isExpanded = this.getAttribute('aria-expanded') === 'true';
+            this.setAttribute('aria-expanded', !isExpanded);
+            menuContent.classList.toggle('show');
+            
+            // Changer l'icône
+            const menuIcon = this.querySelector('.settings-menu-icon');
+            if (menuIcon) {
+                menuIcon.textContent = isExpanded ? '☰' : '✕';
+            }
+        });
+        
+        // Fermer le menu quand on clique sur un lien
+        menuContent.addEventListener('click', function(event) {
+            if (event.target.tagName === 'A') {
+                menuToggle.setAttribute('aria-expanded', 'false');
+                this.classList.remove('show');
+                
+                const menuIcon = menuToggle.querySelector('.settings-menu-icon');
+                if (menuIcon) {
+                    menuIcon.textContent = '☰';
+                }
+                
+                // Mettre à jour le texte du bouton avec la section sélectionnée
+                const linkText = event.target.textContent;
+                const menuText = menuToggle.querySelector('.settings-menu-text');
+                if (menuText) {
+                    menuText.textContent = linkText;
+                }
+            }
+        });
+        
+        // Fermer le menu en cliquant à l'extérieur
+        document.addEventListener('click', function(event) {
+            if (!menuToggle.contains(event.target) && !menuContent.contains(event.target)) {
+                menuToggle.setAttribute('aria-expanded', 'false');
+                menuContent.classList.remove('show');
+                
+                const menuIcon = menuToggle.querySelector('.settings-menu-icon');
+                if (menuIcon) {
+                    menuIcon.textContent = '☰';
+                }
+            }
+        });
+    }
+    
+    // ==================== GESTION DES OPTIONS ====================
     // Récupérer le token CSRF depuis l'attribut data
     const container = document.querySelector('.settings-container');
     const csrfToken = container ? container.dataset.csrfToken : '';

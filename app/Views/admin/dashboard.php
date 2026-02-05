@@ -1,5 +1,6 @@
 <?php
 $title = "Tableau de bord";
+$scripts = ["js/sections/dashboard/dashboard.js"];
 
 // Formater la date si elle existe
 $formatted_date = null;
@@ -11,7 +12,13 @@ if (!empty($last_updated)) {
 require __DIR__ . '/../partials/header.php';
 ?>
 <div class="dashboard">
-    <h2>Tableau de bord</h2>
+    <!-- En-tête avec titre et bouton paramètres -->
+    <div class="dashboard-header">
+        <h2>Tableau de bord</h2>
+        <a href="?page=settings" class="settings-icon-btn" title="Paramètres">
+            <span class="settings-icon">⚙️</span>
+        </a>
+    </div>
 
     <!-- Messages flash -->
     <?php if (!empty($success_message)): ?>
@@ -34,21 +41,47 @@ require __DIR__ . '/../partials/header.php';
         <?php endif; ?>
     </div>
 
-    <div class="dashboard-top-buttons">
-        <a href="?page=edit-card" class="btn">Modifier la carte</a>
-        <a href="?page=edit-contact" class="btn">Modifier le contact</a>
-        <a href="?page=edit-logo" class="btn">Modifier le logo</a>
-        <a href="?page=view-card" class="btn success">Aperçu de la carte</a>
-        <a href="?page=settings" class="btn" title="Paramètres">Paramètres</a>
+    <!-- Menu déroulant pour mobile -->
+    <div class="dashboard-mobile-menu">
+        <button class="mobile-menu-toggle" aria-expanded="false" aria-controls="mobile-menu-content">
+            <span class="menu-icon">☰</span>
+        </button>
+        
+        <div class="mobile-menu-content" id="mobile-menu-content">
+            <div class="dashboard-top-buttons">
+                <a href="?page=edit-card" class="btn">Modifier la carte</a>
+                <a href="?page=edit-contact" class="btn">Modifier le contact</a>
+                <a href="?page=edit-logo" class="btn">Modifier le logo</a>
+                <a href="?page=view-card" class="btn success">Aperçu de la carte</a>
+                <?php if ($role === 'SUPER_ADMIN'): ?>
+                    <a href="?page=send-invitation" class="btn">Envoyer un lien de création de compte</a>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 
-    <!-- Zone du bas pour les boutons d'action -->
-    <div class="dashboard-bottom">
-        <?php if ($role === 'SUPER_ADMIN'): ?>
-            <a href="?page=send-invitation" class="btn left">Envoyer un lien de création de compte</a>
-        <?php endif; ?>
+    <!-- Boutons normaux pour desktop -->
+    <div class="dashboard-desktop">
+        <div class="dashboard-top-buttons">
+            <a href="?page=edit-card" class="btn">Modifier la carte</a>
+            <a href="?page=edit-contact" class="btn">Modifier le contact</a>
+            <a href="?page=edit-logo" class="btn">Modifier le logo</a>
+            <a href="?page=view-card" class="btn success">Aperçu de la carte</a>
+        </div>
 
-        <a href="?page=logout" class="btn danger right">Se déconnecter</a>
+        <!-- Zone du bas pour les boutons d'action desktop -->
+        <div class="dashboard-bottom desktop-bottom">
+            <?php if ($role === 'SUPER_ADMIN'): ?>
+                <a href="?page=send-invitation" class="btn">Envoyer un lien de création de compte</a>
+            <?php endif; ?>
+
+            <a href="?page=logout" class="btn danger">Se déconnecter</a>
+        </div>
+    </div>
+    
+    <!-- Bouton déconnexion toujours visible sur mobile -->
+    <div class="mobile-logout-container">
+        <a href="?page=logout" class="btn danger mobile-logout">Se déconnecter</a>
     </div>
 </div>
 
