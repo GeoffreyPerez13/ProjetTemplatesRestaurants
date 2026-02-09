@@ -208,7 +208,6 @@
    */
   function toggleAccordion(target, toggle) {
     const isExpanded = target.classList.contains("expanded");
-    const icon = toggle.querySelector("i");
 
     if (isExpanded) {
       closeAccordion(target.id);
@@ -222,7 +221,6 @@
    */
   function toggleDishAccordion(target, toggle) {
     const isExpanded = target.classList.contains("expanded");
-    const icon = toggle.querySelector("i");
 
     if (isExpanded) {
       closeDishAccordion(target.id);
@@ -247,8 +245,8 @@
     if (toggle) {
       const icon = toggle.querySelector("i");
       if (icon) {
-        icon.classList.remove("fa-chevron-down");
-        icon.classList.add("fa-chevron-up");
+        icon.classList.remove("fa-chevron-up");   // ← CHANGÉ (était fa-chevron-down)
+        icon.classList.add("fa-chevron-down");    // ← CHANGÉ (était fa-chevron-up)
       }
     }
   }
@@ -269,8 +267,8 @@
     if (toggle) {
       const icon = toggle.querySelector("i");
       if (icon) {
-        icon.classList.remove("fa-chevron-up");
-        icon.classList.add("fa-chevron-down");
+        icon.classList.remove("fa-chevron-down"); // ← CHANGÉ (était fa-chevron-up)
+        icon.classList.add("fa-chevron-up");      // ← CHANGÉ (était fa-chevron-down)
       }
     }
   }
@@ -292,8 +290,8 @@
     if (toggle) {
       const icon = toggle.querySelector("i");
       if (icon) {
-        icon.classList.remove("fa-chevron-down");
-        icon.classList.add("fa-chevron-up");
+        icon.classList.remove("fa-chevron-up");   // ← CHANGÉ (était fa-chevron-down)
+        icon.classList.add("fa-chevron-down");    // ← CHANGÉ (était fa-chevron-up)
       }
     }
   }
@@ -315,8 +313,8 @@
     if (toggle) {
       const icon = toggle.querySelector("i");
       if (icon) {
-        icon.classList.remove("fa-chevron-up");
-        icon.classList.add("fa-chevron-down");
+        icon.classList.remove("fa-chevron-down"); // ← CHANGÉ (était fa-chevron-up)
+        icon.classList.add("fa-chevron-up");      // ← CHANGÉ (était fa-chevron-down)
       }
     }
   }
@@ -389,17 +387,6 @@
     expandAll: expandAllAccordions,
     collapseAll: collapseAllAccordions,
     closeAllExceptFirst: closeAllExceptFirst,
-  };
-
-  /**
-   * Fonctions de compatibilité (pour edit-card.js)
-   */
-  window.closeAccordionById = function (accordionId) {
-    closeAccordion(accordionId);
-  };
-
-  window.collapseCategoryById = function (categoryId) {
-    collapseCategory(categoryId);
   };
 
   // Initialisation

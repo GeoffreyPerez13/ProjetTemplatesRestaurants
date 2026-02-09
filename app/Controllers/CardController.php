@@ -20,7 +20,7 @@ class CardController extends BaseController
     public function __construct($pdo)
     {
         parent::__construct($pdo);
-        $this->setScrollDelay(3500);
+        $this->setScrollDelay(1500); // 1,5 secondes
         $this->restaurantModel = new Restaurant($pdo); // Initialisation
     }
 
@@ -227,107 +227,152 @@ class CardController extends BaseController
     }
 
     /**
-     * Gestion simplifiée de la suppression d'image
-     */
-    private function handleDeleteImageSimple($carteImageModel, $admin_id, $anchor)
-    {
-        // 1. Récupérer l'ID de l'image
-        $image_id = (int)($_POST['image_id'] ?? 0);
-        error_log("Image ID from POST: $image_id");
+ * Gestion simplifiée de la suppression d'image
+ */
+private function handleDeleteImageSimple($carteImageModel, $admin_id, $anchor)
+{
+    // 1. Récupérer l'ID de l'image
+    $image_id = (int)($_POST['image_id'] ?? 0);
+    error_log("=== DELETE IMAGE PROCESS START ===");
+    error_log("Image ID from POST: $image_id");
+    error_log("Admin ID: $admin_id");
 
-        if ($image_id <= 0) {
-            error_log("Invalid image ID");
-            $this->addErrorMessage("ID d'image invalide.", 'images-list');
-            return;
-        }
+    if ($image_id <= 0) {
+        error_log("Invalid image ID");
+        $this->addErrorMessage("ID d'image invalide.", 'images-list');
+        return;
+    }
 
-        // 2. Vérifier que l'image appartient bien à l'admin
-        $stmt = $this->pdo->prepare("SELECT * FROM card_images WHERE id = ? AND admin_id = ?");
+    // 2. Récupérer les infos de l'image AVANT suppression
+    $stmt = $this->pdo->prepare("SELECT * FROM card_images WHERE id = ? AND admin_id = ?");
+    $stmt->execute([$image_id, $admin_id]);
+    $image = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$image) {
+        error_log("Image not found or doesn't belong to admin");
+        $this->addErrorMessage("Image non trouvée ou vous n'avez pas les droits.", 'images-list');
+        return;
+    }
+
+    error_log("Image found:");
+    error_log("- ID: " . $image['id']);
+    error_log("- Filename: " . $image['filename']);
+    error_log("- Original name: " . $image['original_name']);
+    error_log("- Admin ID: " . $image['admin_id']);
+
+    // 3. SUPPRESSION EN BASE DE DONNÉES D'ABORD
+    try {
+        $stmt = $this->pdo->prepare("DELETE FROM card_images WHERE id = ? AND admin_id = ?");
         $stmt->execute([$image_id, $admin_id]);
-        $image = $stmt->fetch(PDO::FETCH_ASSOC);
+        $rowCount = $stmt->rowCount();
 
-        if (!$image) {
-            error_log("Image not found or doesn't belong to admin");
-            $this->addErrorMessage("Image non trouvée ou vous n'avez pas les droits.", 'images-list');
+        error_log("Database delete - Rows affected: $rowCount");
+
+        if ($rowCount === 0) {
+            error_log("Failed to delete from database - no rows affected");
+            $this->addErrorMessage("Échec de la suppression de la base de données.", 'images-list');
+            $_SESSION['open_accordion'] = 'images-list-content';
+            $this->redirectToEditCard($anchor);
             return;
         }
 
-        error_log("Image found: " . json_encode($image));
+        error_log("Image successfully deleted from database");
 
-        // 3. Supprimer le fichier physique s'il existe
-        if (!empty($image['filename'])) {
-            if (!$this->deletePhysicalFile($image['filename'])) {
-                error_log("Failed to delete physical file");
-                $this->addErrorMessage("Erreur lors de la suppression du fichier.", 'images-list');
-                $_SESSION['open_accordion'] = 'images-list-content';
-                $this->redirectToEditCard($anchor);
-                return;
-            }
-        }
-
-        // 4. Supprimer de la base de données
-        try {
-            $stmt = $this->pdo->prepare("DELETE FROM card_images WHERE id = ? AND admin_id = ?");
-            $stmt->execute([$image_id, $admin_id]);
-            $rowCount = $stmt->rowCount();
-
-            error_log("Database delete - Rows affected: $rowCount");
-
-            if ($rowCount > 0) {
-                error_log("Image deleted successfully");
-
-                // Mettre à jour le timestamp du restaurant
-                $this->updateRestaurantTimestamp();
-
-                $this->addSuccessMessage("Image supprimée avec succès.", 'images-list');
-
-                // IMPORTANT : Configurer les accordéons après suppression
-                $_SESSION['close_accordion'] = 'mode-selector-content';
-                $_SESSION['open_accordion'] = 'images-list-content';
-            } else {
-                error_log("Failed to delete from database");
-                $this->addErrorMessage("Échec de la suppression.", 'images-list');
-                $_SESSION['open_accordion'] = 'images-list-content';
-            }
-        } catch (Exception $e) {
-            error_log("Database delete error: " . $e->getMessage());
-            $this->addErrorMessage("Erreur de base de données: " . $e->getMessage(), 'images-list');
-            $_SESSION['open_accordion'] = 'images-list-content';
-        }
-
+    } catch (Exception $e) {
+        error_log("Database delete error: " . $e->getMessage());
+        $this->addErrorMessage("Erreur de base de données: " . $e->getMessage(), 'images-list');
+        $_SESSION['open_accordion'] = 'images-list-content';
         $this->redirectToEditCard($anchor);
+        return;
     }
 
-    /**
-     * Supprime un fichier physique
-     */
-    private function deletePhysicalFile($filename)
-    {
-        // Nettoyer le chemin du fichier
-        $filepath = $filename;
-
-        // Si le chemin commence par '/', l'enlever
-        if (strpos($filepath, '/') === 0) {
-            $filepath = substr($filepath, 1);
-        }
-
-        // Chemin absolu
-        $absolutePath = $_SERVER['DOCUMENT_ROOT'] . '/' . $filepath;
-        error_log("Trying to delete file: $absolutePath");
-
-        if (file_exists($absolutePath)) {
-            if (unlink($absolutePath)) {
-                error_log("Physical file deleted: $absolutePath");
-                return true;
-            } else {
-                error_log("Failed to delete physical file: $absolutePath");
-                return false;
-            }
+    // 4. SUPPRESSION DU FICHIER PHYSIQUE
+    if (!empty($image['filename'])) {
+        if ($this->deletePhysicalFile($image['filename'])) {
+            error_log("Physical file deleted successfully");
         } else {
-            error_log("File does not exist: $absolutePath");
-            return false;
+            error_log("WARNING: Physical file could not be deleted, but DB record was removed");
+            // On continue même si le fichier physique n'a pas pu être supprimé
+            // car l'enregistrement en base est déjà supprimé
+        }
+    } else {
+        error_log("No filename to delete");
+    }
+
+    // 5. SUCCÈS
+    error_log("Image deletion process completed successfully");
+
+    // Mettre à jour le timestamp du restaurant
+    $this->updateRestaurantTimestamp();
+
+    $this->addSuccessMessage("Image supprimée avec succès.", 'images-list');
+
+    // IMPORTANT : Configurer les accordéons après suppression
+    $_SESSION['close_accordion'] = 'mode-selector-content';
+    $_SESSION['open_accordion'] = 'images-list-content';
+
+    $this->redirectToEditCard($anchor);
+}
+
+/**
+ * Supprime un fichier physique - VERSION CORRIGÉE
+ */
+private function deletePhysicalFile($filename)
+{
+    error_log("Attempting to delete physical file: $filename");
+    
+    // 1. Nettoyer le chemin
+    $filepath = trim($filename);
+    
+    // 2. Si le chemin commence par '/', l'enlever
+    if (strpos($filepath, '/') === 0) {
+        $filepath = substr($filepath, 1);
+        error_log("Removed leading slash, new path: $filepath");
+    }
+    
+    // 3. Chemin absolu depuis la racine du projet
+    // Supposons que les images sont dans 'uploads/card-images/'
+    $projectRoot = realpath(__DIR__ . '/../../');
+    $absolutePath = $projectRoot . '/' . $filepath;
+    
+    error_log("Project root: $projectRoot");
+    error_log("Absolute path: $absolutePath");
+    
+    // 4. Vérifier si le fichier existe
+    if (!file_exists($absolutePath)) {
+        error_log("File does not exist at: $absolutePath");
+        
+        // Essayer un autre emplacement possible
+        $alternativePath = $_SERVER['DOCUMENT_ROOT'] . '/' . $filepath;
+        error_log("Trying alternative path: $alternativePath");
+        
+        if (file_exists($alternativePath)) {
+            $absolutePath = $alternativePath;
+            error_log("File found at alternative location");
+        } else {
+            error_log("File not found at alternative location either");
+            // On retourne true pour continuer même si le fichier n'existe pas
+            return true;
         }
     }
+    
+    // 5. Vérifier les permissions
+    if (!is_writable($absolutePath)) {
+        error_log("File is not writable: $absolutePath");
+        error_log("Permissions: " . substr(sprintf('%o', fileperms($absolutePath)), -4));
+        return false;
+    }
+    
+    // 6. Supprimer le fichier
+    if (unlink($absolutePath)) {
+        error_log("Physical file deleted successfully: $absolutePath");
+        return true;
+    } else {
+        error_log("Failed to delete physical file: $absolutePath");
+        error_log("Error: " . error_get_last()['message'] ?? 'Unknown error');
+        return false;
+    }
+}
 
     /**
      * Supprime une image de la base de données

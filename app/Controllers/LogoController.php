@@ -6,7 +6,7 @@ class LogoController extends BaseController {
 
     public function __construct($pdo) {
         parent::__construct($pdo);
-        $this->setScrollDelay(3500);
+        $this->setScrollDelay(1500); // Changé à 1.5s pour correspondre aux autres
     }
 
     /**
@@ -25,6 +25,9 @@ class LogoController extends BaseController {
         
         // 4. Traitement du formulaire d'upload
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Récupérer l'ancre du formulaire
+            $anchor = $_POST['anchor'] ?? 'logo-form';
+            
             // Vérifier si c'est un upload de fichier
             if (isset($_FILES['logo']) && !empty($_FILES['logo']['tmp_name'])) {
                 try {
@@ -33,29 +36,39 @@ class LogoController extends BaseController {
                     
                     if ($result['success']) {
                         // Message de succès
-                        $this->addSuccessMessage("Logo mis à jour avec succès !", 'logo-form');
+                        $this->addSuccessMessage("Logo mis à jour avec succès !", $anchor);
+                        
+                        // Gestion des accordéons : ouvrir logo actuel, fermer upload
+                        $_SESSION['close_accordion'] = 'upload-logo-content';
+                        $_SESSION['open_accordion'] = 'current-logo-content';
                         
                         // Mettre à jour le logo actuel
                         $current_logo = $this->getCurrentLogo($admin_id);
                     } else {
                         // Message d'erreur
-                        $this->addErrorMessage($result['error'], 'logo-form');
+                        $this->addErrorMessage($result['error'], $anchor);
+                        // En cas d'erreur, garder l'accordéon upload ouvert
+                        $_SESSION['open_accordion'] = 'upload-logo-content';
                     }
                     
                     // Redirection pour éviter la soumission multiple
-                    header('Location: ?page=edit-logo');
+                    $redirectUrl = '?page=edit-logo&anchor=' . urlencode($anchor);
+                    header('Location: ' . $redirectUrl);
                     exit;
                 } catch (Exception $e) {
-                    $this->addErrorMessage("Erreur lors du traitement: " . $e->getMessage(), 'logo-form');
-                    header('Location: ?page=edit-logo');
+                    $this->addErrorMessage("Erreur lors du traitement: " . $e->getMessage(), $anchor);
+                    $_SESSION['open_accordion'] = 'upload-logo-content';
+                    $redirectUrl = '?page=edit-logo&anchor=' . urlencode($anchor);
+                    header('Location: ' . $redirectUrl);
                     exit;
                 }
             }
             
             // Si c'est une suppression de logo
             if (isset($_POST['delete_logo'])) {
-                $this->handleLogoDeletion($admin_id);
-                header('Location: ?page=edit-logo');
+                $this->handleLogoDeletion($admin_id, $anchor);
+                $redirectUrl = '?page=edit-logo&anchor=' . urlencode($anchor);
+                header('Location: ' . $redirectUrl);
                 exit;
             }
         }
@@ -67,8 +80,12 @@ class LogoController extends BaseController {
             'error_message' => $messages['error_message'] ?? null,
             'scroll_delay' => $messages['scroll_delay'] ?? $this->scrollDelay,
             'anchor' => $messages['anchor'] ?? null,
-            'scripts' => ['js/sections/edit-logo/edit-logo.js'] // Inclure le JS spécifique
+            'closeAccordion' => $_SESSION['close_accordion'] ?? '',
+            'openAccordion' => $_SESSION['open_accordion'] ?? ''
         ];
+
+        // Nettoyer les variables de session
+        unset($_SESSION['close_accordion'], $_SESSION['open_accordion']);
 
         // 6. Affichage de la vue
         $this->render('admin/edit-logo', $data);
@@ -219,7 +236,7 @@ class LogoController extends BaseController {
     /**
      * Gère la suppression du logo
      */
-    private function handleLogoDeletion($admin_id) {
+    private function handleLogoDeletion($admin_id, $anchor) {
         $uploadDir = __DIR__ . '/../../public/assets/logos/';
         $logo = $this->getCurrentLogo($admin_id);
         
@@ -233,9 +250,15 @@ class LogoController extends BaseController {
             $stmt = $this->pdo->prepare("DELETE FROM logos WHERE admin_id = ?");
             $stmt->execute([$admin_id]);
             
-            $this->addSuccessMessage("Logo supprimé avec succès.", 'logo-form');
+            $this->addSuccessMessage("Logo supprimé avec succès.", $anchor);
+            
+            // Gestion des accordéons : ouvrir upload, fermer logo actuel
+            $_SESSION['close_accordion'] = 'current-logo-content';
+            $_SESSION['open_accordion'] = 'upload-logo-content';
         } else {
-            $this->addErrorMessage("Aucun logo à supprimer.", 'logo-form');
+            $this->addErrorMessage("Aucun logo à supprimer.", $anchor);
+            // En cas d'erreur, garder l'accordéon logo actuel ouvert
+            $_SESSION['open_accordion'] = 'current-logo-content';
         }
     }
 }

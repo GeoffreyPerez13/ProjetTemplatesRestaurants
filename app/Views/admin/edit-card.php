@@ -34,7 +34,7 @@ require __DIR__ . '/../partials/header.php';
     // Variables disponibles pour edit-card.js
     window.scrollParams = {
         anchor: '<?= htmlspecialchars($anchor ?? '') ?>',
-        scrollDelay: <?= (int)($scroll_delay ?? 3500) ?>,
+        scrollDelay: <?= (int)($scroll_delay ?? 1500) ?>,
         closeAccordion: '<?= htmlspecialchars($closeAccordion) ?>',
         closeAccordionSecondary: '<?= htmlspecialchars($closeAccordionSecondary) ?>',
         closeDishAccordion: '<?= htmlspecialchars($closeDishAccordion) ?>',
@@ -82,7 +82,7 @@ require __DIR__ . '/../partials/header.php';
 <!-- Sélecteur de mode (accordéon) -->
 <div class="accordion-section mode-selector-accordion" id="mode-selector">
     <div class="accordion-header">
-        <h2>Mode d'affichage de la carte</h2>
+        <h2><i class="fas fa-cogs"></i> Mode d'affichage de la carte</h2>
         <button type="button" class="accordion-toggle" data-target="mode-selector-content">
             <i class="fas fa-chevron-down"></i>
         </button>
@@ -126,7 +126,7 @@ require __DIR__ . '/../partials/header.php';
         <!-- Bloc Ajouter une catégorie (accordéon) -->
         <div class="accordion-section new-category-accordion" id="new-category">
             <div class="accordion-header">
-                <h2>Ajouter une nouvelle catégorie</h2>
+                <h2><i class="fas fa-plus-circle"></i> Ajouter une nouvelle catégorie</h2>
                 <button type="button" class="accordion-toggle" data-target="new-category-content">
                     <i class="fas fa-chevron-down"></i>
                 </button>
@@ -172,7 +172,7 @@ require __DIR__ . '/../partials/header.php';
                     <?php endif; ?>
 
                     <div class="category-header">
-                        <strong><?= htmlspecialchars($cat['name']) ?></strong>
+                        <strong><i class="fas fa-folder"></i> <?= htmlspecialchars($cat['name']) ?></strong>
 
                         <!-- Contrôles d'accordéon pour cette catégorie -->
                         <div class="category-accordion-controls">
@@ -188,7 +188,7 @@ require __DIR__ . '/../partials/header.php';
                     <!-- Section Modifier la catégorie (accordéon) -->
                     <div class="accordion-section">
                         <div class="accordion-header">
-                            <h3>Modifier la catégorie</h3>
+                            <h3><i class="fas fa-edit"></i> Modifier la catégorie</h3>
                             <button type="button" class="accordion-toggle" data-target="edit-category-<?= $cat['id'] ?>">
                                 <i class="fas fa-chevron-down"></i>
                             </button>
@@ -245,7 +245,7 @@ require __DIR__ . '/../partials/header.php';
                     <!-- Section Ajouter un plat (accordéon) -->
                     <div class="accordion-section">
                         <div class="accordion-header">
-                            <h3>Ajouter un plat</h3>
+                            <h3><i class="fas fa-plus-square"></i> Ajouter un plat</h3>
                             <button type="button" class="accordion-toggle" data-target="add-dish-<?= $cat['id'] ?>">
                                 <i class="fas fa-chevron-down"></i>
                             </button>
@@ -303,7 +303,7 @@ require __DIR__ . '/../partials/header.php';
                         <!-- Section Modifier les plats (accordéon) -->
                         <div class="accordion-section">
                             <div class="accordion-header">
-                                <h3>Modifier les plats (<?= count($plats) ?>)</h3>
+                                <h3><i class="fas fa-utensils"></i> Modifier les plats (<?= count($plats) ?>)</h3>
                                 <button type="button" class="accordion-toggle" data-target="edit-dishes-<?= $cat['id'] ?>">
                                     <i class="fas fa-chevron-down"></i>
                                 </button>
@@ -315,7 +315,7 @@ require __DIR__ . '/../partials/header.php';
                                         <li class="dish-accordion-item">
                                             <!-- En-tête du plat (accordéon) -->
                                             <div class="dish-accordion-header">
-                                                <h4><?= htmlspecialchars($plat['name']) ?> - <?= htmlspecialchars($plat['price']) ?>€</h4>
+                                                <h4><i class="fas fa-utensil-spoon"></i> <?= htmlspecialchars($plat['name']) ?> - <?= htmlspecialchars($plat['price']) ?>€</h4>
                                                 <button type="button" class="dish-accordion-toggle"
                                                     data-target="dish-<?= $plat['id'] ?>"
                                                     data-category="<?= $cat['id'] ?>">
@@ -432,7 +432,7 @@ require __DIR__ . '/../partials/header.php';
         <!-- Upload d'images (accordéon) -->
         <div class="accordion-section upload-images-accordion" id="upload-images">
             <div class="accordion-header">
-                <h2>Ajouter des images à la carte</h2>
+                <h2><i class="fas fa-cloud-upload-alt"></i> Ajouter des images à la carte</h2>
                 <button type="button" class="accordion-toggle" data-target="upload-images-content">
                     <i class="fas fa-chevron-down"></i>
                 </button>
@@ -480,7 +480,7 @@ require __DIR__ . '/../partials/header.php';
         <!-- Liste des images existantes (accordéon) -->
         <div class="accordion-section images-list-accordion" id="images-list">
             <div class="accordion-header">
-                <h2>Images de la carte (<?= !empty($carteImages) ? count($carteImages) : '0' ?>)</h2>
+                <h2><i class="fas fa-images"></i> Images de la carte (<?= !empty($carteImages) ? count($carteImages) : '0' ?>)</h2>
                 <button type="button" class="accordion-toggle" data-target="images-list-content">
                     <i class="fas fa-chevron-down"></i>
                 </button>

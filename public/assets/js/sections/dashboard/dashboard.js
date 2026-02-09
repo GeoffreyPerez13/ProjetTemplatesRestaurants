@@ -3,42 +3,39 @@ document.addEventListener('DOMContentLoaded', function() {
     const menuContent = document.getElementById('mobile-menu-content');
     
     if (menuToggle && menuContent) {
-        menuToggle.addEventListener('click', function() {
+        menuToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
             const isExpanded = this.getAttribute('aria-expanded') === 'true';
             this.setAttribute('aria-expanded', !isExpanded);
             menuContent.classList.toggle('show');
             
-            // Changer l'icône
-            const menuIcon = this.querySelector('.menu-icon');
-            if (menuIcon) {
-                menuIcon.textContent = isExpanded ? '☰' : '✕';
+            // Animation simple du bouton
+            if (!isExpanded) {
+                // Ouverture
+                this.style.borderRadius = '6px 6px 0 0';
+            } else {
+                // Fermeture
+                setTimeout(() => {
+                    this.style.borderRadius = '6px';
+                }, 300);
             }
         });
         
         // Fermer le menu en cliquant à l'extérieur
         document.addEventListener('click', function(event) {
-            if (!menuToggle.contains(event.target) && !menuContent.contains(event.target)) {
+            if (menuContent.classList.contains('show') && 
+                !menuToggle.contains(event.target) && 
+                !menuContent.contains(event.target)) {
+                
                 menuToggle.setAttribute('aria-expanded', 'false');
                 menuContent.classList.remove('show');
-                
-                const menuIcon = menuToggle.querySelector('.menu-icon');
-                if (menuIcon) {
-                    menuIcon.textContent = '☰';
-                }
+                menuToggle.style.borderRadius = '6px';
             }
         });
         
-        // Fermer le menu quand on clique sur un lien
-        menuContent.addEventListener('click', function(event) {
-            if (event.target.tagName === 'A') {
-                menuToggle.setAttribute('aria-expanded', 'false');
-                this.classList.remove('show');
-                
-                const menuIcon = menuToggle.querySelector('.menu-icon');
-                if (menuIcon) {
-                    menuIcon.textContent = '☰';
-                }
-            }
+        // Empêcher la fermeture quand on clique dans le menu
+        menuContent.addEventListener('click', function(e) {
+            e.stopPropagation();
         });
     }
 });

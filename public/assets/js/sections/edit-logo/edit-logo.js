@@ -55,11 +55,11 @@
 
         // Gestion du scroll vers une ancre
         if (scrollParams.anchor) {
-            handleAnchorScroll(scrollParams.anchor, scrollParams.scrollDelay || 3500);
+            handleAnchorScroll(scrollParams.anchor, scrollParams.scrollDelay || 1500);
         }
 
         // ==================== GESTION DES MESSAGES ====================
-        setupMessageHandlers(scrollParams.scrollDelay || 3500);
+        setupMessageHandlers(scrollParams.scrollDelay || 1500);
 
         // ==================== INITIALISATION DES ÉLÉMENTS ====================
         initElements();
@@ -677,7 +677,7 @@
 
                 setTimeout(() => {
                     element.style.boxShadow = '';
-                }, 2000);
+                }, 1500);
             }
         }, delay);
     }

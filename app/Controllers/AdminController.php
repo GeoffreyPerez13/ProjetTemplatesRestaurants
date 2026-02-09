@@ -16,6 +16,7 @@ class AdminController extends BaseController
     public function __construct($pdo)
     {
         parent::__construct($pdo);
+        $this->setScrollDelay(1500);
     }
 
     /**
@@ -32,6 +33,7 @@ class AdminController extends BaseController
         $admin = $adminModel->findById($_SESSION['admin_id']);
 
         if ($admin->role !== 'SUPER_ADMIN') {
+            $this->addErrorMessage("Accès refusé : réservé aux SUPER_ADMIN uniquement.", '');
             header('Location: ?page=dashboard');
             exit;
         }
@@ -39,27 +41,21 @@ class AdminController extends BaseController
         // Étape 3: Traitement du formulaire si soumis
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
-                $_SESSION['error_message'] = "Requête invalide (CSRF).";
+                $this->addErrorMessage("Requête invalide (CSRF).", '');
             } else {
                 $email = trim($_POST['email'] ?? '');
                 $restaurantName = trim($_POST['restaurant_name'] ?? '');
 
                 if (empty($email) || empty($restaurantName)) {
-                    $_SESSION['error_message'] = "Veuillez remplir tous les champs.";
+                    $this->addErrorMessage("Veuillez remplir tous les champs.", '');
                 } else {
                     $adminModel = new Admin($this->pdo);
                     $token = bin2hex(random_bytes(32));
 
                     if ($adminModel->createInvitation($email, $restaurantName, $token)) {
-                        $inviteLink = "http://" . $_SERVER['HTTP_HOST'] . "?page=register&token=" . $token;
-
-                        if (defined('DEV_SHOW_LINK') && DEV_SHOW_LINK === true) {
-                            $_SESSION['success_message'] = "L'invitation a été envoyée avec succès. Lien: " . $inviteLink;
-                        } else {
-                            $_SESSION['success_message'] = "L'invitation a été envoyée avec succès.";
-                        }
+                        $this->addSuccessMessage("L'invitation a été envoyée avec succès à $email.", '');
                     } else {
-                        $_SESSION['error_message'] = "Erreur lors de la création de l'invitation.";
+                        $this->addErrorMessage("Erreur lors de l'envoi de l'invitation. Vérifiez les logs.", '');
                     }
                 }
             }
@@ -70,11 +66,9 @@ class AdminController extends BaseController
         }
 
         // Étape 4: Récupération des messages flash
-        $success_message = $_SESSION['success_message'] ?? null;
-        $error_message = $_SESSION['error_message'] ?? null;
-
-        // Nettoyer après récupération
-        unset($_SESSION['success_message'], $_SESSION['error_message']);
+        $messages = $this->getFlashMessages();
+        $success_message = $messages['success_message'];
+        $error_message = $messages['error_message'];
 
         // Étape 5: Affichage de la vue avec les données
         $this->render('admin/send-invitation', [
@@ -86,7 +80,6 @@ class AdminController extends BaseController
 
     /**
      * Inscription via un lien d'invitation
-     * Permet à un restaurateur de créer son compte après avoir reçu une invitation
      */
     public function register()
     {
@@ -94,7 +87,7 @@ class AdminController extends BaseController
         $token = $_GET['token'] ?? null;
 
         if (empty($token)) {
-            $_SESSION['error_message'] = "Token d'invitation manquant.";
+            $this->addErrorMessage("Token d'invitation manquant.", '');
             header('Location: ?page=login');
             exit;
         }
@@ -104,19 +97,19 @@ class AdminController extends BaseController
         $invitation = $adminModel->getInvitation($token);
 
         if (!$invitation) {
-            $_SESSION['error_message'] = "Lien d'invitation invalide ou introuvable.";
+            $this->addErrorMessage("Lien d'invitation invalide ou introuvable.", '');
             header('Location: ?page=login');
             exit;
         }
 
         if (strtotime($invitation->expiry) < time()) {
-            $_SESSION['error_message'] = "Ce lien d'invitation a expiré.";
+            $this->addErrorMessage("Ce lien d'invitation a expiré.", '');
             header('Location: ?page=login');
             exit;
         }
 
         if ($invitation->used == 1) {
-            $_SESSION['error_message'] = "Ce lien d'invitation a déjà été utilisé.";
+            $this->addErrorMessage("Ce lien d'invitation a déjà été utilisé.", '');
             header('Location: ?page=login');
             exit;
         }
@@ -140,30 +133,27 @@ class AdminController extends BaseController
             }
 
             if ($error) {
-                // Stocker l'erreur dans la session
-                $_SESSION['error_message'] = $error;
+                $this->addErrorMessage($error, '');
                 header('Location: ?page=register&token=' . urlencode($token));
                 exit;
             }
 
             // Essayer de créer le compte
             if ($adminModel->createAccount($invitation, $username, $password)) {
-                $_SESSION['success_message'] = "Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.";
+                $this->addSuccessMessage("Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.", '');
                 header('Location: ?page=login');
                 exit;
             } else {
-                $_SESSION['error_message'] = "Erreur lors de la création du compte. Le nom d'utilisateur existe peut-être déjà.";
+                $this->addErrorMessage("Erreur lors de la création du compte. Le nom d'utilisateur existe peut-être déjà.", '');
                 header('Location: ?page=register&token=' . urlencode($token));
                 exit;
             }
         }
 
         // Étape 4: Récupération des messages flash
-        $success_message = $_SESSION['success_message'] ?? null;
-        $error_message = $_SESSION['error_message'] ?? null;
-
-        // Nettoyer les messages après les avoir récupérés
-        unset($_SESSION['success_message'], $_SESSION['error_message']);
+        $messages = $this->getFlashMessages();
+        $success_message = $messages['success_message'];
+        $error_message = $messages['error_message'];
 
         // Étape 5: Affichage du formulaire d'inscription
         $this->render('admin/register', [
@@ -177,16 +167,13 @@ class AdminController extends BaseController
 
     /**
      * Connexion d'un administrateur
-     * Authentifie un administrateur et démarre une session
      */
     public function login()
     {
-        // Récupérer les messages de session
-        $success_message = $_SESSION['success_message'] ?? null;
-        $error_message = $_SESSION['error_message'] ?? null;
-
-        // Nettoyer après récupération
-        unset($_SESSION['success_message'], $_SESSION['error_message']);
+        // Récupération des messages flash
+        $messages = $this->getFlashMessages();
+        $success_message = $messages['success_message'];
+        $error_message = $messages['error_message'];
 
         $error = null;
 
@@ -243,7 +230,6 @@ class AdminController extends BaseController
 
     /**
      * Tableau de bord de l'administrateur
-     * Page principale après connexion, affiche les informations de l'admin
      */
     public function dashboard()
     {
@@ -255,7 +241,7 @@ class AdminController extends BaseController
         $admin = $adminModel->findById($_SESSION['admin_id']);
 
         if (!$admin) {
-            $_SESSION['error_message'] = "Administrateur non trouvé.";
+            $this->addErrorMessage("Administrateur non trouvé.", '');
             header('Location: ?page=login');
             exit;
         }
@@ -282,11 +268,9 @@ class AdminController extends BaseController
         }
 
         // Étape 4: Récupération des messages flash
-        $success_message = $_SESSION['success_message'] ?? null;
-        $error_message = $_SESSION['error_message'] ?? null;
-
-        // Nettoyer après récupération
-        unset($_SESSION['success_message'], $_SESSION['error_message']);
+        $messages = $this->getFlashMessages();
+        $success_message = $messages['success_message'];
+        $error_message = $messages['error_message'];
 
         // Étape 5: Affichage du tableau de bord
         $this->render('admin/dashboard', [

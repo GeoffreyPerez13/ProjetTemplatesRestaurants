@@ -68,12 +68,13 @@
   border-top: 1px solid #dee2e6;
 }
 
-/* Style pour le menu mobile */
+/* ==================== MENU MOBILE AMÉLIORÉ ==================== */
 .dashboard-mobile-menu {
-  display: none; /* Caché par défaut sur desktop */
+  display: none;
   margin-bottom: 20px;
 }
 
+/* Bouton toggle amélioré */
 .mobile-menu-toggle {
   width: 100%;
   padding: 12px 20px;
@@ -88,33 +89,45 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
 }
 
 .mobile-menu-toggle:hover {
   background: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
 }
 
 .mobile-menu-toggle[aria-expanded="true"] {
   background: #0056b3;
+  border-radius: 6px 6px 0 0;
 }
 
 .menu-icon {
   font-size: 20px;
+  transition: transform 0.3s ease;
 }
 
+.mobile-menu-toggle[aria-expanded="true"] .menu-icon {
+  transform: rotate(90deg);
+}
+
+.menu-text {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Contenu du menu amélioré */
 .mobile-menu-content {
   display: none;
   background: white;
   border: 1px solid #ddd;
-  border-radius: 6px;
-  margin-top: 10px;
-  padding: 15px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.mobile-menu-content.show {
-  display: block;
+  border-radius: 0 0 6px 6px;
+  margin-top: -1px;
+  padding: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
   animation: fadeIn 0.3s ease-in-out;
 }
 
@@ -123,16 +136,159 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Boutons dans le menu mobile */
-.dashboard-mobile-menu .dashboard-top-buttons {
-  flex-direction: column;
-  gap: 10px;
+.mobile-menu-content.show {
+  display: block;
 }
 
-.dashboard-mobile-menu .btn {
-  width: 100%;
+/* Items du menu */
+.mobile-menu-items {
+  padding: 10px 0;
+}
+
+.mobile-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  text-decoration: none;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.mobile-menu-item:last-child {
+  border-bottom: none;
+}
+
+.mobile-menu-item:hover {
+  background: #f8f9fa;
+  padding-left: 22px;
+}
+
+/* Icone des items */
+.menu-item-icon {
+  width: 36px;
+  height: 36px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-item:hover .menu-item-icon {
+  background: #e3f2fd;
+  transform: scale(1.05);
+}
+
+.menu-item-icon i {
+  font-size: 15px;
+  color: #007bff;
+}
+
+/* Pour l'item "Aperçu de la carte" */
+.mobile-menu-item.success .menu-item-icon {
+  background: #e8f5e9;
+}
+
+.mobile-menu-item.success .menu-item-icon i {
+  color: #28a745;
+}
+
+.mobile-menu-item.success:hover .menu-item-icon {
+  background: #d4edda;
+}
+
+/* Pour l'item admin */
+.mobile-menu-item.admin .menu-item-icon {
+  background: #f3e8ff;
+}
+
+.mobile-menu-item.admin .menu-item-icon i {
+  color: #6f42c1;
+}
+
+.mobile-menu-item.admin:hover .menu-item-icon {
+  background: #e2d9f3;
+}
+
+/* Contenu des items */
+.menu-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.menu-item-desc {
+  font-size: 12px;
+  color: #666;
+  font-weight: 400;
+}
+
+/* Flèche des items */
+.menu-item-arrow {
+  color: #999;
+  font-size: 12px;
+  transition: all 0.3s ease;
+  margin-left: 8px;
+}
+
+.mobile-menu-item:hover .menu-item-arrow {
+  color: #007bff;
+  transform: translateX(3px);
+}
+
+.mobile-menu-item.success:hover .menu-item-arrow {
+  color: #28a745;
+}
+
+.mobile-menu-item.admin:hover .menu-item-arrow {
+  color: #6f42c1;
+}
+
+/* Footer du menu mobile */
+.mobile-menu-footer {
+  padding: 12px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
   text-align: center;
-  padding: 18px;
+}
+
+.settings-menu-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #6c757d;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  background: white;
+  border: 1px solid #dee2e6;
+}
+
+.settings-menu-link:hover {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.2);
+}
+
+.settings-menu-link i {
+  font-size: 12px;
 }
 
 /* Dashboard desktop (affiché par défaut) */
@@ -206,11 +362,13 @@
     display: none;
   }
   
-  /* En-tête responsive */
   .dashboard-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+    position: relative;
+    padding-right: 50px;
+    padding-bottom: 25px;
   }
   
   .dashboard-header h2 {
@@ -221,10 +379,29 @@
     position: absolute;
     top: 0;
     right: 0;
+    width: 40px;
+    height: 40px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 50%;
+    color: #6c757d;
+    text-decoration: none;
+    transition: all 0.3s;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .settings-icon-btn:hover {
+    background: #e9ecef;
+    color: #495057;
+    transform: rotate(90deg);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   }
   
   /* S'assurer que le bouton de déconnexion est bien visible */
-  .btn.danger {
+  .btn.danger, .mobile-logout {
     background: #dc3545;
     color: white;
     padding: 12px 20px;
@@ -233,15 +410,24 @@
     text-decoration: none;
     font-weight: 500;
     transition: background-color 0.3s;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    display: block;
   }
   
-  .btn.danger:hover {
+  .btn.danger:hover, .mobile-logout:hover {
     background: #c82333;
   }
 }
 
 /* Desktop: à partir de 769px */
 @media (min-width: 769px) {
+  .dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
   /* Desktop: afficher le dashboard normal */
   .dashboard-desktop .dashboard-top-buttons {
     grid-template-columns: repeat(4, 1fr);
@@ -269,6 +455,11 @@
   /* Desktop: afficher les boutons normalement */
   .dashboard-desktop {
     display: block;
+  }
+  
+  /* Desktop: reset de la position du bouton settings */
+  .settings-icon-btn {
+    position: static;
   }
 }
 

@@ -1,0 +1,138 @@
+/* ==================== EDIT CONTACT PAGE SPECIFIC STYLES ==================== */
+
+/* Formulaire de contact */
+.edit-contact-form {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
+}
+
+.edit-contact-form h2 {
+  margin-bottom: 2rem;
+  color: #2c3e50;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 0.75rem;
+  font-size: 1.5rem;
+}
+
+.edit-contact-form h2 i {
+  color: #3498db;
+  margin-right: 10px;
+}
+
+/* Ajustements spécifiques pour les champs de contact */
+.edit-contact-form .form-group input,
+.edit-contact-form .form-group textarea {
+  font-size: 1rem;
+  padding: 12px;
+  border: 1px solid #ddd;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+}
+
+.edit-contact-form .form-group input:focus,
+.edit-contact-form .form-group textarea:focus {
+  background-color: #fff;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+}
+
+/* Champ textarea spécifique pour les horaires */
+.edit-contact-form textarea#horaires {
+  min-height: 150px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* Indication pour les horaires */
+.edit-contact-form .form-hint {
+  display: block;
+  margin-top: 0.5rem;
+  color: #7f8c8d;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+/* Bouton de soumission spécifique */
+.edit-contact-form .btn.primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1.5rem;
+}
+
+.edit-contact-form .btn.primary:hover {
+  background: linear-gradient(135deg, #2980b9, #1f6396);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(41, 128, 185, 0.3);
+}
+
+.edit-contact-form .btn.primary:active {
+  transform: translateY(0);
+}
+
+.edit-contact-form .btn.primary i {
+  margin-right: 10px;
+  font-size: 1.1rem;
+}
+
+/* Icônes dans les labels de contact */
+.edit-contact-form label i {
+  color: #3498db;
+  width: 20px;
+  text-align: center;
+}
+
+/* Responsive pour la page contact */
+@media (max-width: 650px) {
+  .edit-contact-form {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+  
+  .edit-contact-form h2 {
+    font-size: 1.3rem;
+  }
+  
+  .edit-contact-form .btn.primary {
+    padding: 12px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .edit-contact-form {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .edit-contact-form h2 {
+    font-size: 1.2rem;
+  }
+  
+  .edit-contact-form .form-group input,
+  .edit-contact-form .form-group textarea {
+    padding: 10px;
+    font-size: 0.95rem;
+  }
+  
+  .edit-contact-form .btn.primary {
+    padding: 10px;
+    font-size: 0.95rem;
+  }
+}

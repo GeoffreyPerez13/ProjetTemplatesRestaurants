@@ -1,0 +1,415 @@
+/* send-invitation.css - Styles spécifiques à la page d'envoi d'invitation */
+
+/* ==================== CONTAINER & LAYOUT ==================== */
+.send-invitation-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+}
+
+.send-invitation-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #f1f3f4;
+}
+
+.send-invitation-header h1 {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.send-invitation-header .subtitle {
+    color: #6c757d;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* ==================== CARD STYLE FORM ==================== */
+.invitation-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.invitation-card:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #3498db, #2ecc71);
+}
+
+/* ==================== FORM ELEMENTS ==================== */
+.invitation-form-group {
+    margin-bottom: 1.8rem;
+    position: relative;
+}
+
+.invitation-form-group label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 0.95rem;
+}
+
+.invitation-form-group label i {
+    margin-right: 0.5rem;
+    color: #3498db;
+    font-size: 1rem;
+}
+
+.invitation-form-group input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #fdfdfd;
+}
+
+.invitation-form-group input:focus {
+    border-color: #3498db;
+    background-color: white;
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.15);
+    outline: none;
+}
+
+.invitation-form-group input:hover {
+    border-color: #bdc3c7;
+}
+
+/* ==================== INPUT WITH ICONS ==================== */
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    z-index: 2;
+}
+
+.input-with-icon input {
+    padding-left: 3rem;
+}
+
+/* ==================== BUTTON STYLES ==================== */
+.send-invitation-btn {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.send-invitation-btn:hover {
+    background: linear-gradient(135deg, #2980b9, #1c5a7a);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.send-invitation-btn:active {
+    transform: translateY(0);
+}
+
+.send-invitation-btn i {
+    font-size: 1.1rem;
+}
+
+/* ==================== MESSAGES STYLING ==================== */
+.invitation-message {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.invitation-success {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.invitation-error {
+    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.invitation-message i {
+    font-size: 1.2rem;
+}
+
+/* ==================== BACK BUTTON ==================== */
+.back-to-dashboard {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #f8f9fa;
+    color: #495057;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid #dee2e6;
+    margin-bottom: 2rem;
+}
+
+.back-to-dashboard:hover {
+    background: #e9ecef;
+    color: #212529;
+    transform: translateX(-3px);
+}
+
+/* ==================== FORM VALIDATION ==================== */
+.invitation-form-group.has-error input {
+    border-color: #dc3545;
+    background: linear-gradient(135deg, #fff5f5, #ffe3e3);
+}
+
+.invitation-form-group.has-success input {
+    border-color: #28a745;
+    background: linear-gradient(135deg, #f0fff4, #e6ffe6);
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.success-message {
+    color: #28a745;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ==================== FORM FOOTER ==================== */
+.form-footer {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+    text-align: center;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.form-footer p {
+    margin: 0.5rem 0;
+    line-height: 1.5;
+}
+
+/* ==================== LOADING STATE ==================== */
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+}
+
+.btn-loading:after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin: -10px 0 0 -10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 768px) {
+    .send-invitation-container {
+        margin: 1rem;
+        padding: 1.5rem;
+        border-radius: 10px;
+    }
+    
+    .invitation-card {
+        padding: 1.5rem;
+    }
+    
+    .send-invitation-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .invitation-form-group input {
+        padding: 0.75rem;
+    }
+    
+    .send-invitation-btn {
+        padding: 0.875rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .send-invitation-container {
+        padding: 1rem;
+        margin: 0.5rem;
+    }
+    
+    .invitation-card {
+        padding: 1rem;
+    }
+    
+    .send-invitation-header h1 {
+        font-size: 1.3rem;
+    }
+    
+    .back-to-dashboard {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ==================== ANIMATIONS ==================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.send-invitation-container {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* ==================== HELP TEXT ==================== */
+.help-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+    line-height: 1.4;
+    padding-left: 0.25rem;
+}
+
+.help-text i {
+    margin-right: 0.25rem;
+    color: #3498db;
+}
+
+/* ==================== FEATURE LIST ==================== */
+.invitation-features {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+}
+
+.invitation-features h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.invitation-features ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.invitation-features li {
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    color: #495057;
+}
+
+.invitation-features li i {
+    color: #2ecc71;
+    font-size: 0.9rem;
+    margin-top: 0.2rem;
+}
+
+/* ==================== PREVIEW CARD ==================== */
+.invitation-preview {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #f0f7ff;
+    border-radius: 8px;
+    border: 1px dashed #3498db;
+}
+
+.invitation-preview h4 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.preview-content {
+    background: white;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.preview-content p {
+    margin: 0.5rem 0;
+    color: #495057;
+    line-height: 1.5;
+}

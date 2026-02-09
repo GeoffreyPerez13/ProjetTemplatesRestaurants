@@ -22,68 +22,54 @@ class Admin
     // --- INVITATIONS ---
 
     // Crée une invitation pour un nouvel administrateur
+    // Envoie ensuite un mail avec le lien d'inscription
     public function createInvitation($email, $restaurantName, $token)
     {
         // Date d'expiration du lien = +24 heures
         $expiry = date('Y-m-d H:i:s', strtotime('+24 hours'));
 
         try {
-            // Insertion de l'invitation en base (SANS restaurant_id)
-            $sql = "INSERT INTO invitations (email, restaurant_name, token, expiry) 
-                VALUES (?, ?, ?, ?)";
+            // Insertion de l'invitation en base
+            $sql = "INSERT INTO invitations (email, restaurant_name, token, expiry) VALUES (?, ?, ?, ?)";
             $stmt = $this->pdo->prepare($sql);
             $result = $stmt->execute([$email, $restaurantName, $token, $expiry]);
 
             if ($result) {
-                // Génération du lien d'inscription
-                $inviteLink = "http://" . $_SERVER['HTTP_HOST'] . "/admin/?page=register&token=" . $token;
+                $inviteLink = "http://" . $_SERVER['HTTP_HOST'] . "?page=register&token=" . $token;
 
-                // Préparation du mail
+                // ⬇⬇⬇ AMÉLIOREZ L'EMAIL ⬇⬇⬇
                 $to = $email;
                 $subject = "Invitation à créer votre compte restaurant";
 
-                // Dans la méthode createInvitation(), modifiez la construction du lien :
                 $message = "
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>Invitation à créer votre compte restaurant</title>
-                    </head>
-                    <body style='font-family: Arial, sans-serif; line-height: 1.6;'>
-                        <h2>Invitation Menumiam</h2>
-                        <p>Bonjour,</p>
-                        <p>Vous avez été invité à créer un compte pour gérer la carte en ligne de votre restaurant <strong>{$restaurantName}</strong> sur Menumiam.</p>
-                        <p>Cliquez sur le lien ci-dessous pour créer votre compte :</p>
-                        <p><code style='background-color: #f4f4f4; padding: 5px; border-radius: 3px;'>" . htmlspecialchars($inviteLink) . "</code></p>
-                        <p><strong>Attention :</strong> Ce lien expirera dans 24 heures.</p>
-                        <br>
-                        <p>Cordialement,<br>L'équipe Menumiam</p>
-                    </body>
-                    </html>
-                    ";
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Invitation à créer votre compte restaurant</title>
+        </head>
+        <body style='font-family: Arial, sans-serif; line-height: 1.6;'>
+            <h2>Invitation Menumiam</h2>
+            <p>Bonjour,</p>
+            <p>Vous avez été invité à créer un compte pour gérer la carte en ligne de votre restaurant <strong>{$restaurantName}</strong> sur Menumiam.</p>
+            <p>Cliquez sur le lien ci-dessous pour créer votre compte :</p>
+            <p><code style='background-color: #f4f4f4; padding: 5px; border-radius: 3px;'>" . htmlspecialchars($inviteLink) . "</code></p>
+            <p><strong>Attention :</strong> Ce lien expirera dans 24 heures.</p>
+            <br>
+            <p>Cordialement,<br>L'équipe Menumiam</p>
+        </body>
+        </html>
+        ";
 
-                // En-têtes pour l'email HTML
-                $headers = "MIME-Version: 1.0" . "\r\n";
-                $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-                $headers .= "From: Menumiam <no-reply@menumiam.com>" . "\r\n";
-                $headers .= "Reply-To: no-reply@menumiam.com" . "\r\n";
+                $headers = "MIME-Version: 1.0\r\n";
+                $headers .= "Content-type:text/html;charset=UTF-8\r\n";
+                $headers .= "From: Menumiam <no-reply@menumiam.com>\r\n";
+                $headers .= "Reply-To: no-reply@menumiam.com\r\n";
 
-                // Envoi du mail
-                $mailResult = mail($to, $subject, $message, $headers);
-
-                // Log pour déboguer
-                error_log("[DEBUG] Envoi d'invitation:");
-                error_log("  - Email: $email");
-                error_log("  - Restaurant: $restaurantName");
-                error_log("  - Lien: $inviteLink");
-                error_log("  - Mail envoyé: " . ($mailResult ? "OUI" : "NON"));
-
-                return $mailResult;
+                return mail($to, $subject, $message, $headers);
             }
 
             return false;
         } catch (PDOException $e) {
-            error_log("[ERREUR] createInvitation: " . $e->getMessage());
             return false;
         }
     }
@@ -100,7 +86,6 @@ class Admin
 
     // --- GESTION DES COMPTES ---
 
-    // Crée un compte administrateur à partir d'une invitation
     public function createAccount($invitation, $username, $password)
     {
         try {
@@ -115,7 +100,8 @@ class Admin
                 return false;
             }
 
-            // 1. CRÉER LE RESTAURANT
+            // 1. CRÉER LE RESTAURANT (si nécessaire - selon votre nouvelle logique)
+            // Générez un slug
             $slug = $this->generateSlug($invitation->restaurant_name);
 
             $stmt = $this->pdo->prepare("
@@ -144,8 +130,6 @@ class Admin
                 throw new Exception("Erreur lors de l'insertion dans la table admins");
             }
 
-            $adminId = $this->pdo->lastInsertId();
-
             // 3. Marquer l'invitation comme utilisée
             $sql = "UPDATE invitations SET used = 1 WHERE id = ?";
             $stmt = $this->pdo->prepare($sql);
@@ -159,7 +143,6 @@ class Admin
 
             // Log de succès
             error_log("[DEBUG] Compte et restaurant créés avec succès:");
-            error_log("  - Admin ID: $adminId");
             error_log("  - Username: $username");
             error_log("  - Restaurant: " . $invitation->restaurant_name);
             error_log("  - Restaurant ID créé: $restaurantId");
@@ -174,7 +157,7 @@ class Admin
         }
     }
 
-    // Ajoutez cette méthode pour générer un slug
+    // ⬇⬇⬇ AJOUTEZ CES MÉTHODES SI ELLES N'EXISTENT PAS ⬇⬇⬇
     private function generateSlug($name)
     {
         // Remplace les caractères spéciaux
@@ -286,7 +269,7 @@ class Admin
         $this->password = $data['password'];
         $this->role = $data['role'];
         $this->restaurant_name = $data['restaurant_name'];
-        $this->restaurant_id = $data['restaurant_id'] ?? null; // Ajoutez cette ligne
+        $this->restaurant_id = $data['restaurant_id'] ?? null;
     }
 
     // --- RÉINITIALISATION DE MOT DE PASSE ---
@@ -461,26 +444,6 @@ class Admin
     public function setRestaurant_name($restaurant_name)
     {
         $this->restaurant_name = $restaurant_name;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of restaurant_id
-     */
-    public function getRestaurant_id()
-    {
-        return $this->restaurant_id;
-    }
-
-    /**
-     * Set the value of restaurant_id
-     *
-     * @return  self
-     */
-    public function setRestaurant_id($restaurant_id)
-    {
-        $this->restaurant_id = $restaurant_id;
 
         return $this;
     }
