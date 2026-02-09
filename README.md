@@ -132,6 +132,9 @@ ServerName localhost:80
 Listen 8080
 ServerName localhost:8080
 ```
+#### Système de mail box virtuelle avec MailHog
+- Création d'un fichier mailhog.bat à la racine du projet pour lancer Mailhog.
+- Exécutable avec la commande ```.\mailhog.bat``` depuis la racine du projet ```PS C:\wamp64\www\ProjetTemplatesRestaurants>```. Fermer l'onglet du navigateur arrêtera le service.
 
 ---
 
