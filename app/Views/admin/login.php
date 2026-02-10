@@ -1,6 +1,6 @@
 <?php
 $title = "Connexion Admin";
-$scripts = ["js/sections/login/auth.js"];
+$scripts = ["js/sections/login/login.js"];
 
 require __DIR__ . '/../partials/header.php';
 ?>

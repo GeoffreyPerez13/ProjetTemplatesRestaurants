@@ -38,6 +38,9 @@
 /* Section login */
 @import url("admin/sections/send-invitation/send-invitation.css");
 
+/* Section login */
+@import url("admin/sections/register/register.css");
+
 /* Section settings */
 @import url("admin/sections/settings/settings.css");
 

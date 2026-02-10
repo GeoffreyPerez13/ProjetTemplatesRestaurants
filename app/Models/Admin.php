@@ -35,41 +35,47 @@ class Admin
             $result = $stmt->execute([$email, $restaurantName, $token, $expiry]);
 
             if ($result) {
-                $inviteLink = "http://" . $_SERVER['HTTP_HOST'] . "?page=register&token=" . $token;
+                // Utiliser urlencode pour le token
+                $inviteLink = "http://" . $_SERVER['HTTP_HOST'] . "?page=register&token=" . urlencode($token);
 
-                // ⬇⬇⬇ AMÉLIOREZ L'EMAIL ⬇⬇⬇
                 $to = $email;
                 $subject = "Invitation à créer votre compte restaurant";
 
-                $message = "
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Invitation à créer votre compte restaurant</title>
-        </head>
-        <body style='font-family: Arial, sans-serif; line-height: 1.6;'>
-            <h2>Invitation Menumiam</h2>
-            <p>Bonjour,</p>
-            <p>Vous avez été invité à créer un compte pour gérer la carte en ligne de votre restaurant <strong>{$restaurantName}</strong> sur Menumiam.</p>
-            <p>Cliquez sur le lien ci-dessous pour créer votre compte :</p>
-            <p><code style='background-color: #f4f4f4; padding: 5px; border-radius: 3px;'>" . htmlspecialchars($inviteLink) . "</code></p>
-            <p><strong>Attention :</strong> Ce lien expirera dans 24 heures.</p>
-            <br>
-            <p>Cordialement,<br>L'équipe Menumiam</p>
-        </body>
-        </html>
-        ";
+                // Utilisez des guillemets simples pour éviter l'encodage HTML
+                $message = '<!DOCTYPE html>
+<html>
+<head>
+    <title>Invitation à créer votre compte restaurant</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+    <h2>Invitation Menumiam</h2>
+    <p>Bonjour,</p>
+    <p>Vous avez été invité à créer un compte pour gérer la carte en ligne de votre restaurant <strong>' . htmlspecialchars($restaurantName) . '</strong> sur Menumiam.</p>
+    <p>Cliquez sur le lien ci-dessous pour créer votre compte :</p>
+    <p><a href="' . $inviteLink . '" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Créer mon compte</a></p>
+    <p>Ou copiez ce lien :<br>
+    <code style="background-color: #f4f4f4; padding: 5px; border-radius: 3px;">' . $inviteLink . '</code></p>
+    <p><strong>Attention :</strong> Ce lien expirera dans 24 heures.</p>
+    <br>
+    <p>Cordialement,<br>L\'équipe Menumiam</p>
+</body>
+</html>';
 
                 $headers = "MIME-Version: 1.0\r\n";
                 $headers .= "Content-type:text/html;charset=UTF-8\r\n";
                 $headers .= "From: Menumiam <no-reply@menumiam.com>\r\n";
                 $headers .= "Reply-To: no-reply@menumiam.com\r\n";
 
+                error_log("[DEBUG] Envoi d'invitation à: $email");
+                error_log("[DEBUG] Lien généré: $inviteLink");
+                error_log("[DEBUG] Token: $token");
+
                 return mail($to, $subject, $message, $headers);
             }
 
             return false;
         } catch (PDOException $e) {
+            error_log("Erreur createInvitation: " . $e->getMessage());
             return false;
         }
     }
@@ -85,7 +91,7 @@ class Admin
     }
 
     // --- GESTION DES COMPTES ---
-
+    
     public function createAccount($invitation, $username, $password)
     {
         try {
@@ -100,8 +106,7 @@ class Admin
                 return false;
             }
 
-            // 1. CRÉER LE RESTAURANT (si nécessaire - selon votre nouvelle logique)
-            // Générez un slug
+            // 1. CRÉER LE RESTAURANT
             $slug = $this->generateSlug($invitation->restaurant_name);
 
             $stmt = $this->pdo->prepare("
@@ -123,14 +128,20 @@ class Admin
                 $invitation->email,
                 $hashedPassword,
                 $invitation->restaurant_name,
-                $restaurantId  // ID du restaurant créé
+                $restaurantId
             ]);
 
             if (!$success) {
                 throw new Exception("Erreur lors de l'insertion dans la table admins");
             }
 
-            // 3. Marquer l'invitation comme utilisée
+            // Récupérer l'ID de l'admin créé
+            $adminId = $this->pdo->lastInsertId();
+
+            // 3. CRÉER LES OPTIONS PAR DÉFAUT POUR L'ADMIN
+            $this->createDefaultOptions($adminId);
+
+            // 4. Marquer l'invitation comme utilisée
             $sql = "UPDATE invitations SET used = 1 WHERE id = ?";
             $stmt = $this->pdo->prepare($sql);
             $success = $stmt->execute([$invitation->id]);
@@ -142,10 +153,11 @@ class Admin
             $this->pdo->commit();
 
             // Log de succès
-            error_log("[DEBUG] Compte et restaurant créés avec succès:");
+            error_log("[DEBUG] Compte, restaurant et options créés avec succès:");
             error_log("  - Username: $username");
             error_log("  - Restaurant: " . $invitation->restaurant_name);
             error_log("  - Restaurant ID créé: $restaurantId");
+            error_log("  - Admin ID: $adminId");
             error_log("  - Slug: $slug");
 
             return true;
@@ -157,7 +169,36 @@ class Admin
         }
     }
 
-    // ⬇⬇⬇ AJOUTEZ CES MÉTHODES SI ELLES N'EXISTENT PAS ⬇⬇⬇
+    // Ajoutez cette méthode pour créer les options par défaut
+    private function createDefaultOptions($adminId)
+    {
+        // Définir les options par défaut selon vos préférences
+        $defaultOptions = [
+            'site_online' => '1',           // Site actif par défaut
+            'mail_reminder' => '0',         // Rappel mail désactivé par défaut
+            'email_notifications' => '0'    // Notifications désactivées par défaut
+        ];
+
+        try {
+            // Préparer la requête pour insérer les options
+            $stmt = $this->pdo->prepare("
+            INSERT INTO admin_options (admin_id, option_name, option_value, created_at, updated_at) 
+            VALUES (?, ?, ?, NOW(), NOW())
+        ");
+
+            // Insérer chaque option par défaut
+            foreach ($defaultOptions as $name => $value) {
+                $stmt->execute([$adminId, $name, $value]);
+                error_log("[DEBUG] Option créée: $name = $value pour admin $adminId");
+            }
+
+            return true;
+        } catch (Exception $e) {
+            error_log("Erreur création options par défaut: " . $e->getMessage());
+            return false;
+        }
+    }
+
     private function generateSlug($name)
     {
         // Remplace les caractères spéciaux

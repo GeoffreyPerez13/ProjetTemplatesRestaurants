@@ -110,7 +110,7 @@
 
 .dish-preview-image:hover {
   transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(183, 28, 28, 0.2);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   border-color: black;
 }
 
@@ -128,7 +128,7 @@
 
 .category-preview-image:hover {
   transform: scale(1.02);
-  box-shadow: 0 8px 20px rgba(183, 28, 28, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .dish-description {
@@ -158,7 +158,7 @@
   position: absolute;
   top: 5px;
   right: 5px;
-  background: rgba(183, 28, 28, 0.7);
+  background: rgba(0, 0, 0, 0.7);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -275,7 +275,7 @@
 }
 
 .btn-view-full {
-  background: rgba(183, 28, 28, 0.9);
+  background: rgba(0, 0, 0, 0.7);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -289,7 +289,7 @@
 }
 
 .btn-view-full:hover {
-  background: rgba(183, 28, 28, 1);
+  background: rgba(0, 0, 0, 1);
   transform: scale(1.05);
 }
 
@@ -301,7 +301,7 @@
 }
 
 .pdf-header {
-  background: #dc3545;
+  background: black;
   color: white;
   padding: 12px 20px;
   display: flex;

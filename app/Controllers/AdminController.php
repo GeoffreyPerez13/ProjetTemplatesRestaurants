@@ -121,18 +121,30 @@ class AdminController extends BaseController
             $confirmPassword = trim($_POST['confirm_password'] ?? '');
             $error = null;
 
-            // Validation
+            // Validation améliorée avec messages spécifiques
             if (empty($username) || empty($password) || empty($confirmPassword)) {
                 $error = "Tous les champs sont obligatoires.";
             } elseif ($password !== $confirmPassword) {
                 $error = "Les mots de passe ne correspondent pas.";
             } elseif (strlen($password) < 8) {
                 $error = "Le mot de passe doit contenir au moins 8 caractères.";
-            } elseif (!preg_match('/[a-zA-Z]/', $password) || !preg_match('/\d/', $password)) {
-                $error = "Le mot de passe doit contenir au moins une lettre et un chiffre.";
+            } elseif (!preg_match('/[a-zA-Z]/', $password)) {
+                $error = "Le mot de passe doit contenir au moins une lettre.";
+            } elseif (!preg_match('/[A-Z]/', $password)) {
+                $error = "Le mot de passe doit contenir au moins une majuscule.";
+            } elseif (!preg_match('/\d/', $password)) {
+                $error = "Le mot de passe doit contenir au moins un chiffre.";
+            } elseif (!preg_match('/[^a-zA-Z0-9]/', $password)) {
+                $error = "Le mot de passe doit contenir au moins un caractère spécial (ex: @$!%*?&).";
             }
 
             if ($error) {
+                // Conserver les données saisies
+                $_SESSION['form_data'] = [
+                    'username' => $username,
+                    'password' => $password,
+                    'confirm_password' => $confirmPassword
+                ];
                 $this->addErrorMessage($error, '');
                 header('Location: ?page=register&token=' . urlencode($token));
                 exit;
@@ -155,13 +167,18 @@ class AdminController extends BaseController
         $success_message = $messages['success_message'];
         $error_message = $messages['error_message'];
 
+        // Récupérer les données du formulaire en cas d'erreur
+        $form_data = $_SESSION['form_data'] ?? [];
+        unset($_SESSION['form_data']);
+
         // Étape 5: Affichage du formulaire d'inscription
         $this->render('admin/register', [
             'invitation' => $invitation,
             'token' => $token,
             'success_message' => $success_message,
             'error_message' => $error_message,
-            'csrf_token' => $this->getCsrfToken()
+            'csrf_token' => $this->getCsrfToken(),
+            'form_data' => $form_data
         ]);
     }
 

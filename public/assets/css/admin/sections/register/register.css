@@ -1,0 +1,205 @@
+/* Styles pour la page d'inscription */
+.register-container {
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.invitation-info {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 5px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #007bff;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.password-input-group {
+    display: flex;
+    position: relative;
+}
+
+.password-input-wrapper {
+    flex: 1;
+}
+
+.password-input-with-toggle {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #ddd;
+    border-radius: 5px 0 0 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.password-toggle-btn {
+    padding: 0.75rem 1rem;
+    background: #f8f9fa;
+    border: 2px solid #ddd;
+    border-left: none;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.3s;
+}
+
+.password-toggle-btn:hover {
+    background: #e9ecef;
+}
+
+/* Indicateur de force du mot de passe */
+.password-strength-meter {
+    margin-top: 0.5rem;
+    height: 5px;
+    background: #eee;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0;
+    transition: width 0.3s, background-color 0.3s;
+}
+
+/* Liste des exigences */
+.password-requirements {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0;
+}
+
+.requirement {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.requirement i {
+    margin-right: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.requirement.valid {
+    color: #4CAF50;
+}
+
+.requirement.invalid {
+    color: #f44336;
+}
+
+/* Messages de correspondance */
+.password-match-error,
+.password-match-success {
+    display: flex;
+    align-items: center;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.password-match-error {
+    background: #ffebee;
+    color: #c62828;
+    border-left: 4px solid #f44336;
+}
+
+.password-match-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-left: 4px solid #4CAF50;
+}
+
+.password-match-error i,
+.password-match-success i {
+    margin-right: 0.5rem;
+}
+
+/* Bouton de soumission */
+.btn-primary {
+    width: 100%;
+    padding: 1rem;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-primary:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.btn-primary.btn-enabled {
+    background: #007bff;
+    cursor: pointer;
+}
+
+.btn-primary.btn-disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.help-text {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.help-text i {
+    margin-right: 0.5rem;
+    color: #ffc107;
+}
+
+.form-footer {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Alertes */
+.alert {
+    padding: 1rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    color: #856404;
+}
+
+.alert-warning i {
+    color: #ffc107;
+    margin-right: 0.5rem;
+}

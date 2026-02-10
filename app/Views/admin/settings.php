@@ -25,13 +25,13 @@ $last_card_update = !empty($user['last_card_update']) ? (new DateTime($user['las
 </div>
 
 <div class="settings-container" data-csrf-token="<?= htmlspecialchars($csrf_token ?? '') ?>">
-    
+
     <!-- Menu déroulant pour mobile -->
     <div class="settings-mobile-menu">
         <button class="settings-mobile-toggle" aria-expanded="false" aria-controls="settings-mobile-content">
             <span class="settings-menu-icon">☰</span>
         </button>
-        
+
         <div class="settings-mobile-content" id="settings-mobile-content">
             <ul class="settings-mobile-list">
                 <li>
@@ -90,13 +90,13 @@ $last_card_update = !empty($user['last_card_update']) ? (new DateTime($user['las
     </div>
 
     <div class="settings-content">
-        <!-- Messages flash -->
+        <!-- Affichage des messages -->
         <?php if (!empty($success_message)): ?>
-            <div class="message-success"><?= htmlspecialchars($success_message) ?></div>
+            <p class="message-success"><?= htmlspecialchars($success_message) ?></p>
         <?php endif; ?>
 
         <?php if (!empty($error_message)): ?>
-            <div class="message-error"><?= htmlspecialchars($error_message) ?></div>
+            <p class="message-error"><?= htmlspecialchars($error_message) ?></p>
         <?php endif; ?>
 
         <h1><?= htmlspecialchars($title) ?></h1>
@@ -131,29 +131,103 @@ $last_card_update = !empty($user['last_card_update']) ? (new DateTime($user['las
             </div>
 
         <?php elseif ($current_section === 'password'): ?>
-            <!-- Section Mot de passe -->
+            <!-- Section Mot de passe avec tous les éléments visuels -->
             <div class="settings-section" id="password-form">
                 <h2>Changer le mot de passe</h2>
-                <form method="POST" action="?page=settings&action=change-password">
+                <form method="POST" action="?page=settings&action=change-password" id="password-change-form">
                     <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
 
                     <div class="form-group">
-                        <label for="current_password">Mot de passe actuel</label>
-                        <input type="password" id="current_password" name="current_password" required>
+                        <label for="current_password">Mot de passe actuel *</label>
+                        <div class="password-input-group">
+                            <div class="password-input-wrapper">
+                                <input type="password" id="current_password" name="current_password"
+                                    placeholder="Entrez votre mot de passe actuel" required>
+                            </div>
+                            <button type="button" class="password-toggle-btn" data-target="current_password"
+                                aria-label="Afficher le mot de passe">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-error" id="current_password_error"></div>
                     </div>
 
                     <div class="form-group">
-                        <label for="new_password">Nouveau mot de passe</label>
-                        <input type="password" id="new_password" name="new_password" required>
-                        <small class="form-hint">Minimum 8 caractères</small>
+                        <label for="new_password">Nouveau mot de passe *</label>
+                        <div class="password-input-group">
+                            <div class="password-input-wrapper">
+                                <input type="password" id="new_password" name="new_password"
+                                    placeholder="Créez un mot de passe sécurisé" required minlength="8">
+                            </div>
+                            <button type="button" class="password-toggle-btn" data-target="new_password"
+                                aria-label="Afficher le mot de passe">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+
+                        <!-- Indicateur de force du mot de passe -->
+                        <div class="password-strength-meter">
+                            <div class="strength-bar" id="strength-bar"></div>
+                        </div>
+                        <div class="strength-text" id="strength-text">Force : faible</div>
+
+                        <!-- Liste des exigences du mot de passe -->
+                        <ul class="password-requirements" id="password-requirements">
+                            <li class="requirement" data-requirement="length">
+                                <i class="fa-solid fa-circle"></i>
+                                <span>Au moins 8 caractères</span>
+                            </li>
+                            <li class="requirement" data-requirement="letter">
+                                <i class="fa-solid fa-circle"></i>
+                                <span>Au moins une lettre</span>
+                            </li>
+                            <li class="requirement" data-requirement="uppercase">
+                                <i class="fa-solid fa-circle"></i>
+                                <span>Au moins une majuscule</span>
+                            </li>
+                            <li class="requirement" data-requirement="number">
+                                <i class="fa-solid fa-circle"></i>
+                                <span>Au moins un chiffre</span>
+                            </li>
+                            <li class="requirement" data-requirement="special">
+                                <i class="fa-solid fa-circle"></i>
+                                <span>Au moins un caractère spécial</span>
+                            </li>
+                        </ul>
+
+                        <div class="help-text">
+                            <i class="fa-solid fa-lightbulb"></i>
+                            Utilisez une combinaison de lettres, chiffres et caractères spéciaux pour plus de sécurité
+                        </div>
+                        <div class="password-error" id="new_password_error"></div>
                     </div>
 
                     <div class="form-group">
-                        <label for="confirm_password">Confirmer le nouveau mot de passe</label>
-                        <input type="password" id="confirm_password" name="confirm_password" required>
+                        <label for="confirm_password">Confirmer le nouveau mot de passe *</label>
+                        <div class="password-input-group">
+                            <div class="password-input-wrapper">
+                                <input type="password" id="confirm_password" name="confirm_password"
+                                    placeholder="Retapez votre nouveau mot de passe" required minlength="8">
+                            </div>
+                            <button type="button" class="password-toggle-btn" data-target="confirm_password"
+                                aria-label="Afficher le mot de passe">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-match-error" id="password-match-error" style="display: none;">
+                            <i class="fa-solid fa-exclamation-circle"></i>
+                            <span>Les mots de passe ne correspondent pas</span>
+                        </div>
+                        <div class="password-match-success" id="password-match-success" style="display: none;">
+                            <i class="fa-solid fa-check-circle"></i>
+                            <span>Les mots de passe correspondent</span>
+                        </div>
+                        <div class="password-error" id="confirm_password_error"></div>
                     </div>
 
-                    <button type="submit" class="btn">Changer le mot de passe</button>
+                    <button type="submit" class="btn" id="submit-password">
+                        Changer le mot de passe
+                    </button>
 
                     <div class="password-reset-link">
                         <p><a href="?page=reset-password">Mot de passe oublié ? Réinitialiser le mot de passe</a></p>
@@ -204,66 +278,55 @@ $last_card_update = !empty($user['last_card_update']) ? (new DateTime($user['las
             <div class="settings-section" id="options-form">
                 <h2>Options du compte</h2>
                 <p class="section-description">Configurez les paramètres de votre compte et de votre site.</p>
-                
+
                 <div class="options-list">
-                    <div class="option-item">
-                        <div class="option-header">
-                            <span class="option-label">Afficher le site en ligne</span>
-                            <div class="option-tooltip">
-                                <span class="tooltip-icon" title="Plus d'infos">i</span>
-                                <div class="tooltip-content">
-                                    <p>Activez cette option pour rendre votre site visible au public. Si désactivé, votre site sera en maintenance.</p>
+                    <?php foreach (['site_online', 'mail_reminder', 'email_notifications'] as $option): ?>
+                        <div class="option-item">
+                            <div class="option-header">
+                                <span class="option-label">
+                                    <?=
+                                    $option === 'site_online' ? 'Afficher le site en ligne' : ($option === 'mail_reminder' ? 'Rappel mail pour actualisation' :
+                                        'Notifications par email')
+                                    ?>
+                                </span>
+                                <div class="option-tooltip">
+                                    <span class="tooltip-icon" title="Plus d'infos">i</span>
+                                    <div class="tooltip-content">
+                                        <p>
+                                            <?=
+                                            $option === 'site_online' ? 'Activez cette option pour rendre votre site visible au public. Si désactivé, votre site sera en maintenance.' : ($option === 'mail_reminder' ? 'Recevez un email de rappel tous les mois pour mettre à jour votre carte. Assurez-vous que vos plats et prix sont à jour.' :
+                                                'Recevez des notifications par email pour les mises à jour importantes et les activités sur votre compte.')
+                                            ?>
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="option-buttons">
-                            <button type="button" class="option-btn option-active" data-option="site_online" data-value="1">Actif</button>
-                            <button type="button" class="option-btn" data-option="site_online" data-value="0">Non actif</button>
-                        </div>
-                        <div class="option-description">
-                            <small>Contrôle la visibilité publique de votre site.</small>
-                        </div>
-                    </div>
-                    
-                    <div class="option-item">
-                        <div class="option-header">
-                            <span class="option-label">Rappel mail pour actualisation</span>
-                            <div class="option-tooltip">
-                                <span class="tooltip-icon" title="Plus d'infos">i</span>
-                                <div class="tooltip-content">
-                                    <p>Recevez un email de rappel tous les mois pour mettre à jour votre carte. Assurez-vous que vos plats et prix sont à jour.</p>
-                                </div>
+                            <div class="option-buttons">
+                                <button type="button"
+                                    class="option-btn <?= ($options[$option] ?? '1') === '1' ? 'option-active' : '' ?>"
+                                    data-option="<?= $option ?>"
+                                    data-value="1">
+                                    Actif
+                                </button>
+                                <button type="button"
+                                    class="option-btn <?= ($options[$option] ?? '1') === '0' ? 'option-active' : '' ?>"
+                                    data-option="<?= $option ?>"
+                                    data-value="0">
+                                    Non actif
+                                </button>
+                            </div>
+                            <div class="option-description">
+                                <small>
+                                    <?=
+                                    $option === 'site_online' ? 'Contrôle la visibilité publique de votre site.' : ($option === 'mail_reminder' ? 'Recevez des rappels mensuels pour mettre à jour votre carte.' :
+                                        'Activez les notifications importantes par email.')
+                                    ?>
+                                </small>
                             </div>
                         </div>
-                        <div class="option-buttons">
-                            <button type="button" class="option-btn option-active" data-option="mail_reminder" data-value="1">Actif</button>
-                            <button type="button" class="option-btn" data-option="mail_reminder" data-value="0">Non actif</button>
-                        </div>
-                        <div class="option-description">
-                            <small>Recevez des rappels mensuels pour mettre à jour votre carte.</small>
-                        </div>
-                    </div>
-                    
-                    <div class="option-item">
-                        <div class="option-header">
-                            <span class="option-label">Notifications par email</span>
-                            <div class="option-tooltip">
-                                <span class="tooltip-icon" title="Plus d'infos">i</span>
-                                <div class="tooltip-content">
-                                    <p>Recevez des notifications par email pour les mises à jour importantes et les activités sur votre compte.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="option-buttons">
-                            <button type="button" class="option-btn option-active" data-option="email_notifications" data-value="1">Actif</button>
-                            <button type="button" class="option-btn" data-option="email_notifications" data-value="0">Non actif</button>
-                        </div>
-                        <div class="option-description">
-                            <small>Activez les notifications importantes par email.</small>
-                        </div>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
-                
+
                 <div class="options-actions">
                     <button type="button" class="btn" id="save-all-options">Enregistrer toutes les options</button>
                     <button type="button" class="btn secondary" id="reset-options">Restaurer les valeurs par défaut</button>

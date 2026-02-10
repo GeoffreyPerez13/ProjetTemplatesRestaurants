@@ -69,28 +69,24 @@ switch ($page) {
         $controller = new SettingsController($pdo);
         $action = $_GET['action'] ?? 'show';
 
-        if ($action === 'update-profile') {
-            $controller->updateProfile();
-        } elseif ($action === 'change-password') {
-            $controller->changePassword();
-        } else {
-            $controller->show();
+        switch ($action) {
+            case 'update-profile':
+                $controller->updateProfile();
+                break;
+            case 'change-password':
+                $controller->changePassword();
+                break;
+            case 'get-options':
+                $controller->getOptions();
+                break;
+            case 'save-options-batch':
+                $controller->saveOptionsBatch();
+                break;
+            // Retirez save-option car non utilisé
+            default:
+                $controller->show();
+                break;
         }
-        break;
-
-    case 'save-option':
-        $controller = new SettingsController($pdo);
-        $controller->saveOption();
-        break;
-
-    case 'save-options-batch':
-        $controller = new SettingsController($pdo);
-        $controller->saveOptionsBatch();
-        break;
-
-    case 'get-options':
-        $controller = new SettingsController($pdo);
-        $controller->getOptions();
         break;
 
     case 'logout':

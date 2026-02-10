@@ -161,4 +161,40 @@ require __DIR__ . '/../partials/header.php';
     </div>
 </div>
 
+<!-- Script pour corriger définitivement l'état des accordéons -->
+<script>
+// Exécuter après que tous les scripts soient chargés
+window.addEventListener('load', function() {
+    <?php if (!empty($current_logo)): ?>
+        // Si un logo existe, forcer l'état des accordéons
+        setTimeout(function() {
+            const currentLogoContent = document.getElementById('current-logo-content');
+            const uploadLogoContent = document.getElementById('upload-logo-content');
+            
+            // Forcer l'affichage du logo actuel
+            if (currentLogoContent) {
+                currentLogoContent.style.display = 'block';
+                currentLogoContent.style.maxHeight = 'none';
+                currentLogoContent.style.opacity = '1';
+                currentLogoContent.style.visibility = 'visible';
+                currentLogoContent.classList.add('expanded');
+                currentLogoContent.classList.remove('collapsed');
+            }
+            
+            // Forcer la fermeture de l'upload
+            if (uploadLogoContent) {
+                uploadLogoContent.style.display = 'none';
+                uploadLogoContent.style.maxHeight = '0';
+                uploadLogoContent.style.opacity = '0';
+                uploadLogoContent.style.visibility = 'hidden';
+                uploadLogoContent.classList.add('collapsed');
+                uploadLogoContent.classList.remove('expanded');
+            }
+            
+            console.log("Accordéons corrigés par PHP");
+        }, 500);
+    <?php endif; ?>
+});
+</script>
+
 <?php require __DIR__ . '/../partials/footer.php'; ?>
