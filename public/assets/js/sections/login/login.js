@@ -1,4 +1,20 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // =============== FAIRE DISPARAÎTRE LES MESSAGES APRÈS 5s ===============
+    const errorMessage = document.querySelector('.message-error');
+    if (errorMessage) {
+        setTimeout(() => {
+            errorMessage.remove();
+        }, 4000);
+    }
+    
+    const successMessage = document.querySelector('.message-success');
+    if (successMessage) {
+        setTimeout(() => {
+            successMessage.remove();
+        }, 4000); // 4 secondes
+    }
+    
+    // =============== GESTION DES MOTS DE PASSE (VOTRE CODE) ===============
     const passwordInputs = document.querySelectorAll('input[type="password"]');
     
     passwordInputs.forEach(input => {

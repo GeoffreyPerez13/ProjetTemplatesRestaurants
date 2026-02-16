@@ -13,7 +13,6 @@
 }
 
 .mode-indicator i {
-  color: #b71c1c;
   font-size: 16px;
 }
 
@@ -37,8 +36,7 @@
 }
 
 .category-title {
-  color: #b71c1c;
-  border-bottom: 2px solid #b71c1c;
+  border-bottom: 2px solid black;
   padding-bottom: 10px;
   margin-bottom: 20px;
   text-align: center;
@@ -91,7 +89,6 @@
 
 .dish-price {
   font-weight: bold;
-  color: #b71c1c;
   font-size: 1.1em;
   white-space: nowrap;
   order: 2;
@@ -113,8 +110,8 @@
 
 .dish-preview-image:hover {
   transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(183, 28, 28, 0.2);
-  border-color: #b71c1c;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  border-color: black;
 }
 
 /* Image de la catégorie - rendue cliquable */
@@ -124,14 +121,14 @@
   border-radius: 8px;
   margin-bottom: 15px;
   object-fit: cover;
-  border: 2px solid #b71c1c;
+  border: 2px solid black;
   cursor: pointer;
   transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .category-preview-image:hover {
   transform: scale(1.02);
-  box-shadow: 0 8px 20px rgba(183, 28, 28, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .dish-description {
@@ -161,7 +158,7 @@
   position: absolute;
   top: 5px;
   right: 5px;
-  background: rgba(183, 28, 28, 0.7);
+  background: rgba(0, 0, 0, 0.7);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -203,7 +200,7 @@
   border-radius: 8px;
   padding: 15px;
   margin-bottom: 20px;
-  border-left: 4px solid #b71c1c;
+  border-left: 4px solid black;
 }
 
 .images-info p {
@@ -278,7 +275,7 @@
 }
 
 .btn-view-full {
-  background: rgba(183, 28, 28, 0.9);
+  background: rgba(0, 0, 0, 0.7);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -292,7 +289,7 @@
 }
 
 .btn-view-full:hover {
-  background: rgba(183, 28, 28, 1);
+  background: rgba(0, 0, 0, 1);
   transform: scale(1.05);
 }
 
@@ -304,7 +301,7 @@
 }
 
 .pdf-header {
-  background: #dc3545;
+  background: black;
   color: white;
   padding: 12px 20px;
   display: flex;
@@ -387,7 +384,6 @@
 
 .empty-state i {
   font-size: 48px;
-  color: #b71c1c;
   margin-bottom: 20px;
 }
 

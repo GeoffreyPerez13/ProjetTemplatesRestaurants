@@ -1,536 +1,769 @@
 <?php
+// ====== DEBUG TEMPORAIRE ======
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+// ==============================
 
-// Inclusion des fichiers nécessaires
-require_once __DIR__ . '/BaseController.php';         // Contrôleur de base avec les fonctionnalités communes
-require_once __DIR__ . '/../Models/Category.php';     // Modèle pour gérer les catégories
-require_once __DIR__ . '/../Models/Dish.php';         // Modèle pour gérer les plats
-require_once __DIR__ . '/../Models/CardImage.php';    // Modèle pour gérer les images de carte
-require_once __DIR__ . '/../Models/Admin.php';        // Modèle pour gérer les administrateurs
-require_once __DIR__ . '/../Helpers/Validator.php';   // Helper pour valider les données des formulaires
+require_once __DIR__ . '/BaseController.php';
+require_once __DIR__ . '/../Models/Category.php';
+require_once __DIR__ . '/../Models/Dish.php';
+require_once __DIR__ . '/../Models/CardImage.php';
+require_once __DIR__ . '/../Models/Admin.php';
+require_once __DIR__ . '/../Models/Restaurant.php'; // Ajouté
+require_once __DIR__ . '/../Helpers/Validator.php';
 
-/**
- * Contrôleur pour la gestion de la carte du restaurant
- * Permet d'éditer, visualiser et gérer les catégories, plats et images de la carte
- */
 class CardController extends BaseController
 {
-    /**
-     * Constructeur
-     * Initialise le contrôleur avec la connexion PDO
-     * Définit le délai de scroll à 5 secondes pour tous les messages
-     * @param PDO $pdo Instance de connexion à la base de données
-     */
+    private $restaurantModel; // Nouvelle propriété
+
     public function __construct($pdo)
     {
-        parent::__construct($pdo);  // Appelle le constructeur du parent (BaseController)
-        $this->setScrollDelay(3500); // Définit un délai de 3,5 secondes pour le défilement
+        parent::__construct($pdo);
+        $this->setScrollDelay(1500); // 1,5 secondes
+        $this->restaurantModel = new Restaurant($pdo); // Initialisation
     }
 
     /**
-     * Page d'édition de la carte (catégories + plats)
-     * Méthode principale pour modifier la structure et le contenu de la carte
-     * 
-     * Processus:
-     * 1. Vérifie que l'admin est connecté
-     * 2. Récupère les données selon le mode (éditable ou images)
-     * 3. Traite les formulaires POST
-     * 4. Récupère les messages flash
-     * 5. Affiche la vue d'édition avec les données
+     * Met à jour le timestamp du restaurant
+     */
+    private function updateRestaurantTimestamp()
+    {
+        if (isset($_SESSION['admin_id'])) {
+            // Récupérer l'admin avec son restaurant_id
+            $stmt = $this->pdo->prepare("SELECT restaurant_id FROM admins WHERE id = ?");
+            $stmt->execute([$_SESSION['admin_id']]);
+            $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($admin && isset($admin['restaurant_id'])) {
+                return $this->restaurantModel->updateTimestamp($admin['restaurant_id']);
+            } else {
+                error_log("Avertissement: admin " . $_SESSION['admin_id'] . " n'a pas de restaurant_id");
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Page d'édition de la carte
      */
     public function edit()
     {
-        // Étape 1: Vérification de l'authentification
-        $this->requireLogin();  // Redirige vers login.php si non connecté
-
-        // Étape 2: Récupération de l'ID de l'admin depuis la session
-        // $_SESSION['admin_id'] est défini lors de la connexion dans AdminController
+        // 1. Vérifier la connexion
+        $this->requireLogin();
         $admin_id = $_SESSION['admin_id'];
 
-        // Étape 3: Instanciation des modèles nécessaires
-        $adminModel = new Admin($this->pdo);           // Pour les infos admin (mode de carte)
-        $categoryModel = new Category($this->pdo);     // Pour les opérations sur les catégories
-        $dishModel = new Dish($this->pdo);             // Pour les opérations sur les plats
-        $carteImageModel = new CardImage($this->pdo);  // Pour les images de carte (mode images)
+        error_log("=== EDIT CARD START ===");
+        error_log("Admin ID: $admin_id");
 
-        // Étape 4: Récupération du mode actuel de la carte
-        // Deux modes possibles: 'editable' (catégories/plats) ou 'images' (PDF/images)
+        // 2. Initialiser les modèles
+        $adminModel = new Admin($this->pdo);
+        $categoryModel = new Category($this->pdo);
+        $dishModel = new Dish($this->pdo);
+        $carteImageModel = new CardImage($this->pdo);
+
+        // 3. Récupérer le mode actuel
         $currentMode = $adminModel->getCarteMode($admin_id);
+        error_log("Current mode: $currentMode");
 
-        // Étape 5: Traitement des formulaires POST (si soumis)
-        // La méthode handlePostActions gère toutes les actions et redirige
+        // 4. Traiter les formulaires POST
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $this->handlePostActions($categoryModel, $dishModel, $carteImageModel, $adminModel, $admin_id, $currentMode);
+            error_log("=== POST REQUEST ===");
+            error_log("POST data: " . print_r($_POST, true));
+
+            $this->handlePostRequest($adminModel, $categoryModel, $dishModel, $carteImageModel, $admin_id, $currentMode);
         }
 
-        // Étape 6: Récupération des messages flash de session
-        // Utilise la méthode héritée de BaseController pour centraliser la gestion
+        // 5. Préparer les données pour la vue
         $messages = $this->getFlashMessages();
-        extract($messages); // Crée les variables $success_message, $error_message, $scroll_delay, $anchor
+        extract($messages);
 
-        // Étape 7: Récupération des autres données de session spécifiques
-        // Ces données ne sont pas gérées par getFlashMessages() car spécifiques à cette page
+        // Nettoyer les erreurs de formulaire
         $error_fields = $_SESSION['error_fields'] ?? [];
         $old_input = $_SESSION['old_input'] ?? [];
-
-        // Étape 8: Nettoyage des variables de session spécifiques après lecture
-        // Évite que les données persistent après rafraîchissement
         unset($_SESSION['error_fields'], $_SESSION['old_input']);
 
-        // Étape 9: Préparation des données selon le mode
+        // 6. Charger les données selon le mode
         if ($currentMode === 'editable') {
-            // Mode éditable: récupère les catégories et leurs plats
-
-            // Récupère toutes les catégories de cet admin
-            $categories = $categoryModel->getAllByAdmin($admin_id);
-
-            // Pour chaque catégorie, récupère les plats associés
-            // &$cat passe la référence pour modifier directement le tableau
-            foreach ($categories as &$cat) {
-                $cat['plats'] = $dishModel->getAllByCategory($cat['id']);
-            }
-
-            // Préparation des données pour la vue
-            $data = [
-                'currentMode' => $currentMode,    // 'editable'
-                'categories' => $categories,      // Tableau des catégories avec plats
-                'success_message' => $success_message,    // Message de succès
-                'error_message' => $error_message,        // Message d'erreur
-                'error_fields' => $error_fields,         // Erreurs de validation
-                'old_input' => $old_input,               // Anciennes valeurs des formulaires
-                'anchor' => $anchor,                     // Ancre pour le scroll
-                'scroll_delay' => $scroll_delay          // Délai pour le défilement
-            ];
+            $data = $this->getEditableModeData($admin_id, $categoryModel, $dishModel, $messages, $error_fields, $old_input);
         } else {
-            // Mode images: récupère les images/PDF de la carte
-            $carteImages = $carteImageModel->getAllByAdmin($admin_id);
-
-            $data = [
-                'currentMode' => $currentMode,    // 'images'
-                'carteImages' => $carteImages,    // Tableau des images
-                'success_message' => $success_message,    // Message de succès
-                'error_message' => $error_message,        // Message d'erreur
-                'error_fields' => $error_fields,         // Erreurs de validation
-                'old_input' => $old_input,               // Anciennes valeurs des formulaires
-                'anchor' => $anchor,                     // Ancre pour le scroll
-                'scroll_delay' => $scroll_delay          // Délai pour le défilement
-            ];
+            $data = $this->getImagesModeData($admin_id, $carteImageModel, $messages, $error_fields, $old_input);
         }
 
-        // Étape 10: Affichage de la vue avec les données préparées
+        // 7. Afficher la vue
         $this->render('admin/edit-card', $data);
     }
 
     /**
-     * Gestion centralisée des actions POST
-     * Traite toutes les soumissions de formulaires et gère les redirections
-     * Utilise les méthodes addSuccessMessage() et addErrorMessage() de BaseController
-     * pour une gestion cohérente des messages avec délai de défilement
-     * 
-     * @param Category $categoryModel Instance du modèle Category
-     * @param Dish $dishModel Instance du modèle Dish
-     * @param CardImage $carteImageModel Instance du modèle CardImage
-     * @param Admin $adminModel Instance du modèle Admin
-     * @param int $admin_id ID de l'administrateur connecté
-     * @param string $currentMode Mode actuel de la carte ('editable' ou 'images')
+     * Gère toutes les requêtes POST
      */
-    private function handlePostActions($categoryModel, $dishModel, $carteImageModel, $adminModel, $admin_id, $currentMode)
+    private function handlePostRequest($adminModel, $categoryModel, $dishModel, $carteImageModel, $admin_id, $currentMode)
     {
+        $anchor = $_POST['anchor'] ?? '';
+
         try {
-            // Récupérer l'ancre à partir du POST pour le défilement ciblé
-            $anchor = $_POST['anchor'] ?? '';
-
-            // ==================== CHANGEMENT DE MODE ====================
+            // Changement de mode
             if (isset($_POST['change_mode'])) {
-                $newMode = $_POST['carte_mode'];
-                if (in_array($newMode, ['editable', 'images'])) {
-                    $adminModel->updateCarteMode($admin_id, $newMode);
-                    $this->addSuccessMessage("Mode de carte changé avec succès", 'mode-selector');
-                    $_SESSION['close_accordion'] = 'mode-selector-content';
-                }
-
-                // Redirection immédiate
-                $this->redirectWithAnchor($anchor);
+                $this->handleChangeMode($adminModel, $admin_id, $anchor);
                 return;
             }
 
-            // ==================== MODE ÉDITABLE ====================
+            // Mode éditable
             if ($currentMode === 'editable') {
-                $this->handleEditableMode($categoryModel, $dishModel, $admin_id, $anchor);
+                $this->handleEditableModeActions($categoryModel, $dishModel, $admin_id, $anchor);
+                return;
             }
 
-            // ==================== MODE IMAGES ====================
-            elseif ($currentMode === 'images') {
-                $this->handleImagesMode($carteImageModel, $admin_id, $anchor);
+            // Mode images
+            if ($currentMode === 'images') {
+                $this->handleImagesModeActions($carteImageModel, $admin_id, $anchor);
+                return;
             }
         } catch (Exception $e) {
-            // Gestion globale des exceptions
-            $this->addErrorMessage("Erreur : " . $e->getMessage(), $anchor);
+            error_log("Exception in handlePostRequest: " . $e->getMessage());
+            $this->addErrorMessage("Erreur: " . $e->getMessage(), $anchor);
         }
 
-        // Redirection avec ancre
-        $this->redirectWithAnchor($anchor);
+        // Redirection par défaut
+        $this->redirectToEditCard($anchor);
+    }
+
+    /**
+     * Gestion du changement de mode
+     */
+    private function handleChangeMode($adminModel, $admin_id, $anchor)
+    {
+        $newMode = $_POST['carte_mode'] ?? '';
+
+        if (in_array($newMode, ['editable', 'images'])) {
+            $adminModel->updateCarteMode($admin_id, $newMode);
+
+            // Mettre à jour le timestamp
+            $this->updateRestaurantTimestamp();
+
+            $this->addSuccessMessage("Mode de carte changé avec succès", 'mode-selector');
+            $_SESSION['close_accordion'] = 'mode-selector-content';
+        }
+
+        $this->redirectToEditCard($anchor);
     }
 
     /**
      * Gestion des actions en mode éditable
      */
-    private function handleEditableMode($categoryModel, $dishModel, $admin_id, $anchor)
+    private function handleEditableModeActions($categoryModel, $dishModel, $admin_id, $anchor)
     {
-        // --- SUPPRESSION D'UNE CATÉGORIE ---
-        if (isset($_POST['delete_category'])) {
-            $this->handleDeleteCategory($categoryModel, $admin_id, $anchor);
-        }
+        error_log("Handling editable mode actions");
 
-        // --- AJOUT D'UNE CATÉGORIE ---
-        elseif (isset($_POST['new_category'])) {
+        // Ajout de catégorie
+        if (isset($_POST['new_category'])) {
             $this->handleAddCategory($categoryModel, $admin_id, $anchor);
         }
 
-        // --- MODIFICATION D'UNE CATÉGORIE ---
+        // Modification de catégorie
         elseif (isset($_POST['edit_category'])) {
             $this->handleEditCategory($categoryModel, $admin_id, $anchor);
         }
 
-        // --- SUPPRESSION DE L'IMAGE DE LA CATÉGORIE ---
+        // Suppression de catégorie
+        elseif (isset($_POST['delete_category'])) {
+            $this->handleDeleteCategory($categoryModel, $admin_id, $anchor);
+        }
+
+        // Suppression d'image de catégorie
         elseif (isset($_POST['remove_category_image'])) {
             $this->handleRemoveCategoryImage($categoryModel, $admin_id, $anchor);
         }
 
-        // --- AJOUT D'UN PLAT ---
+        // Ajout de plat
         elseif (isset($_POST['new_dish'])) {
             $this->handleAddDish($dishModel, $anchor);
         }
 
-        // --- MODIFICATION D'UN PLAT ---
+        // Modification de plat
         elseif (isset($_POST['edit_dish'])) {
             $this->handleEditDish($dishModel, $anchor);
         }
 
-        // --- SUPPRESSION DE L'IMAGE D'UN PLAT ---
+        // Suppression de plat
+        elseif (isset($_POST['delete_dish'])) {
+            $this->handleDeleteDish($dishModel, $anchor);
+        }
+
+        // Suppression d'image de plat
         elseif (isset($_POST['remove_dish_image'])) {
             $this->handleRemoveDishImage($dishModel, $anchor);
         }
 
-        // --- SUPPRESSION D'UN PLAT ---
-        elseif (isset($_POST['delete_dish'])) {
-            $this->handleDeleteDish($dishModel, $anchor);
-        }
+        // Redirection par défaut
+        $this->redirectToEditCard($anchor);
     }
 
     /**
      * Gestion des actions en mode images
      */
-    private function handleImagesMode($carteImageModel, $admin_id, $anchor)
+    private function handleImagesModeActions($carteImageModel, $admin_id, $anchor)
     {
-        // --- UPLOAD D'IMAGES ---
+        error_log("Handling images mode actions");
+
+        // Upload d'images
         if (isset($_POST['upload_images']) && isset($_FILES['card_images'])) {
             $this->handleUploadImages($carteImageModel, $admin_id, $anchor);
         }
 
-        // --- SUPPRESSION D'UNE IMAGE ---
+        // SUPPRESSION D'IMAGE - APPROCHE SIMPLIFIÉE
         elseif (isset($_POST['delete_image'])) {
-            $this->handleDeleteImage($carteImageModel, $admin_id, $anchor);
+            error_log("DELETE IMAGE ACTION DETECTED");
+            $this->handleDeleteImageSimple($carteImageModel, $admin_id, $anchor);
         }
 
-        // --- RÉORGANISATION DES IMAGES ---
+        // Réorganisation des images
         elseif (isset($_POST['update_image_order'])) {
             $this->handleReorderImages($carteImageModel, $admin_id, $anchor);
+        }
+
+        // Redirection par défaut
+        $this->redirectToEditCard($anchor);
+    }
+
+    /**
+ * Gestion simplifiée de la suppression d'image
+ */
+private function handleDeleteImageSimple($carteImageModel, $admin_id, $anchor)
+{
+    // 1. Récupérer l'ID de l'image
+    $image_id = (int)($_POST['image_id'] ?? 0);
+    error_log("=== DELETE IMAGE PROCESS START ===");
+    error_log("Image ID from POST: $image_id");
+    error_log("Admin ID: $admin_id");
+
+    if ($image_id <= 0) {
+        error_log("Invalid image ID");
+        $this->addErrorMessage("ID d'image invalide.", 'images-list');
+        return;
+    }
+
+    // 2. Récupérer les infos de l'image AVANT suppression
+    $stmt = $this->pdo->prepare("SELECT * FROM card_images WHERE id = ? AND admin_id = ?");
+    $stmt->execute([$image_id, $admin_id]);
+    $image = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$image) {
+        error_log("Image not found or doesn't belong to admin");
+        $this->addErrorMessage("Image non trouvée ou vous n'avez pas les droits.", 'images-list');
+        return;
+    }
+
+    error_log("Image found:");
+    error_log("- ID: " . $image['id']);
+    error_log("- Filename: " . $image['filename']);
+    error_log("- Original name: " . $image['original_name']);
+    error_log("- Admin ID: " . $image['admin_id']);
+
+    // 3. SUPPRESSION EN BASE DE DONNÉES D'ABORD
+    try {
+        $stmt = $this->pdo->prepare("DELETE FROM card_images WHERE id = ? AND admin_id = ?");
+        $stmt->execute([$image_id, $admin_id]);
+        $rowCount = $stmt->rowCount();
+
+        error_log("Database delete - Rows affected: $rowCount");
+
+        if ($rowCount === 0) {
+            error_log("Failed to delete from database - no rows affected");
+            $this->addErrorMessage("Échec de la suppression de la base de données.", 'images-list');
+            $_SESSION['open_accordion'] = 'images-list-content';
+            $this->redirectToEditCard($anchor);
+            return;
+        }
+
+        error_log("Image successfully deleted from database");
+
+    } catch (Exception $e) {
+        error_log("Database delete error: " . $e->getMessage());
+        $this->addErrorMessage("Erreur de base de données: " . $e->getMessage(), 'images-list');
+        $_SESSION['open_accordion'] = 'images-list-content';
+        $this->redirectToEditCard($anchor);
+        return;
+    }
+
+    // 4. SUPPRESSION DU FICHIER PHYSIQUE
+    if (!empty($image['filename'])) {
+        if ($this->deletePhysicalFile($image['filename'])) {
+            error_log("Physical file deleted successfully");
+        } else {
+            error_log("WARNING: Physical file could not be deleted, but DB record was removed");
+            // On continue même si le fichier physique n'a pas pu être supprimé
+            // car l'enregistrement en base est déjà supprimé
+        }
+    } else {
+        error_log("No filename to delete");
+    }
+
+    // 5. SUCCÈS
+    error_log("Image deletion process completed successfully");
+
+    // Mettre à jour le timestamp du restaurant
+    $this->updateRestaurantTimestamp();
+
+    $this->addSuccessMessage("Image supprimée avec succès.", 'images-list');
+
+    // IMPORTANT : Configurer les accordéons après suppression
+    $_SESSION['close_accordion'] = 'mode-selector-content';
+    $_SESSION['open_accordion'] = 'images-list-content';
+
+    $this->redirectToEditCard($anchor);
+}
+
+/**
+ * Supprime un fichier physique - VERSION CORRIGÉE
+ */
+private function deletePhysicalFile($filename)
+{
+    error_log("Attempting to delete physical file: $filename");
+    
+    // 1. Nettoyer le chemin
+    $filepath = trim($filename);
+    
+    // 2. Si le chemin commence par '/', l'enlever
+    if (strpos($filepath, '/') === 0) {
+        $filepath = substr($filepath, 1);
+        error_log("Removed leading slash, new path: $filepath");
+    }
+    
+    // 3. Chemin absolu depuis la racine du projet
+    // Supposons que les images sont dans 'uploads/card-images/'
+    $projectRoot = realpath(__DIR__ . '/../../');
+    $absolutePath = $projectRoot . '/' . $filepath;
+    
+    error_log("Project root: $projectRoot");
+    error_log("Absolute path: $absolutePath");
+    
+    // 4. Vérifier si le fichier existe
+    if (!file_exists($absolutePath)) {
+        error_log("File does not exist at: $absolutePath");
+        
+        // Essayer un autre emplacement possible
+        $alternativePath = $_SERVER['DOCUMENT_ROOT'] . '/' . $filepath;
+        error_log("Trying alternative path: $alternativePath");
+        
+        if (file_exists($alternativePath)) {
+            $absolutePath = $alternativePath;
+            error_log("File found at alternative location");
+        } else {
+            error_log("File not found at alternative location either");
+            // On retourne true pour continuer même si le fichier n'existe pas
+            return true;
+        }
+    }
+    
+    // 5. Vérifier les permissions
+    if (!is_writable($absolutePath)) {
+        error_log("File is not writable: $absolutePath");
+        error_log("Permissions: " . substr(sprintf('%o', fileperms($absolutePath)), -4));
+        return false;
+    }
+    
+    // 6. Supprimer le fichier
+    if (unlink($absolutePath)) {
+        error_log("Physical file deleted successfully: $absolutePath");
+        return true;
+    } else {
+        error_log("Failed to delete physical file: $absolutePath");
+        error_log("Error: " . error_get_last()['message'] ?? 'Unknown error');
+        return false;
+    }
+}
+
+    /**
+     * Supprime une image de la base de données
+     */
+    private function deleteFromDatabase($image_id, $admin_id)
+    {
+        try {
+            $stmt = $this->pdo->prepare("DELETE FROM card_images WHERE id = ? AND admin_id = ?");
+            $stmt->execute([$image_id, $admin_id]);
+            $rowCount = $stmt->rowCount();
+
+            error_log("Database delete - Rows affected: $rowCount");
+
+            return $rowCount > 0;
+        } catch (Exception $e) {
+            error_log("Database delete error: " . $e->getMessage());
+            return false;
         }
     }
 
     /**
-     * Gestion de la suppression d'une catégorie
+     * Gestion de l'ajout de catégorie
+     */
+    private function handleAddCategory($categoryModel, $admin_id, $anchor)
+    {
+        $name = trim($_POST['new_category'] ?? '');
+
+        // Validation
+        if (empty($name) || strlen($name) > 100) {
+            $this->addErrorMessage("Le nom de la catégorie est requis (max 100 caractères)", 'new-category');
+            $_SESSION['error_fields'] = ['new_category' => true];
+            $_SESSION['old_input'] = $_POST;
+            $_SESSION['open_accordion'] = 'new-category-content';
+            $this->redirectToEditCard($anchor);
+            return;
+        }
+
+        // Gestion de l'image
+        $imagePath = null;
+        if (isset($_FILES['category_image']) && $_FILES['category_image']['error'] === UPLOAD_ERR_OK) {
+            try {
+                $imagePath = $categoryModel->uploadImage($_FILES['category_image']);
+            } catch (Exception $e) {
+                $this->addErrorMessage("Erreur image: " . $e->getMessage(), 'new-category');
+                $this->redirectToEditCard($anchor);
+                return;
+            }
+        }
+
+        // Créer la catégorie
+        try {
+            $categoryModel->create($admin_id, $name, $imagePath);
+            $categoryId = $this->pdo->lastInsertId();
+
+            // Mettre à jour le timestamp du restaurant
+            $this->updateRestaurantTimestamp();
+
+            $this->addSuccessMessage("Catégorie ajoutée avec succès.", 'category-' . $categoryId);
+            $_SESSION['close_accordion'] = 'mode-selector-content';
+            $_SESSION['close_accordion_secondary'] = 'new-category-content';
+        } catch (Exception $e) {
+            $this->addErrorMessage("Erreur: " . $e->getMessage(), 'new-category');
+        }
+
+        $this->redirectToEditCard($anchor);
+    }
+
+    /**
+     * Gestion de la modification de catégorie
+     */
+    private function handleEditCategory($categoryModel, $admin_id, $anchor)
+    {
+        $category_id = (int)($_POST['category_id'] ?? 0);
+        $new_name = trim($_POST['edit_category_name'] ?? '');
+
+        if (empty($new_name) || strlen($new_name) > 100) {
+            $this->addErrorMessage("Nom invalide (max 100 caractères)", 'category-' . $category_id);
+            $_SESSION['error_fields'] = ['edit_category_name' => true];
+            $_SESSION['old_input'] = $_POST;
+            $_SESSION['open_accordion'] = 'edit-category-' . $category_id;
+            $this->redirectToEditCard($anchor);
+            return;
+        }
+
+        // Gestion de la nouvelle image
+        $imagePath = null;
+        if (isset($_FILES['edit_category_image']) && $_FILES['edit_category_image']['error'] === UPLOAD_ERR_OK) {
+            try {
+                $imagePath = $categoryModel->uploadImage($_FILES['edit_category_image']);
+
+                // Supprimer l'ancienne image si elle existe
+                $category = $categoryModel->getById($category_id, $admin_id);
+                if ($category && !empty($category['image'])) {
+                    $categoryModel->deleteImage($category['image']);
+                }
+            } catch (Exception $e) {
+                $this->addErrorMessage("Erreur image: " . $e->getMessage(), 'category-' . $category_id);
+                $this->redirectToEditCard($anchor);
+                return;
+            }
+        }
+
+        // Mettre à jour
+        try {
+            $categoryModel->update($category_id, $new_name, $imagePath);
+
+            // Mettre à jour le timestamp du restaurant
+            $this->updateRestaurantTimestamp();
+
+            $this->addSuccessMessage("Catégorie modifiée avec succès.", 'category-' . $category_id);
+            $_SESSION['close_accordion'] = 'mode-selector-content';
+            $_SESSION['close_accordion_secondary'] = 'edit-category-' . $category_id;
+        } catch (Exception $e) {
+            $this->addErrorMessage("Erreur: " . $e->getMessage(), 'category-' . $category_id);
+        }
+
+        $this->redirectToEditCard($anchor);
+    }
+
+    /**
+     * Gestion de la suppression de catégorie
      */
     private function handleDeleteCategory($categoryModel, $admin_id, $anchor)
     {
-        $category_id = (int)$_POST['delete_category'];
+        $category_id = (int)($_POST['delete_category'] ?? 0);
 
-        // Vérifier que la catégorie appartient bien à l'admin
-        $category = $categoryModel->getById($category_id, $admin_id);
+        try {
+            // Vérifier que la catégorie existe et appartient à l'admin
+            $category = $categoryModel->getById($category_id, $admin_id);
 
-        if ($category) {
-            try {
-                // Supprimer l'image de la catégorie si elle existe
+            if ($category) {
+                // Supprimer l'image si elle existe
                 if (!empty($category['image'])) {
                     $categoryModel->deleteImage($category['image']);
                 }
 
-                // Supprimer la catégorie (la méthode delete() supprime aussi les plats)
+                // Supprimer la catégorie
                 $categoryModel->delete($category_id, $admin_id);
 
-                // Utilisation de addSuccessMessage() avec ancre spécifique
+                // Mettre à jour le timestamp du restaurant
+                $this->updateRestaurantTimestamp();
+
                 $this->addSuccessMessage("Catégorie et tous ses plats supprimés avec succès.", 'categories-grid');
                 $_SESSION['close_accordion'] = 'mode-selector-content';
-            } catch (Exception $e) {
-                // Utilisation de addErrorMessage() pour les erreurs
-                $this->addErrorMessage("Erreur lors de la suppression : " . $e->getMessage(), $anchor);
+            } else {
+                $this->addErrorMessage("Catégorie non trouvée.", $anchor);
             }
-        } else {
-            $this->addErrorMessage("Catégorie non trouvée ou vous n'avez pas les droits.", $anchor);
+        } catch (Exception $e) {
+            $this->addErrorMessage("Erreur: " . $e->getMessage(), $anchor);
         }
+
+        $this->redirectToEditCard($anchor);
     }
 
     /**
-     * Gestion de l'ajout d'une catégorie
-     */
-    private function handleAddCategory($categoryModel, $admin_id, $anchor)
-    {
-        $name = trim($_POST['new_category']);
-
-        // Validation de la catégorie
-        $validator = new Validator($_POST);
-        $validator->rules([
-            'new_category' => ['required', 'max:100']
-        ]);
-
-        if (!$validator->validate()) {
-            // Gestion des erreurs de validation
-            $this->addErrorMessage("Veuillez vérifier les champs du formulaire.", 'new-category');
-            $_SESSION['error_fields'] = $validator->errors();
-            $_SESSION['old_input'] = $_POST;
-            $_SESSION['open_accordion'] = 'new-category-content';
-        } else {
-            $imagePath = null;
-
-            // Gestion du téléchargement d'image
-            if (isset($_FILES['category_image']) && $_FILES['category_image']['error'] === UPLOAD_ERR_OK) {
-                $imagePath = $categoryModel->uploadImage($_FILES['category_image']);
-            }
-
-            // Création de la catégorie
-            $categoryModel->create($admin_id, $name, $imagePath);
-            $categoryId = $this->pdo->lastInsertId();
-
-            // Message de succès avec ancre vers la nouvelle catégorie
-            $this->addSuccessMessage("Catégorie ajoutée avec succès.", 'category-' . $categoryId);
-            $_SESSION['close_accordion'] = 'mode-selector-content';
-            $_SESSION['close_accordion_secondary'] = 'new-category-content';
-        }
-    }
-
-    /**
-     * Gestion de la modification d'une catégorie
-     */
-    private function handleEditCategory($categoryModel, $admin_id, $anchor)
-    {
-        $category_id = (int)$_POST['category_id'];
-        $new_name = trim($_POST['edit_category_name'] ?? '');
-
-        // Validation de la catégorie
-        $validator = new Validator($_POST);
-        $validator->rules([
-            'edit_category_name' => ['required', 'max:100']
-        ]);
-
-        if (!$validator->validate()) {
-            $this->addErrorMessage("Veuillez vérifier les champs du formulaire.", 'category-' . $category_id);
-            $_SESSION['error_fields'] = $validator->errors();
-            $_SESSION['old_input'] = $_POST;
-            $_SESSION['open_accordion'] = 'edit-category-' . $category_id;
-        } else {
-            $imagePath = null;
-            $hasNewImage = false;
-
-            // Gestion de la nouvelle image
-            if (isset($_FILES['edit_category_image']) && $_FILES['edit_category_image']['error'] === UPLOAD_ERR_OK) {
-                $imagePath = $categoryModel->uploadImage($_FILES['edit_category_image']);
-                $hasNewImage = true;
-
-                // Suppression de l'ancienne image si elle existe
-                $existingCategory = $this->getCategoryById($categoryModel, $category_id, $admin_id);
-                if ($existingCategory && !empty($existingCategory['image'])) {
-                    $categoryModel->deleteImage($existingCategory['image']);
-                }
-            }
-
-            // Mise à jour de la catégorie
-            $categoryModel->update($category_id, $new_name, $imagePath);
-            $this->addSuccessMessage("Catégorie modifiée avec succès.", 'category-' . $category_id);
-            $_SESSION['close_accordion'] = 'mode-selector-content';
-            $_SESSION['close_accordion_secondary'] = 'edit-category-' . $category_id;
-        }
-    }
-
-    /**
-     * Gestion de la suppression de l'image d'une catégorie
+     * Gestion de la suppression d'image de catégorie
      */
     private function handleRemoveCategoryImage($categoryModel, $admin_id, $anchor)
     {
-        $category_id = (int)$_POST['remove_category_image'];
+        $category_id = (int)($_POST['remove_category_image'] ?? 0);
 
-        $category = $categoryModel->getById($category_id, $admin_id);
+        try {
+            $category = $categoryModel->getById($category_id, $admin_id);
 
-        if ($category && !empty($category['image'])) {
-            $categoryModel->deleteImage($category['image']);
-            $categoryModel->update($category_id, $category['name'], '');
-            $this->addSuccessMessage("Image de la catégorie supprimée avec succès.", 'category-' . $category_id);
-            $_SESSION['close_accordion'] = 'mode-selector-content';
-            $_SESSION['close_accordion_secondary'] = 'edit-category-' . $category_id;
-        } else {
-            $this->addErrorMessage("Cette catégorie n'a pas d'image à supprimer.", 'category-' . $category_id);
+            if ($category && !empty($category['image'])) {
+                // Supprimer le fichier
+                $categoryModel->deleteImage($category['image']);
+
+                // Mettre à jour la base
+                $categoryModel->update($category_id, $category['name'], '');
+
+                // Mettre à jour le timestamp du restaurant
+                $this->updateRestaurantTimestamp();
+
+                $this->addSuccessMessage("Image de catégorie supprimée avec succès.", 'category-' . $category_id);
+                $_SESSION['close_accordion'] = 'mode-selector-content';
+                $_SESSION['close_accordion_secondary'] = 'edit-category-' . $category_id;
+            } else {
+                $this->addErrorMessage("Cette catégorie n'a pas d'image.", 'category-' . $category_id);
+            }
+        } catch (Exception $e) {
+            $this->addErrorMessage("Erreur: " . $e->getMessage(), 'category-' . $category_id);
         }
+
+        $this->redirectToEditCard($anchor);
     }
 
     /**
-     * Gestion de l'ajout d'un plat
+     * Gestion de l'ajout de plat
      */
     private function handleAddDish($dishModel, $anchor)
     {
-        $category_id = (int)$_POST['category_id'];
+        $category_id = (int)($_POST['category_id'] ?? 0);
+        $name = trim($_POST['dish_name'] ?? '');
+        $price = str_replace(',', '.', $_POST['dish_price'] ?? '0');
+        $description = trim($_POST['dish_description'] ?? '');
 
-        // Validation du plat
-        $validator = new Validator($_POST);
-        $validator->rules([
-            'dish_name' => ['required', 'max:100'],
-            'dish_price' => ['required', 'numeric', 'min_value:0.01', 'max_value:999.99'],
-            'dish_description' => ['max:500']
-        ]);
+        // Validation
+        $errors = [];
+        if (empty($name) || strlen($name) > 100) $errors['dish_name'] = true;
+        if (!is_numeric($price) || $price <= 0 || $price > 999.99) $errors['dish_price'] = true;
+        if (strlen($description) > 500) $errors['dish_description'] = true;
 
-        if (!$validator->validate()) {
-            $this->addErrorMessage("Veuillez vérifier les champs du formulaire.", 'category-' . $category_id);
-            $_SESSION['error_fields'] = $validator->errors();
+        if (!empty($errors)) {
+            $this->addErrorMessage("Veuillez corriger les erreurs.", 'category-' . $category_id);
+            $_SESSION['error_fields'] = $errors;
             $_SESSION['old_input'] = $_POST;
             $_SESSION['open_accordion'] = 'add-dish-' . $category_id;
-        } else {
-            $name = trim($_POST['dish_name']);
-            $price = floatval($_POST['dish_price']);
-            $description = trim($_POST['dish_description'] ?? '');
-            $imagePath = null;
+            $this->redirectToEditCard($anchor);
+            return;
+        }
 
-            // Gestion de l'image du plat
-            if (isset($_FILES['dish_image']) && $_FILES['dish_image']['error'] === UPLOAD_ERR_OK) {
+        // Gestion de l'image
+        $imagePath = null;
+        if (isset($_FILES['dish_image']) && $_FILES['dish_image']['error'] === UPLOAD_ERR_OK) {
+            try {
                 $imagePath = $dishModel->uploadImage($_FILES['dish_image']);
+            } catch (Exception $e) {
+                $this->addErrorMessage("Erreur image: " . $e->getMessage(), 'category-' . $category_id);
+                $this->redirectToEditCard($anchor);
+                return;
             }
+        }
 
-            // Création du plat
-            $dishObject = $dishModel->create($category_id, $name, $price, $description, $imagePath);
-            $dishId = $dishObject->getId();
+        // Créer le plat
+        try {
+            $dish = $dishModel->create($category_id, $name, (float)$price, $description, $imagePath);
+            $dishId = $dish->getId();
 
-            // Message de succès avec ancre vers le nouveau plat
+            // Mettre à jour le timestamp du restaurant
+            $this->updateRestaurantTimestamp();
+
             $this->addSuccessMessage("Plat ajouté avec succès.", 'dish-' . $dishId);
             $_SESSION['close_accordion'] = 'mode-selector-content';
             $_SESSION['open_accordion'] = 'edit-dishes-' . $category_id;
             $_SESSION['close_dish_accordion'] = 'dish-' . $dishId;
             $_SESSION['close_accordion_secondary'] = 'add-dish-' . $category_id;
+        } catch (Exception $e) {
+            $this->addErrorMessage("Erreur: " . $e->getMessage(), 'category-' . $category_id);
         }
+
+        $this->redirectToEditCard($anchor);
     }
 
     /**
-     * Gestion de la modification d'un plat
+     * Gestion de la modification de plat
      */
     private function handleEditDish($dishModel, $anchor)
     {
-        $dish_id = (int)$_POST['dish_id'];
+        $dish_id = (int)($_POST['dish_id'] ?? 0);
         $current_category_id = (int)($_POST['current_category_id'] ?? 0);
+        $name = trim($_POST['dish_name'] ?? '');
+        $price = str_replace(',', '.', $_POST['dish_price'] ?? '0');
+        $description = trim($_POST['dish_description'] ?? '');
 
-        // Validation du plat
-        $validator = new Validator($_POST);
-        $validator->rules([
-            'dish_name' => ['required', 'max:100'],
-            'dish_price' => ['required', 'numeric', 'min_value:0.01', 'max_value:999.99'],
-            'dish_description' => ['max:500']
-        ]);
+        // Validation
+        $errors = [];
+        if (empty($name) || strlen($name) > 100) $errors['dish_name_' . $dish_id] = true;
+        if (!is_numeric($price) || $price <= 0 || $price > 999.99) $errors['dish_price_' . $dish_id] = true;
+        if (strlen($description) > 500) $errors['dish_description_' . $dish_id] = true;
 
-        if (!$validator->validate()) {
-            $this->addErrorMessage("Veuillez vérifier les champs du formulaire.", 'dish-' . $dish_id);
-
-            // Préfixer les erreurs avec l'ID du plat pour éviter les conflits
-            $errors = $validator->errors();
-            $prefixedErrors = [];
-            foreach ($errors as $field => $hasError) {
-                $prefixedErrors[$field . '_' . $dish_id] = $hasError;
-            }
-
-            $_SESSION['error_fields'] = $prefixedErrors;
+        if (!empty($errors)) {
+            $this->addErrorMessage("Veuillez corriger les erreurs.", 'dish-' . $dish_id);
+            $_SESSION['error_fields'] = $errors;
             $_SESSION['old_input'] = $_POST;
             $_SESSION['open_accordion'] = 'dish-' . $dish_id;
-        } else {
-            $name = trim($_POST['dish_name']);
-            $price = floatval($_POST['dish_price']);
-            $description = trim($_POST['dish_description'] ?? '');
-
-            // Récupérer le plat existant D'ABORD
-            $existingDish = $this->getDishById($dishModel, $dish_id);
-
-            // Par défaut, garder l'image existante
-            $imagePath = $existingDish && !empty($existingDish['image']) ? $existingDish['image'] : null;
-
-            // Vérifier si une nouvelle image est uploadée
-            if (isset($_FILES['dish_image']) && $_FILES['dish_image']['error'] === UPLOAD_ERR_OK) {
-                $imagePath = $dishModel->uploadImage($_FILES['dish_image']);
-
-                // Supprimer l'ancienne image si elle existe
-                if ($existingDish && !empty($existingDish['image'])) {
-                    $dishModel->deleteImage($existingDish['image']);
-                }
-            }
-
-            // Mise à jour du plat
-            $dishModel->update($dish_id, $name, $price, $description, $imagePath);
-            $this->addSuccessMessage("Plat modifié avec succès.", 'dish-' . $dish_id);
-            $_SESSION['close_accordion'] = 'mode-selector-content';
-            $_SESSION['close_dish_accordion'] = 'dish-' . $dish_id;
-            $_SESSION['open_accordion'] = 'edit-dishes-' . $current_category_id;
+            $this->redirectToEditCard($anchor);
+            return;
         }
-    }
 
-    /**
-     * Gestion de la suppression de l'image d'un plat
-     */
-    private function handleRemoveDishImage($dishModel, $anchor)
-    {
-        $dish_id = (int)$_POST['remove_dish_image'];
-        $current_category_id = (int)($_POST['current_category_id'] ?? 0);
-
-        // Récupérer le plat AVANT de le modifier
+        // Récupérer le plat existant
         $stmt = $this->pdo->prepare("SELECT * FROM plats WHERE id = ?");
         $stmt->execute([$dish_id]);
         $existingDish = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($existingDish) {
-            if (!empty($existingDish['image'])) {
-                // 1. D'abord supprimer le fichier physique
-                $dishModel->deleteImage($existingDish['image']);
-
-                // 2. Ensuite mettre à jour la base de données avec image = NULL
-                $dishModel->update(
-                    $dish_id,
-                    $existingDish['name'],
-                    $existingDish['price'],
-                    $existingDish['description'],
-                    null
-                );
-
-                $this->addSuccessMessage("Image du plat supprimée avec succès.", 'dish-' . $dish_id);
-            } else {
-                $this->addErrorMessage("Ce plat n'a pas d'image à supprimer.", 'dish-' . $dish_id);
-            }
-        } else {
+        if (!$existingDish) {
             $this->addErrorMessage("Plat non trouvé.", 'dish-' . $dish_id);
+            $this->redirectToEditCard($anchor);
+            return;
         }
 
-        $_SESSION['close_accordion'] = 'mode-selector-content';
-        $_SESSION['close_dish_accordion'] = 'dish-' . $dish_id;
-        $_SESSION['open_accordion'] = 'edit-dishes-' . $current_category_id;
+        // Gestion de la nouvelle image
+        $imagePath = $existingDish['image'];
+        if (isset($_FILES['dish_image']) && $_FILES['dish_image']['error'] === UPLOAD_ERR_OK) {
+            try {
+                $imagePath = $dishModel->uploadImage($_FILES['dish_image']);
+
+                // Supprimer l'ancienne image
+                if (!empty($existingDish['image'])) {
+                    $dishModel->deleteImage($existingDish['image']);
+                }
+            } catch (Exception $e) {
+                $this->addErrorMessage("Erreur image: " . $e->getMessage(), 'dish-' . $dish_id);
+                $this->redirectToEditCard($anchor);
+                return;
+            }
+        }
+
+        // Mettre à jour
+        try {
+            $dishModel->update($dish_id, $name, (float)$price, $description, $imagePath);
+
+            // Mettre à jour le timestamp du restaurant
+            $this->updateRestaurantTimestamp();
+
+            $this->addSuccessMessage("Plat modifié avec succès.", 'dish-' . $dish_id);
+            $_SESSION['close_accordion'] = 'mode-selector-content';
+            $_SESSION['close_dish_accordion'] = 'dish-' . $dish_id;
+            $_SESSION['open_accordion'] = 'edit-dishes-' . $current_category_id;
+        } catch (Exception $e) {
+            $this->addErrorMessage("Erreur: " . $e->getMessage(), 'dish-' . $dish_id);
+        }
+
+        $this->redirectToEditCard($anchor);
     }
 
     /**
-     * Gestion de la suppression d'un plat
+     * Gestion de la suppression de plat
      */
     private function handleDeleteDish($dishModel, $anchor)
     {
-        $dishId = (int)$_POST['delete_dish'];
+        $dish_id = (int)($_POST['delete_dish'] ?? 0);
         $current_category_id = (int)($_POST['current_category_id'] ?? 0);
 
-        $existingDish = $this->getDishById($dishModel, $dishId);
-        if ($existingDish && !empty($existingDish['image'])) {
-            $dishModel->deleteImage($existingDish['image']);
+        try {
+            // Récupérer le plat pour supprimer son image
+            $stmt = $this->pdo->prepare("SELECT * FROM plats WHERE id = ?");
+            $stmt->execute([$dish_id]);
+            $dish = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($dish) {
+                // Supprimer l'image si elle existe
+                if (!empty($dish['image'])) {
+                    $dishModel->deleteImage($dish['image']);
+                }
+
+                // Supprimer le plat
+                $dishModel->delete($dish_id);
+
+                // Mettre à jour le timestamp du restaurant
+                $this->updateRestaurantTimestamp();
+
+                $this->addSuccessMessage("Plat supprimé avec succès.", 'category-' . $current_category_id);
+                $_SESSION['close_accordion'] = 'mode-selector-content';
+                $_SESSION['open_accordion'] = 'edit-dishes-' . $current_category_id;
+            } else {
+                $this->addErrorMessage("Plat non trouvé.", 'category-' . $current_category_id);
+            }
+        } catch (Exception $e) {
+            $this->addErrorMessage("Erreur: " . $e->getMessage(), 'category-' . $current_category_id);
         }
 
-        $dishModel->delete($dishId);
-        $this->addSuccessMessage("Plat supprimé avec succès.", 'category-' . $current_category_id);
-        $_SESSION['close_accordion'] = 'mode-selector-content';
-        $_SESSION['open_accordion'] = 'edit-dishes-' . $current_category_id;
+        $this->redirectToEditCard($anchor);
+    }
+
+    /**
+     * Gestion de la suppression d'image de plat
+     */
+    private function handleRemoveDishImage($dishModel, $anchor)
+    {
+        $dish_id = (int)($_POST['remove_dish_image'] ?? 0);
+        $current_category_id = (int)($_POST['current_category_id'] ?? 0);
+
+        try {
+            // Récupérer le plat
+            $stmt = $this->pdo->prepare("SELECT * FROM plats WHERE id = ?");
+            $stmt->execute([$dish_id]);
+            $dish = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($dish && !empty($dish['image'])) {
+                // Supprimer le fichier
+                $dishModel->deleteImage($dish['image']);
+
+                // Mettre à jour la base (image = NULL)
+                $dishModel->update($dish_id, $dish['name'], $dish['price'], $dish['description'], null);
+
+                // Mettre à jour le timestamp du restaurant
+                $this->updateRestaurantTimestamp();
+
+                $this->addSuccessMessage("Image du plat supprimée avec succès.", 'dish-' . $dish_id);
+                $_SESSION['close_accordion'] = 'mode-selector-content';
+                $_SESSION['close_dish_accordion'] = 'dish-' . $dish_id;
+                $_SESSION['open_accordion'] = 'edit-dishes-' . $current_category_id;
+            } else {
+                $this->addErrorMessage("Ce plat n'a pas d'image.", 'dish-' . $dish_id);
+            }
+        } catch (Exception $e) {
+            $this->addErrorMessage("Erreur: " . $e->getMessage(), 'dish-' . $dish_id);
+        }
+
+        $this->redirectToEditCard($anchor);
     }
 
     /**
@@ -538,79 +771,59 @@ class CardController extends BaseController
      */
     private function handleUploadImages($carteImageModel, $admin_id, $anchor)
     {
-        $uploadedFiles = $_FILES['card_images'];
+        error_log("=== HANDLE UPLOAD IMAGES ===");
+
+        if (!isset($_FILES['card_images']) || empty($_FILES['card_images']['name'][0])) {
+            $this->addErrorMessage("Veuillez sélectionner au moins un fichier.", 'upload-images');
+            $this->redirectToEditCard($anchor);
+            return;
+        }
+
         $uploadCount = 0;
         $errorCount = 0;
 
-        // Vérifier s'il y a des fichiers
-        if (!empty($uploadedFiles['name'][0])) {
-            // Traiter chaque fichier uploadé
-            for ($i = 0; $i < count($uploadedFiles['name']); $i++) {
-                if ($uploadedFiles['error'][$i] === UPLOAD_ERR_OK) {
-                    try {
-                        // Uploader l'image via le modèle
-                        $filename = $carteImageModel->uploadImage([
-                            'name' => $uploadedFiles['name'][$i],
-                            'type' => $uploadedFiles['type'][$i],
-                            'tmp_name' => $uploadedFiles['tmp_name'][$i],
-                            'error' => $uploadedFiles['error'][$i],
-                            'size' => $uploadedFiles['size'][$i]
-                        ]);
+        foreach ($_FILES['card_images']['name'] as $index => $name) {
+            if ($_FILES['card_images']['error'][$index] === UPLOAD_ERR_OK) {
+                try {
+                    // Préparer le tableau de fichier
+                    $file = [
+                        'name' => $_FILES['card_images']['name'][$index],
+                        'type' => $_FILES['card_images']['type'][$index],
+                        'tmp_name' => $_FILES['card_images']['tmp_name'][$index],
+                        'error' => $_FILES['card_images']['error'][$index],
+                        'size' => $_FILES['card_images']['size'][$index]
+                    ];
 
-                        // Enregistrer en base de données
-                        $carteImageModel->add($admin_id, $filename, $uploadedFiles['name'][$i]);
-                        $uploadCount++;
-                    } catch (Exception $e) {
-                        $errorCount++;
-                        error_log("Erreur upload image {$uploadedFiles['name'][$i]}: " . $e->getMessage());
-                    }
-                } elseif ($uploadedFiles['error'][$i] !== UPLOAD_ERR_NO_FILE) {
+                    // Uploader l'image
+                    $filename = $carteImageModel->uploadImage($file);
+
+                    // Enregistrer en base
+                    $carteImageModel->add($admin_id, $filename, $name);
+
+                    $uploadCount++;
+                    error_log("File uploaded successfully: $name");
+                } catch (Exception $e) {
                     $errorCount++;
+                    error_log("Error uploading file $name: " . $e->getMessage());
                 }
             }
-
-            if ($uploadCount > 0) {
-                $this->addSuccessMessage("$uploadCount image(s) téléchargée(s) avec succès.", 'upload-images');
-                if ($errorCount > 0) {
-                    $this->addErrorMessage("$errorCount image(s) n'ont pas pu être téléchargées.", 'upload-images');
-                }
-                $_SESSION['close_accordion'] = 'mode-selector-content';
-            } else {
-                $this->addErrorMessage("Aucune image n'a été téléchargée. Vérifiez les formats (JPG, PNG, GIF, WebP, PDF) et tailles (max 5MB).", 'upload-images');
-            }
-        } else {
-            $this->addErrorMessage("Veuillez sélectionner au moins un fichier.", 'upload-images');
         }
-    }
 
-    /**
-     * Gestion de la suppression d'une image
-     */
-    private function handleDeleteImage($carteImageModel, $admin_id, $anchor)
-    {
-        $image_id = (int)$_POST['image_id'];
+        // Messages de résultat
+        if ($uploadCount > 0) {
+            // Mettre à jour le timestamp du restaurant
+            $this->updateRestaurantTimestamp();
 
-        // Vérifier que l'image appartient bien à l'admin
-        $image = $carteImageModel->getById($image_id, $admin_id);
-
-        if ($image) {
-            try {
-                // Supprimer le fichier physique
-                if ($carteImageModel->deleteImageFile($image['filename'])) {
-                    // Supprimer l'entrée en base de données
-                    $carteImageModel->delete($image_id, $admin_id);
-
-                    $this->addSuccessMessage("Image supprimée avec succès.", 'images-list');
-                    $_SESSION['close_accordion'] = 'mode-selector-content';
-                } else {
-                    $this->addErrorMessage("Erreur lors de la suppression du fichier physique.", 'images-list');
-                }
-            } catch (Exception $e) {
-                $this->addErrorMessage("Erreur lors de la suppression : " . $e->getMessage(), 'images-list');
+            $this->addSuccessMessage("$uploadCount image(s) téléchargée(s) avec succès.", 'upload-images');
+            if ($errorCount > 0) {
+                $this->addErrorMessage("$errorCount image(s) n'ont pas pu être téléchargées.", 'upload-images');
             }
+            $_SESSION['close_accordion'] = 'mode-selector-content';
         } else {
-            $this->addErrorMessage("Image non trouvée ou vous n'avez pas les droits.", 'images-list');
+            $this->addErrorMessage("Aucune image n'a pu être téléchargée.", 'upload-images');
         }
+
+        $this->redirectToEditCard($anchor);
     }
 
     /**
@@ -619,85 +832,118 @@ class CardController extends BaseController
     private function handleReorderImages($carteImageModel, $admin_id, $anchor)
     {
         $newOrder = $_POST['new_order'] ?? '';
-
-        // Décoder le JSON
         $orderArray = json_decode($newOrder, true);
 
-        if (is_array($orderArray) && !empty($orderArray)) {
-            try {
-                $carteImageModel->updateImageOrder($admin_id, $orderArray);
-                $this->addSuccessMessage("Ordre des images mis à jour avec succès.", 'images-list');
-                $_SESSION['close_accordion'] = 'mode-selector-content';
-            } catch (Exception $e) {
-                $this->addErrorMessage("Erreur lors de la mise à jour de l'ordre : " . $e->getMessage(), 'images-list');
-            }
-        } else {
+        if (!is_array($orderArray) || empty($orderArray)) {
             $this->addErrorMessage("Aucun ordre valide reçu.", 'images-list');
+            $this->redirectToEditCard($anchor);
+            return;
         }
+
+        try {
+            $carteImageModel->updateImageOrder($admin_id, $orderArray);
+
+            // Mettre à jour le timestamp du restaurant
+            $this->updateRestaurantTimestamp();
+
+            $this->addSuccessMessage("Ordre des images mis à jour avec succès.", 'images-list');
+
+            // IMPORTANT : Garder l'accordéon "Images de la carte" ouvert
+            $_SESSION['close_accordion'] = 'mode-selector-content'; // Fermer le sélecteur de mode
+            $_SESSION['open_accordion'] = 'images-list-content'; // Ouvrir la liste des images
+            // NE PAS fermer l'accordéon secondaire pour qu'il reste ouvert
+
+        } catch (Exception $e) {
+            $this->addErrorMessage("Erreur: " . $e->getMessage(), 'images-list');
+            $_SESSION['open_accordion'] = 'images-list-content'; // Ouvrir même en cas d'erreur
+        }
+
+        $this->redirectToEditCard($anchor);
     }
 
     /**
-     * Redirection avec ancre
+     * Récupère les données pour le mode éditable
      */
-    private function redirectWithAnchor($anchor)
+    private function getEditableModeData($admin_id, $categoryModel, $dishModel, $messages, $error_fields, $old_input)
+    {
+        $categories = $categoryModel->getAllByAdmin($admin_id);
+
+        foreach ($categories as &$cat) {
+            $cat['plats'] = $dishModel->getAllByCategory($cat['id']);
+        }
+
+        // Mettre en cache pour les opérations de plat
+        $_SESSION['categories_cache'] = $categories;
+
+        return [
+            'currentMode' => 'editable',
+            'categories' => $categories,
+            'success_message' => $messages['success_message'] ?? null,
+            'error_message' => $messages['error_message'] ?? null,
+            'error_fields' => $error_fields,
+            'old_input' => $old_input,
+            'anchor' => $messages['anchor'] ?? null,
+            'scroll_delay' => $messages['scroll_delay'] ?? $this->scrollDelay
+        ];
+    }
+
+    /**
+     * Récupère les données pour le mode images
+     */
+    private function getImagesModeData($admin_id, $carteImageModel, $messages, $error_fields, $old_input)
+    {
+        $carteImages = $carteImageModel->getAllByAdmin($admin_id);
+
+        error_log("Images loaded: " . count($carteImages));
+
+        return [
+            'currentMode' => 'images',
+            'carteImages' => $carteImages,
+            'success_message' => $messages['success_message'] ?? null,
+            'error_message' => $messages['error_message'] ?? null,
+            'error_fields' => $error_fields,
+            'old_input' => $old_input,
+            'anchor' => $messages['anchor'] ?? null,
+            'scroll_delay' => $messages['scroll_delay'] ?? $this->scrollDelay
+        ];
+    }
+
+    /**
+     * Redirection vers la page d'édition
+     */
+    private function redirectToEditCard($anchor = '')
     {
         $redirectUrl = '?page=edit-card';
         if (!empty($anchor)) {
             $redirectUrl .= '&anchor=' . urlencode($anchor);
         }
 
+        error_log("Redirecting to: $redirectUrl");
         header('Location: ' . $redirectUrl);
         exit;
     }
 
     /**
-     * Récupère un plat directement depuis la base de données
-     * Alternative à getDishById qui utilise le cache de session
-     * Méthode utilisée pour des opérations critiques nécessitant des données fraîches
-     * 
-     * @param Dish $dishModel Instance du modèle Dish
-     * @param int $dish_id ID du plat à récupérer
-     * @return array|null Données du plat ou null si non trouvé
-     */
-    private function getDishByIdDirect($dishModel, $dish_id)
-    {
-        // Requête SQL directe (plus fiable que le cache)
-        $stmt = $this->pdo->prepare("SELECT * FROM plats WHERE id = ?");
-        $stmt->execute([$dish_id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);  // Retourne un tableau associatif ou false
-    }
-
-    /**
      * Page d'aperçu de la carte
-     * Version lecture seule pour visualiser la carte complète
-     * Utilisée pour la prévisualisation avant publication
      */
     public function view()
     {
-        // Vérification authentification
         $this->requireLogin();
         $admin_id = $_SESSION['admin_id'];
 
-        // Instanciation des modèles
         $adminModel = new Admin($this->pdo);
         $categoryModel = new Category($this->pdo);
         $dishModel = new Dish($this->pdo);
         $carteImageModel = new CardImage($this->pdo);
 
-        // Récupération du mode
         $currentMode = $adminModel->getCarteMode($admin_id);
 
-        // Préparation des données selon le mode
         if ($currentMode === 'editable') {
-            // Mode éditable: structure catégorie/plat
             $categories = $categoryModel->getAllByAdmin($admin_id);
-
-            // Ajout des plats à chaque catégorie
             foreach ($categories as &$cat) {
                 $cat['plats'] = $dishModel->getAllByCategory($cat['id']);
             }
 
-            // Mise en cache en session (utilisé par getDishById)
             $_SESSION['categories_cache'] = $categories;
 
             $data = [
@@ -705,7 +951,6 @@ class CardController extends BaseController
                 'categories' => $categories
             ];
         } else {
-            // Mode images: affichage des images/PDF
             $carteImages = $carteImageModel->getAllByAdmin($admin_id);
 
             $data = [
@@ -714,58 +959,126 @@ class CardController extends BaseController
             ];
         }
 
-        // Affichage de la vue d'aperçu
         $this->render('admin/view-card', $data);
     }
 
     /**
-     * Méthode utilitaire pour récupérer une catégorie par son ID
-     * Recherche dans le tableau des catégories de l'admin
-     * Utilisée pour vérifier les droits d'accès avant modification/suppression
-     * 
-     * @param Category $categoryModel Instance du modèle Category
-     * @param int $category_id ID de la catégorie recherchée
-     * @param int $admin_id ID de l'administrateur (vérification des droits)
-     * @return array|null Données de la catégorie ou null si non trouvée
+     * Récupère une catégorie par ID (utilitaire)
      */
     private function getCategoryById($categoryModel, $category_id, $admin_id)
     {
-        // Récupère toutes les catégories de cet admin
         $categories = $categoryModel->getAllByAdmin($admin_id);
-
-        // Recherche linéaire dans le tableau
         foreach ($categories as $cat) {
             if ($cat['id'] == $category_id) {
-                return $cat;  // Retourne la catégorie trouvée
+                return $cat;
             }
         }
-        return null;  // Non trouvée
+        return null;
     }
 
     /**
-     * Méthode utilitaire pour récupérer un plat par son ID
-     * Recherche dans le cache de session des catégories
-     * Plus rapide que les requêtes DB mais utilise des données en cache
-     * 
-     * @param Dish $dishModel Instance du modèle Dish (non utilisée ici)
-     * @param int $dish_id ID du plat recherché
-     * @return array|null Données du plat ou null si non trouvé
+     * Récupère un plat par ID (utilitaire)
      */
     private function getDishById($dishModel, $dish_id)
     {
-        // Récupération du cache depuis la session
         $allCategories = $_SESSION['categories_cache'] ?? [];
-
-        // Parcours double: catégories -> plats
         foreach ($allCategories as $cat) {
             if (isset($cat['plats'])) {
                 foreach ($cat['plats'] as $plat) {
                     if ($plat['id'] == $dish_id) {
-                        return $plat;  // Plat trouvé
+                        return $plat;
                     }
                 }
             }
         }
-        return null;  // Plat non trouvé
+        return null;
+    }
+
+    /**
+     * Méthode de test directe
+     */
+    public function testDelete()
+    {
+        error_log("=== TEST DELETE METHOD CALLED ===");
+
+        // Debug complet
+        error_log("REQUEST METHOD: " . $_SERVER['REQUEST_METHOD']);
+        error_log("POST data: " . print_r($_POST, true));
+        error_log("GET data: " . print_r($_GET, true));
+        error_log("SESSION data: " . print_r($_SESSION, true));
+
+        // Vérifier si on est dans une requête de suppression
+        if (isset($_POST['delete_image'])) {
+            error_log("DELETE_IMAGE POST DETECTED!");
+            error_log("Image ID: " . ($_POST['image_id'] ?? 'NOT SET'));
+
+            // Essayer une suppression directe
+            $admin_id = $_SESSION['admin_id'] ?? 0;
+            $image_id = (int)($_POST['image_id'] ?? 0);
+
+            error_log("Admin ID: $admin_id");
+            error_log("Image ID to delete: $image_id");
+
+            if ($image_id > 0 && $admin_id > 0) {
+                try {
+                    // Suppression directe
+                    $stmt = $this->pdo->prepare("DELETE FROM card_images WHERE id = ? AND admin_id = ?");
+                    $stmt->execute([$image_id, $admin_id]);
+
+                    $rowCount = $stmt->rowCount();
+                    error_log("Rows deleted: $rowCount");
+
+                    if ($rowCount > 0) {
+                        echo "SUCCESS: Image deleted from database<br>";
+                    } else {
+                        echo "ERROR: No rows affected<br>";
+                    }
+                } catch (Exception $e) {
+                    error_log("Exception: " . $e->getMessage());
+                    echo "EXCEPTION: " . $e->getMessage() . "<br>";
+                }
+            }
+        }
+
+        // Afficher un formulaire de test
+?>
+        <!DOCTYPE html>
+        <html>
+
+        <head>
+            <title>Test Delete</title>
+        </head>
+
+        <body>
+            <h1>Test Suppression Image</h1>
+
+            <form method="post">
+                <input type="hidden" name="delete_image" value="1">
+                <label>Image ID: <input type="number" name="image_id" required></label><br>
+                <button type="submit">Tester suppression</button>
+            </form>
+
+            <hr>
+
+            <h2>Images existantes :</h2>
+            <?php
+            $admin_id = $_SESSION['admin_id'] ?? 0;
+            if ($admin_id > 0) {
+                $stmt = $this->pdo->prepare("SELECT * FROM card_images WHERE admin_id = ? ORDER BY id DESC");
+                $stmt->execute([$admin_id]);
+                $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                foreach ($images as $image) {
+                    echo "<div>";
+                    echo "ID: " . $image['id'] . " - " . $image['original_name'];
+                    echo " <small>(" . $image['filename'] . ")</small>";
+                    echo "</div>";
+                }
+            }
+            ?>
+        </body>
+
+        </html>
+<?php
     }
 }

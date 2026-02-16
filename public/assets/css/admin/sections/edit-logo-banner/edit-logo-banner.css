@@ -1,0 +1,923 @@
+/* ==================== ÉDITION LOGO ET BANNIÈRE ==================== */
+.edit-logo-container,
+.edit-banner-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+/* ==================== SECTION MÉDIA ACTUEL ==================== */
+.current-logo-section,
+.current-banner-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eaeaea;
+}
+
+.current-logo-section h2,
+.current-banner-section h2 {
+    color: #2c3e50;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.current-logo-section h2 i,
+.current-banner-section h2 i {
+    color: #3498db;
+    font-size: 24px;
+}
+
+.logo-display,
+.banner-display {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+    .logo-display,
+    .banner-display {
+        flex-direction: column;
+    }
+}
+
+.logo-image-container,
+.banner-image-container {
+    position: relative;
+    flex-shrink: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.logo-image-container:hover,
+.banner-image-container:hover {
+    transform: translateY(-5px);
+}
+
+.current-logo-image,
+.current-banner-image {
+    display: block;
+    width: 300px;
+    height: 300px;
+    object-fit: contain;
+    background: #f8f9fa;
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.current-banner-image {
+    width: 400px;
+    height: auto;
+    max-height: 200px;
+    object-fit: cover;
+    padding: 0;
+}
+
+.current-logo-image:hover,
+.current-banner-image:hover {
+    transform: scale(1.02);
+}
+
+.logo-overlay,
+.banner-overlay {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    color: #2c3e50;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+    background: #fff;
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.logo-info,
+.banner-info {
+    flex: 1;
+    padding: 15px 0;
+}
+
+.logo-info p,
+.banner-info p {
+    margin-bottom: 12px;
+    color: #34495e;
+    font-size: 15px;
+}
+
+.logo-info strong,
+.banner-info strong {
+    color: #2c3e50;
+    min-width: 120px;
+    display: inline-block;
+}
+
+.delete-logo-form,
+.delete-banner-form {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.delete-logo-form .btn.danger,
+.delete-banner-form .btn.danger {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-weight: 500;
+    box-shadow: 0 3px 10px rgba(231, 76, 60, 0.3);
+    transition: all 0.3s ease;
+}
+
+.delete-logo-form .btn.danger:hover,
+.delete-banner-form .btn.danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+}
+
+.delete-logo-form .btn.danger i,
+.delete-banner-form .btn.danger i {
+    margin-right: 8px;
+}
+
+/* Séparateur */
+.logo-separator,
+.banner-separator {
+    text-align: center;
+    margin: 30px 0;
+    position: relative;
+}
+
+.logo-separator::before,
+.banner-separator::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #ddd, transparent);
+}
+
+.logo-separator span,
+.banner-separator span {
+    display: inline-block;
+    background: #fff;
+    padding: 0 20px;
+    color: #7f8c8d;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+/* ==================== SECTION UPLOAD ==================== */
+.upload-logo-section,
+.upload-banner-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eaeaea;
+}
+
+.upload-logo-section h2,
+.upload-banner-section h2 {
+    color: #2c3e50;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.upload-logo-section h2 i,
+.upload-banner-section h2 i {
+    color: #27ae60;
+    font-size: 24px;
+}
+
+/* Zone d'upload */
+.upload-area {
+    border: 3px dashed #bdc3c7;
+    border-radius: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    background: #f8f9fa;
+    margin-bottom: 25px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.upload-area:hover {
+    border-color: #3498db;
+    background: #f0f7ff;
+}
+
+.upload-area.drag-over {
+    border-color: #27ae60;
+    background: #e8f6f3;
+    transform: scale(1.01);
+}
+
+.upload-area.file-selected {
+    border-color: #27ae60;
+    background: #e8f6f3;
+}
+
+.upload-area.file-selected .upload-icon {
+    color: #27ae60;
+}
+
+.upload-area.file-selected .upload-text .upload-title {
+    color: #27ae60;
+}
+
+.upload-icon {
+    font-size: 48px;
+    color: #95a5a6;
+    margin-bottom: 15px;
+    transition: color 0.3s ease;
+}
+
+.upload-area:hover .upload-icon {
+    color: #3498db;
+}
+
+.upload-text {
+    margin-bottom: 25px;
+}
+
+.upload-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    transition: color 0.3s ease;
+}
+
+.upload-subtitle {
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+.file-input-hidden {
+    display: none;
+}
+
+.select-file-btn {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    padding: 12px 30px;
+    border-radius: 8px;
+    border: none;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3);
+}
+
+.select-file-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+    background: linear-gradient(135deg, #2980b9, #1f639c);
+}
+
+.select-file-btn i {
+    font-size: 16px;
+}
+
+/* ==================== PRÉVISUALISATION CÔTE À CÔTE ==================== */
+.preview-side-by-side {
+    display: flex;
+    gap: 30px;
+    margin: 25px 0;
+    animation: slideUp 0.5s ease;
+    align-items: flex-start;
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 25px;
+    border: 1px solid #eaeaea;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 768px) {
+    .preview-side-by-side {
+        flex-direction: column;
+        gap: 20px;
+    }
+}
+
+.preview-image-column {
+    flex-shrink: 0;
+    width: 300px;
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    background: #fff;
+}
+
+@media (max-width: 768px) {
+    .preview-image-column {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+}
+
+.preview-image-main {
+    width: 100%;
+    height: 300px;
+    object-fit: contain;
+    padding: 20px;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.preview-image-main:hover {
+    transform: scale(1.02);
+}
+
+.preview-image-overlay {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.preview-info-column {
+    flex: 1;
+    padding: 10px 0;
+}
+
+.preview-info-header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #eaeaea;
+}
+
+.preview-info-header h3 {
+    color: #2c3e50;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.preview-info-header h3 i {
+    color: #3498db;
+}
+
+.preview-badge-side {
+    display: inline-block;
+    background: #3498db;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 15px;
+    vertical-align: middle;
+}
+
+.file-info-side {
+    margin-bottom: 20px;
+}
+
+.file-info-side p {
+    margin-bottom: 12px;
+    color: #34495e;
+    font-size: 15px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.file-info-side strong {
+    color: #2c3e50;
+    min-width: 100px;
+    display: inline-block;
+    font-weight: 600;
+}
+
+.file-info-name-side {
+    font-size: 16px;
+    font-weight: 500;
+    color: #2c3e50;
+    background: #fff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.file-info-name-side i {
+    color: #3498db;
+    font-size: 16px;
+}
+
+.file-info-size-side,
+.file-info-type-side,
+.file-info-dimensions-side {
+    background: #fff;
+    padding: 8px 15px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border-left: 3px solid #27ae60;
+    transition: transform 0.2s ease;
+}
+
+.file-info-size-side:hover,
+.file-info-type-side:hover,
+.file-info-dimensions-side:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.preview-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.remove-file-btn {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    box-shadow: 0 3px 10px rgba(231, 76, 60, 0.3);
+}
+
+.remove-file-btn:hover {
+    background: linear-gradient(135deg, #c0392b, #a93226);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+}
+
+.remove-file-btn i {
+    font-size: 14px;
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(-20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+.preview-info-column {
+    animation: slideInRight 0.5s ease;
+}
+
+.file-info-container {
+    margin: 20px 0;
+    animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ==================== INFORMATIONS ET ACTIONS ==================== */
+.form-info {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 25px 0;
+    border-left: 4px solid #3498db;
+}
+
+.form-info p {
+    margin-bottom: 10px;
+    color: #34495e;
+    font-size: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.form-info i {
+    color: #3498db;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.form-info strong {
+    color: #2c3e50;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+#uploadBtn,
+#uploadBannerBtn {
+    background: linear-gradient(135deg, #27ae60, #219a52);
+    padding: 14px 35px;
+    border-radius: 8px;
+    border: none;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 15px;
+    box-shadow: 0 3px 10px rgba(39, 174, 96, 0.3);
+}
+
+#uploadBtn:hover:not(:disabled),
+#uploadBannerBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+    background: linear-gradient(135deg, #219a52, #1d8449);
+}
+
+#uploadBtn:disabled,
+#uploadBannerBtn:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none !important;
+    box-shadow: 0 3px 10px rgba(149, 165, 166, 0.2) !important;
+}
+
+#uploadBtn.active:not(:disabled),
+#uploadBannerBtn.active:not(:disabled) {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(39, 174, 96, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+}
+
+#uploadBtn i,
+#uploadBannerBtn i {
+    font-size: 16px;
+}
+
+#resetBtn,
+#resetBannerBtn {
+    background: #95a5a6;
+    padding: 14px 25px;
+    border-radius: 8px;
+    border: none;
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 15px;
+}
+
+#resetBtn:hover,
+#resetBannerBtn:hover {
+    background: #7f8c8d;
+    transform: translateY(-2px);
+}
+
+#resetBtn i,
+#resetBannerBtn i {
+    font-size: 14px;
+}
+
+/* ==================== LIGHTBOX ==================== */
+.media-lightbox {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 20px;
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    animation: zoomIn 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes zoomIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.lightbox-close:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: rotate(90deg);
+}
+
+#lightbox-image {
+    display: block;
+    max-width: 100%;
+    max-height: calc(90vh - 80px);
+    object-fit: contain;
+    padding: 40px;
+    background: #f8f9fa;
+}
+
+.lightbox-caption {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 15px 20px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .edit-logo-container,
+    .edit-banner-container {
+        padding: 0 15px;
+        margin: 20px auto;
+    }
+    .current-logo-section,
+    .current-banner-section,
+    .upload-logo-section,
+    .upload-banner-section {
+        padding: 20px;
+    }
+    .current-logo-image,
+    .current-banner-image {
+        max-width: 250px;
+        max-height: 250px;
+    }
+    .current-banner-image {
+        max-height: 150px;
+    }
+    .preview-image-column {
+        max-width: 250px;
+    }
+    .preview-image-main {
+        height: 250px;
+    }
+    .form-actions {
+        flex-direction: column;
+    }
+    #uploadBtn,
+    #uploadBannerBtn,
+    #resetBtn,
+    #resetBannerBtn {
+        width: 100%;
+    }
+    .upload-area {
+        padding: 30px 15px;
+    }
+    .upload-title {
+        font-size: 16px;
+    }
+    .upload-subtitle {
+        font-size: 13px;
+    }
+    .lightbox-content {
+        max-width: 95%;
+        max-height: 95%;
+    }
+    #lightbox-image {
+        padding: 30px;
+        max-height: calc(95vh - 80px);
+    }
+}
+
+@media (max-width: 480px) {
+    .current-logo-section h2,
+    .current-banner-section h2,
+    .upload-logo-section h2,
+    .upload-banner-section h2 {
+        font-size: 20px;
+    }
+    .current-logo-image,
+    .current-banner-image {
+        max-width: 200px;
+        max-height: 200px;
+        padding: 15px;
+    }
+    .current-banner-image {
+        padding: 0;
+    }
+    .logo-info p,
+    .banner-info p {
+        font-size: 14px;
+    }
+    .logo-info strong,
+    .banner-info strong {
+        min-width: 100px;
+    }
+    .preview-image-column {
+        max-width: 200px;
+    }
+    .preview-image-main {
+        height: 200px;
+        padding: 15px;
+    }
+    .preview-info-header h3 {
+        font-size: 16px;
+    }
+    .file-info-side p {
+        font-size: 14px;
+    }
+    .file-info-side strong {
+        min-width: 80px;
+    }
+    .select-file-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+        width: 100%;
+    }
+    .form-info p {
+        font-size: 13px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    .form-info i {
+        margin-top: 0;
+    }
+    #uploadBtn,
+    #uploadBannerBtn,
+    #resetBtn,
+    #resetBannerBtn {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+    .remove-file-btn {
+        padding: 10px 20px;
+        font-size: 13px;
+    }
+    .media-lightbox {
+        padding: 10px;
+    }
+    #lightbox-image {
+        padding: 20px;
+        max-height: calc(95vh - 60px);
+    }
+    .lightbox-caption {
+        padding: 12px 15px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 360px) {
+    .edit-logo-container,
+    .edit-banner-container {
+        padding: 0 10px;
+    }
+    .current-logo-section,
+    .current-banner-section,
+    .upload-logo-section,
+    .upload-banner-section {
+        padding: 15px;
+    }
+    .current-logo-image,
+    .current-banner-image {
+        max-width: 180px;
+        max-height: 180px;
+    }
+    .upload-area {
+        padding: 20px 10px;
+    }
+    .upload-icon {
+        font-size: 36px;
+        margin-bottom: 10px;
+    }
+    .upload-title {
+        font-size: 15px;
+    }
+    .upload-subtitle {
+        font-size: 12px;
+    }
+    .preview-image-column {
+        max-width: 180px;
+    }
+    .preview-image-main {
+        height: 180px;
+        padding: 12px;
+    }
+    .file-info-side p {
+        font-size: 13px;
+    }
+    .file-info-side strong {
+        min-width: 70px;
+    }
+}
+
+@media print {
+    .edit-logo-container,
+    .edit-banner-container {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    .upload-logo-section,
+    .upload-banner-section,
+    .upload-area,
+    .form-actions,
+    .delete-logo-form,
+    .delete-banner-form,
+    .media-lightbox {
+        display: none !important;
+    }
+    .current-logo-section,
+    .current-banner-section {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        page-break-inside: avoid;
+    }
+    .current-logo-image,
+    .current-banner-image {
+        max-width: 200px;
+        max-height: 200px;
+    }
+}

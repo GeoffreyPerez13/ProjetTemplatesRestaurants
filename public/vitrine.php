@@ -3,6 +3,11 @@ require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../app/Models/Category.php';
 require_once __DIR__ . '/../app/Models/Dish.php';
 
+/**
+ * @var Category $categoryModel
+ * @var Dish $dishModel
+ */
+
 $title = "Restaurant Templates";
 require __DIR__ . '/../partials/header.php';
 

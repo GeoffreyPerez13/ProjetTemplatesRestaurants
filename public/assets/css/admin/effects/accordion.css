@@ -93,7 +93,6 @@
 
 .accordion-header h3 {
   margin: 0;
-  color: #b71c1c;
   font-size: 1.2em;
 }
 
@@ -150,7 +149,6 @@
 
 /* Sections individuelles de plat */
 .dish-accordion-item {
-  margin-bottom: 15px;
   border: 1px solid #eee;
   border-radius: 8px;
   overflow: hidden;

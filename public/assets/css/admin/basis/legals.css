@@ -1,0 +1,136 @@
+/* Page légale */
+.legal-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    display: flex;
+    gap: 40px;
+    padding: 0 20px;
+}
+
+.legal-sidebar {
+    flex: 0 0 250px;
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 10px;
+    height: fit-content;
+}
+
+.legal-sidebar h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-size: 18px;
+}
+
+.legal-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.legal-menu li {
+    margin-bottom: 10px;
+}
+
+.legal-menu a {
+    display: block;
+    padding: 12px 15px;
+    color: #34495e;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+.legal-menu a:hover {
+    background: #e8f4fc;
+    color: #3498db;
+}
+
+.legal-menu a.active {
+    background: #3498db;
+    color: white;
+}
+
+.legal-content {
+    flex: 1;
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+}
+
+.legal-content h1 {
+    margin-top: 0;
+    margin-bottom: 30px;
+    color: #2c3e50;
+    border-bottom: 2px solid #f1f3f6;
+    padding-bottom: 15px;
+}
+
+.legal-content h2 {
+    color: #3498db;
+    margin-top: 30px;
+    margin-bottom: 15px;
+}
+
+.legal-content h3 {
+    color: #2c3e50;
+    margin-top: 25px;
+    margin-bottom: 10px;
+}
+
+.legal-text p {
+    line-height: 1.6;
+    margin-bottom: 15px;
+    color: #555;
+}
+
+.legal-text ul {
+    margin-bottom: 15px;
+    padding-left: 20px;
+}
+
+.legal-text li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+/* Table cookies */
+.cookies-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.cookies-table th, .cookies-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+.cookies-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.cookies-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .legal-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .legal-sidebar {
+        flex: none;
+        width: 100%;
+    }
+    
+    .legal-content {
+        padding: 25px;
+    }
+}

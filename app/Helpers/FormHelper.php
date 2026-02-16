@@ -1,5 +1,6 @@
 <?php
 
+/* Génère des champs de formulaire HTML */
 class FormHelper
 {
     /**

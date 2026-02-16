@@ -15,35 +15,71 @@ body {
 h1,
 h2,
 h3 {
-  color: #b71c1c;
   margin-bottom: 20px;
 }
 
-/* Styles de secours pour les messages */
+/* ==================== MESSAGES GÉNÉRAUX ==================== */
 .message-success,
 .message-error {
-  display: block;
-  margin: 10px 0;
-  padding: 10px;
-  border-radius: 4px;
+  padding: 15px 20px;
+  margin: 15px 0;
+  border-radius: 8px;
+  font-size: 1em;
+  animation: slideInDown 0.5s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  border-left-width: 5px;
+  border-left-style: solid;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .message-success {
   background-color: #d4edda;
   color: #155724;
-  border: 1px solid #c3e6cb;
+  border-color: #c3e6cb;
+  border-left-color: #28a745;
+}
+
+.message-success:before {
+  content: "✓";
+  font-size: 1.2em;
+  font-weight: bold;
 }
 
 .message-error {
   background-color: #f8d7da;
   color: #721c24;
-  border: 1px solid #f5c6cb;
+  border-color: #f5c6cb;
+  border-left-color: #dc3545;
+}
+
+.message-error:before {
+  content: "⚠️";
+  font-size: 1.2em;
+}
+
+.message-success i,
+.message-error i {
+  margin-right: 10px;
+  font-size: 1.1em;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ==================== CONTAINERS ==================== */
 .login-container,
 .dashboard,
-form,
 .category-block,
 .reset-password-container,
 .register-container {
@@ -58,7 +94,6 @@ form,
 /* ==================== RESPONSIVE BASE ==================== */
 @media (min-width: 601px) {
   body {
-    padding: 30px;
     padding-top: 80px;
   }
 
@@ -69,7 +104,7 @@ form,
   .reset-password-container,
   .register-container {
     padding: 25px;
-    max-width: 600px;
+    max-width: 850px;
   }
 }
 
@@ -78,18 +113,17 @@ form,
     padding: 40px;
     padding-top: 90px;
   }
-
-  .login-container,
-  .dashboard,
-  form,
-  .category-block {
-    padding: 30px;
-  }
 }
 
 /* Pour les très petits écrans (téléphones) */
 @media (max-width: 600px) {
   body {
     padding-top: 60px;
+  }
+  
+  .message-success,
+  .message-error {
+    padding: 12px 15px;
+    font-size: 0.95em;
   }
 }

@@ -1,6 +1,10 @@
 <?php
 $title = "Aperçu de la carte";
-$scripts = ["js/effects/lightbox.js", "js/sections/view-card/view-card-lightbox.js"];
+$scripts = [
+    "js/effects/lightbox.js", 
+    "js/sections/view-card/view-card-lightbox.js",
+    "js/effects/scroll-buttons.js"  // Ajout du script de scroll
+];
 
 // Si en mode images et qu'il y a des PDF, ajouter un script PDF viewer optionnel
 if ($currentMode === 'images' && !empty($carteImages)) {
@@ -21,6 +25,16 @@ require __DIR__ . '/../partials/header.php';
 
 <a class="btn-back" href="?page=dashboard">Retour au dashboard</a>
 
+<!-- Boutons de navigation haut/bas -->
+<div class="page-navigation-buttons">
+    <button type="button" class="btn-navigation scroll-to-bottom" title="Aller en bas de la page">
+        <i class="fas fa-arrow-down"></i>
+    </button>
+    <button type="button" class="btn-navigation scroll-to-top" title="Aller en haut de la page">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+</div>
+
 <h1>Aperçu de la carte du restaurant</h1>
 
 <?php if ($currentMode === 'editable'): ?>
@@ -35,7 +49,7 @@ require __DIR__ . '/../partials/header.php';
             <i class="fas fa-utensils"></i>
             <p class="success">Aucune catégorie pour le moment.</p>
             <a href="?page=edit-card" class="btn primary">
-                <i class="fas fa-plus"></i> Créer votre première catégorie
+                Créer votre première catégorie
             </a>
         </div>
     <?php else: ?>

@@ -3,7 +3,8 @@ $title = "Modifier la carte";
 $scripts = [
     "js/effects/accordion.js",
     "js/sections/edit-card/edit-card.js",
-    "js/effects/lightbox.js"
+    "js/effects/lightbox.js",
+    "js/effects/scroll-buttons.js"
 ];
 
 if ($currentMode === 'images') {
@@ -33,15 +34,31 @@ require __DIR__ . '/../partials/header.php';
     // Variables disponibles pour edit-card.js
     window.scrollParams = {
         anchor: '<?= htmlspecialchars($anchor ?? '') ?>',
-        scrollDelay: <?= (int)($scroll_delay ?? 3500) ?>,
+        scrollDelay: <?= (int)($scroll_delay ?? 1500) ?>,
         closeAccordion: '<?= htmlspecialchars($closeAccordion) ?>',
         closeAccordionSecondary: '<?= htmlspecialchars($closeAccordionSecondary) ?>',
         closeDishAccordion: '<?= htmlspecialchars($closeDishAccordion) ?>',
         openAccordion: '<?= htmlspecialchars($openAccordion) ?>'
     };
+
+    // FORCER l'ouverture de l'accordéon images si on vient d'une réorganisation
+    <?php if (isset($_POST['update_image_order']) && empty($error_message)): ?>
+        window.scrollParams.openAccordion = 'images-list-content';
+        window.scrollParams.closeAccordion = 'mode-selector-content';
+    <?php endif; ?>
 </script>
 
 <a class="btn-back" href="?page=dashboard">Retour au dashboard</a>
+
+<!-- Boutons de navigation haut/bas (alignés à droite) -->
+<div class="page-navigation-buttons">
+    <button type="button" class="btn-navigation scroll-to-bottom" title="Aller en bas de la page">
+        <i class="fas fa-arrow-down"></i>
+    </button>
+    <button type="button" class="btn-navigation scroll-to-top" title="Aller en haut de la page">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+</div>
 
 <!-- Boutons de contrôle généraux pour tous les accordéons -->
 <div class="global-accordion-controls">
@@ -65,7 +82,7 @@ require __DIR__ . '/../partials/header.php';
 <!-- Sélecteur de mode (accordéon) -->
 <div class="accordion-section mode-selector-accordion" id="mode-selector">
     <div class="accordion-header">
-        <h2>Mode d'affichage de la carte</h2>
+        <h2><i class="fas fa-cogs"></i> Mode d'affichage de la carte</h2>
         <button type="button" class="accordion-toggle" data-target="mode-selector-content">
             <i class="fas fa-chevron-down"></i>
         </button>
@@ -109,7 +126,7 @@ require __DIR__ . '/../partials/header.php';
         <!-- Bloc Ajouter une catégorie (accordéon) -->
         <div class="accordion-section new-category-accordion" id="new-category">
             <div class="accordion-header">
-                <h2>Ajouter une nouvelle catégorie</h2>
+                <h2><i class="fas fa-plus-circle"></i> Ajouter une nouvelle catégorie</h2>
                 <button type="button" class="accordion-toggle" data-target="new-category-content">
                     <i class="fas fa-chevron-down"></i>
                 </button>
@@ -155,7 +172,7 @@ require __DIR__ . '/../partials/header.php';
                     <?php endif; ?>
 
                     <div class="category-header">
-                        <strong><?= htmlspecialchars($cat['name']) ?></strong>
+                        <strong><i class="fas fa-folder"></i> <?= htmlspecialchars($cat['name']) ?></strong>
 
                         <!-- Contrôles d'accordéon pour cette catégorie -->
                         <div class="category-accordion-controls">
@@ -171,7 +188,7 @@ require __DIR__ . '/../partials/header.php';
                     <!-- Section Modifier la catégorie (accordéon) -->
                     <div class="accordion-section">
                         <div class="accordion-header">
-                            <h3>Modifier la catégorie</h3>
+                            <h3><i class="fas fa-edit"></i> Modifier la catégorie</h3>
                             <button type="button" class="accordion-toggle" data-target="edit-category-<?= $cat['id'] ?>">
                                 <i class="fas fa-chevron-down"></i>
                             </button>
@@ -228,7 +245,7 @@ require __DIR__ . '/../partials/header.php';
                     <!-- Section Ajouter un plat (accordéon) -->
                     <div class="accordion-section">
                         <div class="accordion-header">
-                            <h3>Ajouter un plat</h3>
+                            <h3><i class="fas fa-plus-square"></i> Ajouter un plat</h3>
                             <button type="button" class="accordion-toggle" data-target="add-dish-<?= $cat['id'] ?>">
                                 <i class="fas fa-chevron-down"></i>
                             </button>
@@ -286,7 +303,7 @@ require __DIR__ . '/../partials/header.php';
                         <!-- Section Modifier les plats (accordéon) -->
                         <div class="accordion-section">
                             <div class="accordion-header">
-                                <h3>Modifier les plats (<?= count($plats) ?>)</h3>
+                                <h3><i class="fas fa-utensils"></i> Modifier les plats (<?= count($plats) ?>)</h3>
                                 <button type="button" class="accordion-toggle" data-target="edit-dishes-<?= $cat['id'] ?>">
                                     <i class="fas fa-chevron-down"></i>
                                 </button>
@@ -298,7 +315,7 @@ require __DIR__ . '/../partials/header.php';
                                         <li class="dish-accordion-item">
                                             <!-- En-tête du plat (accordéon) -->
                                             <div class="dish-accordion-header">
-                                                <h4><?= htmlspecialchars($plat['name']) ?> - <?= htmlspecialchars($plat['price']) ?>€</h4>
+                                                <h4><i class="fas fa-utensil-spoon"></i> <?= htmlspecialchars($plat['name']) ?> - <?= htmlspecialchars($plat['price']) ?>€</h4>
                                                 <button type="button" class="dish-accordion-toggle"
                                                     data-target="dish-<?= $plat['id'] ?>"
                                                     data-category="<?= $cat['id'] ?>">
@@ -415,7 +432,7 @@ require __DIR__ . '/../partials/header.php';
         <!-- Upload d'images (accordéon) -->
         <div class="accordion-section upload-images-accordion" id="upload-images">
             <div class="accordion-header">
-                <h2>Ajouter des images à la carte</h2>
+                <h2><i class="fas fa-cloud-upload-alt"></i> Ajouter des images à la carte</h2>
                 <button type="button" class="accordion-toggle" data-target="upload-images-content">
                     <i class="fas fa-chevron-down"></i>
                 </button>
@@ -463,7 +480,7 @@ require __DIR__ . '/../partials/header.php';
         <!-- Liste des images existantes (accordéon) -->
         <div class="accordion-section images-list-accordion" id="images-list">
             <div class="accordion-header">
-                <h2>Images de la carte (<?= !empty($carteImages) ? count($carteImages) : '0' ?>)</h2>
+                <h2><i class="fas fa-images"></i> Images de la carte (<?= !empty($carteImages) ? count($carteImages) : '0' ?>)</h2>
                 <button type="button" class="accordion-toggle" data-target="images-list-content">
                     <i class="fas fa-chevron-down"></i>
                 </button>
@@ -476,16 +493,22 @@ require __DIR__ . '/../partials/header.php';
                     <!-- Grille d'images avec système de réorganisation -->
                     <div class="images-grid" id="sortable-images">
                         <?php foreach ($carteImages as $index => $image): ?>
-                            <div class="image-card" data-image-id="<?= $image['id'] ?>">
-                                <input type="hidden" name="image_order[]" value="<?= $image['id'] ?>">
+                            <div class="image-card"
+                                data-image-id="<?= $image['id'] ?>"
+                                draggable="false"> <!-- Initialement false -->
 
                                 <!-- Badge de position en haut à gauche -->
                                 <div class="position-badge">
                                     <span class="position-number"><?= $index + 1 ?></span>
                                 </div>
 
+                                <!-- Poignée de drag (optionnelle mais recommandée) -->
+                                <div class="drag-handle" title="Glisser pour réorganiser" style="display: none;">
+                                    <i class="fas fa-grip-vertical"></i>
+                                </div>
+
                                 <div class="image-preview-container">
-                                    <?php if (pathinfo($image['filename'], PATHINFO_EXTENSION) === 'pdf'): ?>
+                                    <?php if (strtolower(pathinfo($image['filename'], PATHINFO_EXTENSION)) === 'pdf'): ?>
                                         <div class="pdf-preview">
                                             <i class="fas fa-file-pdf"></i>
                                             <span>PDF</span>
@@ -494,7 +517,8 @@ require __DIR__ . '/../partials/header.php';
                                         <img src="/<?= htmlspecialchars($image['filename']) ?>"
                                             alt="<?= htmlspecialchars($image['original_name']) ?>"
                                             class="carte-image-preview lightbox-image"
-                                            data-caption="<?= htmlspecialchars($image['original_name']) ?>">
+                                            data-caption="<?= htmlspecialchars($image['original_name']) ?>"
+                                            draggable="false"> <!-- Important : empêcher le drag natif de l'image -->
                                     <?php endif; ?>
                                 </div>
 
@@ -504,24 +528,35 @@ require __DIR__ . '/../partials/header.php';
                                 </div>
 
                                 <div class="image-actions">
-                                    <form method="post" class="inline-form">
+                                    <form method="post" class="inline-form delete-image-form">
                                         <input type="hidden" name="image_id" value="<?= $image['id'] ?>">
                                         <input type="hidden" name="anchor" value="images-list">
-                                        <button type="submit" name="delete_image" class="btn danger">
-                                            Supprimer
+                                        <button type="submit" name="delete_image" class="btn danger delete-image-btn"
+                                            data-image-id="<?= $image['id'] ?>"
+                                            data-image-name="<?= htmlspecialchars($image['original_name']) ?>">
+                                            <i class="fas fa-trash"></i> Supprimer
                                         </button>
                                     </form>
                                 </div>
 
                                 <!-- Contrôles de réorganisation -->
                                 <div class="reorder-controls" style="display: none;">
-                                    <button type="button" class="btn small move-up" <?= $index === 0 ? 'disabled' : '' ?>>
+                                    <!-- Bouton "Monter" -->
+                                    <button type="button" class="btn small move-up <?= $index === 0 ? 'hidden' : '' ?>"
+                                        data-position="<?= $index + 1 ?>">
                                         <i class="fas fa-arrow-up"></i> Monter
                                     </button>
-                                    <button type="button" class="btn small move-down" <?= $index === count($carteImages) - 1 ? 'disabled' : '' ?>>
+
+                                    <!-- Bouton "Descendre" -->
+                                    <button type="button" class="btn small move-down <?= $index === count($carteImages) - 1 ? 'hidden' : '' ?>"
+                                        data-position="<?= $index + 1 ?>">
                                         <i class="fas fa-arrow-down"></i> Descendre
                                     </button>
                                 </div>
+
+                                <!-- Indicateurs de zone de drop (optionnels) -->
+                                <div class="drop-zone-indicator top"></div>
+                                <div class="drop-zone-indicator bottom"></div>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -533,7 +568,7 @@ require __DIR__ . '/../partials/header.php';
                         <input type="hidden" name="update_image_order" value="1">
 
                         <div class="reorder-actions">
-                            <button type="button" id="start-reorder-btn" class="btn">
+                            <button type="button" id="start-reorder-btn" class="btn primary">
                                 <i class="fas fa-sort"></i> Réorganiser l'ordre d'affichage
                             </button>
 
@@ -548,7 +583,16 @@ require __DIR__ . '/../partials/header.php';
                         </div>
 
                         <div id="reorder-instructions" class="reorder-instructions" style="display: none;">
-                            <p><i class="fas fa-info-circle"></i> Utilisez les boutons "Monter" et "Descendre" sous chaque image pour réorganiser. Cliquez sur "Enregistrer" pour valider.</p>
+                            <p>
+                                <i class="fas fa-info-circle"></i>
+                                Cliquez-glissez une image pour la déplacer, OU utilisez les boutons
+                                <strong>"Monter"</strong> et <strong>"Descendre"</strong> sous chaque image.
+                                Cliquez sur <strong>"Enregistrer"</strong> pour valider.
+                            </p>
+                            <p class="drag-hint">
+                                <i class="fas fa-hand-pointer"></i>
+                                <small>Astuce : Maintenez le clic sur une image et glissez-la pour changer sa position.</small>
+                            </p>
                         </div>
                     </form>
                 <?php endif; ?>

@@ -1,0 +1,147 @@
+/* Footer admin */
+.admin-footer {
+  background: #2c3e50;
+  color: #ecf0f1;
+  padding: 20px 0;
+  margin: 20px auto 20px auto;
+  border-radius: 10px;
+  max-width: 1200px;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.footer-left p {
+  margin: 0;
+  font-size: 14px;
+  color: #bdc3c7;
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.footer-links a {
+  color: #ecf0f1;
+  text-decoration: none;
+  font-size: 13px;
+  transition: color 0.3s;
+  padding: 5px 0;
+}
+
+.footer-links a:hover {
+  color: #3498db;
+  text-decoration: underline;
+}
+
+.separator {
+  color: #7f8c8d;
+  font-size: 12px;
+}
+
+/* Responsive pour écrans moyens */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .separator {
+    display: none; /* Masquer les séparateurs sur mobile */
+  }
+
+  .footer-links a {
+    margin: 0 5px;
+    font-size: 12px;
+  }
+}
+
+/* Pour écrans très petits (moins de 400px) */
+@media (max-width: 400px) {
+  .footer-content {
+    padding: 0 15px;
+  }
+
+  .footer-links {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 colonnes */
+    gap: 10px;
+    width: 100%;
+    justify-items: center;
+  }
+
+  .footer-links a {
+    padding: 8px 5px;
+    text-align: center;
+    width: 100%;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 12px;
+  }
+
+  .footer-links a:last-child {
+    grid-column: 1 / -1; /* Le dernier lien prend toute la largeur */
+    border-bottom: none;
+  }
+
+  .footer-left p {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .admin-footer {
+    padding: 15px 0;
+    margin: 15px auto;
+    border-radius: 8px;
+  }
+}
+
+/* Alternative avec flexbox si vous préférez */
+@media (max-width: 400px) {
+  /* Option 1: Alignement en 2 colonnes avec flexbox */
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .footer-links a {
+    flex: 0 0 calc(50% - 10px); /* 2 liens par ligne */
+    text-align: center;
+    padding: 8px 5px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .footer-links {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .footer-links a {
+    width: 100%;
+    text-align: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .footer-links a:last-child {
+    border-bottom: none;
+  }
+}

@@ -25,6 +25,44 @@ textarea {
   line-height: 1.5;
 }
 
+/* ==================== FORM LABELS ==================== */
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #333;
+}
+
+label.required:after {
+  content: " *";
+  color: #dc3545;
+}
+
+label i {
+  margin-right: 8px;
+  color: #3498db;
+}
+
+/* ==================== FORM GROUP ==================== */
+.form-group {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  margin: 8px 0 0;
+}
+
+/* ==================== FORM HELP TEXT ==================== */
+.form-help {
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
 /* ==================== INPUTS EURO ==================== */
 .input-euro {
   position: relative;
@@ -65,19 +103,22 @@ textarea {
 }
 
 /* ==================== FORM GROUP & ERROR STATES ==================== */
-.form-group {
-  margin-bottom: 1rem;
-  position: relative;
-}
-
-.error-field {
+.form-group.has-error input,
+.form-group.has-error textarea {
   border: 2px solid #dc3545 !important;
   background-color: #fff8f8 !important;
 }
 
-.error-field:focus {
+.form-group.has-error input:focus,
+.form-group.has-error textarea:focus {
   border-color: #dc3545 !important;
   box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.field-error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
 
 /* Pour les groupes input avec symbole euro en erreur */
@@ -120,42 +161,6 @@ textarea {
 
 .form-row .form-group {
   margin-bottom: 0; /* Les marges sont gérées par .form-row */
-}
-
-/* ==================== MESSAGES ==================== */
-.message-error {
-  color: #721c24;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  padding: 12px 20px;
-  border-radius: 5px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.message-error:before {
-  content: "⚠️";
-  font-size: 1.2em;
-}
-
-.message-success {
-  color: #155724;
-  background-color: #d4edda;
-  border: 1px solid #c3e6cb;
-  padding: 12px 20px;
-  border-radius: 5px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.message-success:before {
-  content: "✓";
-  font-size: 1.2em;
-  font-weight: bold;
 }
 
 /* ==================== INPUT NUMBER STYLING ==================== */
@@ -207,7 +212,6 @@ input[type="number"] {
   flex-direction: column;
   gap: 10px;
   width: 100%;
-  margin-bottom: 15px;
 }
 
 /* Réglage pour les formulaires de plat */
@@ -233,27 +237,6 @@ input.valid-field:focus,
 textarea.valid-field:focus {
   border-color: #28a745 !important;
   box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
-}
-
-/* ==================== FORM LABELS ==================== */
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: 600;
-  color: #333;
-}
-
-label.required:after {
-  content: " *";
-  color: #dc3545;
-}
-
-/* ==================== FORM HELP TEXT ==================== */
-.form-help {
-  color: #6c757d;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  margin-bottom: 0.5rem;
 }
 
 /* ==================== FOCUS STATES CONSISTENCY ==================== */

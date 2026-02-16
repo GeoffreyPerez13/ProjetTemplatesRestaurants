@@ -61,7 +61,6 @@
 .password-toggle-btn {
   background: none;
   border: 1px solid #ccc;
-  border-left: none;
   cursor: pointer;
   padding: 0 15px;
   color: #666;
@@ -161,6 +160,7 @@
 
 /* Éviter les conflits avec les styles généraux de bouton */
 .password-input-group .password-toggle-btn {
+  align-self: stretch;
   margin-top: 0 !important;
   width: auto !important;
   display: flex !important;

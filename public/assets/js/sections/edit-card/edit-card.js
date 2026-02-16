@@ -3,8 +3,7 @@
 
   // Configuration
   const CONFIG = {
-    scrollDelay: 3500, // 3,5 secondes par défaut (comme dans PHP)
-    animationDuration: 300,
+    scrollDelay: 1500, // 1,5 secondes par défaut (comme dans PHP)
   };
 
   /**
@@ -45,8 +44,8 @@
       document.querySelector(".images-mode-container") !== null;
 
     if (isImagesMode) {
-      // ==================== CONFIRMATION DE SUPPRESSION D'IMAGES ====================
-      setupImageDeleteConfirmations();
+      // Appeler notre fonction pour les confirmations de suppression
+      setupImageDeletionConfirmations();
 
       // ==================== INITIALISATION DU DRAG & DROP ====================
       setTimeout(() => {
@@ -57,9 +56,6 @@
     } else {
       // ==================== VALIDATION DES PRIX ====================
       setupPriceValidation();
-
-      // ==================== GESTION DES ACCORDÉONS PAR CATÉGORIE ====================
-      setupCategoryAccordionControls();
 
       // ==================== FORMATAGE AUTOMATIQUE DES PRIX ====================
       setupPriceAutoFormat();
@@ -109,7 +105,7 @@
 
         setTimeout(() => {
           element.style.boxShadow = "";
-        }, 2000);
+        }, 1500);
       }
     }, delay);
   }
@@ -118,51 +114,38 @@
    * Gère les actions sur les accordéons après soumission
    */
   function handleAccordionActions(scrollParams) {
+    // Utiliser AccordionManager s'il existe, sinon ne rien faire
+    if (!window.AccordionManager) return;
+
     // Fermer l'accordéon principal
     if (scrollParams.closeAccordion) {
       setTimeout(() => {
-        if (window.AccordionManager) {
-          window.AccordionManager.closeAccordion(scrollParams.closeAccordion);
-        } else {
-          closeAccordion(scrollParams.closeAccordion);
-        }
+        window.AccordionManager.closeAccordion(scrollParams.closeAccordion);
       }, 500);
     }
 
     // Fermer l'accordéon secondaire
     if (scrollParams.closeAccordionSecondary) {
       setTimeout(() => {
-        if (window.AccordionManager) {
-          window.AccordionManager.closeAccordion(
-            scrollParams.closeAccordionSecondary,
-          );
-        } else {
-          closeAccordion(scrollParams.closeAccordionSecondary);
-        }
+        window.AccordionManager.closeAccordion(
+          scrollParams.closeAccordionSecondary,
+        );
       }, 600);
     }
 
     // Ouvrir l'accordéon spécifié
     if (scrollParams.openAccordion) {
       setTimeout(() => {
-        if (window.AccordionManager) {
-          window.AccordionManager.openAccordion(scrollParams.openAccordion);
-        } else {
-          openAccordion(scrollParams.openAccordion);
-        }
+        window.AccordionManager.openAccordion(scrollParams.openAccordion);
       }, 700);
     }
 
     // Fermer l'accordéon spécifique d'un plat
     if (scrollParams.closeDishAccordion) {
       setTimeout(() => {
-        if (window.AccordionManager) {
-          window.AccordionManager.closeDishAccordion(
-            scrollParams.closeDishAccordion,
-          );
-        } else {
-          closeDishAccordion(scrollParams.closeDishAccordion);
-        }
+        window.AccordionManager.closeDishAccordion(
+          scrollParams.closeDishAccordion,
+        );
       }, 800);
     }
   }
@@ -176,8 +159,8 @@
     );
 
     messages.forEach((message) => {
-      // Auto-dismiss après le délai configuré ou 3,5 secondes par défaut
-      const scrollDelay = window.scrollParams?.scrollDelay || 3500;
+      // Auto-dismiss après le délai configuré ou 1,5 secondes par défaut
+      const scrollDelay = window.scrollParams?.scrollDelay || 1500;
       setTimeout(() => {
         message.style.opacity = "0";
         message.style.transition = "opacity 0.5s ease";
@@ -403,66 +386,88 @@
   }
 
   /**
-   * Configure les confirmations de suppression pour les images en mode images
+   * Configure les confirmations de suppression d'images (mode images)
    */
-  function setupImageDeleteConfirmations() {
-    // Sélectionner les formulaires de suppression d'image dans le mode images
-    const imageDeleteForms = document.querySelectorAll(
-      ".images-grid .inline-form",
-    );
+  function setupImageDeletionConfirmations() {
+    // Attendre que le DOM soit complètement chargé
+    setTimeout(() => {
+      // Sélectionner TOUS les boutons de suppression
+      const deleteButtons = document.querySelectorAll(
+        'button[name="delete_image"]',
+      );
 
-    imageDeleteForms.forEach((form) => {
-      const deleteButton = form.querySelector('button[name="delete_image"]');
+      console.log(`Trouvé ${deleteButtons.length} boutons de suppression`);
 
-      if (deleteButton) {
-        form.addEventListener("submit", function (e) {
-          e.preventDefault();
+      deleteButtons.forEach((button, index) => {
+        // Supprimer TOUS les anciens écouteurs en clonant l'élément
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
 
-          // Trouver le nom de l'image
-          const imageCard = form.closest(".image-card");
-          const imageNameElement = imageCard
-            ? imageCard.querySelector(".image-name")
-            : null;
-          const imageName = imageNameElement
-            ? imageNameElement.textContent.trim()
-            : "cette image";
+        // Ajouter le nouvel écouteur
+        newButton.addEventListener("click", handleImageDelete);
 
-          // Vérifier si c'est un PDF ou une image
-          const pdfPreview = imageCard
-            ? imageCard.querySelector(".pdf-preview")
-            : null;
-          const fileType = pdfPreview ? "PDF" : "image";
+        console.log(`Bouton ${index + 1} réinitialisé`);
+      });
+    }, 1000); // Délai plus long pour s'assurer que tout est chargé
+  }
 
-          // Vérifier que SweetAlert est disponible
-          if (typeof Swal === "undefined") {
-            form.submit();
-            return;
-          }
+  /**
+   * Gestionnaire de suppression d'image - VERSION CHAMP CACHÉ
+   */
+  function handleImageDelete(e) {
+    e.preventDefault();
+    e.stopPropagation();
 
-          Swal.fire({
-            title: "Confirmer la suppression",
-            html: `Voulez-vous vraiment supprimer l'${fileType} <strong>"${imageName}"</strong> ?<br><br>`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Oui, supprimer",
-            cancelButtonText: "Annuler",
-            backdrop: true,
-            allowOutsideClick: false,
-            width: 500,
-          }).then((result) => {
-            if (result.isConfirmed) {
-              // Afficher un loader pendant la suppression
-              showLoading("Suppression en cours...");
+    const form = this.closest("form");
+    if (!form) return;
 
-              // Soumettre le formulaire
-              setTimeout(() => {
-                form.submit();
-              }, 100);
-            }
-          });
-        });
+    const imageCard = this.closest(".image-card");
+    const imageName =
+      imageCard.querySelector(".image-name")?.textContent?.trim() ||
+      "cette image";
+    const isPDF = imageCard.querySelector(".pdf-preview") !== null;
+    const fileType = isPDF ? "PDF" : "image";
+    const imageId = form.querySelector('input[name="image_id"]').value;
+
+    Swal.fire({
+      title: "Confirmer la suppression",
+      html: `Voulez-vous vraiment supprimer l'${fileType} <strong>"${imageName}"</strong> ?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Oui, supprimer",
+      cancelButtonText: "Annuler",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Créer un formulaire caché et le soumettre
+        const hiddenForm = document.createElement("form");
+        hiddenForm.method = "POST";
+        hiddenForm.action = form.action || window.location.href;
+        hiddenForm.style.display = "none";
+
+        // Ajouter les champs nécessaires
+        const imageIdInput = document.createElement("input");
+        imageIdInput.type = "hidden";
+        imageIdInput.name = "image_id";
+        imageIdInput.value = imageId;
+
+        const deleteInput = document.createElement("input");
+        deleteInput.type = "hidden";
+        deleteInput.name = "delete_image";
+        deleteInput.value = "1";
+
+        const anchorInput = document.createElement("input");
+        anchorInput.type = "hidden";
+        anchorInput.name = "anchor";
+        anchorInput.value = "images-list";
+
+        hiddenForm.appendChild(imageIdInput);
+        hiddenForm.appendChild(deleteInput);
+        hiddenForm.appendChild(anchorInput);
+
+        document.body.appendChild(hiddenForm);
+        hiddenForm.submit();
       }
     });
   }
@@ -523,89 +528,6 @@
   }
 
   /**
-   * Configure les contrôles d'accordéon par catégorie
-   */
-  function setupCategoryAccordionControls() {
-    // Bouton "Tout ouvrir" pour une catégorie
-    document.querySelectorAll(".expand-category").forEach((btn) => {
-      btn.addEventListener("click", function () {
-        const categoryId = this.dataset.categoryId;
-        expandAllInCategory(categoryId);
-      });
-    });
-
-    // Bouton "Tout fermer" pour une catégorie
-    document.querySelectorAll(".collapse-category").forEach((btn) => {
-      btn.addEventListener("click", function () {
-        const categoryId = this.dataset.categoryId;
-        collapseAllInCategory(categoryId);
-      });
-    });
-  }
-
-  /**
-   * Ouvre tous les accordéons d'une catégorie
-   */
-  function expandAllInCategory(categoryId) {
-    const categoryBlock = document.querySelector(`#category-${categoryId}`);
-    if (!categoryBlock) return;
-
-    // Ouvrir tous les accordéons de catégorie
-    categoryBlock
-      .querySelectorAll(".accordion-content.collapsed")
-      .forEach((content) => {
-        const toggleBtn =
-          content.previousElementSibling?.querySelector(".accordion-toggle");
-        if (toggleBtn && !content.classList.contains("expanded")) {
-          toggleBtn.click();
-        }
-      });
-
-    // Ouvrir tous les accordéons de plat
-    categoryBlock
-      .querySelectorAll(".dish-accordion-content.collapsed")
-      .forEach((content) => {
-        const toggleBtn = content.previousElementSibling?.querySelector(
-          ".dish-accordion-toggle",
-        );
-        if (toggleBtn && !content.classList.contains("expanded")) {
-          toggleBtn.click();
-        }
-      });
-  }
-
-  /**
-   * Ferme tous les accordéons d'une catégorie
-   */
-  function collapseAllInCategory(categoryId) {
-    const categoryBlock = document.querySelector(`#category-${categoryId}`);
-    if (!categoryBlock) return;
-
-    // Fermer tous les accordéons de catégorie
-    categoryBlock
-      .querySelectorAll(".accordion-content.expanded")
-      .forEach((content) => {
-        const toggleBtn =
-          content.previousElementSibling?.querySelector(".accordion-toggle");
-        if (toggleBtn && !content.classList.contains("collapsed")) {
-          toggleBtn.click();
-        }
-      });
-
-    // Fermer tous les accordéons de plat
-    categoryBlock
-      .querySelectorAll(".dish-accordion-content.expanded")
-      .forEach((content) => {
-        const toggleBtn = content.previousElementSibling?.querySelector(
-          ".dish-accordion-toggle",
-        );
-        if (toggleBtn && !content.classList.contains("collapsed")) {
-          toggleBtn.click();
-        }
-      });
-  }
-
-  /**
    * Formate automatiquement les champs de prix
    */
   function setupPriceAutoFormat() {
@@ -651,155 +573,11 @@
   }
 
   /**
-   * Ferme un accordéon principal (fallback)
-   */
-  function closeAccordion(accordionId) {
-    const accordion = document.getElementById(accordionId);
-    if (!accordion) return;
-
-    accordion.classList.remove("expanded");
-    accordion.classList.add("collapsed");
-
-    const toggle = document.querySelector(
-      `.accordion-toggle[data-target="${accordionId}"]`,
-    );
-    if (toggle) {
-      const icon = toggle.querySelector("i");
-      if (icon) {
-        icon.classList.remove("fa-chevron-up");
-        icon.classList.add("fa-chevron-down");
-      }
-    }
-  }
-
-  /**
-   * Ouvre un accordéon principal (fallback)
-   */
-  function openAccordion(accordionId) {
-    const accordion = document.getElementById(accordionId);
-    if (!accordion) return;
-
-    accordion.classList.remove("collapsed");
-    accordion.classList.add("expanded");
-
-    const toggle = document.querySelector(
-      `.accordion-toggle[data-target="${accordionId}"]`,
-    );
-    if (toggle) {
-      const icon = toggle.querySelector("i");
-      if (icon) {
-        icon.classList.remove("fa-chevron-down");
-        icon.classList.add("fa-chevron-up");
-      }
-    }
-  }
-
-  /**
-   * Ferme un accordéon de plat (fallback)
-   */
-  function closeDishAccordion(accordionId) {
-    const accordion = document.getElementById(accordionId);
-    if (!accordion) return;
-
-    accordion.classList.remove("expanded");
-    accordion.classList.add("collapsed");
-    accordion.style.display = "none";
-
-    const toggle = document.querySelector(
-      `.dish-accordion-toggle[data-target="${accordionId}"]`,
-    );
-    if (toggle) {
-      const icon = toggle.querySelector("i");
-      if (icon) {
-        icon.classList.remove("fa-chevron-up");
-        icon.classList.add("fa-chevron-down");
-      }
-    }
-  }
-
-  // ==================== FONCTIONS D'API PUBLIQUE ====================
-
-  /**
-   * Ferme un accordéon spécifique
-   */
-  window.closeAccordion = function (accordionId) {
-    const accordionContent = document.getElementById(accordionId);
-    if (accordionContent && accordionContent.classList.contains("expanded")) {
-      const toggle = document.querySelector(
-        `.accordion-toggle[data-target="${accordionId}"]`,
-      );
-      if (toggle) {
-        toggle.click();
-      }
-    }
-  };
-
-  /**
-   * Ferme tous les accordéons d'une catégorie
-   */
-  window.collapseCategory = function (categoryId) {
-    // Fermer les sections principales
-    document
-      .querySelectorAll(
-        `[id="edit-category-${categoryId}"],
-       [id="add-dish-${categoryId}"],
-       [id="edit-dishes-${categoryId}"]`,
-      )
-      .forEach((section) => {
-        if (section.classList.contains("expanded")) {
-          const toggle = document.querySelector(
-            `.accordion-toggle[data-target="${section.id}"]`,
-          );
-          if (toggle) {
-            toggle.click();
-          }
-        }
-      });
-
-    // Fermer tous les plats
-    setTimeout(() => {
-      document
-        .querySelectorAll(
-          `.dish-accordion-content[data-category="${categoryId}"]`,
-        )
-        .forEach((dishSection) => {
-          if (dishSection.style.display === "block") {
-            const toggle = document.querySelector(
-              `.dish-accordion-toggle[data-target="${dishSection.id}"]`,
-            );
-            if (toggle) {
-              toggle.click();
-            }
-          }
-        });
-    }, 100);
-  };
-
-  /**
-   * Ferme tous les plats d'une catégorie
-   */
-  window.closeAllDishesInCategory = function (categoryId) {
-    const categoryBlock = document.querySelector(`#category-${categoryId}`);
-    if (!categoryBlock) return;
-
-    categoryBlock
-      .querySelectorAll(".dish-accordion-content.expanded")
-      .forEach((content) => {
-        const toggleBtn = content.previousElementSibling?.querySelector(
-          ".dish-accordion-toggle",
-        );
-        if (toggleBtn && !content.classList.contains("collapsed")) {
-          toggleBtn.click();
-        }
-      });
-  };
-
-  /**
    * Rafraîchit les confirmations (utile après AJAX)
    */
   window.refreshConfirmations = function () {
     setupDeleteConfirmations();
-    setupImageDeleteConfirmations();
+    setupImageDeletionConfirmations();
   };
 
   /**
@@ -815,12 +593,7 @@
   window.EditCard = {
     init: init,
     scrollToAnchor: window.scrollToAnchor,
-    closeAccordion: window.closeAccordion,
-    collapseCategory: window.collapseCategory,
-    closeAllDishesInCategory: window.closeAllDishesInCategory,
     refreshConfirmations: window.refreshConfirmations,
-    expandAllInCategory: expandAllInCategory,
-    collapseAllInCategory: collapseAllInCategory,
   };
 
   // Initialisation automatique

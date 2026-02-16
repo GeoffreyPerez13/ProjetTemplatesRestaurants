@@ -4,6 +4,9 @@
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 25px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .category-header {
@@ -16,11 +19,16 @@
 .category-block strong {
   display: block;
   font-size: 1.5em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .edit-card-container {
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .categories-grid {
@@ -30,11 +38,6 @@
   width: 100%;
 }
 
-.edit-category-form,
-.inline-form {
-  border: 1px solid #eee;
-}
-
 /* ==================== RESPONSIVE CATEGORIES ==================== */
 @media (min-width: 601px) {
   .category-header {
@@ -42,6 +45,7 @@
     justify-content: space-between;
     align-items: center;
     margin-top: 15px;
+    min-width: 0;
   }
 
   .edit-card-container {
@@ -59,6 +63,7 @@
   .category-block {
     flex: 1 1 calc(50% - 10px);
     align-self: flex-start;
+    min-width: 0; /* CRITIQUE : permet la réduction */
   }
 }
 
@@ -81,8 +86,15 @@
 
   .category-block {
     flex: 0 0 calc(33.333% - 20px);
-    width: calc(33.333% - 20px);
     align-self: flex-start;
     min-height: auto;
+    min-width: 0; /* CRITIQUE : permet la réduction */
+  }
+}
+
+/* Pour les très grands écrans */
+@media (min-width: 1400px) {
+  .category-block {
+    flex: 0 0 calc(25% - 25px);
   }
 }
