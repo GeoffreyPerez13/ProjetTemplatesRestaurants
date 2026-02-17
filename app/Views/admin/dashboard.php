@@ -34,6 +34,14 @@ require __DIR__ . '/../partials/header.php';
         <p>Bienvenue <strong><?= htmlspecialchars($username) ?></strong>.</p>
         <p>Vous gérez le restaurant : <strong><?= htmlspecialchars($restaurant_name) ?></strong>.</p>
 
+        <?php if (!empty($slug)): ?>
+            <p class="visit-site">
+                <a href="?page=display&slug=<?= urlencode($slug) ?>" target="_blank" class="btn btn-outline">
+                    <i class="fas fa-external-link-alt"></i> Aller sur le site
+                </a>
+            </p>
+        <?php endif; ?>
+
         <?php if (!empty($last_updated)): ?>
             <p class="last-updated">Dernière modification de la carte le : <em><strong><?= htmlspecialchars($formatted_date) ?></strong></em>.</p>
         <?php else: ?>

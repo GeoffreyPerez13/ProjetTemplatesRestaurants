@@ -250,10 +250,8 @@ class AdminController extends BaseController
      */
     public function dashboard()
     {
-        // Étape 1: Vérification de la connexion
         $this->requireLogin();
 
-        // Étape 2: Récupération des informations détaillées depuis la BD
         $adminModel = new Admin($this->pdo);
         $admin = $adminModel->findById($_SESSION['admin_id']);
 
@@ -268,14 +266,25 @@ class AdminController extends BaseController
         $username = $admin->username ?? '';
         $restaurant_id = $admin->restaurant_id ?? null;
 
-        // Étape 3: Récupération de la date de dernière modification du restaurant
+        // Récupération du slug
+        $slug = null;
+        if ($restaurant_id) {
+            try {
+                $stmt = $this->pdo->prepare("SELECT slug FROM restaurants WHERE id = ?");
+                $stmt->execute([$restaurant_id]);
+                $slug = $stmt->fetchColumn();
+            } catch (Exception $e) {
+                error_log("Erreur récupération slug: " . $e->getMessage());
+            }
+        }
+
+        // Récupération de la date de dernière modification
         $last_updated = null;
         if ($restaurant_id) {
             try {
                 $stmt = $this->pdo->prepare("SELECT updated_at FROM restaurants WHERE id = ?");
                 $stmt->execute([$restaurant_id]);
                 $restaurant = $stmt->fetch(PDO::FETCH_ASSOC);
-
                 if ($restaurant && $restaurant['updated_at']) {
                     $last_updated = $restaurant['updated_at'];
                 }
@@ -284,12 +293,10 @@ class AdminController extends BaseController
             }
         }
 
-        // Étape 4: Récupération des messages flash
         $messages = $this->getFlashMessages();
         $success_message = $messages['success_message'];
         $error_message = $messages['error_message'];
 
-        // Étape 5: Affichage du tableau de bord
         $this->render('admin/dashboard', [
             'success_message' => $success_message,
             'error_message' => $error_message,
@@ -297,10 +304,10 @@ class AdminController extends BaseController
             'username' => $username,
             'role' => $role,
             'last_updated' => $last_updated,
-            'restaurant_id' => $restaurant_id
+            'restaurant_id' => $restaurant_id,
+            'slug' => $slug
         ]);
     }
-
     public function resetPassword()
     {
         // Initialisation

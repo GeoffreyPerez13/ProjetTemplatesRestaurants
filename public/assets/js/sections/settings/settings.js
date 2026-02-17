@@ -244,8 +244,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Préparer les valeurs par défaut
     const defaultOptions = {
       site_online: "1",
-      mail_reminder: "1",
-      email_notifications: "1",
+      mail_reminder: "0",
+      email_notifications: "0",
     };
 
     // Créer un formulaire pour soumettre les données

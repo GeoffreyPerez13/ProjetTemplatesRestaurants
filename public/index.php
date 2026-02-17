@@ -10,6 +10,7 @@ require_once __DIR__ . '/../app/Controllers/ContactController.php';
 require_once __DIR__ . '/../app/Controllers/LogoBannerController.php';
 require_once __DIR__ . '/../app/Controllers/LegalController.php';
 require_once __DIR__ . '/../app/Controllers/SettingsController.php';
+require_once __DIR__ . '/../app/Controllers/DisplayController.php';
 require_once __DIR__ . '/../app/Helpers/FormHelper.php';
 require_once __DIR__ . '/../app/Helpers/Validator.php';
 require_once __DIR__ . '/../app/Helpers/old.php';
@@ -87,7 +88,6 @@ switch ($page) {
             case 'save-options-batch':
                 $controller->saveOptionsBatch();
                 break;
-            // Retirez save-option car non utilisé
             default:
                 $controller->show();
                 break;
@@ -104,11 +104,15 @@ switch ($page) {
         $adminController->resetPassword();  // Réinitialisation du mot de passe
         break;
 
-    case 'vitrine':
-        // $displayController = new DisplayController($pdo);
-        // $displayController->show($slug);
-        http_response_code(404);
-        echo "Page en construction";
+    case 'display':
+        $slug = $_GET['slug'] ?? '';
+        if (empty($slug)) {
+            http_response_code(404);
+            echo "Slug manquant";
+            break;
+        }
+        $controller = new DisplayController($pdo);
+        $controller->show($slug);
         break;
 
     case 'legal':

@@ -46,8 +46,12 @@ class Contact
     // --- Récupérer le contact pour un restaurant public ---
     public function getByRestaurant($restaurantId)
     {
-        // Limité à 1 ligne, renvoie un objet avec les informations
-        $stmt = $this->pdo->prepare("SELECT * FROM contacts WHERE restaurant_id = ? LIMIT 1");
+        $stmt = $this->pdo->prepare("
+        SELECT c.* FROM contact c
+        JOIN admins a ON a.id = c.admin_id
+        WHERE a.restaurant_id = ?
+        LIMIT 1
+    ");
         $stmt->execute([$restaurantId]);
         return $stmt->fetch(PDO::FETCH_OBJ);
     }

@@ -169,10 +169,10 @@ class Category
     public function getByRestaurant($restaurantId)
     {
         $stmt = $this->pdo->prepare(
-            "SELECT * FROM categories WHERE restaurant_id = ? ORDER BY sort_order ASC, id ASC"
+            "SELECT * FROM categories WHERE restaurant_id = ? ORDER BY id ASC"
         );
         $stmt->execute([$restaurantId]);
-        return $stmt->fetchAll(PDO::FETCH_OBJ); // Retourne un tableau d'objets
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
 
     /**

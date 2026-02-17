@@ -8,10 +8,14 @@ class Admin
     // Propriétés publiques représentant un administrateur
     public $id;
     public $username;
+    public $email;
     public $password;
     public $role;
     public $restaurant_name;
     public $restaurant_id;
+    public $carte_mode;
+    public $reset_token;
+    public $reset_token_expiry;
 
     // Constructeur : initialise la connexion PDO
     public function __construct($pdo)
@@ -91,7 +95,7 @@ class Admin
     }
 
     // --- GESTION DES COMPTES ---
-    
+
     public function createAccount($invitation, $username, $password)
     {
         try {
@@ -110,9 +114,9 @@ class Admin
             $slug = $this->generateSlug($invitation->restaurant_name);
 
             $stmt = $this->pdo->prepare("
-            INSERT INTO restaurants (name, slug, created_at, updated_at) 
-            VALUES (?, ?, NOW(), NOW())
-        ");
+                INSERT INTO restaurants (name, slug, created_at, updated_at) 
+                VALUES (?, ?, NOW(), NOW())
+            ");
             $stmt->execute([$invitation->restaurant_name, $slug]);
             $restaurantId = $this->pdo->lastInsertId();
 
@@ -121,7 +125,7 @@ class Admin
 
             // 2. CRÉER L'ADMIN avec l'ID du restaurant
             $sql = "INSERT INTO admins (username, email, password, restaurant_name, restaurant_id, role) 
-                VALUES (?, ?, ?, ?, ?, 'ADMIN')";
+                    VALUES (?, ?, ?, ?, ?, 'ADMIN')";
             $stmt = $this->pdo->prepare($sql);
             $success = $stmt->execute([
                 $username,
@@ -182,9 +186,9 @@ class Admin
         try {
             // Préparer la requête pour insérer les options
             $stmt = $this->pdo->prepare("
-            INSERT INTO admin_options (admin_id, option_name, option_value, created_at, updated_at) 
-            VALUES (?, ?, ?, NOW(), NOW())
-        ");
+                INSERT INTO admin_options (admin_id, option_name, option_value, created_at, updated_at) 
+                VALUES (?, ?, ?, NOW(), NOW())
+            ");
 
             // Insérer chaque option par défaut
             foreach ($defaultOptions as $name => $value) {
@@ -270,6 +274,19 @@ class Admin
         return null;
     }
 
+    // Trouver un admin par restaurant_id
+    public function findByRestaurantId($restaurantId)
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM admins WHERE restaurant_id = ? LIMIT 1");
+        $stmt->execute([$restaurantId]);
+        $data = $stmt->fetch();
+        if ($data) {
+            $this->fill($data);
+            return $this;
+        }
+        return null;
+    }
+
     // Vérifie si le mot de passe fourni correspond au hash stocké
     public function verifyPassword($password)
     {
@@ -307,10 +324,14 @@ class Admin
     {
         $this->id = $data['id'];
         $this->username = $data['username'];
+        $this->email = $data['email'] ?? null;
         $this->password = $data['password'];
         $this->role = $data['role'];
         $this->restaurant_name = $data['restaurant_name'];
         $this->restaurant_id = $data['restaurant_id'] ?? null;
+        $this->carte_mode = $data['carte_mode'] ?? 'editable';
+        $this->reset_token = $data['reset_token'] ?? null;
+        $this->reset_token_expiry = $data['reset_token_expiry'] ?? null;
     }
 
     // --- RÉINITIALISATION DE MOT DE PASSE ---

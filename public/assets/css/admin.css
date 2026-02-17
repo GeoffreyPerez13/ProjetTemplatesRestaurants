@@ -1,6 +1,6 @@
-/* ==================== ADMIN CSS PRINCIPAL ==================== */
-/* Ce fichier importe tous les modules CSS pour l'interface d'administration */
+/* Ce fichier importe tous les modules CSS pour l'interface d'administration et l'affichage des vitrines */
 
+/* ==================== ADMIN CSS PRINCIPAL ==================== */
 /* CSS de base */
 @import url("admin/basis/base.css");
 @import url("admin/basis/buttons.css");

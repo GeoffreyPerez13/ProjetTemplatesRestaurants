@@ -10,18 +10,18 @@ require_once __DIR__ . '/../Models/Category.php';
 require_once __DIR__ . '/../Models/Dish.php';
 require_once __DIR__ . '/../Models/CardImage.php';
 require_once __DIR__ . '/../Models/Admin.php';
-require_once __DIR__ . '/../Models/Restaurant.php'; // Ajouté
+require_once __DIR__ . '/../Models/Restaurant.php';
 require_once __DIR__ . '/../Helpers/Validator.php';
 
 class CardController extends BaseController
 {
-    private $restaurantModel; // Nouvelle propriété
+    private $restaurantModel;
 
     public function __construct($pdo)
     {
         parent::__construct($pdo);
-        $this->setScrollDelay(1500); // 1,5 secondes
-        $this->restaurantModel = new Restaurant($pdo); // Initialisation
+        $this->setScrollDelay(1500);
+        $this->restaurantModel = new Restaurant($pdo);
     }
 
     /**
@@ -30,16 +30,32 @@ class CardController extends BaseController
     private function updateRestaurantTimestamp()
     {
         if (isset($_SESSION['admin_id'])) {
-            // Récupérer l'admin avec son restaurant_id
+            error_log("updateRestaurantTimestamp: admin_id = " . $_SESSION['admin_id']);
+
+            // Récupérer le restaurant_id
             $stmt = $this->pdo->prepare("SELECT restaurant_id FROM admins WHERE id = ?");
             $stmt->execute([$_SESSION['admin_id']]);
-            $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+            $restaurantId = $stmt->fetchColumn();
 
-            if ($admin && isset($admin['restaurant_id'])) {
-                return $this->restaurantModel->updateTimestamp($admin['restaurant_id']);
+            if ($restaurantId) {
+                error_log("updateRestaurantTimestamp: restaurant_id = " . $restaurantId);
+
+                // Mettre à jour le timestamp
+                $stmt2 = $this->pdo->prepare("UPDATE restaurants SET updated_at = NOW() WHERE id = ?");
+                $result = $stmt2->execute([$restaurantId]);
+
+                if ($result) {
+                    error_log("updateRestaurantTimestamp: SUCCESS");
+                } else {
+                    $errorInfo = $stmt2->errorInfo();
+                    error_log("updateRestaurantTimestamp: ERROR - " . $errorInfo[2]);
+                }
+                return $result;
             } else {
-                error_log("Avertissement: admin " . $_SESSION['admin_id'] . " n'a pas de restaurant_id");
+                error_log("updateRestaurantTimestamp: Aucun restaurant_id trouvé pour admin " . $_SESSION['admin_id']);
             }
+        } else {
+            error_log("updateRestaurantTimestamp: admin_id non défini dans la session");
         }
         return false;
     }
@@ -66,7 +82,6 @@ class CardController extends BaseController
         $currentMode = $adminModel->getCarteMode($admin_id);
         error_log("Current mode: $currentMode");
 
-        // 4. Traiter les formulaires POST
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log("=== POST REQUEST ===");
             error_log("POST data: " . print_r($_POST, true));
@@ -74,23 +89,19 @@ class CardController extends BaseController
             $this->handlePostRequest($adminModel, $categoryModel, $dishModel, $carteImageModel, $admin_id, $currentMode);
         }
 
-        // 5. Préparer les données pour la vue
         $messages = $this->getFlashMessages();
         extract($messages);
 
-        // Nettoyer les erreurs de formulaire
         $error_fields = $_SESSION['error_fields'] ?? [];
         $old_input = $_SESSION['old_input'] ?? [];
         unset($_SESSION['error_fields'], $_SESSION['old_input']);
 
-        // 6. Charger les données selon le mode
         if ($currentMode === 'editable') {
             $data = $this->getEditableModeData($admin_id, $categoryModel, $dishModel, $messages, $error_fields, $old_input);
         } else {
             $data = $this->getImagesModeData($admin_id, $carteImageModel, $messages, $error_fields, $old_input);
         }
 
-        // 7. Afficher la vue
         $this->render('admin/edit-card', $data);
     }
 
@@ -102,19 +113,16 @@ class CardController extends BaseController
         $anchor = $_POST['anchor'] ?? '';
 
         try {
-            // Changement de mode
             if (isset($_POST['change_mode'])) {
                 $this->handleChangeMode($adminModel, $admin_id, $anchor);
                 return;
             }
 
-            // Mode éditable
             if ($currentMode === 'editable') {
                 $this->handleEditableModeActions($categoryModel, $dishModel, $admin_id, $anchor);
                 return;
             }
 
-            // Mode images
             if ($currentMode === 'images') {
                 $this->handleImagesModeActions($carteImageModel, $admin_id, $anchor);
                 return;
@@ -124,23 +132,16 @@ class CardController extends BaseController
             $this->addErrorMessage("Erreur: " . $e->getMessage(), $anchor);
         }
 
-        // Redirection par défaut
         $this->redirectToEditCard($anchor);
     }
 
-    /**
-     * Gestion du changement de mode
-     */
     private function handleChangeMode($adminModel, $admin_id, $anchor)
     {
         $newMode = $_POST['carte_mode'] ?? '';
 
         if (in_array($newMode, ['editable', 'images'])) {
             $adminModel->updateCarteMode($admin_id, $newMode);
-
-            // Mettre à jour le timestamp
             $this->updateRestaurantTimestamp();
-
             $this->addSuccessMessage("Mode de carte changé avec succès", 'mode-selector');
             $_SESSION['close_accordion'] = 'mode-selector-content';
         }
@@ -148,247 +149,143 @@ class CardController extends BaseController
         $this->redirectToEditCard($anchor);
     }
 
-    /**
-     * Gestion des actions en mode éditable
-     */
     private function handleEditableModeActions($categoryModel, $dishModel, $admin_id, $anchor)
     {
         error_log("Handling editable mode actions");
 
-        // Ajout de catégorie
         if (isset($_POST['new_category'])) {
             $this->handleAddCategory($categoryModel, $admin_id, $anchor);
-        }
-
-        // Modification de catégorie
-        elseif (isset($_POST['edit_category'])) {
+        } elseif (isset($_POST['edit_category'])) {
             $this->handleEditCategory($categoryModel, $admin_id, $anchor);
-        }
-
-        // Suppression de catégorie
-        elseif (isset($_POST['delete_category'])) {
+        } elseif (isset($_POST['delete_category'])) {
             $this->handleDeleteCategory($categoryModel, $admin_id, $anchor);
-        }
-
-        // Suppression d'image de catégorie
-        elseif (isset($_POST['remove_category_image'])) {
+        } elseif (isset($_POST['remove_category_image'])) {
             $this->handleRemoveCategoryImage($categoryModel, $admin_id, $anchor);
-        }
-
-        // Ajout de plat
-        elseif (isset($_POST['new_dish'])) {
+        } elseif (isset($_POST['new_dish'])) {
             $this->handleAddDish($dishModel, $anchor);
-        }
-
-        // Modification de plat
-        elseif (isset($_POST['edit_dish'])) {
+        } elseif (isset($_POST['edit_dish'])) {
             $this->handleEditDish($dishModel, $anchor);
-        }
-
-        // Suppression de plat
-        elseif (isset($_POST['delete_dish'])) {
+        } elseif (isset($_POST['delete_dish'])) {
             $this->handleDeleteDish($dishModel, $anchor);
-        }
-
-        // Suppression d'image de plat
-        elseif (isset($_POST['remove_dish_image'])) {
+        } elseif (isset($_POST['remove_dish_image'])) {
             $this->handleRemoveDishImage($dishModel, $anchor);
         }
 
-        // Redirection par défaut
         $this->redirectToEditCard($anchor);
     }
 
-    /**
-     * Gestion des actions en mode images
-     */
     private function handleImagesModeActions($carteImageModel, $admin_id, $anchor)
     {
         error_log("Handling images mode actions");
 
-        // Upload d'images
         if (isset($_POST['upload_images']) && isset($_FILES['card_images'])) {
             $this->handleUploadImages($carteImageModel, $admin_id, $anchor);
-        }
-
-        // SUPPRESSION D'IMAGE - APPROCHE SIMPLIFIÉE
-        elseif (isset($_POST['delete_image'])) {
-            error_log("DELETE IMAGE ACTION DETECTED");
+        } elseif (isset($_POST['delete_image'])) {
             $this->handleDeleteImageSimple($carteImageModel, $admin_id, $anchor);
-        }
-
-        // Réorganisation des images
-        elseif (isset($_POST['update_image_order'])) {
+        } elseif (isset($_POST['update_image_order'])) {
             $this->handleReorderImages($carteImageModel, $admin_id, $anchor);
         }
 
-        // Redirection par défaut
         $this->redirectToEditCard($anchor);
     }
 
     /**
- * Gestion simplifiée de la suppression d'image
- */
-private function handleDeleteImageSimple($carteImageModel, $admin_id, $anchor)
-{
-    // 1. Récupérer l'ID de l'image
-    $image_id = (int)($_POST['image_id'] ?? 0);
-    error_log("=== DELETE IMAGE PROCESS START ===");
-    error_log("Image ID from POST: $image_id");
-    error_log("Admin ID: $admin_id");
+     * Gestion simplifiée de la suppression d'image
+     */
+    private function handleDeleteImageSimple($carteImageModel, $admin_id, $anchor)
+    {
+        $image_id = (int)($_POST['image_id'] ?? 0);
+        error_log("=== DELETE IMAGE PROCESS START ===");
+        error_log("Image ID from POST: $image_id");
+        error_log("Admin ID: $admin_id");
 
-    if ($image_id <= 0) {
-        error_log("Invalid image ID");
-        $this->addErrorMessage("ID d'image invalide.", 'images-list');
-        return;
-    }
-
-    // 2. Récupérer les infos de l'image AVANT suppression
-    $stmt = $this->pdo->prepare("SELECT * FROM card_images WHERE id = ? AND admin_id = ?");
-    $stmt->execute([$image_id, $admin_id]);
-    $image = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$image) {
-        error_log("Image not found or doesn't belong to admin");
-        $this->addErrorMessage("Image non trouvée ou vous n'avez pas les droits.", 'images-list');
-        return;
-    }
-
-    error_log("Image found:");
-    error_log("- ID: " . $image['id']);
-    error_log("- Filename: " . $image['filename']);
-    error_log("- Original name: " . $image['original_name']);
-    error_log("- Admin ID: " . $image['admin_id']);
-
-    // 3. SUPPRESSION EN BASE DE DONNÉES D'ABORD
-    try {
-        $stmt = $this->pdo->prepare("DELETE FROM card_images WHERE id = ? AND admin_id = ?");
-        $stmt->execute([$image_id, $admin_id]);
-        $rowCount = $stmt->rowCount();
-
-        error_log("Database delete - Rows affected: $rowCount");
-
-        if ($rowCount === 0) {
-            error_log("Failed to delete from database - no rows affected");
-            $this->addErrorMessage("Échec de la suppression de la base de données.", 'images-list');
-            $_SESSION['open_accordion'] = 'images-list-content';
-            $this->redirectToEditCard($anchor);
+        if ($image_id <= 0) {
+            error_log("Invalid image ID");
+            $this->addErrorMessage("ID d'image invalide.", 'images-list');
             return;
         }
 
-        error_log("Image successfully deleted from database");
+        // Récupérer les infos de l'image
+        $stmt = $this->pdo->prepare("SELECT * FROM card_images WHERE id = ? AND admin_id = ?");
+        $stmt->execute([$image_id, $admin_id]);
+        $image = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    } catch (Exception $e) {
-        error_log("Database delete error: " . $e->getMessage());
-        $this->addErrorMessage("Erreur de base de données: " . $e->getMessage(), 'images-list');
-        $_SESSION['open_accordion'] = 'images-list-content';
-        $this->redirectToEditCard($anchor);
-        return;
-    }
-
-    // 4. SUPPRESSION DU FICHIER PHYSIQUE
-    if (!empty($image['filename'])) {
-        if ($this->deletePhysicalFile($image['filename'])) {
-            error_log("Physical file deleted successfully");
-        } else {
-            error_log("WARNING: Physical file could not be deleted, but DB record was removed");
-            // On continue même si le fichier physique n'a pas pu être supprimé
-            // car l'enregistrement en base est déjà supprimé
+        if (!$image) {
+            error_log("Image not found or doesn't belong to admin");
+            $this->addErrorMessage("Image non trouvée ou vous n'avez pas les droits.", 'images-list');
+            return;
         }
-    } else {
-        error_log("No filename to delete");
-    }
 
-    // 5. SUCCÈS
-    error_log("Image deletion process completed successfully");
-
-    // Mettre à jour le timestamp du restaurant
-    $this->updateRestaurantTimestamp();
-
-    $this->addSuccessMessage("Image supprimée avec succès.", 'images-list');
-
-    // IMPORTANT : Configurer les accordéons après suppression
-    $_SESSION['close_accordion'] = 'mode-selector-content';
-    $_SESSION['open_accordion'] = 'images-list-content';
-
-    $this->redirectToEditCard($anchor);
-}
-
-/**
- * Supprime un fichier physique - VERSION CORRIGÉE
- */
-private function deletePhysicalFile($filename)
-{
-    error_log("Attempting to delete physical file: $filename");
-    
-    // 1. Nettoyer le chemin
-    $filepath = trim($filename);
-    
-    // 2. Si le chemin commence par '/', l'enlever
-    if (strpos($filepath, '/') === 0) {
-        $filepath = substr($filepath, 1);
-        error_log("Removed leading slash, new path: $filepath");
-    }
-    
-    // 3. Chemin absolu depuis la racine du projet
-    // Supposons que les images sont dans 'uploads/card-images/'
-    $projectRoot = realpath(__DIR__ . '/../../');
-    $absolutePath = $projectRoot . '/' . $filepath;
-    
-    error_log("Project root: $projectRoot");
-    error_log("Absolute path: $absolutePath");
-    
-    // 4. Vérifier si le fichier existe
-    if (!file_exists($absolutePath)) {
-        error_log("File does not exist at: $absolutePath");
-        
-        // Essayer un autre emplacement possible
-        $alternativePath = $_SERVER['DOCUMENT_ROOT'] . '/' . $filepath;
-        error_log("Trying alternative path: $alternativePath");
-        
-        if (file_exists($alternativePath)) {
-            $absolutePath = $alternativePath;
-            error_log("File found at alternative location");
-        } else {
-            error_log("File not found at alternative location either");
-            // On retourne true pour continuer même si le fichier n'existe pas
-            return true;
-        }
-    }
-    
-    // 5. Vérifier les permissions
-    if (!is_writable($absolutePath)) {
-        error_log("File is not writable: $absolutePath");
-        error_log("Permissions: " . substr(sprintf('%o', fileperms($absolutePath)), -4));
-        return false;
-    }
-    
-    // 6. Supprimer le fichier
-    if (unlink($absolutePath)) {
-        error_log("Physical file deleted successfully: $absolutePath");
-        return true;
-    } else {
-        error_log("Failed to delete physical file: $absolutePath");
-        error_log("Error: " . error_get_last()['message'] ?? 'Unknown error');
-        return false;
-    }
-}
-
-    /**
-     * Supprime une image de la base de données
-     */
-    private function deleteFromDatabase($image_id, $admin_id)
-    {
+        // Supprimer de la base
         try {
             $stmt = $this->pdo->prepare("DELETE FROM card_images WHERE id = ? AND admin_id = ?");
             $stmt->execute([$image_id, $admin_id]);
             $rowCount = $stmt->rowCount();
 
-            error_log("Database delete - Rows affected: $rowCount");
-
-            return $rowCount > 0;
+            if ($rowCount === 0) {
+                error_log("Failed to delete from database");
+                $this->addErrorMessage("Échec de la suppression en base.", 'images-list');
+                $_SESSION['open_accordion'] = 'images-list-content';
+                $this->redirectToEditCard($anchor);
+                return;
+            }
         } catch (Exception $e) {
             error_log("Database delete error: " . $e->getMessage());
+            $this->addErrorMessage("Erreur de base de données: " . $e->getMessage(), 'images-list');
+            $_SESSION['open_accordion'] = 'images-list-content';
+            $this->redirectToEditCard($anchor);
+            return;
+        }
+
+        // Supprimer le fichier physique
+        if (!empty($image['filename'])) {
+            $this->deletePhysicalFile($image['filename']);
+        }
+
+        // Mettre à jour le timestamp du restaurant
+        $this->updateRestaurantTimestamp();
+
+        $this->addSuccessMessage("Image supprimée avec succès.", 'images-list');
+        $_SESSION['close_accordion'] = 'mode-selector-content';
+        $_SESSION['open_accordion'] = 'images-list-content';
+
+        $this->redirectToEditCard($anchor);
+    }
+
+    /**
+     * Supprime un fichier physique - VERSION CORRIGÉE
+     */
+    private function deletePhysicalFile($filename)
+    {
+        error_log("Attempting to delete physical file: $filename");
+
+        $filepath = trim($filename);
+        if (strpos($filepath, '/') === 0) {
+            $filepath = substr($filepath, 1);
+            error_log("Removed leading slash, new path: $filepath");
+        }
+
+        $projectRoot = realpath(__DIR__ . '/../../');
+        $absolutePath = $projectRoot . '/' . $filepath;
+
+        error_log("Project root: $projectRoot");
+        error_log("Absolute path: $absolutePath");
+
+        if (!file_exists($absolutePath)) {
+            error_log("File does not exist at: $absolutePath");
+            return true; // On considère que c'est ok si le fichier n'existe pas
+        }
+
+        if (!is_writable($absolutePath)) {
+            error_log("File is not writable: $absolutePath");
+            return false;
+        }
+
+        if (unlink($absolutePath)) {
+            error_log("Physical file deleted successfully: $absolutePath");
+            return true;
+        } else {
+            error_log("Failed to delete physical file: $absolutePath");
             return false;
         }
     }
@@ -400,7 +297,6 @@ private function deletePhysicalFile($filename)
     {
         $name = trim($_POST['new_category'] ?? '');
 
-        // Validation
         if (empty($name) || strlen($name) > 100) {
             $this->addErrorMessage("Le nom de la catégorie est requis (max 100 caractères)", 'new-category');
             $_SESSION['error_fields'] = ['new_category' => true];
@@ -410,7 +306,6 @@ private function deletePhysicalFile($filename)
             return;
         }
 
-        // Gestion de l'image
         $imagePath = null;
         if (isset($_FILES['category_image']) && $_FILES['category_image']['error'] === UPLOAD_ERR_OK) {
             try {
@@ -422,13 +317,11 @@ private function deletePhysicalFile($filename)
             }
         }
 
-        // Créer la catégorie
         try {
             $categoryModel->create($admin_id, $name, $imagePath);
             $categoryId = $this->pdo->lastInsertId();
 
-            // Mettre à jour le timestamp du restaurant
-            $this->updateRestaurantTimestamp();
+            $this->updateRestaurantTimestamp(); // Mise à jour du restaurant
 
             $this->addSuccessMessage("Catégorie ajoutée avec succès.", 'category-' . $categoryId);
             $_SESSION['close_accordion'] = 'mode-selector-content';
@@ -457,13 +350,11 @@ private function deletePhysicalFile($filename)
             return;
         }
 
-        // Gestion de la nouvelle image
         $imagePath = null;
         if (isset($_FILES['edit_category_image']) && $_FILES['edit_category_image']['error'] === UPLOAD_ERR_OK) {
             try {
                 $imagePath = $categoryModel->uploadImage($_FILES['edit_category_image']);
 
-                // Supprimer l'ancienne image si elle existe
                 $category = $categoryModel->getById($category_id, $admin_id);
                 if ($category && !empty($category['image'])) {
                     $categoryModel->deleteImage($category['image']);
@@ -475,12 +366,10 @@ private function deletePhysicalFile($filename)
             }
         }
 
-        // Mettre à jour
         try {
             $categoryModel->update($category_id, $new_name, $imagePath);
 
-            // Mettre à jour le timestamp du restaurant
-            $this->updateRestaurantTimestamp();
+            $this->updateRestaurantTimestamp(); // Mise à jour du restaurant
 
             $this->addSuccessMessage("Catégorie modifiée avec succès.", 'category-' . $category_id);
             $_SESSION['close_accordion'] = 'mode-selector-content';
@@ -500,20 +389,16 @@ private function deletePhysicalFile($filename)
         $category_id = (int)($_POST['delete_category'] ?? 0);
 
         try {
-            // Vérifier que la catégorie existe et appartient à l'admin
             $category = $categoryModel->getById($category_id, $admin_id);
 
             if ($category) {
-                // Supprimer l'image si elle existe
                 if (!empty($category['image'])) {
                     $categoryModel->deleteImage($category['image']);
                 }
 
-                // Supprimer la catégorie
                 $categoryModel->delete($category_id, $admin_id);
 
-                // Mettre à jour le timestamp du restaurant
-                $this->updateRestaurantTimestamp();
+                $this->updateRestaurantTimestamp(); // Mise à jour du restaurant
 
                 $this->addSuccessMessage("Catégorie et tous ses plats supprimés avec succès.", 'categories-grid');
                 $_SESSION['close_accordion'] = 'mode-selector-content';
@@ -538,14 +423,10 @@ private function deletePhysicalFile($filename)
             $category = $categoryModel->getById($category_id, $admin_id);
 
             if ($category && !empty($category['image'])) {
-                // Supprimer le fichier
                 $categoryModel->deleteImage($category['image']);
-
-                // Mettre à jour la base
                 $categoryModel->update($category_id, $category['name'], '');
 
-                // Mettre à jour le timestamp du restaurant
-                $this->updateRestaurantTimestamp();
+                $this->updateRestaurantTimestamp(); // Mise à jour du restaurant
 
                 $this->addSuccessMessage("Image de catégorie supprimée avec succès.", 'category-' . $category_id);
                 $_SESSION['close_accordion'] = 'mode-selector-content';
@@ -570,7 +451,6 @@ private function deletePhysicalFile($filename)
         $price = str_replace(',', '.', $_POST['dish_price'] ?? '0');
         $description = trim($_POST['dish_description'] ?? '');
 
-        // Validation
         $errors = [];
         if (empty($name) || strlen($name) > 100) $errors['dish_name'] = true;
         if (!is_numeric($price) || $price <= 0 || $price > 999.99) $errors['dish_price'] = true;
@@ -585,7 +465,6 @@ private function deletePhysicalFile($filename)
             return;
         }
 
-        // Gestion de l'image
         $imagePath = null;
         if (isset($_FILES['dish_image']) && $_FILES['dish_image']['error'] === UPLOAD_ERR_OK) {
             try {
@@ -597,13 +476,11 @@ private function deletePhysicalFile($filename)
             }
         }
 
-        // Créer le plat
         try {
             $dish = $dishModel->create($category_id, $name, (float)$price, $description, $imagePath);
             $dishId = $dish->getId();
 
-            // Mettre à jour le timestamp du restaurant
-            $this->updateRestaurantTimestamp();
+            $this->updateRestaurantTimestamp(); // Mise à jour du restaurant
 
             $this->addSuccessMessage("Plat ajouté avec succès.", 'dish-' . $dishId);
             $_SESSION['close_accordion'] = 'mode-selector-content';
@@ -628,7 +505,6 @@ private function deletePhysicalFile($filename)
         $price = str_replace(',', '.', $_POST['dish_price'] ?? '0');
         $description = trim($_POST['dish_description'] ?? '');
 
-        // Validation
         $errors = [];
         if (empty($name) || strlen($name) > 100) $errors['dish_name_' . $dish_id] = true;
         if (!is_numeric($price) || $price <= 0 || $price > 999.99) $errors['dish_price_' . $dish_id] = true;
@@ -643,7 +519,6 @@ private function deletePhysicalFile($filename)
             return;
         }
 
-        // Récupérer le plat existant
         $stmt = $this->pdo->prepare("SELECT * FROM plats WHERE id = ?");
         $stmt->execute([$dish_id]);
         $existingDish = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -654,13 +529,10 @@ private function deletePhysicalFile($filename)
             return;
         }
 
-        // Gestion de la nouvelle image
         $imagePath = $existingDish['image'];
         if (isset($_FILES['dish_image']) && $_FILES['dish_image']['error'] === UPLOAD_ERR_OK) {
             try {
                 $imagePath = $dishModel->uploadImage($_FILES['dish_image']);
-
-                // Supprimer l'ancienne image
                 if (!empty($existingDish['image'])) {
                     $dishModel->deleteImage($existingDish['image']);
                 }
@@ -671,12 +543,10 @@ private function deletePhysicalFile($filename)
             }
         }
 
-        // Mettre à jour
         try {
             $dishModel->update($dish_id, $name, (float)$price, $description, $imagePath);
 
-            // Mettre à jour le timestamp du restaurant
-            $this->updateRestaurantTimestamp();
+            $this->updateRestaurantTimestamp(); // Mise à jour du restaurant
 
             $this->addSuccessMessage("Plat modifié avec succès.", 'dish-' . $dish_id);
             $_SESSION['close_accordion'] = 'mode-selector-content';
@@ -698,22 +568,18 @@ private function deletePhysicalFile($filename)
         $current_category_id = (int)($_POST['current_category_id'] ?? 0);
 
         try {
-            // Récupérer le plat pour supprimer son image
             $stmt = $this->pdo->prepare("SELECT * FROM plats WHERE id = ?");
             $stmt->execute([$dish_id]);
             $dish = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($dish) {
-                // Supprimer l'image si elle existe
                 if (!empty($dish['image'])) {
                     $dishModel->deleteImage($dish['image']);
                 }
 
-                // Supprimer le plat
                 $dishModel->delete($dish_id);
 
-                // Mettre à jour le timestamp du restaurant
-                $this->updateRestaurantTimestamp();
+                $this->updateRestaurantTimestamp(); // Mise à jour du restaurant
 
                 $this->addSuccessMessage("Plat supprimé avec succès.", 'category-' . $current_category_id);
                 $_SESSION['close_accordion'] = 'mode-selector-content';
@@ -737,20 +603,15 @@ private function deletePhysicalFile($filename)
         $current_category_id = (int)($_POST['current_category_id'] ?? 0);
 
         try {
-            // Récupérer le plat
             $stmt = $this->pdo->prepare("SELECT * FROM plats WHERE id = ?");
             $stmt->execute([$dish_id]);
             $dish = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($dish && !empty($dish['image'])) {
-                // Supprimer le fichier
                 $dishModel->deleteImage($dish['image']);
-
-                // Mettre à jour la base (image = NULL)
                 $dishModel->update($dish_id, $dish['name'], $dish['price'], $dish['description'], null);
 
-                // Mettre à jour le timestamp du restaurant
-                $this->updateRestaurantTimestamp();
+                $this->updateRestaurantTimestamp(); // Mise à jour du restaurant
 
                 $this->addSuccessMessage("Image du plat supprimée avec succès.", 'dish-' . $dish_id);
                 $_SESSION['close_accordion'] = 'mode-selector-content';
@@ -785,7 +646,6 @@ private function deletePhysicalFile($filename)
         foreach ($_FILES['card_images']['name'] as $index => $name) {
             if ($_FILES['card_images']['error'][$index] === UPLOAD_ERR_OK) {
                 try {
-                    // Préparer le tableau de fichier
                     $file = [
                         'name' => $_FILES['card_images']['name'][$index],
                         'type' => $_FILES['card_images']['type'][$index],
@@ -794,14 +654,9 @@ private function deletePhysicalFile($filename)
                         'size' => $_FILES['card_images']['size'][$index]
                     ];
 
-                    // Uploader l'image
                     $filename = $carteImageModel->uploadImage($file);
-
-                    // Enregistrer en base
                     $carteImageModel->add($admin_id, $filename, $name);
-
                     $uploadCount++;
-                    error_log("File uploaded successfully: $name");
                 } catch (Exception $e) {
                     $errorCount++;
                     error_log("Error uploading file $name: " . $e->getMessage());
@@ -809,11 +664,8 @@ private function deletePhysicalFile($filename)
             }
         }
 
-        // Messages de résultat
         if ($uploadCount > 0) {
-            // Mettre à jour le timestamp du restaurant
-            $this->updateRestaurantTimestamp();
-
+            $this->updateRestaurantTimestamp(); // Mise à jour du restaurant
             $this->addSuccessMessage("$uploadCount image(s) téléchargée(s) avec succès.", 'upload-images');
             if ($errorCount > 0) {
                 $this->addErrorMessage("$errorCount image(s) n'ont pas pu être téléchargées.", 'upload-images');
@@ -843,19 +695,14 @@ private function deletePhysicalFile($filename)
         try {
             $carteImageModel->updateImageOrder($admin_id, $orderArray);
 
-            // Mettre à jour le timestamp du restaurant
-            $this->updateRestaurantTimestamp();
+            $this->updateRestaurantTimestamp(); // Mise à jour du restaurant
 
             $this->addSuccessMessage("Ordre des images mis à jour avec succès.", 'images-list');
-
-            // IMPORTANT : Garder l'accordéon "Images de la carte" ouvert
-            $_SESSION['close_accordion'] = 'mode-selector-content'; // Fermer le sélecteur de mode
-            $_SESSION['open_accordion'] = 'images-list-content'; // Ouvrir la liste des images
-            // NE PAS fermer l'accordéon secondaire pour qu'il reste ouvert
-
+            $_SESSION['close_accordion'] = 'mode-selector-content';
+            $_SESSION['open_accordion'] = 'images-list-content';
         } catch (Exception $e) {
             $this->addErrorMessage("Erreur: " . $e->getMessage(), 'images-list');
-            $_SESSION['open_accordion'] = 'images-list-content'; // Ouvrir même en cas d'erreur
+            $_SESSION['open_accordion'] = 'images-list-content';
         }
 
         $this->redirectToEditCard($anchor);
@@ -872,7 +719,6 @@ private function deletePhysicalFile($filename)
             $cat['plats'] = $dishModel->getAllByCategory($cat['id']);
         }
 
-        // Mettre en cache pour les opérations de plat
         $_SESSION['categories_cache'] = $categories;
 
         return [
@@ -893,7 +739,6 @@ private function deletePhysicalFile($filename)
     private function getImagesModeData($admin_id, $carteImageModel, $messages, $error_fields, $old_input)
     {
         $carteImages = $carteImageModel->getAllByAdmin($admin_id);
-
         error_log("Images loaded: " . count($carteImages));
 
         return [
@@ -917,7 +762,6 @@ private function deletePhysicalFile($filename)
         if (!empty($anchor)) {
             $redirectUrl .= '&anchor=' . urlencode($anchor);
         }
-
         error_log("Redirecting to: $redirectUrl");
         header('Location: ' . $redirectUrl);
         exit;
@@ -943,16 +787,13 @@ private function deletePhysicalFile($filename)
             foreach ($categories as &$cat) {
                 $cat['plats'] = $dishModel->getAllByCategory($cat['id']);
             }
-
             $_SESSION['categories_cache'] = $categories;
-
             $data = [
                 'currentMode' => $currentMode,
                 'categories' => $categories
             ];
         } else {
             $carteImages = $carteImageModel->getAllByAdmin($admin_id);
-
             $data = [
                 'currentMode' => $currentMode,
                 'carteImages' => $carteImages
@@ -960,125 +801,5 @@ private function deletePhysicalFile($filename)
         }
 
         $this->render('admin/view-card', $data);
-    }
-
-    /**
-     * Récupère une catégorie par ID (utilitaire)
-     */
-    private function getCategoryById($categoryModel, $category_id, $admin_id)
-    {
-        $categories = $categoryModel->getAllByAdmin($admin_id);
-        foreach ($categories as $cat) {
-            if ($cat['id'] == $category_id) {
-                return $cat;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Récupère un plat par ID (utilitaire)
-     */
-    private function getDishById($dishModel, $dish_id)
-    {
-        $allCategories = $_SESSION['categories_cache'] ?? [];
-        foreach ($allCategories as $cat) {
-            if (isset($cat['plats'])) {
-                foreach ($cat['plats'] as $plat) {
-                    if ($plat['id'] == $dish_id) {
-                        return $plat;
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Méthode de test directe
-     */
-    public function testDelete()
-    {
-        error_log("=== TEST DELETE METHOD CALLED ===");
-
-        // Debug complet
-        error_log("REQUEST METHOD: " . $_SERVER['REQUEST_METHOD']);
-        error_log("POST data: " . print_r($_POST, true));
-        error_log("GET data: " . print_r($_GET, true));
-        error_log("SESSION data: " . print_r($_SESSION, true));
-
-        // Vérifier si on est dans une requête de suppression
-        if (isset($_POST['delete_image'])) {
-            error_log("DELETE_IMAGE POST DETECTED!");
-            error_log("Image ID: " . ($_POST['image_id'] ?? 'NOT SET'));
-
-            // Essayer une suppression directe
-            $admin_id = $_SESSION['admin_id'] ?? 0;
-            $image_id = (int)($_POST['image_id'] ?? 0);
-
-            error_log("Admin ID: $admin_id");
-            error_log("Image ID to delete: $image_id");
-
-            if ($image_id > 0 && $admin_id > 0) {
-                try {
-                    // Suppression directe
-                    $stmt = $this->pdo->prepare("DELETE FROM card_images WHERE id = ? AND admin_id = ?");
-                    $stmt->execute([$image_id, $admin_id]);
-
-                    $rowCount = $stmt->rowCount();
-                    error_log("Rows deleted: $rowCount");
-
-                    if ($rowCount > 0) {
-                        echo "SUCCESS: Image deleted from database<br>";
-                    } else {
-                        echo "ERROR: No rows affected<br>";
-                    }
-                } catch (Exception $e) {
-                    error_log("Exception: " . $e->getMessage());
-                    echo "EXCEPTION: " . $e->getMessage() . "<br>";
-                }
-            }
-        }
-
-        // Afficher un formulaire de test
-?>
-        <!DOCTYPE html>
-        <html>
-
-        <head>
-            <title>Test Delete</title>
-        </head>
-
-        <body>
-            <h1>Test Suppression Image</h1>
-
-            <form method="post">
-                <input type="hidden" name="delete_image" value="1">
-                <label>Image ID: <input type="number" name="image_id" required></label><br>
-                <button type="submit">Tester suppression</button>
-            </form>
-
-            <hr>
-
-            <h2>Images existantes :</h2>
-            <?php
-            $admin_id = $_SESSION['admin_id'] ?? 0;
-            if ($admin_id > 0) {
-                $stmt = $this->pdo->prepare("SELECT * FROM card_images WHERE admin_id = ? ORDER BY id DESC");
-                $stmt->execute([$admin_id]);
-                $images = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                foreach ($images as $image) {
-                    echo "<div>";
-                    echo "ID: " . $image['id'] . " - " . $image['original_name'];
-                    echo " <small>(" . $image['filename'] . ")</small>";
-                    echo "</div>";
-                }
-            }
-            ?>
-        </body>
-
-        </html>
-<?php
     }
 }
