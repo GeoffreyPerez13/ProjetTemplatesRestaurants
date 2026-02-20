@@ -141,7 +141,10 @@ class Restaurant
      */
     public function isSiteOnline($adminId)
     {
-        $stmt = $this->pdo->prepare("SELECT option_value FROM admin_options WHERE admin_id = ? AND option_name = 'site_online'");
+        $stmt = $this->pdo->prepare("
+            SELECT option_value FROM admin_options 
+            WHERE admin_id = ? AND option_name = 'site_online'
+        ");
         $stmt->execute([$adminId]);
         $value = $stmt->fetchColumn();
         return $value === '1';

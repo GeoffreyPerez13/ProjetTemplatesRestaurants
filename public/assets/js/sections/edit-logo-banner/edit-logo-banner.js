@@ -1,6 +1,6 @@
 /**
- * Gestion des médias (logo, bannière)
- * Version générique avec classe MediaUploader
+ * Gestion des médias (logo, bannière) et du texte de bannière
+ * Version avec support du texte de bannière
  */
 (function () {
     "use strict";
@@ -414,6 +414,39 @@
         });
     }
 
+    function setupBannerTextDelete() {
+        const deleteBtn = document.getElementById('deleteBannerTextBtn');
+        if (!deleteBtn) return;
+
+        const deleteForm = document.getElementById('deleteBannerTextForm');
+        if (!deleteForm) return;
+
+        deleteBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            if (typeof Swal !== "undefined") {
+                Swal.fire({
+                    title: "Confirmer la suppression",
+                    text: "Voulez-vous vraiment supprimer le texte de la bannière ?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Oui, supprimer",
+                    cancelButtonText: "Annuler"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        deleteForm.submit();
+                    }
+                });
+            } else {
+                if (confirm("Voulez-vous vraiment supprimer le texte de la bannière ?")) {
+                    deleteForm.submit();
+                }
+            }
+        });
+    }
+
     function disableAutoCloseAccordions() {
         if (!document.querySelector('.edit-logo-container, .edit-banner-container')) return;
         if (window.AccordionManager && window.AccordionManager.closeAllExceptFirst) {
@@ -445,6 +478,9 @@
                 hasMedia: scrollParams.hasBanner || false
             });
         }
+
+        // Gestion du texte de bannière
+        setupBannerTextDelete();
 
         const messages = document.querySelectorAll('.message-success, .message-error');
         const delay = scrollParams.scrollDelay || 1500;

@@ -18,6 +18,7 @@ require __DIR__ . '/../partials/header.php';
         hasLogo: <?= !empty($current_logo) ? 'true' : 'false' ?>,
         currentBannerUrl: '<?= !empty($current_banner['public_url']) ? htmlspecialchars($current_banner['public_url']) : '' ?>',
         hasBanner: <?= !empty($current_banner) ? 'true' : 'false' ?>,
+        bannerText: '<?= !empty($current_banner['text']) ? htmlspecialchars($current_banner['text']) : '' ?>',
         closeAccordion: '<?= htmlspecialchars($closeAccordion ?? '') ?>',
         openAccordion: '<?= htmlspecialchars($openAccordion ?? '') ?>'
     };
@@ -131,6 +132,43 @@ require __DIR__ . '/../partials/header.php';
                 </div>
             </div>
         </div>
+
+        <!-- ==================== SECTION TEXTE DE LA BANNIÈRE ==================== -->
+        <div class="accordion-section banner-text-accordion" id="banner-text">
+            <div class="accordion-header">
+                <h2><i class="fas fa-comment-dots"></i> Texte de la bannière</h2>
+                <button type="button" class="accordion-toggle" data-target="banner-text-content">
+                    <i class="fas fa-chevron-<?= !empty($current_banner['text']) ? 'up' : 'down' ?>"></i>
+                </button>
+            </div>
+            <div id="banner-text-content" class="accordion-content <?= !empty($current_banner['text']) ? 'expanded' : 'collapsed' ?>">
+                <form method="post" action="?page=edit-logo-banner&action=updateBannerText" class="banner-text-form">
+                    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                    <input type="hidden" name="anchor" value="banner-text">
+
+                    <div class="form-group">
+                        <label for="banner_text">Saisissez le texte à afficher sur la bannière :</label>
+                        <textarea name="banner_text" id="banner_text" rows="3" class="form-control" placeholder="Ex : Bienvenue chez nous !"><?= htmlspecialchars($current_banner['text'] ?? '') ?></textarea>
+                        <p class="form-text text-muted"><i class="fas fa-info-circle"></i> Ce texte apparaîtra en superposition sur la bannière (position par défaut : centré).</p>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn success"><i class="fas fa-save"></i> Enregistrer le texte</button>
+                        <?php if (!empty($current_banner['text'])): ?>
+                            <button type="button" class="btn danger" id="deleteBannerTextBtn" data-filename="texte">Supprimer le texte</button>
+                        <?php endif; ?>
+                    </div>
+                </form>
+
+                <?php if (!empty($current_banner['text'])): ?>
+                    <form method="post" action="?page=edit-logo-banner&action=deleteBannerText" id="deleteBannerTextForm" style="display: none;">
+                        <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                        <input type="hidden" name="anchor" value="banner-text">
+                    </form>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <div class="banner-separator"><span>OU</span></div>
     <?php endif; ?>
 

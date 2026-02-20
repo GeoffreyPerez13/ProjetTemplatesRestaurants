@@ -98,6 +98,7 @@ class LogoBannerController extends BaseController
      */
     private function getCurrentMedia($admin_id, $table)
     {
+        // Ajoutez 'text' à la sélection pour la table banners
         $stmt = $this->pdo->prepare("SELECT * FROM $table WHERE admin_id = ?");
         $stmt->execute([$admin_id]);
         $media = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -111,12 +112,84 @@ class LogoBannerController extends BaseController
                     : 'Date inconnue';
                 return $media;
             } else {
-                // Fichier manquant, nettoyer
                 $this->cleanupMissingMedia($admin_id, $table);
                 return null;
             }
         }
         return null;
+    }
+
+    /**
+     * Met à jour le texte de la bannière
+     */
+    public function updateBannerText()
+    {
+        $this->requireLogin();
+        $admin_id = $_SESSION['admin_id'];
+        $anchor = 'banner-text'; // ID de l'accordéon
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location: ?page=edit-logo-banner");
+            exit;
+        }
+
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            $this->addErrorMessage("Token de sécurité invalide.", $anchor);
+            header("Location: ?page=edit-logo-banner&anchor=$anchor");
+            exit;
+        }
+
+        $texte = trim($_POST['banner_text'] ?? '');
+
+        // Vérifier qu'une bannière existe
+        $banner = $this->getCurrentBanner($admin_id);
+        if (!$banner) {
+            $this->addErrorMessage("Vous devez d'abord uploader une bannière.", $anchor);
+            header("Location: ?page=edit-logo-banner&anchor=$anchor");
+            exit;
+        }
+
+        // Mise à jour en base
+        $stmt = $this->pdo->prepare("UPDATE banners SET text = ? WHERE admin_id = ?");
+        if ($stmt->execute([$texte !== '' ? $texte : null, $admin_id])) {
+            $this->addSuccessMessage("Texte de la bannière mis à jour.", $anchor);
+        } else {
+            $this->addErrorMessage("Erreur lors de l'enregistrement.", $anchor);
+        }
+
+        header("Location: ?page=edit-logo-banner&anchor=$anchor");
+        exit;
+    }
+
+    /**
+     * Supprime le texte de la bannière
+     */
+    public function deleteBannerText()
+    {
+        $this->requireLogin();
+        $admin_id = $_SESSION['admin_id'];
+        $anchor = 'banner-text';
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header("Location: ?page=edit-logo-banner");
+            exit;
+        }
+
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            $this->addErrorMessage("Token de sécurité invalide.", $anchor);
+            header("Location: ?page=edit-logo-banner&anchor=$anchor");
+            exit;
+        }
+
+        $stmt = $this->pdo->prepare("UPDATE banners SET text = NULL WHERE admin_id = ?");
+        if ($stmt->execute([$admin_id])) {
+            $this->addSuccessMessage("Texte de la bannière supprimé.", $anchor);
+        } else {
+            $this->addErrorMessage("Erreur lors de la suppression.", $anchor);
+        }
+
+        header("Location: ?page=edit-logo-banner&anchor=$anchor");
+        exit;
     }
 
     /**

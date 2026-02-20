@@ -97,6 +97,20 @@ require __DIR__ . '/../partials/header.php';
                     </div>
                 </a>
 
+                <!-- Services & Options -->
+                <a href="?page=edit-services" class="mobile-menu-item">
+                    <div class="menu-item-icon">
+                        <i class="fas fa-concierge-bell"></i>
+                    </div>
+                    <div class="menu-item-content">
+                        <span class="menu-item-title">Services, paiements & réseaux</span>
+                        <span class="menu-item-desc">Gérer les services et contacts</span>
+                    </div>
+                    <div class="menu-item-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+
                 <a href="?page=view-card" class="mobile-menu-item success">
                     <div class="menu-item-icon">
                         <i class="fas fa-eye"></i>
@@ -140,16 +154,20 @@ require __DIR__ . '/../partials/header.php';
             <a href="?page=edit-card" class="btn">Modifier la carte</a>
             <a href="?page=edit-contact" class="btn">Modifier le contact</a>
             <a href="?page=edit-logo-banner" class="btn">Modifier logo/bannière</a>
-            <a href="?page=view-card" class="btn success">Aperçu de la carte</a>
+            <a href="?page=edit-services" class="btn">Services, paiements & réseaux</a>
         </div>
 
         <!-- Zone du bas pour les boutons d'action desktop -->
         <div class="dashboard-bottom desktop-bottom">
-            <?php if ($role === 'SUPER_ADMIN'): ?>
-                <a href="?page=send-invitation" class="btn">Envoyer un lien de création de compte</a>
-            <?php endif; ?>
-
-            <a href="?page=logout" class="btn danger">Se déconnecter</a>
+            <div class="bottom-left">
+                <?php if ($role === 'SUPER_ADMIN'): ?>
+                    <a href="?page=send-invitation" class="btn">Envoyer un lien de création de compte</a>
+                <?php endif; ?>
+                <a href="?page=view-card" class="btn success">Aperçu de la carte</a>
+            </div>
+            <div class="bottom-right">
+                <a href="?page=logout" class="btn danger">Se déconnecter</a>
+            </div>
         </div>
     </div>
 
@@ -161,3 +179,4 @@ require __DIR__ . '/../partials/header.php';
 
 <?php
 require __DIR__ . '/../partials/footer.php';
+?>

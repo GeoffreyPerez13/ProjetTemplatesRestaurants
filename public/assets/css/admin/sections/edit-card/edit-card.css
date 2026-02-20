@@ -168,13 +168,12 @@
   width: 100%;
 }
 
-/* Catégories - CHANGEMENT CRITIQUE : flex au lieu de grid */
 .categories-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 25px;
   margin-top: 30px;
-  width: 100%;
+  max-width: 80%;
 }
 
 .category-block {

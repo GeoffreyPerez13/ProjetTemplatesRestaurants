@@ -11,6 +11,7 @@ require_once __DIR__ . '/../app/Controllers/LogoBannerController.php';
 require_once __DIR__ . '/../app/Controllers/LegalController.php';
 require_once __DIR__ . '/../app/Controllers/SettingsController.php';
 require_once __DIR__ . '/../app/Controllers/DisplayController.php';
+require_once __DIR__ . '/../app/Controllers/ServicesController.php';
 require_once __DIR__ . '/../app/Helpers/FormHelper.php';
 require_once __DIR__ . '/../app/Helpers/Validator.php';
 require_once __DIR__ . '/../app/Helpers/old.php';
@@ -63,6 +64,16 @@ switch ($page) {
 
     case 'edit-logo-banner':
         $controller = new LogoBannerController($pdo);
+        $action = $_GET['action'] ?? 'show';
+        if (method_exists($controller, $action)) {
+            $controller->$action();
+        } else {
+            $controller->show();
+        }
+        break;
+
+    case 'edit-services':
+        $controller = new ServicesController($pdo);
         $action = $_GET['action'] ?? 'show';
         if (method_exists($controller, $action)) {
             $controller->$action();

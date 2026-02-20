@@ -32,6 +32,9 @@
 /* Section edit-logo-banner */
 @import url("admin/sections/edit-logo-banner/edit-logo-banner.css");
 
+/* Section send-invitation */
+@import url("admin/sections/edit-services/edit-services.css");
+
 /* Section login */
 @import url("admin/sections/login/login.css");
 
