@@ -154,11 +154,11 @@ Pour que les rappels soient envoyés automatiquement chaque 1er du mois aux admi
 1. Ouvrir le Planificateur de tâches (`taskschd.msc`).
 2. Créer une nouvelle tâche de base avec un nom (ex: "Rappel carte Menumiam").
 3. Déclencheur : mensuel, le 1er jour de chaque mois à l'heure souhaitée (ex: 08:00).
-4. Action : démarrer un programme.
-- Programme/script : `php`
-- Arguments : `C:\wamp64\www\ProjetTemplatesRestaurants\cron\send_reminders.php`
-- Démarrer dans : `C:\wamp64\www\ProjetTemplatesRestaurants\cron`
-5. Finalisez et testez la tâche en l'exécutant manuellement.
+4. Action : démarrer un programme :
+   - Programme/script : `php`
+   - Arguments : `C:\wamp64\www\ProjetTemplatesRestaurants\cron\send_reminders.php`
+   - Démarrer dans : `C:\wamp64\www\ProjetTemplatesRestaurants\cron`
+5. Finaliser et tester la tâche en l'exécutant manuellement.
 #### Sous Linux (crontab)
 Ajouter la ligne suivante dans le crontab (`commande crontab -e`) :
 `0 8 1 * * php /chemin/absolu/vers/cron/send_reminders.php >> /dev/null 2>&1`
