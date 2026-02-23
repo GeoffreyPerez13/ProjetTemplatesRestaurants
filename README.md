@@ -144,10 +144,9 @@ ServerName localhost:8080
 - Exécutable avec la commande ```.\mailhog.bat``` depuis la racine du projet ```PS C:\wamp64\www\ProjetTemplatesRestaurants>```. Fermer l'onglet du navigateur arrêtera le service.
 - MailHog est accessible sur http://localhost:8025 (interface web) et le serveur SMTP sur localhost:1025.
 - Fermer l'onglet du navigateur n'arrête pas le service MailHog ; il faut fermer la fenêtre MailHog.
-  
 #### Simulation des tâches cron en développement
 Pour tester l'envoi automatique des rappels mensuels (option `mail_reminder`), exécutez la commande suivante depuis la racine du projet :
-```php cron/send_reminders.php```
+
 ---
 
 ### 6. Sécurité renforcée
