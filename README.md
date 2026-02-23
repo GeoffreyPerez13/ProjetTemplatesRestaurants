@@ -148,6 +148,22 @@ ServerName localhost:8080
 Pour tester l'envoi automatique des rappels mensuels (option `mail_reminder`), exécutez la commande suivante depuis la racine du projet :
 `php cron/send_reminders.php`
 Cela déclenche l'envoi des emails aux administrateurs concernés. Les logs sont disponibles dans `cron/logs/`.
+#### Mise en place de la tâche planifiée (cron) pour les rappels automatiques
+Pour que les rappels soient envoyés automatiquement chaque 1er du mois aux administrateurs ayant activé l'option `mail_reminder`, vous devez configurer une tâche planifiée sur votre serveur.
+#### Sous Windows (Planificateur de tâches)
+1. Ouvrir le Planificateur de tâches (`taskschd.msc`).
+2. Créer une nouvelle tâche de base avec un nom (ex: "Rappel carte Menumiam").
+3. Déclencheur : mensuel, le 1er jour de chaque mois à l'heure souhaitée (ex: 08:00).
+4. Action : démarrer un programme.
+- Programme/script : `php`
+- Arguments : `C:\wamp64\www\ProjetTemplatesRestaurants\cron\send_reminders.php`
+- Démarrer dans : `C:\wamp64\www\ProjetTemplatesRestaurants\cron`
+5. Finalisez et testez la tâche en l'exécutant manuellement.
+#### Sous Linux (crontab)
+Ajouter la ligne suivante dans le crontab (`commande crontab -e`) :
+`0 8 1 * * php /chemin/absolu/vers/cron/send_reminders.php >> /dev/null 2>&1`
+Remplacer `/chemin/absolu/vers/` par le chemin réel du projet.
+**Note** : Le script vérifie lui-même l'option `mail_reminder` dans la base de données ; seuls les administrateurs concernés recevront l'email. Les logs d'exécution sont disponibles dans `cron/logs/reminders.log` et `cron/logs/mail.log`.
 
 **Pourquoi :**
 Permet de simuler une tâche planifiée sans attendre le 1er du mois, facilitant les tests.
