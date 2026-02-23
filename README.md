@@ -225,10 +225,10 @@ Répond aux exigences d'information des consommateurs et améliore la transparen
 
 ### 9. Paramètres utilisateur
 Dans la page "Paramètres", plusieurs sections sont disponibles :
-- Profil utilisateur : modifier nom d'utilisateur, email, nom du restaurant.
-- Mot de passe : changer le mot de passe avec validation de sécurité (force du mot de passe, confirmation).
-- Informations du compte : consulter les données du compte (date de création, rôle, etc.).
-- Options : activer/désactiver :
+- **Profil utilisateur** : modifier nom d'utilisateur, email, nom du restaurant.
+- **Mot de passe** : changer le mot de passe avec validation de sécurité (force du mot de passe, confirmation).
+- **Informations du compte** : consulter les données du compte (date de création, rôle, etc.).
+- **Options** : activer/désactiver :
     - Site en ligne / maintenance
     - Rappels mensuels par email
     - Notifications par email
@@ -241,26 +241,22 @@ Donne aux administrateurs le contrôle total sur leur compte et la visibilité d
 ### Tests en local
 #### Environnement travail
 ```text
-[[http://templatesrestaurants.local/admin/login.php
-http://localhost/phpmyadmin](http://templatesrestaurants.local/
 http://templatesrestaurants.local/admin/login.php
-)](http://templatesrestaurants.local/admin/login.php
-http://localhost/phpmyadmin)
+http://localhost/phpmyadmin
 ```
 #### Environnement domicile
 ```text
-[http://templatesrestaurants.local/admin/login.php
-http://localhost/phpmyadmin](http://templatesrestaurants.local:8080/
 http://templatesrestaurants.local:8080/?page=login
-)
+http://localhost/phpmyadmin
 ```
 
 Vérifications effectuées :
 - Toutes les sections s'affichent correctement
-- Le mode éditable fonctionne
+- Le mode éditable fonctionne avec gestion des allergènes
 - Le mode images affiche correctement les fichiers uploadés
 - La lightbox fonctionne
 - L'interface est totalement responsive
+- Les emails de rappel sont envoyés via MailHog en exécutant le script cron manuellement
 
 ---
 
@@ -271,6 +267,7 @@ Vérifications effectuées :
 - Architecture modulaire facile à maintenir et à faire évoluer
 - Configuration multi-environnements flexible
 - Sécurité renforcée à tous les niveaux
+- Fonctionnalités avancées : allergènes, paramètres utilisateur, rappels automatisés
 
 ---
 
@@ -291,7 +288,9 @@ Vérifications effectuées :
 - Utiliser le port 80 si disponible
 - Sinon, configurer Apache sur le port 8080
 - Adapter les URLs dans le navigateur en conséquence
-
+#### Utilisation en développement
+- Lancer MailHog : `.\mailhog.bat` (depuis la racine)
+- Simuler les rappels mensuels : `php cron/send_reminders.php` (depuis la racine ou le dossier `cron`)
 ---
 
 ### Notes importantes
