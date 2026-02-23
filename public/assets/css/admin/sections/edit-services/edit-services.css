@@ -67,7 +67,7 @@
     color: #34495e;
 }
 
-.livraison-options input[type="radio"] {
+.livraison-options input[type="checkbox"] {
     width: 16px;
     height: 16px;
 }
@@ -123,4 +123,31 @@
 .global-save button {
     padding: 15px 40px;
     font-size: 16px;
+}
+
+/* ==================== BOUTONS TOUT COCHER/DÉCOCHER (COMME POUR ALLERGÈNES) ==================== */
+.allergenes-controls {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 20px;
+}
+
+.btn-allergenes-toggle {
+    background: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    color: #495057;
+}
+
+.btn-allergenes-toggle:hover {
+    background: #dee2e6;
+}
+
+.btn-allergenes-toggle i {
+    margin-right: 4px;
 }

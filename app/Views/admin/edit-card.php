@@ -293,6 +293,30 @@ require __DIR__ . '/../partials/header.php';
                                     <small>Formats acceptés: JPEG, PNG, GIF, WebP (max 2MB)</small>
                                 </div>
 
+                                <!-- Allergènes pour le nouveau plat -->
+                                <div class="allergenes-section">
+                                    <label><i class="fas fa-exclamation-triangle"></i> Allergènes présents dans le plat (optionnel) :</label>
+
+                                    <div class="allergenes-controls">
+                                        <button type="button" class="btn-allergenes-toggle" data-target="allergenes-add-<?= $cat['id'] ?>">
+                                            <i class="fas fa-check-double"></i> Tout (dé)cocher
+                                        </button>
+                                    </div>
+
+                                    <div class="allergenes-grid" id="allergenes-add-<?= $cat['id'] ?>">
+                                        <?php foreach ($allergenes as $allergene): ?>
+                                            <label class="allergene-checkbox">
+                                                <input type="checkbox" name="allergenes[]" value="<?= $allergene['id'] ?>">
+                                                <?php if (!empty($allergene['icone'])): ?>
+                                                    <i class="fas <?= htmlspecialchars($allergene['icone']) ?>"></i>
+                                                <?php endif; ?>
+                                                <?= htmlspecialchars($allergene['nom']) ?>
+                                            </label>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <small>Sélectionnez les allergènes présents dans ce plat.</small>
+                                </div>
+
                                 <button type="submit" name="new_dish" class="btn success">Ajouter plat</button>
                             </form>
                         </div>
@@ -384,6 +408,34 @@ require __DIR__ . '/../partials/header.php';
                                                             <input type="file" name="dish_image" id="edit_dish_image_<?= $plat['id'] ?>"
                                                                 accept="image/jpeg, image/png, image/gif, image/webp">
                                                             <small>Formats acceptés: JPEG, PNG, GIF, WebP (max 2MB)</small>
+                                                        </div>
+
+                                                        <!-- Allergènes pour ce plat -->
+                                                        <div class="allergenes-section">
+                                                            <label><i class="fas fa-exclamation-triangle"></i> Allergènes :</label>
+
+                                                            <div class="allergenes-controls">
+                                                                <button type="button" class="btn-allergenes-toggle" data-target="allergenes-edit-<?= $plat['id'] ?>">
+                                                                    <i class="fas fa-check-double"></i> Tout (dé)cocher
+                                                                </button>
+                                                            </div>
+
+                                                            <div class="allergenes-grid" id="allergenes-edit-<?= $plat['id'] ?>">
+                                                                <?php
+                                                                $allergenesDuPlat = $platsAllergenes[$plat['id']] ?? [];
+                                                                foreach ($allergenes as $allergene):
+                                                                ?>
+                                                                    <label class="allergene-checkbox">
+                                                                        <input type="checkbox" name="allergenes_<?= $plat['id'] ?>[]" value="<?= $allergene['id'] ?>"
+                                                                            <?= in_array($allergene['id'], $allergenesDuPlat) ? 'checked' : '' ?>>
+                                                                        <?php if (!empty($allergene['icone'])): ?>
+                                                                            <i class="fas <?= htmlspecialchars($allergene['icone']) ?>"></i>
+                                                                        <?php endif; ?>
+                                                                        <?= htmlspecialchars($allergene['nom']) ?>
+                                                                    </label>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                            <small>Cochez les allergènes présents.</small>
                                                         </div>
 
                                                         <!-- Boutons pour l'image -->
@@ -603,3 +655,4 @@ require __DIR__ . '/../partials/header.php';
 
 <?php
 require __DIR__ . '/../partials/footer.php';
+?>

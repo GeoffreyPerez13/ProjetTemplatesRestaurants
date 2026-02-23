@@ -12,6 +12,7 @@ require_once __DIR__ . '/../Models/CardImage.php';
 require_once __DIR__ . '/../Models/Admin.php';
 require_once __DIR__ . '/../Models/Restaurant.php';
 require_once __DIR__ . '/../Helpers/Validator.php';
+require_once __DIR__ . '/../Models/Allergene.php';
 
 class CardController extends BaseController
 {
@@ -478,9 +479,15 @@ class CardController extends BaseController
 
         try {
             $dish = $dishModel->create($category_id, $name, (float)$price, $description, $imagePath);
-            $dishId = $dish->getId();
+            $dishId = $dish->getId();  // ou $this->pdo->lastInsertId()
 
-            $this->updateRestaurantTimestamp(); // Mise à jour du restaurant
+            // Sauvegarde des allergènes
+            require_once __DIR__ . '/../Models/Allergene.php';
+            $allergeneModel = new Allergene($this->pdo);
+            $allergeneIds = $_POST['allergenes'] ?? [];
+            $allergeneModel->saveForDish($dishId, $allergeneIds);
+
+            $this->updateRestaurantTimestamp();
 
             $this->addSuccessMessage("Plat ajouté avec succès.", 'dish-' . $dishId);
             $_SESSION['close_accordion'] = 'mode-selector-content';
@@ -546,7 +553,13 @@ class CardController extends BaseController
         try {
             $dishModel->update($dish_id, $name, (float)$price, $description, $imagePath);
 
-            $this->updateRestaurantTimestamp(); // Mise à jour du restaurant
+            // Mise à jour des allergènes
+            require_once __DIR__ . '/../Models/Allergene.php';
+            $allergeneModel = new Allergene($this->pdo);
+            $allergeneIds = $_POST['allergenes_' . $dish_id] ?? []; // name="allergenes_XX[]"
+            $allergeneModel->saveForDish($dish_id, $allergeneIds);
+
+            $this->updateRestaurantTimestamp();
 
             $this->addSuccessMessage("Plat modifié avec succès.", 'dish-' . $dish_id);
             $_SESSION['close_accordion'] = 'mode-selector-content';
@@ -719,11 +732,26 @@ class CardController extends BaseController
             $cat['plats'] = $dishModel->getAllByCategory($cat['id']);
         }
 
+        // Récupération des allergènes
+        require_once __DIR__ . '/../Models/Allergene.php';
+        $allergeneModel = new Allergene($this->pdo);
+        $allergenes = $allergeneModel->getAll();
+
+        // Récupérer les associations pour chaque plat
+        $platsAllergenes = [];
+        foreach ($categories as $cat) {
+            foreach ($cat['plats'] as $plat) {
+                $platsAllergenes[$plat['id']] = $allergeneModel->getForDish($plat['id']);
+            }
+        }
+
         $_SESSION['categories_cache'] = $categories;
 
         return [
             'currentMode' => 'editable',
             'categories' => $categories,
+            'allergenes' => $allergenes,
+            'platsAllergenes' => $platsAllergenes,
             'success_message' => $messages['success_message'] ?? null,
             'error_message' => $messages['error_message'] ?? null,
             'error_fields' => $error_fields,

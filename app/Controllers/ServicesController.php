@@ -9,6 +9,7 @@ class ServicesController extends BaseController
     public function __construct($pdo)
     {
         parent::__construct($pdo);
+        $this->setScrollDelay(1500);
         $this->optionModel = new OptionModel($pdo);
     }
 
@@ -31,8 +32,10 @@ class ServicesController extends BaseController
             'csrf_token' => $this->getCsrfToken(),
             'success_message' => $_SESSION['success_message'] ?? null,
             'error_message' => $_SESSION['error_message'] ?? null,
+            'scroll_delay' => $this->scrollDelay, // Ajouté
+            'anchor' => $_SESSION['anchor'] ?? null, // Ajouté
         ];
-        unset($_SESSION['success_message'], $_SESSION['error_message']);
+        unset($_SESSION['success_message'], $_SESSION['error_message'], $_SESSION['anchor']);
 
         $this->render('admin/edit-services', $data);
     }
@@ -56,8 +59,10 @@ class ServicesController extends BaseController
             exit;
         }
 
-        // Traitement des services
-        // Services
+        // Récupérer l'ancre pour le scroll après soumission
+        $anchor = $_POST['anchor'] ?? 'services';
+
+        // Traitement des services, paiements, réseaux (comme avant)
         $services = [
             'service_sur_place'                => isset($_POST['service_sur_place']) ? '1' : '0',
             'service_a_emporter'               => isset($_POST['service_a_emporter']) ? '1' : '0',
@@ -68,7 +73,6 @@ class ServicesController extends BaseController
             'service_pmr'                       => isset($_POST['service_pmr']) ? '1' : '0',
         ];
 
-        // Traitement des paiements (checkbox multiples)
         $payments = [
             'payment_visa' => isset($_POST['payment_visa']) ? '1' : '0',
             'payment_mastercard' => isset($_POST['payment_mastercard']) ? '1' : '0',
@@ -77,7 +81,6 @@ class ServicesController extends BaseController
             'payment_cheques' => isset($_POST['payment_cheques']) ? '1' : '0',
         ];
 
-        // Traitement des réseaux (champs texte)
         $socials = [
             'social_instagram' => trim($_POST['social_instagram'] ?? ''),
             'social_facebook' => trim($_POST['social_facebook'] ?? ''),
@@ -86,10 +89,8 @@ class ServicesController extends BaseController
             'social_snapchat' => trim($_POST['social_snapchat'] ?? ''),
         ];
 
-        // Fusionner toutes les options
         $allOptions = array_merge($services, $payments, $socials);
 
-        // Sauvegarder chaque option
         $success = true;
         foreach ($allOptions as $key => $value) {
             if (!$this->optionModel->set($admin_id, $key, $value)) {
@@ -103,6 +104,9 @@ class ServicesController extends BaseController
             $_SESSION['error_message'] = "Erreur lors de l'enregistrement de certains paramètres.";
         }
 
+        // Stocker l'ancre pour le scroll après redirection
+        $_SESSION['anchor'] = $anchor;
+
         header('Location: ?page=edit-services');
         exit;
     }
@@ -111,18 +115,18 @@ class ServicesController extends BaseController
      * Extrait les options de services
      */
     private function extractServices($options)
-{
-    $defaults = [
-        'service_sur_place'                => '0',
-        'service_a_emporter'               => '0',
-        'service_livraison_ubereats'       => '0',
-        'service_livraison_etablissement'  => '0',
-        'service_wifi'                      => '0',
-        'service_climatisation'             => '0',
-        'service_pmr'                       => '0',
-    ];
-    return array_merge($defaults, array_intersect_key($options, $defaults));
-}
+    {
+        $defaults = [
+            'service_sur_place'                => '0',
+            'service_a_emporter'               => '0',
+            'service_livraison_ubereats'       => '0',
+            'service_livraison_etablissement'  => '0',
+            'service_wifi'                      => '0',
+            'service_climatisation'             => '0',
+            'service_pmr'                       => '0',
+        ];
+        return array_merge($defaults, array_intersect_key($options, $defaults));
+    }
 
     /**
      * Extrait les options de paiement

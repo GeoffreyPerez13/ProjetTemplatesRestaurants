@@ -61,6 +61,9 @@
       setupPriceAutoFormat();
     }
 
+    // ==================== ALLERGENES : BOUTONS COCHER/TOUT DECOCHER ====================
+    setupAllergenesToggles();
+
     // ==================== GESTION DES FORMULAIRES ====================
     setupFormHandlers();
   }
@@ -570,6 +573,31 @@
       handleAnchorScroll(pendingScroll, CONFIG.scrollDelay);
       sessionStorage.removeItem("pending_scroll");
     }
+  }
+
+  /**
+   * Configure les boutons "Tout (dé)cocher" pour les allergènes
+   */
+  function setupAllergenesToggles() {
+    document.querySelectorAll(".btn-allergenes-toggle").forEach((btn) => {
+      // Supprimer les anciens écouteurs pour éviter les doublons
+      btn.removeEventListener("click", handleAllergenesToggle);
+      btn.addEventListener("click", handleAllergenesToggle);
+    });
+  }
+
+  /**
+   * Gestionnaire du clic sur le bouton "Tout (dé)cocher"
+   */
+  function handleAllergenesToggle(e) {
+    e.preventDefault();
+    const targetId = this.dataset.target;
+    const grid = document.getElementById(targetId);
+    if (!grid) return;
+
+    const checkboxes = grid.querySelectorAll('input[type="checkbox"]');
+    const allChecked = Array.from(checkboxes).every((cb) => cb.checked);
+    checkboxes.forEach((cb) => (cb.checked = !allChecked));
   }
 
   /**

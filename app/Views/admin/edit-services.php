@@ -5,10 +5,18 @@ $styles = [
 ];
 $scripts = [
     "js/effects/scroll-buttons.js",
-    "js/effects/accordion.js"
+    "js/effects/accordion.js",
+    "js/sections/edit-services/edit-services.js"
 ];
 require __DIR__ . '/../partials/header.php';
 ?>
+
+<script>
+    window.scrollParams = {
+        anchor: '<?= htmlspecialchars($anchor ?? '') ?>',
+        scrollDelay: <?= (int)($scroll_delay ?? 1500) ?>,
+    };
+</script>
 
 <a class="btn-back" href="?page=dashboard">Retour au dashboard</a>
 
@@ -43,7 +51,13 @@ require __DIR__ . '/../partials/header.php';
                 <button type="button" class="accordion-toggle" data-target="services-content"><i class="fas fa-chevron-up"></i></button>
             </div>
             <div id="services-content" class="accordion-content expanded">
-                <div class="services-grid">
+                <!-- Bouton tout cocher/décocher -->
+                <div class="allergenes-controls">
+                    <button type="button" class="btn-allergenes-toggle" data-target="services-checkboxes">
+                        <i class="fas fa-check-double"></i> Tout (dé)cocher
+                    </button>
+                </div>
+                <div class="services-grid" id="services-checkboxes">
                     <div class="service-item">
                         <label>
                             <input type="checkbox" name="service_sur_place" value="1" <?= $services['service_sur_place'] == '1' ? 'checked' : '' ?>>
@@ -98,7 +112,13 @@ require __DIR__ . '/../partials/header.php';
                 <button type="button" class="accordion-toggle" data-target="payments-content"><i class="fas fa-chevron-up"></i></button>
             </div>
             <div id="payments-content" class="accordion-content expanded">
-                <div class="payments-grid">
+                <!-- Bouton tout cocher/décocher -->
+                <div class="allergenes-controls">
+                    <button type="button" class="btn-allergenes-toggle" data-target="payments-checkboxes">
+                        <i class="fas fa-check-double"></i> Tout (dé)cocher
+                    </button>
+                </div>
+                <div class="payments-grid" id="payments-checkboxes">
                     <div class="payment-item">
                         <label>
                             <input type="checkbox" name="payment_visa" value="1" <?= $payments['payment_visa'] == '1' ? 'checked' : '' ?>>

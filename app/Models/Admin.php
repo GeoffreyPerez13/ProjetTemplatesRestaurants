@@ -1,9 +1,14 @@
 <?php
+
+require_once __DIR__ . '/../Helpers/Mailer.php';
+
 // Classe Admin : gère la logique des administrateurs et des invitations
 class Admin
 {
     // Connexion PDO à la base de données
     private $pdo;
+
+    private $mailer;
 
     // Propriétés publiques représentant un administrateur
     public $id;
@@ -21,6 +26,7 @@ class Admin
     public function __construct($pdo)
     {
         $this->pdo = $pdo;
+        $this->mailer = new Mailer();
     }
 
     // --- INVITATIONS ---
@@ -29,52 +35,35 @@ class Admin
     // Envoie ensuite un mail avec le lien d'inscription
     public function createInvitation($email, $restaurantName, $token)
     {
-        // Date d'expiration du lien = +24 heures
         $expiry = date('Y-m-d H:i:s', strtotime('+24 hours'));
 
         try {
-            // Insertion de l'invitation en base
             $sql = "INSERT INTO invitations (email, restaurant_name, token, expiry) VALUES (?, ?, ?, ?)";
             $stmt = $this->pdo->prepare($sql);
             $result = $stmt->execute([$email, $restaurantName, $token, $expiry]);
 
             if ($result) {
-                // Utiliser urlencode pour le token
                 $inviteLink = "http://" . $_SERVER['HTTP_HOST'] . "?page=register&token=" . urlencode($token);
 
-                $to = $email;
                 $subject = "Invitation à créer votre compte restaurant";
+                $body = "
+                <html>
+                <body>
+                    <h2>Invitation Menumiam</h2>
+                    <p>Bonjour,</p>
+                    <p>Vous avez été invité à créer un compte pour gérer la carte en ligne de votre restaurant <strong>" . htmlspecialchars($restaurantName) . "</strong> sur Menumiam.</p>
+                    <p>Cliquez sur le lien ci-dessous pour créer votre compte :</p>
+                    <p><a href='$inviteLink' style='background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;'>Créer mon compte</a></p>
+                    <p>Ou copiez ce lien :<br>
+                    <code style='background-color: #f4f4f4; padding: 5px; border-radius: 3px;'>$inviteLink</code></p>
+                    <p><strong>Attention :</strong> Ce lien expirera dans 24 heures.</p>
+                    <br>
+                    <p>Cordialement,<br>L'équipe Menumiam</p>
+                </body>
+                </html>
+                ";
 
-                // Utilisez des guillemets simples pour éviter l'encodage HTML
-                $message = '<!DOCTYPE html>
-<html>
-<head>
-    <title>Invitation à créer votre compte restaurant</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6;">
-    <h2>Invitation Menumiam</h2>
-    <p>Bonjour,</p>
-    <p>Vous avez été invité à créer un compte pour gérer la carte en ligne de votre restaurant <strong>' . htmlspecialchars($restaurantName) . '</strong> sur Menumiam.</p>
-    <p>Cliquez sur le lien ci-dessous pour créer votre compte :</p>
-    <p><a href="' . $inviteLink . '" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Créer mon compte</a></p>
-    <p>Ou copiez ce lien :<br>
-    <code style="background-color: #f4f4f4; padding: 5px; border-radius: 3px;">' . $inviteLink . '</code></p>
-    <p><strong>Attention :</strong> Ce lien expirera dans 24 heures.</p>
-    <br>
-    <p>Cordialement,<br>L\'équipe Menumiam</p>
-</body>
-</html>';
-
-                $headers = "MIME-Version: 1.0\r\n";
-                $headers .= "Content-type:text/html;charset=UTF-8\r\n";
-                $headers .= "From: Menumiam <no-reply@menumiam.com>\r\n";
-                $headers .= "Reply-To: no-reply@menumiam.com\r\n";
-
-                error_log("[DEBUG] Envoi d'invitation à: $email");
-                error_log("[DEBUG] Lien généré: $inviteLink");
-                error_log("[DEBUG] Token: $token");
-
-                return mail($to, $subject, $message, $headers);
+                return $this->mailer->send($email, $subject, $body);
             }
 
             return false;
@@ -341,9 +330,7 @@ class Admin
     {
         error_log("[DEBUG] Tentative de réinitialisation pour email: " . $email);
 
-        // Vérifie que l'email existe
-        $sql = "SELECT id FROM admins WHERE email = ?";
-        $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->pdo->prepare("SELECT id FROM admins WHERE email = ?");
         $stmt->execute([$email]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -352,26 +339,19 @@ class Admin
             return false;
         }
 
-        // Génération du token et date d'expiration
         $token = bin2hex(random_bytes(32));
         $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
-        // Mise à jour en base du token et de l'expiration
-        $sql = "UPDATE admins SET reset_token = ?, reset_token_expiry = ? WHERE email = ?";
-        $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->pdo->prepare("UPDATE admins SET reset_token = ?, reset_token_expiry = ? WHERE email = ?");
         $ok = $stmt->execute([$token, $expiry, $email]);
 
         if ($ok) {
-            // Génération du lien de réinitialisation
             $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "?page=reset-password&token=" . $token;
-            error_log("[DEBUG] Lien de réinitialisation généré: " . $resetLink);
 
-            // Envoi du mail
             $subject = "Réinitialisation de votre mot de passe";
-            $message = "Cliquez sur ce lien pour réinitialiser votre mot de passe : " . $resetLink;
-            $headers = "From: no-reply@votrerestaurant.com";
+            $body = "<p>Bonjour,</p><p>Cliquez sur ce lien pour réinitialiser votre mot de passe : <a href='$resetLink'>$resetLink</a></p>";
 
-            $mailSent = mail($email, $subject, $message, $headers);
+            $mailSent = $this->mailer->send($email, $subject, $body);
             error_log("[DEBUG] Envoi mail: " . ($mailSent ? "OK" : "ÉCHEC"));
 
             return true;

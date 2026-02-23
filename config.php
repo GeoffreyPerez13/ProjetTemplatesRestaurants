@@ -18,17 +18,20 @@ try {
     die("Connexion échouée : " . $e->getMessage());
 }
 
+// ---------- Définition de SITE_URL compatible CLI ----------
+if (php_sapi_name() === 'cli') {
+    // En ligne de commande, on définit l'URL du site (à adapter selon votre environnement)
+    define('SITE_URL', 'http://templatesrestaurants.local');
+    define('BASE_PATH', '');
+} else {
+    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https://' : 'http://';
+    $host = $_SERVER['HTTP_HOST'];
+    $basePath = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+    define('SITE_URL', $protocol . $host . $basePath);
+    define('BASE_PATH', $basePath);
+}
+
 // ---------- Session ----------
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
-// ---------- Définition des constantes utiles ----------
-// URL de base automatique
-$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https://' : 'http://';
-$host = $_SERVER['HTTP_HOST'];
-$basePath = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
-
-define('SITE_URL', $protocol . $host . $basePath); // Ex: http://templatesrestaurants.local/admin
-define('BASE_PATH', $basePath); // Ex: /admin
-?>

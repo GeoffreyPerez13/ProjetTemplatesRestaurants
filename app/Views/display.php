@@ -153,14 +153,22 @@
                     <?php if (!empty($cardImages)): ?>
                         <div class="images-grid">
                             <?php foreach ($cardImages as $image): ?>
+                                <?php 
+                                // Ignorer les entrées sans URL ou sans nom de fichier
+                                if (empty($image['url']) || empty($image['filename'])) {
+                                    continue;
+                                }
+                                $isPdf = strtolower(pathinfo($image['filename'], PATHINFO_EXTENSION)) === 'pdf';
+                                $displayName = $image['original_name'] ?? $image['filename'];
+                                ?>
                                 <div class="image-card">
-                                    <?php if (strtolower(pathinfo($image['filename'], PATHINFO_EXTENSION)) === 'pdf'): ?>
+                                    <?php if ($isPdf): ?>
                                         <div class="pdf-preview"><i class="fas fa-file-pdf"></i></div>
                                     <?php else: ?>
-                                        <img src="<?= htmlspecialchars($image['url']) ?>" alt="<?= htmlspecialchars($image['original_name']) ?>" class="lightbox-image">
+                                        <img src="<?= htmlspecialchars($image['url']) ?>" alt="<?= htmlspecialchars($displayName) ?>" class="lightbox-image">
                                     <?php endif; ?>
                                     <div class="image-info">
-                                        <p><?= htmlspecialchars($image['original_name']) ?></p>
+                                        <p><?= htmlspecialchars($displayName) ?></p>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -215,7 +223,7 @@
                                             </div>
                                             <div class="delivery-options">
                                                 <?php if ($services['service_livraison_ubereats'] == '1'): ?>
-                                                    <div class="delivery-option"><i class="fab fa-ubereats"></i> Uber Eats / Deliveroo</div>
+                                                    <div class="delivery-option"><i class="fa-solid fa-car"></i> Uber Eats / Deliveroo</div>
                                                 <?php endif; ?>
                                                 <?php if ($services['service_livraison_etablissement'] == '1'): ?>
                                                     <div class="delivery-option"><i class="fas fa-motorcycle"></i> Par l'établissement</div>
