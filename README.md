@@ -146,6 +146,11 @@ ServerName localhost:8080
 - Fermer l'onglet du navigateur n'arrête pas le service MailHog ; il faut fermer la fenêtre MailHog.
 #### Simulation des tâches cron en développement
 Pour tester l'envoi automatique des rappels mensuels (option `mail_reminder`), exécutez la commande suivante depuis la racine du projet :
+`php cron/send_reminders.php`
+Cela déclenche l'envoi des emails aux administrateurs concernés. Les logs sont disponibles dans `cron/logs/`.
+
+**Pourquoi :**
+Permet de simuler une tâche planifiée sans attendre le 1er du mois, facilitant les tests.
 
 ---
 
@@ -156,6 +161,7 @@ Pour tester l'envoi automatique des rappels mensuels (option `mail_reminder`), e
 - Validation des uploads (types MIME et tailles limitées)
 - Sessions sécurisées avec régénération d'identifiant
 - Protection des dossiers sensibles via `.htaccess`
+- Tokens CSRF pour les formulaires sensibles
 
 **Pourquoi :**
 Assure la sécurité des données des restaurateurs et de leurs contenus.
@@ -165,10 +171,18 @@ Assure la sécurité des données des restaurateurs et de leurs contenus.
 ### 7. Organisation du système des fichiers
 ```text
 templates-restaurants/
+├── app/
+│   ├── Controllers/
+│   ├── Helpers/
+│   ├── Models/
+│   └── Services/
 ├── assets/
-│   ├── css/admin/
-│   ├── js/effects/
+│   ├── css/
+│   ├── js/
 │   └── uploads/
+├── cron/
+│   ├── logs/
+│   └── send_reminders.php
 ├── database/
 ├── partials/
 ├── pages/
@@ -189,19 +203,49 @@ Structure claire séparant les responsabilités et facilitant l'évolution du pr
 - Design responsive (mobile, tablette et desktop)
 - Accordéons interactifs
 - Notifications de succès et d'erreur en temps réel
+- Boutons "Tout (dé)cocher" pour la sélection rapide d'allergènes
+- Paramètres utilisateur modifiables (profil, mot de passe, options)
+- Rappels mensuels automatisés par email
 
 **Pourquoi :**
 Offre une expérience utilisateur moderne et professionnelle.
 
 ---
 
+### 9. Gestion des allergènes
+Lors de la création ou modification d'un plat, une section dédiée permet de sélectionner les allergènes présents.
+- Les allergènes sont stockés dans une table dédiée et associés via une table de liaison.
+- Un bouton "Tout (dé)cocher" facilite la sélection multiple.
+- Sur la version publique de la carte, les allergènes sont affichés sous forme d'icônes ou de texte.
+
+**Pourquoi :**
+Répond aux exigences d'information des consommateurs et améliore la transparence.
+
+---
+
+### 9. Paramètres utilisateur
+Dans la page "Paramètres", plusieurs sections sont disponibles :
+- Profil utilisateur : modifier nom d'utilisateur, email, nom du restaurant.
+- Mot de passe : changer le mot de passe avec validation de sécurité (force du mot de passe, confirmation).
+- Informations du compte : consulter les données du compte (date de création, rôle, etc.).
+- Options : activer/désactiver :
+    - Site en ligne / maintenance
+    - Rappels mensuels par email
+    - Notifications par email
+
+**Pourquoi :**
+Donne aux administrateurs le contrôle total sur leur compte et la visibilité de leur site.
+
+---
+
 ### Tests en local
 #### Environnement travail
 ```text
-[http://templatesrestaurants.local/admin/login.php
+[[http://templatesrestaurants.local/admin/login.php
 http://localhost/phpmyadmin](http://templatesrestaurants.local/
 http://templatesrestaurants.local/admin/login.php
-)
+)](http://templatesrestaurants.local/admin/login.php
+http://localhost/phpmyadmin)
 ```
 #### Environnement domicile
 ```text
