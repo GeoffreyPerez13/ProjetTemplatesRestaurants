@@ -1,8 +1,16 @@
 <?php
 require_once __DIR__ . '/BaseController.php';
 
+/**
+ * Contrôleur des pages légales (CGU, RGPD, Cookies, Mentions légales)
+ * Affiche le contenu statique des différentes pages juridiques
+ */
 class LegalController extends BaseController
 {
+    /**
+     * Affiche la page légale demandée selon le paramètre ?section=
+     * Sections disponibles : cgu, privacy, cookies, legal
+     */
     public function show()
     {
         $page = $_GET['section'] ?? 'cgu';
@@ -36,6 +44,9 @@ class LegalController extends BaseController
         ]);
     }
 
+    /**
+     * @return string Contenu HTML des Conditions Générales d'Utilisation
+     */
     private function getCGUContent()
     {
         return '
@@ -62,6 +73,9 @@ class LegalController extends BaseController
         ';
     }
 
+    /**
+     * @return string Contenu HTML de la Politique de Confidentialité (RGPD)
+     */
     private function getPrivacyContent()
     {
         return '
@@ -106,6 +120,9 @@ class LegalController extends BaseController
         ';
     }
 
+    /**
+     * @return string Contenu HTML de la Politique des Cookies
+     */
     private function getCookiesContent()
     {
         return '
@@ -145,6 +162,9 @@ class LegalController extends BaseController
         ';
     }
 
+    /**
+     * @return string Contenu HTML des Mentions Légales
+     */
     private function getLegalContent()
     {
         return '

@@ -1,0 +1,454 @@
+/* ==================== TEMPLATE SELECTOR ==================== */
+.template-selector {
+    background: var(--color-bg);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    max-width: 100%;
+    margin: 0 auto var(--spacing-lg) auto;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border);
+}
+
+.template-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.template-header h2 {
+    font-size: 1.5rem;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-sm);
+}
+
+.template-header h2 i {
+    color: var(--color-primary);
+    margin-right: var(--spacing-sm);
+}
+
+.template-subtitle {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ==================== GRILLE DES TEMPLATES ==================== */
+.templates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+/* ==================== CARTE TEMPLATE ==================== */
+.template-card {
+    background: var(--color-bg);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all var(--transition-normal);
+    display: flex;
+    flex-direction: column;
+}
+
+.template-card:hover {
+    border-color: var(--color-primary-light);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px);
+}
+
+.template-card.active {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.15), var(--shadow-lg);
+}
+
+/* ==================== PREVIEW MINIATURE ==================== */
+.template-preview {
+    height: 200px;
+    background: #f8f8f8;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.preview-header-bar {
+    height: 24px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.preview-logo-dot {
+    width: 10px;
+    height: 10px;
+    background: #b45309;
+    border-radius: 50%;
+}
+
+.preview-nav-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.preview-nav-dots span {
+    width: 16px;
+    height: 3px;
+    background: #d4d4d4;
+    border-radius: 2px;
+}
+
+.preview-banner-area {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.classic-banner {
+    background: linear-gradient(135deg, #92400e 0%, #b45309 100%);
+}
+
+.preview-banner-text {
+    text-align: center;
+}
+
+.preview-title-line {
+    width: 60px;
+    height: 6px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 3px;
+    margin: 0 auto 4px;
+}
+
+.preview-subtitle-line {
+    width: 40px;
+    height: 3px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 2px;
+    margin: 0 auto;
+}
+
+.preview-content-area {
+    padding: 8px 10px;
+    flex: 1;
+}
+
+.preview-section-title {
+    width: 40px;
+    height: 4px;
+    background: #b45309;
+    border-radius: 2px;
+    margin-bottom: 6px;
+}
+
+.preview-cards-row {
+    display: flex;
+    gap: 4px;
+}
+
+.preview-card {
+    flex: 1;
+    height: 40px;
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 4px;
+}
+
+.preview-footer-bar {
+    height: 18px;
+}
+
+.classic-footer {
+    background: #1c1917;
+}
+
+/* ==================== PREVIEW MODERNE ==================== */
+.modern-header {
+    background: #0f172a;
+    border-bottom-color: #1e293b;
+}
+
+.modern-dot {
+    background: #2563eb;
+}
+
+.modern-nav span {
+    background: #475569;
+}
+
+.modern-banner {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+    height: 80px;
+}
+
+.modern-line {
+    background: rgba(255,255,255,0.95);
+    width: 80px;
+    height: 5px;
+}
+
+.modern-content {
+    background: #f8fafc;
+}
+
+.modern-title {
+    background: #2563eb;
+}
+
+.modern-card {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    border-radius: 6px;
+    height: 45px;
+}
+
+.modern-cards {
+    gap: 6px;
+}
+
+.modern-footer {
+    background: #0f172a;
+}
+
+.template-preview-modern {
+    background: #f8fafc;
+}
+
+/* ==================== PREVIEW ÉLÉGANT ==================== */
+.elegant-header {
+    background: #0d0d1a;
+    border-bottom-color: #2a2a3d;
+}
+
+.elegant-dot {
+    background: #d4a853;
+}
+
+.elegant-nav span {
+    background: #4a4a5e;
+}
+
+.elegant-banner {
+    background: linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 50%, #2a2a3d 100%);
+    height: 75px;
+}
+
+.elegant-line {
+    background: #d4a853;
+    width: 50px;
+    height: 4px;
+}
+
+.elegant-sub {
+    background: rgba(212, 168, 83, 0.4);
+    width: 30px;
+}
+
+.elegant-content {
+    background: #12121f;
+}
+
+.elegant-title {
+    background: #d4a853;
+    width: 35px;
+}
+
+.elegant-card {
+    background: #1a1a2e;
+    border-color: #2a2a3d;
+    height: 38px;
+}
+
+.elegant-footer {
+    background: #0a0a14;
+}
+
+.template-preview-elegant {
+    background: #12121f;
+}
+
+/* ==================== PREVIEW NATURE ==================== */
+.nature-header {
+    background: #f7fdf9;
+    border-bottom-color: #d1e7d1;
+}
+
+.nature-dot {
+    background: #16a34a;
+}
+
+.nature-nav span {
+    background: #a7d5b8;
+}
+
+.nature-banner {
+    background: linear-gradient(135deg, #14532d 0%, #16a34a 50%, #22c55e 100%);
+}
+
+.nature-content {
+    background: #f7fdf9;
+}
+
+.nature-title {
+    background: #16a34a;
+}
+
+.nature-card {
+    background: #ffffff;
+    border-color: #d1e7d1;
+}
+
+.nature-footer {
+    background: #14532d;
+}
+
+.template-preview-nature {
+    background: #f7fdf9;
+}
+
+/* ==================== PREVIEW ROSÉ ==================== */
+.rose-header {
+    background: #fffbfc;
+    border-bottom-color: #f3d1e0;
+}
+
+.rose-dot {
+    background: #be185d;
+}
+
+.rose-nav span {
+    background: #f0b0cc;
+}
+
+.rose-banner {
+    background: linear-gradient(135deg, #9d174d 0%, #be185d 50%, #ec4899 100%);
+    height: 75px;
+}
+
+.rose-line {
+    background: rgba(255,255,255,0.9);
+    width: 50px;
+}
+
+.rose-sub {
+    background: rgba(255,255,255,0.5);
+    width: 30px;
+}
+
+.rose-content {
+    background: #fdf2f8;
+}
+
+.rose-title {
+    background: #be185d;
+    width: 35px;
+}
+
+.rose-card {
+    background: #fffbfc;
+    border-color: #f3d1e0;
+}
+
+.rose-footer {
+    background: #500724;
+}
+
+.template-preview-rose {
+    background: #fdf2f8;
+}
+
+/* ==================== INFO TEMPLATE ==================== */
+.template-info {
+    padding: var(--spacing-md);
+    flex: 1;
+}
+
+.template-info h3 {
+    font-size: 1.15rem;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-xs);
+}
+
+.template-info p {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: var(--spacing-sm);
+}
+
+.template-colors {
+    display: flex;
+    gap: 6px;
+}
+
+.color-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--color-border);
+}
+
+/* ==================== ACTIONS TEMPLATE ==================== */
+.template-actions {
+    padding: var(--spacing-md);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.template-actions .btn {
+    flex: 1;
+    justify-content: center;
+    font-size: 0.85rem;
+    padding: 8px 16px;
+}
+
+.template-actions .btn-outline {
+    flex: 0;
+    white-space: nowrap;
+}
+
+.template-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    flex: 1;
+    justify-content: center;
+}
+
+.active-badge {
+    background: #f0fdf4;
+    color: var(--color-success);
+    border: 1px solid #bbf7d0;
+}
+
+html.dark-mode .active-badge {
+    background: #052e16;
+    color: #86efac;
+    border-color: #14532d;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .templates-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .template-selector {
+        padding: var(--spacing-md);
+    }
+}
+
+@media (min-width: 601px) {
+    .template-selector {
+        padding: var(--spacing-xl);
+        max-width: 1100px;
+    }
+}

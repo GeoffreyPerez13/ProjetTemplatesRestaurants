@@ -1,11 +1,20 @@
 <?php
 
+/**
+ * Modèle Allergene : gestion des 14 allergènes réglementaires
+ * Gère la table `allergenes` et la table pivot `plat_allergenes`
+ */
 class Allergene
 {
+    /** @var string Nom de la table en BDD */
     protected $table = 'allergenes';
 
+    /** @var PDO Connexion à la base de données */
     private $pdo;
 
+    /**
+     * @param PDO $pdo Connexion à la base de données
+     */
     public function __construct($pdo)
     {
         $this->pdo = $pdo;

@@ -1,0 +1,74 @@
+/* ==================== Bandeau mode démonstration ==================== */
+.demo-banner {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    color: white;
+    text-align: center;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    box-shadow: 0 2px 12px rgba(124, 58, 237, 0.3);
+}
+
+.demo-banner-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.demo-banner-content i {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.demo-banner-content span {
+    line-height: 1.4;
+}
+
+.demo-banner-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.demo-banner-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
+}
+
+/* Dark mode support */
+body.dark-mode .demo-banner {
+    background: linear-gradient(135deg, #5b21b6, #4c1d95);
+}
+
+@media (max-width: 600px) {
+    .demo-banner {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+
+    .demo-banner-content {
+        gap: 6px;
+    }
+
+    .demo-banner-btn {
+        padding: 5px 12px;
+        font-size: 0.75rem;
+    }
+}

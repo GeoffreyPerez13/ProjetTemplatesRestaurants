@@ -7,13 +7,27 @@ require_once __DIR__ . '/../Models/Contact.php';
 require_once __DIR__ . '/../Models/Admin.php';
 require_once __DIR__ . '/../Models/OptionModel.php';
 
+/**
+ * Contrôleur de la vitrine publique du restaurant
+ * Charge toutes les données nécessaires (menu, contact, services, template)
+ * et rend la page publique accessible via le slug du restaurant
+ */
 class DisplayController extends BaseController
 {
+    /**
+     * @param PDO $pdo Connexion à la base de données
+     */
     public function __construct($pdo)
     {
         parent::__construct($pdo);
     }
 
+    /**
+     * Affiche la page vitrine publique d'un restaurant
+     * Gère aussi le mode maintenance et la prévisualisation de templates pour les admins
+     *
+     * @param string|null $slug Slug unique du restaurant (ex: 'mon-restaurant')
+     */
     public function show($slug = null)
     {
         if (empty($slug)) {
@@ -122,6 +136,17 @@ class DisplayController extends BaseController
             }
         }
 
+        // Récupérer le template choisi par l'admin
+        $templateName = $optionModel->get($adminId, 'site_template') ?: 'classic';
+
+        // Permettre la prévisualisation d'un template via GET (admin connecté uniquement)
+        if (!empty($_GET['preview_template']) && isset($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true) {
+            $allowed = ['classic', 'modern', 'elegant', 'nature', 'rose'];
+            if (in_array($_GET['preview_template'], $allowed)) {
+                $templateName = $_GET['preview_template'];
+            }
+        }
+
         $this->render('display', [
             'restaurant'   => $restaurant,
             'logo'         => $logo,
@@ -136,6 +161,7 @@ class DisplayController extends BaseController
             'services'     => $services,
             'payments'     => $payments,
             'socials'      => $socials,
+            'templateName' => $templateName,
         ]);
     }
 }

@@ -1,5 +1,9 @@
 <?php
-// Vérifier si l'utilisateur a déjà fait son choix
+/**
+ * cookie-banner.php — Partial cookie consent pour l'interface admin
+ * Inclus par partials/header.php quand le consentement n'a pas été donné.
+ * Le JS est externalisé dans /assets/js/admin/cookies.js
+ */
 $cookieConsent = $_COOKIE['cookie_consent'] ?? null;
 ?>
 <?php if (!$cookieConsent): ?>
@@ -8,7 +12,7 @@ $cookieConsent = $_COOKIE['cookie_consent'] ?? null;
         <p>
             🍪 Nous utilisons des cookies pour améliorer votre expérience. 
             Certains cookies sont essentiels au fonctionnement du site.
-            <a href="?page=cgu#cookies" class="cookie-link">En savoir plus</a>
+            <a href="?page=legal&section=cookies" class="cookie-link">En savoir plus</a>
         </p>
         <div class="cookie-buttons">
             <button class="cookie-btn accept" onclick="acceptCookies()">Accepter</button>
@@ -56,68 +60,5 @@ $cookieConsent = $_COOKIE['cookie_consent'] ?? null;
     </div>
 </div>
 
-<script>
-function setCookie(name, value, days) {
-    let expires = "";
-    if (days) {
-        const date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax";
-}
-
-function acceptCookies() {
-    setCookie('cookie_consent', 'accepted', 365);
-    setCookie('cookie_analytics', 'true', 365);
-    setCookie('cookie_marketing', 'false', 365);
-    document.getElementById('cookie-banner').style.display = 'none';
-    loadAnalytics(); // À adapter selon vos outils d'analytics
-}
-
-function rejectCookies() {
-    setCookie('cookie_consent', 'rejected', 365);
-    setCookie('cookie_analytics', 'false', 365);
-    setCookie('cookie_marketing', 'false', 365);
-    document.getElementById('cookie-banner').style.display = 'none';
-}
-
-function showCookieSettings() {
-    document.getElementById('cookie-banner').style.display = 'none';
-    document.getElementById('cookie-settings').style.display = 'block';
-}
-
-function hideCookieSettings() {
-    document.getElementById('cookie-settings').style.display = 'none';
-    document.getElementById('cookie-banner').style.display = 'block';
-}
-
-function saveCookieSettings() {
-    const analytics = document.getElementById('cookie-analytics').checked ? 'true' : 'false';
-    const marketing = document.getElementById('cookie-marketing').checked ? 'true' : 'false';
-    
-    setCookie('cookie_consent', 'custom', 365);
-    setCookie('cookie_analytics', analytics, 365);
-    setCookie('cookie_marketing', marketing, 365);
-    
-    if (analytics === 'true') {
-        loadAnalytics();
-    }
-    
-    document.getElementById('cookie-settings').style.display = 'none';
-}
-
-// Fonction pour charger les analytics (exemple avec Google Analytics)
-function loadAnalytics() {
-    if (document.cookie.includes('cookie_analytics=true')) {
-        // Insérez ici votre code Google Analytics ou autre
-        console.log('Analytics chargés');
-    }
-}
-
-// Au chargement de la page
-document.addEventListener('DOMContentLoaded', function() {
-    loadAnalytics();
-});
-</script>
+<script src="/assets/js/admin/cookies.js"></script>
 <?php endif; ?>

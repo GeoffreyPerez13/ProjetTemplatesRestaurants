@@ -76,7 +76,54 @@ class BaseController
             header('Location: ?page=login'); // En-tête HTTP 302 (redirection temporaire)
             exit; // Arrêt immédiat pour éviter que le reste du code s'exécute
         }
+
+        // Vérification de l'expiration de la session démo
+        if ($this->isDemoMode()) {
+            $this->checkDemoExpiry();
+        }
         // Si connecté, le code continue après cette méthode
+    }
+
+    /**
+     * Vérifie si la session courante est en mode démo
+     *
+     * @return bool true si l'utilisateur est en session démo
+     */
+    protected function isDemoMode()
+    {
+        return !empty($_SESSION['demo_mode']) && $_SESSION['demo_mode'] === true;
+    }
+
+    /**
+     * Vérifie que la session démo n'est pas expirée
+     * Si expirée, détruit la session et redirige vers la page d'expiration
+     */
+    protected function checkDemoExpiry()
+    {
+        if (empty($_SESSION['demo_expires_at'])) {
+            return;
+        }
+        if (strtotime($_SESSION['demo_expires_at']) < time()) {
+            session_destroy();
+            session_start();
+            header('Location: ?page=demo-access&token=expired');
+            exit;
+        }
+    }
+
+    /**
+     * Bloque une action si l'utilisateur est en mode démo
+     * Redirige vers le dashboard avec un message d'erreur
+     *
+     * @param string $message Message expliquant la restriction
+     */
+    protected function blockIfDemo($message = "Cette action n'est pas disponible en mode démonstration.")
+    {
+        if ($this->isDemoMode()) {
+            $this->addErrorMessage($message);
+            header('Location: ?page=dashboard');
+            exit;
+        }
     }
 
     /**

@@ -2,11 +2,20 @@
 
 require_once __DIR__ . '/../Helpers/Mailer.php';
 
+/**
+ * Service de notifications par email aux administrateurs
+ * Envoie des emails aux admins ayant activé l'option email_notifications
+ */
 class NotificationService
 {
+    /** @var PDO Connexion à la base de données */
     private $pdo;
+    /** @var Mailer Service d'envoi d'emails */
     private $mailer;
 
+    /**
+     * @param PDO $pdo Connexion à la base de données
+     */
     public function __construct($pdo)
     {
         $this->pdo = $pdo;

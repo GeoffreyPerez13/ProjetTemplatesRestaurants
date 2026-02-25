@@ -3,8 +3,15 @@
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../Models/Contact.php';
 
+/**
+ * Contrôleur de gestion des informations de contact du restaurant
+ * Permet à l'admin de modifier téléphone, email, adresse et horaires
+ */
 class ContactController extends BaseController
 {
+    /**
+     * @param PDO $pdo Connexion à la base de données
+     */
     public function __construct($pdo)
     {
         parent::__construct($pdo);

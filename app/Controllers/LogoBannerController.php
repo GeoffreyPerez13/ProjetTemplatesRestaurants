@@ -2,9 +2,16 @@
 
 require_once __DIR__ . '/BaseController.php';
 
+/**
+ * Contrôleur de gestion du logo et de la bannière du restaurant
+ * Gère l'upload, la suppression et la mise à jour du texte de bannière
+ * Utilise un système générique handleUpload/handleDelete pour les deux types de médias
+ */
 class LogoBannerController extends BaseController
 {
-
+    /**
+     * @param PDO $pdo Connexion à la base de données
+     */
     public function __construct($pdo)
     {
         parent::__construct($pdo);
@@ -41,6 +48,9 @@ class LogoBannerController extends BaseController
 
     // ==================== LOGO ====================
 
+    /**
+     * Upload d'un nouveau logo (POST, fichier 'logo')
+     */
     public function uploadLogo()
     {
         $this->requireLogin();
@@ -49,6 +59,9 @@ class LogoBannerController extends BaseController
         $this->handleUpload('logo', $admin_id, $anchor, 'logos', 'Logo');
     }
 
+    /**
+     * Supprime le logo actuel (fichier + entrée BDD)
+     */
     public function deleteLogo()
     {
         $this->requireLogin();
@@ -59,6 +72,9 @@ class LogoBannerController extends BaseController
 
     // ==================== BANNIÈRE ====================
 
+    /**
+     * Upload d'une nouvelle bannière (POST, fichier 'banner')
+     */
     public function uploadBanner()
     {
         $this->requireLogin();
@@ -67,6 +83,9 @@ class LogoBannerController extends BaseController
         $this->handleUpload('banner', $admin_id, $anchor, 'banners', 'Bannière');
     }
 
+    /**
+     * Supprime la bannière actuelle (fichier + entrée BDD)
+     */
     public function deleteBanner()
     {
         $this->requireLogin();
@@ -94,7 +113,11 @@ class LogoBannerController extends BaseController
     }
 
     /**
-     * Récupère un média (logo ou bannière) depuis la base
+     * Récupère un média (logo ou bannière) depuis la base avec son URL publique
+     *
+     * @param int    $admin_id ID de l'admin
+     * @param string $table    Nom de la table ('logos' ou 'banners')
+     * @return array|null Données du média avec 'public_url' et 'upload_date', ou null
      */
     private function getCurrentMedia($admin_id, $table)
     {
@@ -197,7 +220,10 @@ class LogoBannerController extends BaseController
     }
 
     /**
-     * Nettoie une entrée orpheline
+     * Supprime l'entrée BDD d'un média dont le fichier physique n'existe plus
+     *
+     * @param int    $admin_id ID de l'admin
+     * @param string $table    Nom de la table ('logos' ou 'banners')
      */
     private function cleanupMissingMedia($admin_id, $table)
     {
@@ -210,7 +236,14 @@ class LogoBannerController extends BaseController
     }
 
     /**
-     * Gère l'upload d'un média
+     * Gère l'upload générique d'un média (logo ou bannière)
+     * Valide le fichier, le déplace, supprime l'ancien et sauvegarde en BDD
+     *
+     * @param string $field    Nom du champ file ('logo' ou 'banner')
+     * @param int    $admin_id ID de l'admin
+     * @param string $anchor   Ancre HTML pour le scroll
+     * @param string $table    Table cible ('logos' ou 'banners')
+     * @param string $label    Libellé pour les messages ('Logo' ou 'Bannière')
      */
     private function handleUpload($field, $admin_id, $anchor, $table, $label)
     {
@@ -308,7 +341,13 @@ class LogoBannerController extends BaseController
     }
 
     /**
-     * Gère la suppression d'un média
+     * Gère la suppression générique d'un média (logo ou bannière)
+     *
+     * @param string $field    Type de média ('logo' ou 'banner')
+     * @param int    $admin_id ID de l'admin
+     * @param string $anchor   Ancre HTML pour le scroll
+     * @param string $table    Table cible ('logos' ou 'banners')
+     * @param string $label    Libellé pour les messages ('Logo' ou 'Bannière')
      */
     private function handleDelete($field, $admin_id, $anchor, $table, $label)
     {
@@ -355,7 +394,11 @@ class LogoBannerController extends BaseController
     }
 
     /**
-     * Supprime l'ancien fichier média
+     * Supprime le fichier physique de l'ancien média avant remplacement
+     *
+     * @param int    $admin_id  ID de l'admin
+     * @param string $table     Table ('logos' ou 'banners')
+     * @param string $uploadDir Chemin absolu du dossier d'upload
      */
     private function deleteOldMedia($admin_id, $table, $uploadDir)
     {
@@ -366,7 +409,12 @@ class LogoBannerController extends BaseController
     }
 
     /**
-     * Sauvegarde le média en base
+     * Insère ou met à jour l'entrée média en BDD (INSERT ... ON DUPLICATE KEY UPDATE)
+     *
+     * @param int    $admin_id ID de l'admin
+     * @param string $filename Nom du fichier uploadé
+     * @param string $table    Table cible ('logos' ou 'banners')
+     * @return bool Succès de l'opération
      */
     private function saveMediaToDatabase($admin_id, $filename, $table)
     {
@@ -385,7 +433,10 @@ class LogoBannerController extends BaseController
     }
 
     /**
-     * Convertit les erreurs d'upload en message
+     * Convertit un code d'erreur PHP upload en message lisible
+     *
+     * @param int $error Code d'erreur UPLOAD_ERR_*
+     * @return string Message d'erreur en français
      */
     private function uploadErrorToString($error)
     {

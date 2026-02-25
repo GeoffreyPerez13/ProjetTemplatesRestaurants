@@ -1,8 +1,14 @@
 <?php
 
+/**
+ * Service d'envoi d'emails via la fonction mail() native de PHP
+ * Journalise chaque envoi dans un fichier de log
+ */
 class Mailer
 {
+    /** @var string Adresse email d'expédition */
     private $fromEmail;
+    /** @var string Nom d'affichage de l'expéditeur */
     private $fromName;
 
     /**
@@ -45,7 +51,11 @@ class Mailer
     }
 
     /**
-     * Enregistre un log d'envoi
+     * Enregistre un log d'envoi dans cron/logs/mail.log
+     *
+     * @param string $to      Destinataire
+     * @param string $subject Sujet du mail
+     * @param bool   $success Résultat de l'envoi
      */
     private function log($to, $subject, $success)
     {

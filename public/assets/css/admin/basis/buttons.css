@@ -1,39 +1,68 @@
 /* ==================== BOUTONS ==================== */
 button,
 .btn {
-  color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   text-decoration: none;
-  display: inline-block;
-  transition: background 0.3s;
-  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  font-family: var(--font-family);
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all var(--transition-normal);
+  width: auto;
 }
 
 .btn {
-  background-color: #3498db;
+  background-color: var(--color-primary);
+  color: white;
 }
 
 .btn:hover {
-  background-color: #2980b9;
+  background-color: var(--color-primary-dark);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 .btn.success {
-  background-color: #27ae60;
+  background-color: var(--color-success);
 }
 
 .btn.success:hover {
-  background-color: #219a52;
+  background-color: #116932;
 }
 
 .btn.danger {
-  background-color: #e74c3c;
+  background-color: var(--color-danger);
 }
 
 .btn.danger:hover {
-  background-color: #c0392b;
+  background-color: #b91c1c;
+}
+
+.btn.secondary {
+  background-color: var(--color-text-light);
+}
+
+.btn.secondary:hover {
+  background-color: var(--color-text);
+}
+
+.btn.btn-outline {
+  background: transparent;
+  background-color: transparent;
+  border: 1.5px solid var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn.btn-outline:hover {
+  background: var(--color-primary);
+  color: white;
 }
 
 /* ==================== BOUTON RETOUR FIXE ==================== */
@@ -45,117 +74,103 @@ button,
   display: inline-flex;
   align-items: center;
   padding: 10px 20px;
-  background: #3498db;
-  color: white;
+  background: var(--color-bg);
+  color: var(--color-text);
   text-decoration: none;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 14px;
-  border: none;
-  transition: all 0.3s ease;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-normal);
   width: auto;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-back:hover {
-  background: #2980b9;
-  color: white;
+  background: var(--color-bg);
+  color: var(--color-primary);
   text-decoration: none;
   transform: translateY(-2px);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-primary-light);
 }
 
 .btn-back:active {
   transform: translateY(0);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
 }
 
 .btn-back::before {
   content: "←";
-  margin-right: 8px;
-  font-size: 16px;
+  margin-right: 6px;
+  font-size: 1em;
   font-weight: bold;
 }
 
 /* ==================== BOUTONS HAUT/BAS DE PAGE ==================== */
-
 .page-navigation-buttons {
-    position: fixed;
-    right: 30px;
-    bottom: 30px;
-    z-index: 999;
-    display: flex;
-    flex-direction: column-reverse; /* Inverse l'ordre : haut au-dessus de bas */
-    gap: 10px;
+  position: fixed;
+  right: var(--spacing-lg);
+  bottom: var(--spacing-lg);
+  z-index: 999;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--spacing-sm);
 }
 
 .btn-navigation {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: var(--primary-color, #3498db);
-    color: white;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
 }
 
 .btn-navigation:hover {
-    background: var(--primary-dark, #2980b9);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
 }
 
 .btn-navigation:active {
-    transform: translateY(0);
+  transform: translateY(0);
 }
 
 .scroll-to-top {
-    background: var(--secondary-color, #2ecc71);
+  background: var(--color-success);
 }
 
 .scroll-to-top:hover {
-    background: var(--secondary-dark, #27ae60);
-}
-
-/* SUPPRIMEZ ou COMBINEZ cette règle si vous voulez garder le bouton haut visible */
-.scroll-to-top.hidden {
-    /* Si vous voulez qu'il reste visible, supprimez cette règle ou commentez-la */
-    /* opacity: 0; */
-    /* visibility: hidden; */
-    /* transform: scale(0.8); */
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .page-navigation-buttons {
-        right: 15px;
-        bottom: 20px;
-    }
-    
-    .btn-navigation {
-        width: 45px;
-        height: 45px;
-        font-size: 18px;
-    }
+  background: #116932;
 }
 
 /* ==================== RESPONSIVE BOUTONS ==================== */
-@media (min-width: 601px) {
-  button,
-  .btn {
-    width: auto;
+@media (max-width: 768px) {
+  .page-navigation-buttons {
+    right: var(--spacing-md);
+    bottom: var(--spacing-md);
   }
 
+  .btn-navigation {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 601px) {
   .btn-back {
     top: 25px;
     left: 30px;
     padding: 12px 24px;
-    font-size: 15px;
+    font-size: 0.9rem;
   }
 }
 
@@ -163,23 +178,25 @@ button,
   .btn-back {
     top: 30px;
     left: 40px;
-    padding: 14px 28px;
-    font-size: 16px;
   }
 }
 
-/* Pour les très petits écrans (téléphones) */
 @media (max-width: 600px) {
   .btn-back {
     top: 15px;
     left: 15px;
     padding: 8px 16px;
-    font-size: 13px;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    font-size: 0.8rem;
   }
 
   .btn-back::before {
-    font-size: 14px;
-    margin-right: 6px;
+    font-size: 0.9em;
+    margin-right: 4px;
+  }
+
+  button,
+  .btn {
+    font-size: 0.85rem;
+    padding: 10px 16px;
   }
 }

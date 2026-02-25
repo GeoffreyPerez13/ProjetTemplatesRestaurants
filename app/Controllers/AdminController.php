@@ -27,6 +27,7 @@ class AdminController extends BaseController
     {
         // Étape 1: Vérifier que l'utilisateur est connecté
         $this->requireLogin();
+        $this->blockIfDemo("L'envoi d'invitations n'est pas disponible en mode démonstration.");
 
         // Étape 2: Vérifier les permissions (SUPER_ADMIN uniquement)
         $adminModel = new Admin($this->pdo);
@@ -225,6 +226,12 @@ class AdminController extends BaseController
      */
     public function logout()
     {
+        // En mode démo, rediriger vers la page de fin de démo
+        if ($this->isDemoMode()) {
+            header('Location: ?page=demo-logout');
+            exit;
+        }
+
         // Destruction de la session
         session_destroy();
 
@@ -289,6 +296,15 @@ class AdminController extends BaseController
         $success_message = $messages['success_message'];
         $error_message = $messages['error_message'];
 
+        // Récupérer les tokens de démo actifs pour SUPER_ADMIN
+        $demoTokens = [];
+        $demoExists = false;
+        if ($role === 'SUPER_ADMIN' && !$this->isDemoMode()) {
+            $demoTokenModel = new DemoToken($this->pdo);
+            $demoTokens = $demoTokenModel->getActiveTokens();
+            $demoExists = (bool) $demoTokenModel->getDemoAdminId();
+        }
+
         $this->render('admin/dashboard', [
             'success_message' => $success_message,
             'error_message' => $error_message,
@@ -297,9 +313,17 @@ class AdminController extends BaseController
             'role' => $role,
             'last_updated' => $last_updated,
             'restaurant_id' => $restaurant_id,
-            'slug' => $slug
+            'slug' => $slug,
+            'is_demo' => $this->isDemoMode(),
+            'demoTokens' => $demoTokens,
+            'demoExists' => $demoExists,
         ]);
     }
+    /**
+     * Réinitialisation de mot de passe (2 étapes)
+     * Étape 1 : saisie de l'email → envoi du lien de réinitialisation
+     * Étape 2 : saisie du nouveau mot de passe via le token reçu par mail
+     */
     public function resetPassword()
     {
         // Initialisation

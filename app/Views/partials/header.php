@@ -27,6 +27,9 @@
     <!-- Sortable pour le drag and drop -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js" defer></script>
 
+    <!-- Dark mode (chargé tôt pour éviter le flash) -->
+    <script src="/assets/js/admin/dark-mode.js"></script>
+
     <!-- Inclusion de scripts additionnels dynamiques si fournis -->
     <?php if (!empty($scripts)): ?>
         <?php foreach ($scripts as $script): ?>
@@ -36,130 +39,30 @@
 </head>
 
 <body>
+    <!-- Bandeau mode démo (visible uniquement en session démo) -->
+    <?php if (!empty($_SESSION['demo_mode']) && $_SESSION['demo_mode'] === true): ?>
+        <div class="demo-banner">
+            <div class="demo-banner-content">
+                <i class="fas fa-flask"></i>
+                <span>
+                    <strong>Mode démonstration</strong> — Vous explorez MenuMiam librement.
+                    <?php if (!empty($_SESSION['demo_expires_at'])): ?>
+                        Expire le <?= (new DateTime($_SESSION['demo_expires_at']))->format('d/m/Y à H:i') ?>.
+                    <?php endif; ?>
+                </span>
+                <a href="?page=demo-logout" class="demo-banner-btn">Quitter la démo</a>
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <!-- Bouton flottant dark mode (visible sur toutes les pages) -->
+    <button id="dark-mode-toggle" class="dark-mode-toggle-floating" title="Mode sombre / clair">
+        <i class="fas fa-moon"></i>
+        <i class="fas fa-sun"></i>
+    </button>
+
     <!-- Conteneur principal de toutes les pages admin -->
     <div class="container">
     
-    <!-- Bannière cookies (si non acceptés) -->
-    <?php 
-    // Vérifier si l'utilisateur a déjà fait son choix
-    $cookieConsent = $_COOKIE['cookie_consent'] ?? null;
-    ?>
-    <?php if (!$cookieConsent): ?>
-    <div id="cookie-banner" class="cookie-banner">
-        <div class="cookie-content">
-            <p>
-                🍪 Nous utilisons des cookies pour améliorer votre expérience. 
-                Certains cookies sont essentiels au fonctionnement du site.
-                <a href="?page=legal&section=cookies" class="cookie-link">En savoir plus</a>
-            </p>
-            <div class="cookie-buttons">
-                <button class="cookie-btn accept" onclick="acceptCookies()">Accepter</button>
-                <button class="cookie-btn reject" onclick="rejectCookies()">Refuser</button>
-                <button class="cookie-btn customize" onclick="showCookieSettings()">Personnaliser</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="cookie-settings" class="cookie-settings" style="display: none;">
-        <div class="cookie-settings-content">
-            <h3>📊 Gestion des cookies</h3>
-            
-            <div class="cookie-category">
-                <label class="cookie-toggle">
-                    <input type="checkbox" id="cookie-essential" checked disabled>
-                    <span class="toggle-slider"></span>
-                    <strong>Cookies essentiels</strong>
-                </label>
-                <p class="cookie-desc">Nécessaires au fonctionnement du site (connexion, panier, etc.)</p>
-            </div>
-            
-            <div class="cookie-category">
-                <label class="cookie-toggle">
-                    <input type="checkbox" id="cookie-analytics" checked>
-                    <span class="toggle-slider"></span>
-                    <strong>Cookies analytiques</strong>
-                </label>
-                <p class="cookie-desc">Pour analyser l'usage du site et améliorer nos services</p>
-            </div>
-            
-            <div class="cookie-category">
-                <label class="cookie-toggle">
-                    <input type="checkbox" id="cookie-marketing">
-                    <span class="toggle-slider"></span>
-                    <strong>Cookies marketing</strong>
-                </label>
-                <p class="cookie-desc">Pour personnaliser les publicités et suggestions</p>
-            </div>
-            
-            <div class="cookie-settings-buttons">
-                <button class="cookie-btn accept" onclick="saveCookieSettings()">Enregistrer mes préférences</button>
-                <button class="cookie-btn cancel" onclick="hideCookieSettings()">Annuler</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-    function setCookie(name, value, days) {
-        let expires = "";
-        if (days) {
-            const date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            expires = "; expires=" + date.toUTCString();
-        }
-        document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax";
-    }
-
-    function acceptCookies() {
-        setCookie('cookie_consent', 'accepted', 365);
-        setCookie('cookie_analytics', 'true', 365);
-        setCookie('cookie_marketing', 'false', 365);
-        document.getElementById('cookie-banner').style.display = 'none';
-        loadAnalytics();
-    }
-
-    function rejectCookies() {
-        setCookie('cookie_consent', 'rejected', 365);
-        setCookie('cookie_analytics', 'false', 365);
-        setCookie('cookie_marketing', 'false', 365);
-        document.getElementById('cookie-banner').style.display = 'none';
-    }
-
-    function showCookieSettings() {
-        document.getElementById('cookie-banner').style.display = 'none';
-        document.getElementById('cookie-settings').style.display = 'block';
-    }
-
-    function hideCookieSettings() {
-        document.getElementById('cookie-settings').style.display = 'none';
-        document.getElementById('cookie-banner').style.display = 'block';
-    }
-
-    function saveCookieSettings() {
-        const analytics = document.getElementById('cookie-analytics').checked ? 'true' : 'false';
-        const marketing = document.getElementById('cookie-marketing').checked ? 'true' : 'false';
-        
-        setCookie('cookie_consent', 'custom', 365);
-        setCookie('cookie_analytics', analytics, 365);
-        setCookie('cookie_marketing', marketing, 365);
-        
-        if (analytics === 'true') {
-            loadAnalytics();
-        }
-        
-        document.getElementById('cookie-settings').style.display = 'none';
-    }
-
-    // Fonction pour charger les analytics
-    function loadAnalytics() {
-        if (document.cookie.includes('cookie_analytics=true')) {
-            // Insérez ici votre code Google Analytics ou autre
-            console.log('Analytics chargés');
-        }
-    }
-
-    // Au chargement de la page
-    document.addEventListener('DOMContentLoaded', function() {
-        loadAnalytics();
-    });
-    </script>
-    <?php endif; ?>
+    <!-- Bannière cookies (partial réutilisable) -->
+    <?php include __DIR__ . '/cookie-banner.php'; ?>

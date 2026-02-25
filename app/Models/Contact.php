@@ -1,17 +1,27 @@
 <?php
-// Classe Contact : gère les informations de contact d'un restaurant/admin
+/**
+ * Modèle Contact : gestion des informations de contact du restaurant
+ * Stocke téléphone, email, adresse et horaires dans la table `contact`
+ */
 class Contact
 {
-    // Connexion PDO à la base de données
+    /** @var PDO Connexion à la base de données */
     private $pdo;
 
-    // Constructeur : initialise la connexion PDO
+    /**
+     * @param PDO $pdo Connexion à la base de données
+     */
     public function __construct($pdo)
     {
         $this->pdo = $pdo;
     }
 
-    // --- Récupérer le contact pour un admin spécifique ---
+    /**
+     * Récupère les informations de contact d'un admin
+     *
+     * @param int $admin_id ID de l'admin
+     * @return array|false Données contact ou false
+     */
     public function getByAdmin($admin_id)
     {
         $stmt = $this->pdo->prepare("SELECT * FROM contact WHERE admin_id = ?");
@@ -19,7 +29,16 @@ class Contact
         return $stmt->fetch(); // Retourne un tableau associatif avec les informations de contact
     }
 
-    // --- Mettre à jour les informations de contact pour un admin ---
+    /**
+     * Met à jour les informations de contact
+     *
+     * @param int    $admin_id  ID de l'admin
+     * @param string $telephone Numéro de téléphone
+     * @param string $email     Adresse email
+     * @param string $adresse   Adresse postale
+     * @param string $horaires  Horaires d'ouverture
+     * @return bool Succès
+     */
     public function update($admin_id, $telephone, $email, $adresse, $horaires)
     {
         $stmt = $this->pdo->prepare(
@@ -28,7 +47,11 @@ class Contact
         return $stmt->execute([$telephone, $email, $adresse, $horaires, $admin_id]);
     }
 
-    // --- Créer une ligne de contact si elle n'existe pas pour l'admin ---
+    /**
+     * Crée une ligne de contact vide si aucune n'existe pour cet admin
+     *
+     * @param int $admin_id ID de l'admin
+     */
     public function createIfNotExist($admin_id)
     {
         // Vérifie si une ligne existe déjà
@@ -43,7 +66,12 @@ class Contact
         }
     }
 
-    // --- Récupérer le contact pour un restaurant public ---
+    /**
+     * Récupère le contact d'un restaurant via son ID (front-office)
+     *
+     * @param int $restaurantId ID du restaurant
+     * @return array|false Données contact ou false
+     */
     public function getByRestaurant($restaurantId)
     {
         $stmt = $this->pdo->prepare("

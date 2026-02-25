@@ -1,0 +1,25 @@
+# MenuMiam - Robots.txt
+User-agent: *
+Allow: /
+
+# Pages admin (pas d'indexation)
+Disallow: /index.php?page=login
+Disallow: /index.php?page=register
+Disallow: /index.php?page=dashboard
+Disallow: /index.php?page=edit-card
+Disallow: /index.php?page=edit-contact
+Disallow: /index.php?page=edit-logo-banner
+Disallow: /index.php?page=edit-services
+Disallow: /index.php?page=edit-template
+Disallow: /index.php?page=settings
+Disallow: /index.php?page=send-invitation
+Disallow: /index.php?page=reset-password
+Disallow: /index.php?page=view-card
+Disallow: /index.php?page=seed-demo
+
+# Dossiers techniques
+Disallow: /uploads/
+Disallow: /assets/js/admin/
+
+# Sitemap
+Sitemap: /index.php?page=sitemap

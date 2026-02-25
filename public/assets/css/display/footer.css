@@ -1,0 +1,184 @@
+/* ==================== Footer + Contact (vitrine) ==================== */
+footer {
+  background: var(--color-bg-dark);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+footer h2 {
+  color: #ffffff;
+}
+
+footer h2::after {
+  background: var(--color-primary-light);
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-2xl);
+  align-items: start;
+  margin-top: var(--spacing-lg);
+}
+
+.footer-contact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.footer-map iframe {
+  width: 100%;
+  height: 320px;
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+.footer-map .no-map {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+  padding: var(--spacing-xl) 0;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.contact-item i {
+  font-size: 1.15rem;
+  color: var(--color-primary-light);
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* ==================== Réseaux sociaux ==================== */
+.social-links {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.social-links h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.social-icons {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.social-icons a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  transition: all var(--transition-normal);
+  text-decoration: none;
+}
+
+.social-icons a:hover {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);
+}
+
+/* ---- Responsive footer ---- */
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xl);
+  }
+
+  .footer-map iframe {
+    height: 250px;
+  }
+}
+
+/* ==================== Barre de crédits ==================== */
+.footer-credits {
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.footer-credits .container {
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.footer-credits-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.footer-credits p {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+}
+
+.footer-credits p a {
+  color: var(--color-primary-light);
+  font-weight: 600;
+  transition: color var(--transition-fast);
+}
+
+.footer-credits p a:hover {
+  color: var(--color-primary);
+}
+
+.footer-legal-links {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.footer-legal-links a {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.35);
+  transition: color var(--transition-fast);
+}
+
+.footer-legal-links a:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 480px) {
+  .contact-item {
+    font-size: 0.875rem;
+  }
+
+  .footer-credits-content {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-sm);
+  }
+
+  .footer-legal-links {
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

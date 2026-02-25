@@ -11,16 +11,16 @@
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  background-color: #6c757d;
+  background-color: var(--color-text-light);
   color: white;
   text-decoration: none;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   margin-bottom: 20px;
-  transition: all 0.3s;
+  transition: all var(--transition-normal);
 }
 
 .btn-back:hover {
-  background-color: #5a6268;
+  background-color: var(--color-text);
   transform: translateX(-5px);
 }
 
@@ -29,16 +29,17 @@
   gap: 10px;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid var(--color-border);
 }
 
 /* ==================== ACCORDÉONS ==================== */
 .accordion-section {
-  background: white;
-  border-radius: 10px;
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
   margin-bottom: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
+  border: 1px solid var(--color-border);
 }
 
 .accordion-header {
@@ -46,23 +47,23 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px 25px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
+  background: var(--color-bg-alt);
+  border-bottom: 1px solid var(--color-border);
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background var(--transition-fast);
   position: relative;
   min-height: 60px;
   width: 100%;
 }
 
 .accordion-header:hover {
-  background: #e9ecef;
+  background: var(--color-bg-warm);
 }
 
 .accordion-header h2 {
   margin: 0;
-  font-size: 1.4em;
-  color: #2c3e50;
+  font-size: 1.3rem;
+  color: var(--color-text);
   flex: 1;
   min-width: 0;
   padding-right: 20px;
@@ -75,8 +76,8 @@
 
 .accordion-header h3 {
   margin: 0;
-  font-size: 1.2em;
-  color: #2c3e50;
+  font-size: 1.1rem;
+  color: var(--color-text);
   flex: 1;
   min-width: 0;
   padding-right: 15px;
@@ -90,7 +91,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #666;
+  color: var(--color-text-muted);
   font-size: 1.2em;
   padding: 5px 10px;
   border-radius: 4px;
@@ -105,12 +106,12 @@
 }
 
 .accordion-toggle:hover {
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: var(--color-bg-warm);
+  color: var(--color-text);
 }
 
 .accordion-toggle:focus {
-  outline: 2px solid #3498db;
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -149,14 +150,14 @@
 .global-accordion-controls .btn.small {
   padding: 8px 15px;
   font-size: 13px;
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  color: #495057;
+  background-color: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-light);
 }
 
 .global-accordion-controls .btn.small:hover {
-  background-color: #e9ecef;
-  border-color: #ced4da;
+  background-color: var(--color-bg-warm);
+  border-color: var(--color-primary-light);
   transform: translateY(-2px);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
@@ -180,11 +181,11 @@
 }
 
 .category-block {
-  background: white;
-  border-radius: 10px;
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
   padding: 20px;
-  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e9ecef;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
   flex: 1 1 350px;
   min-width: 0;
   max-width: 100%;
@@ -204,14 +205,14 @@
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 2px solid #f8f9fa;
+  border-bottom: 2px solid var(--color-border);
   min-width: 0;
   width: 100%;
 }
 
 .category-header strong {
-  font-size: 1.3em;
-  color: #2c3e50;
+  font-size: 1.2rem;
+  color: var(--color-text);
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -228,16 +229,16 @@
 .category-accordion-controls .btn.small {
   padding: 6px 12px;
   font-size: 0.85em;
-  background-color: #f8f9fa;
-  color: #666;
-  border: 1px solid #dee2e6;
-  transition: all 0.2s ease;
+  background-color: var(--color-bg-alt);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-fast);
 }
 
 .category-accordion-controls .btn.small:hover {
-  background-color: #e9ecef;
-  color: #333;
-  border-color: #ced4da;
+  background-color: var(--color-bg-warm);
+  color: var(--color-text);
+  border-color: var(--color-primary-light);
 }
 
 .category-accordion-controls .btn.small i {
@@ -254,12 +255,12 @@
 }
 
 .dish-accordion-item {
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   overflow: hidden;
   width: 100%;
   margin-bottom: 10px;
-  background: white;
+  background: var(--color-bg);
 }
 
 .dish-accordion-header {
@@ -267,22 +268,22 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px;
-  background: #f8f9fa;
+  background: var(--color-bg-alt);
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background var(--transition-fast);
   width: 100%;
   box-sizing: border-box;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-border);
   min-height: 50px;
 }
 
 .dish-accordion-header:hover {
-  background: #f0f0f0;
+  background: var(--color-bg-warm);
 }
 
 .dish-accordion-header h4 {
   margin: 0;
-  color: #2c3e50;
+  color: var(--color-text);
   flex: 1;
   min-width: 0;
   padding-right: 15px;
@@ -298,7 +299,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #666;
+  color: var(--color-text-muted);
   font-size: 1em;
   padding: 5px;
   border-radius: 4px;
@@ -312,8 +313,8 @@
 }
 
 .dish-accordion-toggle:hover {
-  background-color: #e9e9e9;
-  color: #333;
+  background-color: var(--color-bg-warm);
+  color: var(--color-text);
 }
 
 .dish-accordion-content {
@@ -324,8 +325,8 @@
 }
 
 .dish-edit-container {
-  background: #f8f9fa;
-  border-radius: 8px;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
@@ -340,28 +341,28 @@
 }
 
 .form-group.has-error .error-field {
-  border-color: #e74c3c !important;
+  border-color: var(--color-danger) !important;
 }
 
 .error-field {
-  border-color: #e74c3c !important;
+  border-color: var(--color-danger) !important;
 }
 
 .form-control {
   width: 100%;
   padding: 12px 15px;
-  border: 1px solid #ced4da;
-  border-radius: 5px;
-  font-size: 1em;
-  transition: border-color 0.3s;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  transition: border-color var(--transition-fast);
   box-sizing: border-box;
   max-width: 100%;
 }
 
 .form-control:focus {
-  border-color: #3498db;
+  border-color: var(--color-primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+  box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.12);
 }
 
 .form-row {
@@ -388,7 +389,7 @@
 .euro-symbol {
   position: absolute;
   right: 15px;
-  color: #6c757d;
+  color: var(--color-text-muted);
   font-weight: 500;
 }
 
@@ -402,21 +403,21 @@
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #495057;
+  color: var(--color-text-light);
 }
 
 .image-upload-container small {
   display: block;
   margin-top: 5px;
-  color: #6c757d;
+  color: var(--color-text-muted);
   font-size: 0.85em;
 }
 
 .current-image {
   margin-bottom: 20px;
   padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
   width: 100%;
   box-sizing: border-box;
 }
@@ -430,8 +431,8 @@
 .image-preview {
   max-width: 100%;
   height: auto;
-  border-radius: 5px;
-  border: 1px solid #dee2e6;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
   box-sizing: border-box;
 }
 
@@ -454,16 +455,16 @@
 .allergenes-section {
   margin: 20px 0;
   padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border-left: 4px solid #ffc107;
+  background: var(--color-bg-warm);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--color-warning);
 }
 
 .allergenes-section label {
   display: block;
   margin-bottom: 10px;
   font-weight: 600;
-  color: #856404;
+  color: var(--color-text);
 }
 
 .allergenes-controls {
@@ -473,18 +474,18 @@
 }
 
 .btn-allergenes-toggle {
-  background: #e9ecef;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   padding: 4px 12px;
   font-size: 0.85rem;
   cursor: pointer;
-  transition: background 0.2s;
-  color: #495057;
+  transition: background var(--transition-fast);
+  color: var(--color-text-light);
 }
 
 .btn-allergenes-toggle:hover {
-  background: #dee2e6;
+  background: var(--color-bg-warm);
 }
 
 .btn-allergenes-toggle i {
@@ -503,18 +504,18 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  background: white;
-  border: 1px solid #e9ecef;
-  border-radius: 5px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   font-size: 0.95rem;
   line-height: 1.2;
 }
 
 .allergene-checkbox:hover {
-  background: #f1f3f5;
-  border-color: #ced4da;
+  background: var(--color-bg-alt);
+  border-color: var(--color-primary-light);
   transform: translateY(-1px);
 }
 
@@ -526,7 +527,7 @@
 }
 
 .allergene-checkbox i {
-  color: #dc3545;
+  color: var(--color-danger);
   width: 18px;
   text-align: center;
   font-size: 1.1rem;
@@ -579,30 +580,30 @@
 }
 
 .btn.primary {
-  background-color: #3498db;
+  background-color: var(--color-primary);
   color: white;
 }
 
 .btn.primary:hover {
-  background-color: #2980b9;
+  background-color: var(--color-primary-dark);
 }
 
 .btn.success {
-  background-color: #28a745;
+  background-color: var(--color-success);
   color: white;
 }
 
 .btn.success:hover {
-  background-color: #218838;
+  background-color: #116932;
 }
 
 .btn.danger {
-  background-color: #e74c3c;
+  background-color: var(--color-danger);
   color: white;
 }
 
 .btn.danger:hover {
-  background-color: #c0392b;
+  background-color: #b91c1c;
 }
 
 .btn.small {

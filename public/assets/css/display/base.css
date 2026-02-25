@@ -1,0 +1,82 @@
+/* ==================== Reset et styles de base (vitrine) ==================== */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-family);
+  line-height: var(--line-height);
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--color-primary-light);
+  color: white;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color var(--transition-fast);
+}
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--spacing-3xl) var(--spacing-lg);
+}
+
+/* Sections */
+section {
+  scroll-margin-top: var(--header-height);
+}
+
+/* Titres de section */
+h2 {
+  font-family: var(--font-family-heading);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: var(--letter-spacing-tight);
+  margin-bottom: var(--spacing-xs);
+  text-align: center;
+  color: var(--color-text);
+}
+
+h2::after {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 3px;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  margin: var(--spacing-md) auto var(--spacing-xl);
+}
+
+h3 {
+  font-family: var(--font-family-heading);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-2xl) var(--spacing-md);
+  }
+}

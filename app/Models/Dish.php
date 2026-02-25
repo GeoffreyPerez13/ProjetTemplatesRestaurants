@@ -1,25 +1,44 @@
 <?php
-// Classe Dish : gère les plats d'un restaurant
+/**
+ * Modèle Dish : CRUD des plats du restaurant
+ * Chaque plat appartient à une catégorie et peut avoir une image et des allergènes
+ */
 class Dish
 {
-    // Connexion PDO à la base de données
+    /** @var PDO Connexion à la base de données */
     private $pdo;
 
-    // Propriétés publiques représentant un plat
+    /** @var int|null ID du plat */
     public $id;
+    /** @var int|null FK vers categories.id */
     public $category_id;
+    /** @var string|null Nom du plat */
     public $name;
+    /** @var float|null Prix en euros */
     public $price;
+    /** @var string|null Description du plat */
     public $description;
+    /** @var string|null Chemin relatif de l'image */
     public $image;
 
-    // Constructeur : initialise la connexion PDO
+    /**
+     * @param PDO $pdo Connexion à la base de données
+     */
     public function __construct($pdo)
     {
         $this->pdo = $pdo;
     }
 
-    // --- Création d'un plat ---
+    /**
+     * Crée un nouveau plat
+     *
+     * @param int         $category_id ID de la catégorie parente
+     * @param string      $name        Nom du plat
+     * @param float       $price       Prix en euros
+     * @param string      $description Description (optionnel)
+     * @param string|null $image       Chemin de l'image (optionnel)
+     * @return self
+     */
     public function create($category_id, $name, $price, $description = '', $image = null)
     {
         $price = floatval($price);
@@ -38,7 +57,17 @@ class Dish
         return $this;
     }
 
-    // --- Mise à jour d'un plat ---
+    /**
+     * Met à jour un plat existant
+     * Si $image est fourni : nouvelle image ; si null : supprime l'image
+     *
+     * @param int         $id          ID du plat
+     * @param string      $name        Nouveau nom
+     * @param float       $price       Nouveau prix
+     * @param string      $description Nouvelle description
+     * @param string|null $image       Nouveau chemin image ou null pour supprimer
+     * @return bool Succès
+     */
     public function update($id, $name, $price, $description = '', $image = null)
     {
         $price = floatval($price);
@@ -65,7 +94,13 @@ class Dish
         return $result;
     }
 
-    // --- Upload d'image pour plat ---
+    /**
+     * Upload et valide une image de plat (max 2MB, JPEG/PNG/GIF/WebP)
+     *
+     * @param array $file Fichier $_FILES
+     * @return string Chemin relatif de l'image uploadée
+     * @throws Exception Si validation ou déplacement échoue
+     */
     public function uploadImage($file)
     {
         if ($file['error'] !== UPLOAD_ERR_OK) {
@@ -113,7 +148,12 @@ class Dish
         return 'uploads/dishes/' . $filename;
     }
 
-    // --- Suppression d'image ---
+    /**
+     * Supprime le fichier image physique du serveur (tente plusieurs chemins)
+     *
+     * @param string|null $imagePath Chemin relatif de l'image
+     * @return bool true si supprimé, false sinon
+     */
     public function deleteImage($imagePath)
     {
         if ($imagePath) {
@@ -139,14 +179,24 @@ class Dish
         return false;
     }
 
-    // --- Suppression d'un plat ---
+    /**
+     * Supprime un plat par son ID
+     *
+     * @param int $id ID du plat
+     * @return bool Succès
+     */
     public function delete($id)
     {
         $stmt = $this->pdo->prepare("DELETE FROM plats WHERE id = ?");
         return $stmt->execute([$id]);
     }
 
-    // --- Récupérer tous les plats d'une catégorie (back-office) ---
+    /**
+     * Récupère tous les plats d'une catégorie (back-office)
+     *
+     * @param int $category_id ID de la catégorie
+     * @return array
+     */
     public function getAllByCategory($category_id)
     {
         $stmt = $this->pdo->prepare("SELECT * FROM plats WHERE category_id = ?");
@@ -154,13 +204,23 @@ class Dish
         return $stmt->fetchAll(); // Retourne un tableau associatif
     }
 
-    // --- Formater le prix pour affichage ---
+    /**
+     * Formate un prix pour l'affichage (ex: '12,50€')
+     *
+     * @param float $price Prix brut
+     * @return string Prix formaté
+     */
     public function formatPrice($price)
     {
         return number_format($price, 2, ',', '') . '€';
     }
 
-    // --- Récupérer tous les plats d'une catégorie pour la vitrine (front-office) ---
+    /**
+     * Récupère les plats d'une catégorie triés par ID (front-office)
+     *
+     * @param int $categoryId ID de la catégorie
+     * @return array
+     */
     public function getByCategory($categoryId)
     {
         $stmt = $this->pdo->prepare(

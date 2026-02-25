@@ -1,19 +1,31 @@
 <?php
 
-/* Valide les données soumises par les formulaires selon des règles prédéfinies. */
+/**
+ * Validateur de formulaires avec règles : required, min, max, numeric, email, min_value, max_value
+ * Inclut aussi une méthode statique validatePassword() pour la validation de mot de passe
+ */
 class Validator
 {
+    /** @var array Données à valider (généralement $_POST) */
     private $data;
+    /** @var array Champs en erreur [field => true] */
     private $errors = [];
+    /** @var array Règles de validation [field => ['required', 'min:3', ...]] */
     private $rules = [];
-    
+
+    /**
+     * @param array $data Données à valider
+     */
     public function __construct($data)
     {
         $this->data = $data;
     }
     
     /**
-     * Définir les règles de validation
+     * Définit les règles de validation
+     *
+     * @param array $rules Tableau [champ => ['required', 'min:3', 'max:100', ...]]
+     * @return self
      */
     public function rules($rules)
     {
@@ -22,7 +34,9 @@ class Validator
     }
     
     /**
-     * Valider les données (retourne seulement true/false)
+     * Exécute la validation selon les règles définies
+     *
+     * @return bool true si toutes les règles passent
      */
     public function validate()
     {
@@ -83,7 +97,9 @@ class Validator
     }
     
     /**
-     * Ajouter une erreur (sans message)
+     * Marque un champ comme invalide
+     *
+     * @param string $field Nom du champ
      */
     private function addError($field)
     {
@@ -91,7 +107,9 @@ class Validator
     }
     
     /**
-     * Récupérer toutes les erreurs
+     * Récupère tous les champs en erreur
+     *
+     * @return array [field => true, ...]
      */
     public function errors()
     {
@@ -99,7 +117,10 @@ class Validator
     }
     
     /**
-     * Vérifier si un champ a une erreur
+     * Vérifie si un champ spécifique est en erreur
+     *
+     * @param string $field Nom du champ
+     * @return bool
      */
     public function hasError($field)
     {

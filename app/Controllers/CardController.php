@@ -8,10 +8,19 @@ require_once __DIR__ . '/../Models/Restaurant.php';
 require_once __DIR__ . '/../Helpers/Validator.php';
 require_once __DIR__ . '/../Models/Allergene.php';
 
+/**
+ * Contrôleur de gestion de la carte du restaurant
+ * Gère les deux modes de carte : "editable" (catégories/plats) et "images" (photos uploadées)
+ * Inclut le CRUD complet pour les catégories, plats, images et leurs fichiers associés
+ */
 class CardController extends BaseController
 {
+    /** @var Restaurant Modèle pour mettre à jour le timestamp du restaurant */
     private $restaurantModel;
 
+    /**
+     * @param PDO $pdo Connexion à la base de données
+     */
     public function __construct($pdo)
     {
         parent::__construct($pdo);
@@ -101,7 +110,14 @@ class CardController extends BaseController
     }
 
     /**
-     * Gère toutes les requêtes POST
+     * Dispatche les requêtes POST vers le bon handler selon le mode et l'action
+     *
+     * @param Admin     $adminModel      Modèle admin (changement de mode)
+     * @param Category  $categoryModel   Modèle catégories
+     * @param Dish      $dishModel       Modèle plats
+     * @param CardImage $carteImageModel Modèle images de carte
+     * @param int       $admin_id        ID de l'admin connecté
+     * @param string    $currentMode     Mode actuel ('editable' ou 'images')
      */
     private function handlePostRequest($adminModel, $categoryModel, $dishModel, $carteImageModel, $admin_id, $currentMode)
     {
@@ -130,6 +146,13 @@ class CardController extends BaseController
         $this->redirectToEditCard($anchor);
     }
 
+    /**
+     * Bascule entre les modes 'editable' et 'images'
+     *
+     * @param Admin  $adminModel Modèle admin
+     * @param int    $admin_id   ID de l'admin
+     * @param string $anchor     Ancre HTML pour le scroll
+     */
     private function handleChangeMode($adminModel, $admin_id, $anchor)
     {
         $newMode = $_POST['carte_mode'] ?? '';
@@ -144,6 +167,14 @@ class CardController extends BaseController
         $this->redirectToEditCard($anchor);
     }
 
+    /**
+     * Dispatche les actions du mode éditable (catégories et plats)
+     *
+     * @param Category $categoryModel Modèle catégories
+     * @param Dish     $dishModel     Modèle plats
+     * @param int      $admin_id      ID de l'admin
+     * @param string   $anchor        Ancre HTML pour le scroll
+     */
     private function handleEditableModeActions($categoryModel, $dishModel, $admin_id, $anchor)
     {
         error_log("Handling editable mode actions");
@@ -169,6 +200,13 @@ class CardController extends BaseController
         $this->redirectToEditCard($anchor);
     }
 
+    /**
+     * Dispatche les actions du mode images (upload, suppression, réorganisation)
+     *
+     * @param CardImage $carteImageModel Modèle images
+     * @param int       $admin_id        ID de l'admin
+     * @param string    $anchor          Ancre HTML pour le scroll
+     */
     private function handleImagesModeActions($carteImageModel, $admin_id, $anchor)
     {
         error_log("Handling images mode actions");
@@ -248,7 +286,10 @@ class CardController extends BaseController
     }
 
     /**
-     * Supprime un fichier physique - VERSION CORRIGÉE
+     * Supprime un fichier physique du serveur à partir de son chemin relatif
+     *
+     * @param string $filename Chemin relatif du fichier (ex: 'uploads/carte-images/xxx.jpg')
+     * @return bool true si supprimé ou inexistant, false si échec
      */
     private function deletePhysicalFile($filename)
     {
@@ -286,7 +327,11 @@ class CardController extends BaseController
     }
 
     /**
-     * Gestion de l'ajout de catégorie
+     * Crée une nouvelle catégorie avec image optionnelle
+     *
+     * @param Category $categoryModel Modèle catégories
+     * @param int      $admin_id      ID de l'admin
+     * @param string   $anchor        Ancre HTML pour le scroll
      */
     private function handleAddCategory($categoryModel, $admin_id, $anchor)
     {
@@ -329,7 +374,11 @@ class CardController extends BaseController
     }
 
     /**
-     * Gestion de la modification de catégorie
+     * Met à jour le nom et/ou l'image d'une catégorie existante
+     *
+     * @param Category $categoryModel Modèle catégories
+     * @param int      $admin_id      ID de l'admin
+     * @param string   $anchor        Ancre HTML pour le scroll
      */
     private function handleEditCategory($categoryModel, $admin_id, $anchor)
     {
@@ -377,7 +426,11 @@ class CardController extends BaseController
     }
 
     /**
-     * Gestion de la suppression de catégorie
+     * Supprime une catégorie et tous ses plats associés (cascade)
+     *
+     * @param Category $categoryModel Modèle catégories
+     * @param int      $admin_id      ID de l'admin
+     * @param string   $anchor        Ancre HTML pour le scroll
      */
     private function handleDeleteCategory($categoryModel, $admin_id, $anchor)
     {
@@ -437,7 +490,10 @@ class CardController extends BaseController
     }
 
     /**
-     * Gestion de l'ajout de plat
+     * Crée un nouveau plat avec image et allergènes optionnels
+     *
+     * @param Dish   $dishModel Modèle plats
+     * @param string $anchor    Ancre HTML pour le scroll
      */
     private function handleAddDish($dishModel, $anchor)
     {
@@ -496,7 +552,10 @@ class CardController extends BaseController
     }
 
     /**
-     * Gestion de la modification de plat
+     * Met à jour un plat existant (nom, prix, description, image, allergènes)
+     *
+     * @param Dish   $dishModel Modèle plats
+     * @param string $anchor    Ancre HTML pour le scroll
      */
     private function handleEditDish($dishModel, $anchor)
     {
@@ -567,7 +626,10 @@ class CardController extends BaseController
     }
 
     /**
-     * Gestion de la suppression de plat
+     * Supprime un plat et son fichier image associé
+     *
+     * @param Dish   $dishModel Modèle plats
+     * @param string $anchor    Ancre HTML pour le scroll
      */
     private function handleDeleteDish($dishModel, $anchor)
     {
@@ -602,7 +664,10 @@ class CardController extends BaseController
     }
 
     /**
-     * Gestion de la suppression d'image de plat
+     * Supprime uniquement l'image d'un plat sans supprimer le plat
+     *
+     * @param Dish   $dishModel Modèle plats
+     * @param string $anchor    Ancre HTML pour le scroll
      */
     private function handleRemoveDishImage($dishModel, $anchor)
     {
@@ -635,7 +700,11 @@ class CardController extends BaseController
     }
 
     /**
-     * Gestion de l'upload d'images
+     * Upload multiple d'images pour le mode carte images
+     *
+     * @param CardImage $carteImageModel Modèle images
+     * @param int       $admin_id        ID de l'admin
+     * @param string    $anchor          Ancre HTML pour le scroll
      */
     private function handleUploadImages($carteImageModel, $admin_id, $anchor)
     {
@@ -686,7 +755,11 @@ class CardController extends BaseController
     }
 
     /**
-     * Gestion de la réorganisation des images
+     * Met à jour l'ordre d'affichage des images (drag & drop)
+     *
+     * @param CardImage $carteImageModel Modèle images
+     * @param int       $admin_id        ID de l'admin
+     * @param string    $anchor          Ancre HTML pour le scroll
      */
     private function handleReorderImages($carteImageModel, $admin_id, $anchor)
     {
@@ -716,7 +789,15 @@ class CardController extends BaseController
     }
 
     /**
-     * Récupère les données pour le mode éditable
+     * Prépare les données pour la vue en mode éditable (catégories + plats + allergènes)
+     *
+     * @param int      $admin_id      ID de l'admin
+     * @param Category $categoryModel Modèle catégories
+     * @param Dish     $dishModel     Modèle plats
+     * @param array    $messages      Messages flash récupérés
+     * @param array    $error_fields  Champs en erreur pour la validation
+     * @param array    $old_input     Anciennes valeurs saisies
+     * @return array Données prêtes pour la vue
      */
     private function getEditableModeData($admin_id, $categoryModel, $dishModel, $messages, $error_fields, $old_input)
     {
@@ -756,7 +837,14 @@ class CardController extends BaseController
     }
 
     /**
-     * Récupère les données pour le mode images
+     * Prépare les données pour la vue en mode images
+     *
+     * @param int       $admin_id        ID de l'admin
+     * @param CardImage $carteImageModel Modèle images
+     * @param array     $messages        Messages flash récupérés
+     * @param array     $error_fields    Champs en erreur
+     * @param array     $old_input       Anciennes valeurs saisies
+     * @return array Données prêtes pour la vue
      */
     private function getImagesModeData($admin_id, $carteImageModel, $messages, $error_fields, $old_input)
     {
@@ -776,7 +864,9 @@ class CardController extends BaseController
     }
 
     /**
-     * Redirection vers la page d'édition
+     * Redirige vers ?page=edit-card avec ancre optionnelle et stoppe le script
+     *
+     * @param string $anchor Ancre HTML pour le scroll post-redirection
      */
     private function redirectToEditCard($anchor = '')
     {

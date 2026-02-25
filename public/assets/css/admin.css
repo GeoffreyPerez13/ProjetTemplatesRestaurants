@@ -1,12 +1,16 @@
-/* Ce fichier importe tous les modules CSS pour l'interface d'administration et l'affichage des vitrines */
+/* Ce fichier importe tous les modules CSS pour l'interface d'administration */
 
 /* ==================== ADMIN CSS PRINCIPAL ==================== */
+/* Variables partagées (charte graphique unifiée) */
+@import url("shared/_variables.css");
+
 /* CSS de base */
 @import url("admin/basis/base.css");
 @import url("admin/basis/buttons.css");
 @import url("admin/basis/components-selector-mode.css");
 @import url("admin/basis/footer.css");
 @import url("admin/basis/legals.css");
+@import url("admin/basis/demo-banner.css");
 
 /* Effets visuels */
 @import url("admin/effects/accordion.css");
@@ -49,6 +53,9 @@
 
 /* Section settings */
 @import url("admin/sections/settings/settings.css");
+
+/* Section edit-template */
+@import url("admin/sections/edit-template/edit-template.css");
 
 /* Section view-card */
 @import url("admin/sections/view-card/view-card.css");

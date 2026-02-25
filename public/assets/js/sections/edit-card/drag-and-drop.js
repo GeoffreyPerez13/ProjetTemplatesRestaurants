@@ -5,12 +5,7 @@
     // Variables d'état
     let isReorderMode = false;
     let isDragging = false;
-    let draggedElement = null;
-    let dragClone = null;
-    let placeholder = null;
-    let dragOffsetX = 0;
-    let dragOffsetY = 0;
-    let originalIndex = 0;
+    let sortableInstance = null;
     
     /**
      * Initialisation principale
@@ -24,20 +19,11 @@
         const imagesGrid = document.getElementById('sortable-images');
         if (!imagesGrid || imagesGrid.children.length === 0) return;
         
-        setupEventListeners();
-    }
-    
-    /**
-     * Vérifie si on est en mode images
-     */
-    function isImagesMode() {
-        return document.querySelector('.images-mode-container') !== null;
-    }
-    
-    /**
-     * Configure tous les écouteurs d'événements
-     */
-    function setupEventListeners() {
+        const reorderForm = document.getElementById('reorder-form');
+        if (reorderForm) {
+            reorderForm.addEventListener('submit', handleFormSubmit);
+        }
+        
         // Boutons de mode réorganisation
         const startReorderBtn = document.getElementById('start-reorder-btn');
         const saveOrderBtn = document.getElementById('save-order-btn');
@@ -49,15 +35,13 @@
         
         // Boutons Monter/Descendre
         document.addEventListener('click', handleMoveButtons);
-        
-        // Formulaire de réorganisation
-        const reorderForm = document.getElementById('reorder-form');
-        if (reorderForm) {
-            reorderForm.addEventListener('submit', handleFormSubmit);
-        }
-        
-        // Drag & drop manuel
-        setupDragEvents();
+    }
+    
+    /**
+     * Vérifie si on est en mode images
+     */
+    function isImagesMode() {
+        return document.querySelector('.images-mode-container') !== null;
     }
     
     /**
@@ -82,373 +66,6 @@
     }
     
     /**
-     * Configure les événements de drag
-     */
-    function setupDragEvents() {
-        const imagesGrid = document.getElementById('sortable-images');
-        if (!imagesGrid) return;
-        
-        // Événements pour desktop
-        imagesGrid.addEventListener('mousedown', startDrag);
-        
-        // Événements pour mobile
-        imagesGrid.addEventListener('touchstart', startDragTouch, { passive: false });
-        
-        // Empêcher le drag natif des images
-        document.addEventListener('dragstart', preventImageDrag);
-    }
-    
-    /**
-     * Empêche le drag natif des images
-     */
-    function preventImageDrag(e) {
-        if (e.target.tagName === 'IMG') e.preventDefault();
-    }
-    
-    /**
-     * Démarre le drag avec la souris
-     */
-    function startDrag(e) {
-        if (!isReorderMode || isDragging || !e.target.closest('.image-card')) return;
-        
-        const imageCard = e.target.closest('.image-card');
-        if (e.target.closest('button')) return;
-        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Calculer l'offset par rapport au coin supérieur gauche
-        const rect = imageCard.getBoundingClientRect();
-        dragOffsetX = e.clientX - rect.left;
-        dragOffsetY = e.clientY - rect.top;
-        
-        beginDrag(imageCard, e.clientX, e.clientY);
-        
-        // Ajouter les événements globaux
-        document.addEventListener('mousemove', handleDragMove);
-        document.addEventListener('mouseup', handleDragEnd);
-    }
-    
-    /**
-     * Démarre le drag avec le touch
-     */
-    function startDragTouch(e) {
-        if (!isReorderMode || isDragging || !e.target.closest('.image-card')) return;
-        
-        const imageCard = e.target.closest('.image-card');
-        if (e.target.closest('button')) return;
-        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const touch = e.touches[0];
-        const rect = imageCard.getBoundingClientRect();
-        dragOffsetX = touch.clientX - rect.left;
-        dragOffsetY = touch.clientY - rect.top;
-        
-        beginDrag(imageCard, touch.clientX, touch.clientY);
-        
-        // Ajouter les événements pour touch
-        document.addEventListener('touchmove', handleDragMoveTouch, { passive: false });
-        document.addEventListener('touchend', handleDragEndTouch);
-    }
-    
-    /**
-     * Commence le processus de drag
-     */
-    function beginDrag(element, clientX, clientY) {
-        isDragging = true;
-        draggedElement = element;
-        
-        // Stocker l'index original
-        const imagesGrid = element.parentElement;
-        originalIndex = Array.from(imagesGrid.children).indexOf(element);
-        
-        // Créer le placeholder
-        createPlaceholder();
-        
-        // Créer le clone pour le drag
-        createDragClone(clientX, clientY);
-        
-        // Cacher l'élément original
-        element.style.opacity = '0';
-        element.style.pointerEvents = 'none';
-        
-        // Désactiver les boutons
-        disableAllControls();
-    }
-    
-    /**
-     * Crée le clone pour le drag
-     */
-    function createDragClone(clientX, clientY) {
-        const rect = draggedElement.getBoundingClientRect();
-        
-        // Cloner l'élément
-        dragClone = draggedElement.cloneNode(true);
-        dragClone.id = 'drag-clone';
-        dragClone.classList.add('drag-clone-active');
-        
-        // Style du clone
-        dragClone.style.cssText = `
-            position: fixed;
-            left: ${clientX - dragOffsetX}px;
-            top: ${clientY - dragOffsetY}px;
-            width: ${rect.width}px;
-            height: ${rect.height}px;
-            z-index: 9999;
-            opacity: 0.95;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-            transform: rotate(2deg);
-            pointer-events: none;
-            cursor: grabbing;
-            margin: 0;
-            transition: none;
-        `;
-        
-        // Supprimer les boutons du clone
-        const buttons = dragClone.querySelectorAll('button');
-        buttons.forEach(btn => btn.remove());
-        
-        document.body.appendChild(dragClone);
-    }
-    
-    /**
-     * Crée le placeholder
-     */
-    function createPlaceholder() {
-        placeholder = document.createElement('div');
-        placeholder.className = 'drag-placeholder';
-        placeholder.style.cssText = `
-            height: ${draggedElement.offsetHeight}px;
-            margin: 10px 0;
-            background: rgba(52, 152, 219, 0.1);
-            border: 2px dashed #3498db;
-            border-radius: 12px;
-            transition: all 0.2s ease;
-        `;
-        
-        const imagesGrid = draggedElement.parentElement;
-        imagesGrid.insertBefore(placeholder, draggedElement);
-    }
-    
-    /**
-     * Gère le mouvement du drag (souris)
-     */
-    function handleDragMove(e) {
-        if (!isDragging || !dragClone) return;
-        e.preventDefault();
-        
-        // Mettre à jour la position du clone
-        dragClone.style.left = `${e.clientX - dragOffsetX}px`;
-        dragClone.style.top = `${e.clientY - dragOffsetY}px`;
-        
-        // Mettre à jour la position du placeholder
-        updatePlaceholderPosition(e.clientY);
-    }
-    
-    /**
-     * Gère le mouvement du drag (touch)
-     */
-    function handleDragMoveTouch(e) {
-        if (!isDragging || !dragClone) return;
-        e.preventDefault();
-        
-        const touch = e.touches[0];
-        
-        // Mettre à jour la position du clone
-        dragClone.style.left = `${touch.clientX - dragOffsetX}px`;
-        dragClone.style.top = `${touch.clientY - dragOffsetY}px`;
-        
-        // Mettre à jour la position du placeholder
-        updatePlaceholderPosition(touch.clientY);
-    }
-    
-    /**
-     * Met à jour la position du placeholder
-     */
-    function updatePlaceholderPosition(clientY) {
-        if (!placeholder || !draggedElement) return;
-        
-        const imagesGrid = placeholder.parentElement;
-        const allCards = Array.from(imagesGrid.children)
-            .filter(child => child !== placeholder && child !== draggedElement);
-        
-        // Trouver la position d'insertion
-        let insertIndex = 0;
-        
-        for (let i = 0; i < allCards.length; i++) {
-            const card = allCards[i];
-            const rect = card.getBoundingClientRect();
-            const cardCenter = rect.top + (rect.height / 2);
-            
-            if (clientY < cardCenter) {
-                insertIndex = i;
-                break;
-            }
-        }
-        
-        // Si pas trouvé ou dépassement
-        if (insertIndex >= allCards.length) {
-            insertIndex = allCards.length;
-        }
-        
-        // Déplacer le placeholder si nécessaire
-        const targetCard = allCards[insertIndex];
-        const currentIndex = Array.from(imagesGrid.children).indexOf(placeholder);
-        
-        if (currentIndex !== insertIndex) {
-            if (targetCard) {
-                imagesGrid.insertBefore(placeholder, targetCard);
-            } else {
-                imagesGrid.appendChild(placeholder);
-            }
-            
-            // Animation des cartes environnantes
-            animateSurroundingCards(insertIndex);
-        }
-    }
-    
-    /**
-     * Anime les cartes autour du placeholder
-     */
-    function animateSurroundingCards(insertIndex) {
-        const imagesGrid = placeholder.parentElement;
-        const cards = Array.from(imagesGrid.children)
-            .filter(child => child !== placeholder && child !== draggedElement);
-        
-        // Réinitialiser les animations
-        cards.forEach(card => {
-            card.classList.remove('card-shift-up', 'card-shift-down');
-        });
-        
-        // Appliquer les animations
-        cards.forEach((card, index) => {
-            if (index >= insertIndex) {
-                card.classList.add('card-shift-down');
-            } else {
-                card.classList.add('card-shift-up');
-            }
-        });
-    }
-    
-    /**
-     * Termine le drag (souris)
-     */
-    function handleDragEnd(e) {
-        if (!isDragging) return;
-        
-        document.removeEventListener('mousemove', handleDragMove);
-        document.removeEventListener('mouseup', handleDragEnd);
-        
-        finishDrag();
-    }
-    
-    /**
-     * Termine le drag (touch)
-     */
-    function handleDragEndTouch(e) {
-        if (!isDragging) return;
-        
-        document.removeEventListener('touchmove', handleDragMoveTouch);
-        document.removeEventListener('touchend', handleDragEndTouch);
-        
-        finishDrag();
-    }
-    
-    /**
-     * Termine le processus de drag
-     */
-    function finishDrag() {
-        if (!draggedElement || !placeholder || !dragClone) return;
-        
-        const imagesGrid = draggedElement.parentElement;
-        const newIndex = Array.from(imagesGrid.children).indexOf(placeholder);
-        
-        // Animer le clone vers la position finale
-        const placeholderRect = placeholder.getBoundingClientRect();
-        
-        dragClone.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-        dragClone.style.left = `${placeholderRect.left}px`;
-        dragClone.style.top = `${placeholderRect.top}px`;
-        dragClone.style.transform = 'rotate(0deg)';
-        dragClone.style.opacity = '0.7';
-        
-        setTimeout(() => {
-            // Réinsérer l'élément à la nouvelle position
-            imagesGrid.insertBefore(draggedElement, placeholder);
-            
-            // Restaurer l'élément original
-            draggedElement.style.opacity = '1';
-            draggedElement.style.pointerEvents = '';
-            
-            // Supprimer le clone
-            if (dragClone.parentNode) {
-                dragClone.parentNode.removeChild(dragClone);
-            }
-            
-            // Supprimer le placeholder
-            if (placeholder.parentNode) {
-                placeholder.parentNode.removeChild(placeholder);
-            }
-            
-            // Réinitialiser les animations des cartes
-            const cards = imagesGrid.querySelectorAll('.image-card');
-            cards.forEach(card => {
-                card.classList.remove('card-shift-up', 'card-shift-down');
-                card.style.transform = '';
-            });
-            
-            // Mettre à jour l'interface
-            updatePositionNumbers();
-            updateOrderInput();
-            updateMoveButtonsVisibility();
-            
-            // Feedback si la position a changé
-            if (newIndex !== originalIndex) {
-                const imageName = draggedElement.querySelector('.image-name')?.textContent || 'Image';
-                const position = newIndex + 1;
-                showFeedback(`"${imageName}" déplacé à la position ${position}`, 'success');
-            }
-            
-            // Nettoyer
-            cleanupDrag();
-        }, 300);
-    }
-    
-    /**
-     * Nettoie après le drag
-     */
-    function cleanupDrag() {
-        isDragging = false;
-        draggedElement = null;
-        dragClone = null;
-        placeholder = null;
-        
-        enableAllControls();
-    }
-    
-    /**
-     * Désactive tous les contrôles pendant le drag
-     */
-    function disableAllControls() {
-        document.querySelectorAll('.move-up, .move-down').forEach(btn => {
-            btn.style.opacity = '0.5';
-            btn.style.pointerEvents = 'none';
-        });
-    }
-    
-    /**
-     * Réactive tous les contrôles
-     */
-    function enableAllControls() {
-        document.querySelectorAll('.move-up, .move-down').forEach(btn => {
-            btn.style.opacity = '';
-            btn.style.pointerEvents = '';
-        });
-    }
-    
-    /**
      * Active le mode de réorganisation
      */
     function enableReorderMode() {
@@ -459,10 +76,72 @@
         // Afficher l'interface
         showReorderInterface();
         
+        // Initialiser Sortable.js pour le drag & drop
+        initSortable();
+        
         // Mettre à jour les numéros
         updatePositionNumbers();
         
         showFeedback('Mode réorganisation activé. Glissez une image pour la déplacer.', 'info');
+    }
+    
+    /**
+     * Désactive le mode de réorganisation
+     */
+    function disableReorderMode() {
+        if (!isReorderMode || isDragging) return;
+        
+        isReorderMode = false;
+        
+        destroySortable();
+        hideReorderInterface();
+        showFeedback('Réorganisation annulée', 'warning');
+    }
+    
+    /**
+     * Initialise Sortable.js sur la grille d'images
+     */
+    function initSortable() {
+        const imagesGrid = document.getElementById('sortable-images');
+        if (!imagesGrid || sortableInstance) return;
+        
+        sortableInstance = new Sortable(imagesGrid, {
+            animation: 250,
+            easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+            ghostClass: 'drag-placeholder',
+            chosenClass: 'dragging',
+            dragClass: 'drag-clone-active',
+            filter: 'button, .btn, a, input',
+            preventOnFilter: false,
+            forceFallback: true,
+            fallbackOnBody: true,
+            fallbackTolerance: 3,
+            swapThreshold: 0.5,
+            onStart: function() {
+                isDragging = true;
+            },
+            onEnd: function(evt) {
+                isDragging = false;
+                
+                updatePositionNumbers();
+                updateOrderInput();
+                updateMoveButtonsVisibility();
+                
+                if (evt.oldIndex !== evt.newIndex) {
+                    showFeedback('Image déplacée à la position ' + (evt.newIndex + 1), 'success');
+                }
+            }
+        });
+    }
+    
+    /**
+     * Détruit l'instance Sortable
+     */
+    function destroySortable() {
+        if (sortableInstance) {
+            sortableInstance.destroy();
+            sortableInstance = null;
+        }
     }
     
     /**
@@ -485,18 +164,6 @@
         });
         
         updateMoveButtonsVisibility();
-    }
-    
-    /**
-     * Désactive le mode de réorganisation
-     */
-    function disableReorderMode() {
-        if (!isReorderMode || isDragging) return;
-        
-        isReorderMode = false;
-        
-        hideReorderInterface();
-        showFeedback('Réorganisation annulée', 'warning');
     }
     
     /**

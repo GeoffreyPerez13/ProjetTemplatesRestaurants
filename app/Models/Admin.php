@@ -2,27 +2,42 @@
 
 require_once __DIR__ . '/../Helpers/Mailer.php';
 
-// Classe Admin : gère la logique des administrateurs et des invitations
+/**
+ * Modèle Admin : gestion des administrateurs, invitations et authentification
+ * Représente un enregistrement de la table `admins`
+ */
 class Admin
 {
-    // Connexion PDO à la base de données
+    /** @var PDO Connexion à la base de données */
     private $pdo;
 
+    /** @var Mailer Service d'envoi d'emails */
     private $mailer;
 
-    // Propriétés publiques représentant un administrateur
+    /** @var int|null Identifiant unique de l'admin */
     public $id;
+    /** @var string|null Nom d'utilisateur (unique) */
     public $username;
+    /** @var string|null Adresse email */
     public $email;
+    /** @var string|null Mot de passe hashé (bcrypt) */
     public $password;
+    /** @var string Rôle : 'SUPER_ADMIN' ou 'ADMIN' */
     public $role;
+    /** @var string|null Nom du restaurant associé */
     public $restaurant_name;
+    /** @var int|null FK vers restaurants.id */
     public $restaurant_id;
+    /** @var string Mode de carte : 'editable' ou 'images' */
     public $carte_mode;
+    /** @var string|null Token de réinitialisation de mot de passe */
     public $reset_token;
+    /** @var string|null Date d'expiration du token de reset */
     public $reset_token_expiry;
 
-    // Constructeur : initialise la connexion PDO
+    /**
+     * @param PDO $pdo Connexion à la base de données
+     */
     public function __construct($pdo)
     {
         $this->pdo = $pdo;
@@ -31,8 +46,14 @@ class Admin
 
     // --- INVITATIONS ---
 
-    // Crée une invitation pour un nouvel administrateur
-    // Envoie ensuite un mail avec le lien d'inscription
+    /**
+     * Crée une invitation et envoie le lien d'inscription par email
+     *
+     * @param string $email          Email du destinataire
+     * @param string $restaurantName Nom du restaurant à créer
+     * @param string $token          Token unique d'invitation
+     * @return bool Succès de l'envoi
+     */
     public function createInvitation($email, $restaurantName, $token)
     {
         $expiry = date('Y-m-d H:i:s', strtotime('+24 hours'));
@@ -73,7 +94,12 @@ class Admin
         }
     }
 
-    // Récupère une invitation valide non utilisée par token
+    /**
+     * Récupère une invitation non utilisée par son token
+     *
+     * @param string $token Token d'invitation
+     * @return object|false Invitation ou false si introuvable
+     */
     public function getInvitation($token)
     {
         $sql = "SELECT * FROM invitations WHERE token = ? AND used = 0";
@@ -85,6 +111,15 @@ class Admin
 
     // --- GESTION DES COMPTES ---
 
+    /**
+     * Crée un compte admin à partir d'une invitation (transaction)
+     * Crée aussi le restaurant et les options par défaut
+     *
+     * @param object $invitation Invitation validée
+     * @param string $username   Nom d'utilisateur choisi
+     * @param string $password   Mot de passe en clair (sera hashé)
+     * @return bool Succès de la création
+     */
     public function createAccount($invitation, $username, $password)
     {
         try {
@@ -162,7 +197,12 @@ class Admin
         }
     }
 
-    // Ajoutez cette méthode pour créer les options par défaut
+    /**
+     * Initialise les options par défaut pour un nouvel admin
+     *
+     * @param int $adminId ID du nouvel admin
+     * @return bool Succès
+     */
     private function createDefaultOptions($adminId)
     {
         // Définir les options par défaut selon vos préférences
@@ -192,6 +232,12 @@ class Admin
         }
     }
 
+    /**
+     * Génère un slug URL-friendly unique à partir du nom du restaurant
+     *
+     * @param string $name Nom du restaurant
+     * @return string Slug unique (ex: 'mon-restaurant-2')
+     */
     private function generateSlug($name)
     {
         // Remplace les caractères spéciaux
@@ -213,7 +259,10 @@ class Admin
         return $slug;
     }
 
-    // Vérifie si un slug existe déjà
+    /**
+     * @param string $slug Slug à vérifier
+     * @return bool true si le slug existe déjà en BDD
+     */
     private function slugExists($slug)
     {
         $stmt = $this->pdo->prepare("SELECT id FROM restaurants WHERE slug = ?");
@@ -221,6 +270,12 @@ class Admin
         return $stmt->fetch() !== false;
     }
 
+    /**
+     * Récupère le mode de carte de l'admin ('editable' ou 'images')
+     *
+     * @param int $adminId ID de l'admin
+     * @return string Mode de carte
+     */
     public function getCarteMode($adminId)
     {
         $stmt = $this->pdo->prepare("SELECT carte_mode FROM admins WHERE id = ?");
@@ -229,6 +284,13 @@ class Admin
         return $result['carte_mode'] ?? 'editable';
     }
 
+    /**
+     * Met à jour le mode de carte de l'admin
+     *
+     * @param int    $adminId ID de l'admin
+     * @param string $mode    'editable' ou 'images'
+     * @return bool Succès
+     */
     public function updateCarteMode($adminId, $mode)
     {
         $stmt = $this->pdo->prepare("UPDATE admins SET carte_mode = ? WHERE id = ?");
@@ -237,7 +299,10 @@ class Admin
 
     // --- RECHERCHES / LOGIN ---
 
-    // Trouver un admin par username
+    /**
+     * @param string $username Nom d'utilisateur
+     * @return self|null L'admin trouvé ou null
+     */
     public function findByUsername($username)
     {
         $stmt = $this->pdo->prepare("SELECT * FROM admins WHERE username = ?");
@@ -250,7 +315,10 @@ class Admin
         return null;
     }
 
-    // Trouver un admin par ID
+    /**
+     * @param int $id ID de l'admin
+     * @return self|null L'admin trouvé ou null
+     */
     public function findById($id)
     {
         $stmt = $this->pdo->prepare("SELECT * FROM admins WHERE id = ?");
@@ -263,7 +331,10 @@ class Admin
         return null;
     }
 
-    // Trouver un admin par restaurant_id
+    /**
+     * @param int $restaurantId ID du restaurant
+     * @return self|null L'admin trouvé ou null
+     */
     public function findByRestaurantId($restaurantId)
     {
         $stmt = $this->pdo->prepare("SELECT * FROM admins WHERE restaurant_id = ? LIMIT 1");
@@ -276,13 +347,24 @@ class Admin
         return null;
     }
 
-    // Vérifie si le mot de passe fourni correspond au hash stocké
+    /**
+     * Vérifie un mot de passe en clair contre le hash stocké
+     *
+     * @param string $password Mot de passe en clair
+     * @return bool true si le mot de passe correspond
+     */
     public function verifyPassword($password)
     {
         return password_verify($password, $this->password);
     }
 
-    // Login : retourne l'admin si les identifiants sont corrects
+    /**
+     * Authentifie un admin par username + mot de passe
+     *
+     * @param string $username Nom d'utilisateur
+     * @param string $password Mot de passe en clair
+     * @return self|null L'admin authentifié ou null
+     */
     public function login($username, $password)
     {
         $admin = $this->findByUsername($username);
@@ -292,7 +374,15 @@ class Admin
         return null;
     }
 
-    // Création d’un nouvel admin (SUPER_ADMIN ou ADMIN)
+    /**
+     * Crée un nouvel admin directement (sans invitation)
+     *
+     * @param string $username        Nom d'utilisateur
+     * @param string $password        Mot de passe en clair
+     * @param string $role            'SUPER_ADMIN' ou 'ADMIN'
+     * @param string $restaurant_name Nom du restaurant
+     * @return self L'admin créé
+     */
     public function create($username, $password, $role, $restaurant_name)
     {
         $hash = password_hash($password, PASSWORD_DEFAULT);
@@ -308,7 +398,11 @@ class Admin
         return $this;
     }
 
-    // Remplit les propriétés de l'objet à partir d'un tableau de données
+    /**
+     * Hydrate les propriétés de l'objet depuis un tableau associatif (row BDD)
+     *
+     * @param array $data Ligne de la table admins
+     */
     private function fill($data)
     {
         $this->id = $data['id'];
@@ -325,7 +419,12 @@ class Admin
 
     // --- RÉINITIALISATION DE MOT DE PASSE ---
 
-    // Demande de réinitialisation : génère un token et envoie le lien par mail
+    /**
+     * Génère un token de réinitialisation et envoie le lien par email
+     *
+     * @param string $email Email de l'admin
+     * @return bool true si le processus a réussi (même si l'email n'existe pas, pour sécurité)
+     */
     public function requestPasswordReset($email)
     {
         error_log("[DEBUG] Tentative de réinitialisation pour email: " . $email);
@@ -361,7 +460,13 @@ class Admin
         return false;
     }
 
-    // Réinitialisation du mot de passe avec le token
+    /**
+     * Réinitialise le mot de passe via un token valide et non expiré
+     *
+     * @param string $token       Token de réinitialisation
+     * @param string $newPassword Nouveau mot de passe en clair
+     * @return bool Succès de la réinitialisation
+     */
     public function resetPassword($token, $newPassword)
     {
         $sql = "SELECT id, reset_token_expiry FROM admins WHERE reset_token = ?";

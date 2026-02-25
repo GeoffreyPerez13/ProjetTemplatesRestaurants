@@ -2,8 +2,16 @@
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../Helpers/Validator.php';
 
+/**
+ * Contrôleur des paramètres de l'administrateur
+ * Gère le profil, le mot de passe, les options (site online, rappels, notifications),
+ * la suppression de compte et la sélection de template
+ */
 class SettingsController extends BaseController
 {
+    /**
+     * Affiche la page des paramètres avec la section demandée (?section=profile|password|options|account)
+     */
     public function show()
     {
         $this->requireLogin();
@@ -54,9 +62,14 @@ class SettingsController extends BaseController
         ]);
     }
 
+    /**
+     * Met à jour le profil admin (username, email, nom du restaurant)
+     * Vérifie l'unicité de l'email et du username avant mise à jour
+     */
     public function updateProfile()
     {
         $this->requireLogin();
+        $this->blockIfDemo("La modification du profil n'est pas disponible en mode démonstration.");
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Validation CSRF
@@ -160,9 +173,14 @@ class SettingsController extends BaseController
         }
     }
 
+    /**
+     * Change le mot de passe de l'admin
+     * Vérifie l'ancien mot de passe et valide le nouveau via Validator
+     */
     public function changePassword()
     {
         $this->requireLogin();
+        $this->blockIfDemo("Le changement de mot de passe n'est pas disponible en mode démonstration.");
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Validation CSRF
@@ -249,6 +267,12 @@ class SettingsController extends BaseController
         }
     }
 
+    /**
+     * Récupère les informations complètes de l'admin connecté
+     * Inclut la date de dernière modification de la carte (plats/catégories)
+     *
+     * @return array Données admin avec 'last_card_update'
+     */
     private function getCurrentUser()
     {
         // Récupérer les informations de base de l'admin
@@ -301,7 +325,12 @@ class SettingsController extends BaseController
         return $admin;
     }
 
-    // Méthode pour récupérer les options de l'utilisateur
+    /**
+     * Récupère toutes les options d'un admin depuis admin_options
+     *
+     * @param int $admin_id ID de l'admin
+     * @return array Tableau clé/valeur des options
+     */
     private function getUserOptions($admin_id)
     {
         try {
@@ -326,6 +355,10 @@ class SettingsController extends BaseController
         }
     }
 
+    /**
+     * Endpoint JSON : retourne les options de l'admin connecté
+     * Utilisé par les appels AJAX depuis la page paramètres
+     */
     public function getOptions()
     {
         $this->requireLogin();
@@ -365,6 +398,10 @@ class SettingsController extends BaseController
         }
     }
 
+    /**
+     * Sauvegarde un lot d'options (site_online, mail_reminder, email_notifications)
+     * Supporte les requêtes AJAX et classiques (POST)
+     */
     public function saveOptionsBatch()
     {
         $this->requireLogin();
@@ -464,17 +501,25 @@ class SettingsController extends BaseController
         }
     }
 
-    // Ajoutez cette méthode pour détecter les requêtes AJAX
+    /**
+     * Détecte si la requête courante est une requête AJAX (XMLHttpRequest)
+     *
+     * @return bool true si requête AJAX
+     */
     private function isAjaxRequest()
     {
         return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
             strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 
-    // Méthode pour gérer la suppression de compte
+    /**
+     * Supprime le compte admin et toutes ses données associées
+     * Requiert le mot de passe et la saisie de "SUPPRIMER" comme confirmation
+     */
     public function deleteAccount()
     {
         $this->requireLogin();
+        $this->blockIfDemo("La suppression de compte n'est pas disponible en mode démonstration.");
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Validation CSRF
@@ -565,5 +610,76 @@ class SettingsController extends BaseController
                 exit;
             }
         }
+    }
+
+    /**
+     * Affiche la page de sélection de template
+     */
+    public function showTemplates()
+    {
+        $this->requireLogin();
+        $adminId = $_SESSION['admin_id'];
+
+        require_once __DIR__ . '/../Models/OptionModel.php';
+        $optionModel = new OptionModel($this->pdo);
+        $currentTemplate = $optionModel->get($adminId, 'site_template') ?: 'classic';
+
+        // Récupérer le slug pour le lien de preview
+        $slug = '';
+        $stmt = $this->pdo->prepare("
+            SELECT r.slug FROM restaurants r 
+            JOIN admins a ON a.restaurant_id = r.id 
+            WHERE a.id = ?
+        ");
+        $stmt->execute([$adminId]);
+        $slug = $stmt->fetchColumn() ?: '';
+
+        $messages = $this->getFlashMessages();
+
+        $this->render('admin/edit-template', [
+            'title' => 'Choisir un template',
+            'currentTemplate' => $currentTemplate,
+            'slug' => $slug,
+            'csrf_token' => $this->getCsrfToken(),
+            'success_message' => $messages['success_message'],
+            'error_message' => $messages['error_message'],
+        ]);
+    }
+
+    /**
+     * Sauvegarde le choix de template
+     */
+    public function saveTemplate()
+    {
+        $this->requireLogin();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?page=edit-template');
+            exit;
+        }
+
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            $this->addErrorMessage('Token CSRF invalide.');
+            header('Location: ?page=edit-template');
+            exit;
+        }
+
+        $template = $_POST['template'] ?? 'classic';
+        $allowed = ['classic', 'modern', 'elegant', 'nature', 'rose'];
+
+        if (!in_array($template, $allowed)) {
+            $this->addErrorMessage('Template invalide.');
+            header('Location: ?page=edit-template');
+            exit;
+        }
+
+        require_once __DIR__ . '/../Models/OptionModel.php';
+        $optionModel = new OptionModel($this->pdo);
+        $optionModel->set($_SESSION['admin_id'], 'site_template', $template);
+
+        $names = ['classic' => 'Classique', 'modern' => 'Moderne', 'elegant' => 'Élégant', 'nature' => 'Nature', 'rose' => 'Rosé'];
+        $this->addSuccessMessage('Template "' . $names[$template] . '" appliqué avec succès !');
+        header('Location: ?page=edit-template');
+        exit;
     }
 }

@@ -1,15 +1,27 @@
 <?php
+
+/**
+ * Modèle OptionModel : gestion des options clé/valeur dans `admin_options`
+ * Utilisé pour les services, paiements, réseaux sociaux, template, site_online, etc.
+ */
 class OptionModel
 {
+    /** @var PDO Connexion à la base de données */
     private $pdo;
 
+    /**
+     * @param PDO $pdo Connexion à la base de données
+     */
     public function __construct($pdo)
     {
         $this->pdo = $pdo;
     }
 
     /**
-     * Récupère toutes les options d'un admin
+     * Récupère toutes les options d'un admin sous forme clé/valeur
+     *
+     * @param int $admin_id ID de l'admin
+     * @return array Tableau associatif [option_name => option_value]
      */
     public function getAll($admin_id)
     {
@@ -24,7 +36,11 @@ class OptionModel
     }
 
     /**
-     * Récupère une option spécifique
+     * Récupère la valeur d'une option spécifique
+     *
+     * @param int    $admin_id    ID de l'admin
+     * @param string $option_name Nom de l'option
+     * @return string|false Valeur de l'option ou false si inexistante
      */
     public function get($admin_id, $option_name)
     {
@@ -34,7 +50,12 @@ class OptionModel
     }
 
     /**
-     * Enregistre ou met à jour une option
+     * Insère ou met à jour une option (INSERT ... ON DUPLICATE KEY UPDATE)
+     *
+     * @param int    $admin_id     ID de l'admin
+     * @param string $option_name  Nom de l'option
+     * @param string $option_value Valeur à enregistrer
+     * @return bool Succès
      */
     public function set($admin_id, $option_name, $option_value)
     {
@@ -48,6 +69,10 @@ class OptionModel
 
     /**
      * Supprime une option
+     *
+     * @param int    $admin_id    ID de l'admin
+     * @param string $option_name Nom de l'option à supprimer
+     * @return bool Succès
      */
     public function delete($admin_id, $option_name)
     {

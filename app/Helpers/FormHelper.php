@@ -1,10 +1,19 @@
 <?php
 
-/* Génère des champs de formulaire HTML */
+/**
+ * Helper de génération de champs de formulaire HTML
+ * Gère automatiquement la préservation des valeurs POST et l'affichage des erreurs
+ */
 class FormHelper
 {
     /**
-     * Génère un champ input avec gestion d'erreurs et de valeurs préservées
+     * Génère un champ input avec label, gestion des erreurs et valeurs préservées
+     *
+     * @param string $name       Nom du champ (attribut name)
+     * @param string $label      Libellé du champ (optionnel)
+     * @param array  $attributes Attributs HTML (type, class, value, placeholder...)
+     * @param array  $errors     Tableau d'erreurs [field => message]
+     * @return string HTML généré
      */
     public static function input($name, $label = '', $attributes = [], $errors = [])
     {
@@ -55,7 +64,13 @@ class FormHelper
     }
     
     /**
-     * Génère un champ textarea avec gestion d'erreurs
+     * Génère un champ textarea avec label et gestion des erreurs
+     *
+     * @param string $name       Nom du champ
+     * @param string $label      Libellé du champ (optionnel)
+     * @param array  $attributes Attributs HTML (class, rows, value...)
+     * @param array  $errors     Tableau d'erreurs [field => message]
+     * @return string HTML généré
      */
     public static function textarea($name, $label = '', $attributes = [], $errors = [])
     {
@@ -103,7 +118,14 @@ class FormHelper
     }
     
     /**
-     * Génère un champ select
+     * Génère un champ select avec options et gestion des erreurs
+     *
+     * @param string $name       Nom du champ
+     * @param string $label      Libellé du champ (optionnel)
+     * @param array  $options    Options [value => text]
+     * @param array  $attributes Attributs HTML (class, selected...)
+     * @param array  $errors     Tableau d'erreurs [field => message]
+     * @return string HTML généré
      */
     public static function select($name, $label = '', $options = [], $attributes = [], $errors = [])
     {
@@ -159,6 +181,10 @@ class FormHelper
     
     /**
      * Vérifie si un champ a une erreur
+     *
+     * @param string $name   Nom du champ
+     * @param array  $errors Tableau d'erreurs
+     * @return bool
      */
     public static function hasError($name, $errors)
     {
@@ -166,7 +192,11 @@ class FormHelper
     }
     
     /**
-     * Obtient le message d'erreur d'un champ
+     * Récupère le message d'erreur d'un champ
+     *
+     * @param string $name   Nom du champ
+     * @param array  $errors Tableau d'erreurs
+     * @return string Message d'erreur ou chaîne vide
      */
     public static function getError($name, $errors)
     {

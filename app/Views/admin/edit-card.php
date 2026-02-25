@@ -48,7 +48,7 @@ require __DIR__ . '/../partials/header.php';
     <?php endif; ?>
 </script>
 
-<a class="btn-back" href="?page=dashboard">Retour au dashboard</a>
+<a class="btn-back" href="?page=dashboard">Retour</a>
 
 <!-- Boutons de navigation haut/bas (alignés à droite) -->
 <div class="page-navigation-buttons">

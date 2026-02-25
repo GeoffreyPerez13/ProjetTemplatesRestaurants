@@ -1,23 +1,38 @@
 <?php
-// Classe Category : gère les catégories de plats pour un restaurant/admin
+/**
+ * Modèle Category : CRUD des catégories de plats
+ * Chaque catégorie appartient à un admin et peut contenir des plats
+ */
 class Category
 {
-    // Connexion PDO à la base de données
+    /** @var PDO Connexion à la base de données */
     private $pdo;
 
-    // Propriétés publiques représentant une catégorie
+    /** @var int|null ID de la catégorie */
     public $id;
+    /** @var int|null ID de l'admin propriétaire */
     public $admin_id;
+    /** @var string|null Nom de la catégorie */
     public $name;
+    /** @var string|null Chemin relatif de l'image (ex: 'uploads/categories/cat_xxx.jpg') */
     public $image;
 
-    // Constructeur : initialise la connexion PDO
+    /**
+     * @param PDO $pdo Connexion à la base de données
+     */
     public function __construct($pdo)
     {
         $this->pdo = $pdo;
     }
 
-    // --- Création d'une catégorie ---
+    /**
+     * Crée une nouvelle catégorie
+     *
+     * @param int         $admin_id ID de l'admin
+     * @param string      $name     Nom de la catégorie
+     * @param string|null $image    Chemin de l'image (optionnel)
+     * @return self
+     */
     public function create($admin_id, $name, $image = null)
     {
         $stmt = $this->pdo->prepare(
@@ -33,7 +48,13 @@ class Category
         return $this;
     }
 
-    // --- Upload d'image pour catégorie ---
+    /**
+     * Upload et valide une image de catégorie (max 2MB, JPEG/PNG/GIF/WebP)
+     *
+     * @param array $file Fichier $_FILES
+     * @return string Chemin relatif de l'image uploadée
+     * @throws Exception Si validation ou déplacement échoue
+     */
     public function uploadImage($file)
     {
         if ($file['error'] !== UPLOAD_ERR_OK) {
@@ -73,7 +94,11 @@ class Category
         return 'uploads/categories/' . $filename;
     }
 
-    // --- Suppression d'image ---
+    /**
+     * Supprime le fichier image physique du serveur
+     *
+     * @param string|null $imagePath Chemin relatif de l'image
+     */
     public function deleteImage($imagePath)
     {
         if ($imagePath && file_exists(__DIR__ . '/../../public/' . $imagePath)) {
@@ -81,7 +106,15 @@ class Category
         }
     }
 
-    // --- Mise à jour d'une catégorie ---
+    /**
+     * Met à jour une catégorie (nom et/ou image)
+     * Si $image est '' : supprime l'image ; si null : conserve l'existante
+     *
+     * @param int         $id    ID de la catégorie
+     * @param string      $name  Nouveau nom
+     * @param string|null $image Nouveau chemin image, '' pour supprimer, null pour garder
+     * @return bool Succès
+     */
     public function update($id, $name, $image = null)
     {
         if ($image === '') {
@@ -105,7 +138,12 @@ class Category
         }
     }
 
-    // --- Récupérer toutes les catégories d'un admin (back-office) ---
+    /**
+     * Récupère toutes les catégories d'un admin (back-office)
+     *
+     * @param int $admin_id ID de l'admin
+     * @return array Liste des catégories
+     */
     public function getAllByAdmin($admin_id)
     {
         $stmt = $this->pdo->prepare(
@@ -115,7 +153,13 @@ class Category
         return $stmt->fetchAll(); // Retourne un tableau associatif
     }
 
-    // --- Récupérer une catégorie par son ID ---
+    /**
+     * Récupère une catégorie par son ID, avec vérification optionnelle du propriétaire
+     *
+     * @param int      $id       ID de la catégorie
+     * @param int|null $admin_id ID de l'admin (si fourni, vérifie l'appartenance)
+     * @return array|null Données de la catégorie ou null
+     */
     public function getById($id, $admin_id = null)
     {
         if ($admin_id) {
@@ -144,7 +188,13 @@ class Category
         return null;
     }
 
-    // --- Suppression d'une catégorie ---
+    /**
+     * Supprime une catégorie et ses plats associés
+     *
+     * @param int $id       ID de la catégorie
+     * @param int $admin_id ID de l'admin propriétaire
+     * @return bool Succès
+     */
     public function delete($id, $admin_id)
     {
         // Supprime d'abord les plats liés à la catégorie
@@ -158,14 +208,23 @@ class Category
         return $stmt->execute([$id, $admin_id]);
     }
 
-    // --- Récupérer toutes les catégories (global) ---
+    /**
+     * Récupère toutes les catégories (toutes les admins confondus)
+     *
+     * @return array
+     */
     public function getAll()
     {
         $stmt = $this->pdo->query("SELECT * FROM categories");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // --- Récupérer les catégories d'un restaurant (front-office) ---
+    /**
+     * Récupère les catégories d'un restaurant via restaurant_id (front-office)
+     *
+     * @param int $restaurantId ID du restaurant
+     * @return array
+     */
     public function getByRestaurant($restaurantId)
     {
         $stmt = $this->pdo->prepare(

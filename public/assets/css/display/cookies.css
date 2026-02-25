@@ -1,0 +1,204 @@
+/* ==================== Cookies banner + modal (vitrine) ==================== */
+.cookie-banner {
+  display: none;
+  position: fixed;
+  bottom: var(--spacing-lg);
+  left: var(--spacing-lg);
+  right: var(--spacing-lg);
+  max-width: 560px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  padding: var(--spacing-lg);
+  z-index: 3000;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--color-border);
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.cookie-text p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: var(--line-height);
+  color: var(--color-text-light);
+}
+
+.cookie-buttons {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.btn-cookie {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+}
+
+.btn-cookie.accept {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-cookie.accept:hover {
+  background: var(--color-primary-dark);
+}
+
+.btn-cookie.preferences {
+  background: transparent;
+  color: var(--color-text-light);
+  border: 1px solid var(--color-border);
+}
+
+.btn-cookie.preferences:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn-cookie.save {
+  background: var(--color-primary);
+  color: white;
+}
+
+.btn-cookie.save:hover {
+  background: var(--color-primary-dark);
+}
+
+.cookie-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 4000;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-lg);
+}
+
+.modal-content {
+  background: var(--color-bg);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  max-width: 480px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: var(--shadow-xl);
+}
+
+.close-modal {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  line-height: 1;
+}
+
+.close-modal:hover {
+  color: var(--color-text);
+  background: var(--color-bg-alt);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.cookie-option {
+  margin: var(--spacing-md) 0;
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+
+.cookie-option:hover {
+  border-color: var(--color-primary-light);
+}
+
+.cookie-option label {
+  font-weight: 600;
+  font-size: 0.925rem;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+}
+
+.cookie-option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary);
+}
+
+.option-desc {
+  margin: var(--spacing-sm) 0 0 30px;
+  font-size: 0.825rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+  margin-top: var(--spacing-lg);
+}
+
+/* ---- Responsive cookies ---- */
+@media (max-width: 768px) {
+  .cookie-banner {
+    left: var(--spacing-md);
+    right: var(--spacing-md);
+    bottom: var(--spacing-md);
+  }
+
+  .cookie-buttons {
+    flex-direction: column;
+  }
+
+  .btn-cookie {
+    width: 100%;
+    text-align: center;
+  }
+
+  .modal-buttons {
+    flex-direction: column;
+  }
+
+  .modal-buttons .btn-cookie {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .cookie-banner {
+    left: var(--spacing-sm);
+    right: var(--spacing-sm);
+    bottom: var(--spacing-sm);
+    padding: var(--spacing-md);
+  }
+}

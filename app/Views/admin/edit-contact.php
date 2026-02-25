@@ -28,7 +28,7 @@ require __DIR__ . '/../partials/header.php';
 </script>
 
 <!-- Bouton retour vers le dashboard -->
-<a class="btn-back" href="?page=dashboard">Retour au dashboard</a>
+<a class="btn-back" href="?page=dashboard">Retour</a>
 
 <!-- Affichage des messages - Même structure que edit-card.php -->
 <?php if (!empty($success_message)): ?>

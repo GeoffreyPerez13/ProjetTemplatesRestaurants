@@ -1,0 +1,220 @@
+/* ==================== TEMPLATE ROSÉ ==================== */
+/* Override CSS pour le template "Rosé" — tons roses/terracotta, doux et chaleureux */
+
+body.template-rose {
+  --color-primary: #be185d;
+  --color-primary-dark: #9d174d;
+  --color-primary-light: #ec4899;
+  --color-bg: #fffbfc;
+  --color-bg-alt: #fdf2f8;
+  --color-bg-warm: #fce7f3;
+  --color-bg-dark: #500724;
+  --color-text: #2d1a24;
+  --color-text-light: #6b4558;
+  --color-text-muted: #a87d93;
+  --color-border: #f3d1e0;
+  --font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-family-heading: 'Playfair Display', 'Georgia', serif;
+}
+
+/* Header — fond rosé doux */
+body.template-rose header {
+  background: rgba(255, 251, 252, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #f3d1e0;
+}
+
+body.template-rose .logo-area h1 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: #500724;
+  font-style: italic;
+}
+
+body.template-rose .nav-menu ul li a {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  color: #6b4558;
+  letter-spacing: 0.04em;
+  font-size: 0.85rem;
+}
+
+body.template-rose .nav-menu ul li a:hover {
+  color: #be185d;
+  background: #fce7f3;
+}
+
+/* Hamburger */
+body.template-rose .hamburger span {
+  background: #500724;
+}
+
+/* Banner — overlay rose chaud */
+body.template-rose .banner {
+  min-height: 500px;
+}
+
+body.template-rose .banner::before {
+  background: linear-gradient(180deg, rgba(80, 7, 36, 0.2) 0%, rgba(80, 7, 36, 0.6) 100%);
+}
+
+body.template-rose .banner-content h2 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  font-style: italic;
+}
+
+body.template-rose .banner-content h2::after {
+  background: #ec4899;
+  width: 50px;
+  height: 2px;
+}
+
+body.template-rose .banner-text {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+}
+
+body.template-rose .banner-fallback {
+  background: linear-gradient(135deg, #9d174d 0%, #be185d 50%, #ec4899 100%);
+}
+
+/* Section h2 — serif + trait rose */
+body.template-rose h2 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-weight: 700;
+  color: #2d1a24;
+}
+
+body.template-rose h2::after {
+  background: #be185d;
+  width: 40px;
+  height: 2px;
+}
+
+/* Carte — cartes douces */
+body.template-rose .category-section {
+  background: #fdf2f8;
+  border: 1px solid #f3d1e0;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 28px;
+}
+
+body.template-rose .category-section h3 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  color: #9d174d;
+  font-style: italic;
+}
+
+body.template-rose .plat-card {
+  border-color: #f3d1e0;
+  border-radius: 12px;
+  background: #fffbfc;
+}
+
+body.template-rose .plat-card:hover {
+  border-color: #be185d;
+  box-shadow: 0 6px 20px rgba(190, 24, 93, 0.08);
+}
+
+body.template-rose .plat-name {
+  font-family: 'Playfair Display', 'Georgia', serif;
+}
+
+body.template-rose .plat-price {
+  color: #be185d;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Images carte */
+body.template-rose .image-card {
+  border-radius: 12px;
+}
+
+body.template-rose .image-card:hover {
+  box-shadow: 0 10px 28px rgba(190, 24, 93, 0.1);
+}
+
+/* Services — fond rosé pâle */
+body.template-rose #services {
+  background: #fdf2f8;
+}
+
+body.template-rose .service-card {
+  background: #fffbfc;
+  border: 1px solid #f3d1e0;
+  border-radius: 12px;
+}
+
+body.template-rose .service-card:hover {
+  border-color: #be185d;
+  transform: translateY(-2px);
+}
+
+body.template-rose .service-card i {
+  color: #be185d;
+}
+
+/* Footer — fond rose foncé */
+body.template-rose footer {
+  background: #500724;
+  color: #f3d1e0;
+}
+
+body.template-rose footer h2 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  color: #ffffff;
+}
+
+body.template-rose footer h2::after {
+  background: #ec4899;
+}
+
+body.template-rose footer p,
+body.template-rose footer a {
+  color: #f9a8d4;
+  font-family: 'Inter', sans-serif;
+}
+
+body.template-rose footer a:hover {
+  color: #ec4899;
+}
+
+body.template-rose .social-links a {
+  background: rgba(236, 72, 153, 0.1);
+  border-color: rgba(236, 72, 153, 0.2);
+  color: #ec4899;
+}
+
+body.template-rose .social-links a:hover {
+  background: #ec4899;
+  color: #500724;
+  border-color: #ec4899;
+}
+
+/* Selection */
+body.template-rose ::selection {
+  background: #ec4899;
+  color: white;
+}
+
+/* Mobile nav */
+@media (max-width: 768px) {
+  body.template-rose .nav-menu {
+    background: #fffbfc;
+  }
+
+  body.template-rose .nav-menu ul li a {
+    color: #6b4558;
+  }
+
+  body.template-rose .nav-menu ul li a:hover {
+    background: #fce7f3;
+    color: #be185d;
+  }
+}

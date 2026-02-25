@@ -14,11 +14,12 @@
 
     <style>
         :root {
-            --color-primary: #2563eb;
-            --color-text: #1f2937;
-            --color-text-light: #6b7280;
+            --color-primary: #b45309;
+            --color-primary-dark: #92400e;
+            --color-text: #1c1917;
+            --color-text-light: #57534e;
             --color-bg: #ffffff;
-            --color-bg-alt: #f9fafb;
+            --color-bg-warm: #fef7ed;
             --font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
@@ -26,26 +27,33 @@
 
         body {
             font-family: var(--font-family);
-            background: var(--color-bg-alt);
+            background: var(--color-bg-warm);
             color: var(--color-text);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
         }
 
         .error-container {
             text-align: center;
-            max-width: 500px;
-            padding: 40px 20px;
+            max-width: 460px;
+            width: 100%;
+            padding: 48px 32px;
+            background: var(--color-bg);
+            border-radius: 20px;
+            box-shadow: 0 20px 48px rgba(28, 25, 23, 0.12);
         }
 
         .error-code {
-            font-size: 8rem;
+            font-size: clamp(5rem, 15vw, 8rem);
             font-weight: 700;
             color: var(--color-primary);
             line-height: 1;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            letter-spacing: -0.04em;
         }
 
         .error-icon {
@@ -67,18 +75,23 @@
         }
 
         .error-link {
-            display: inline-block;
-            padding: 12px 28px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
             background: var(--color-primary);
             color: white;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-weight: 600;
-            transition: filter 0.2s;
+            font-size: 0.95rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .error-link:hover {
-            filter: brightness(0.9);
+            background: var(--color-primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);
         }
     </style>
 </head>

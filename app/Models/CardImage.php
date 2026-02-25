@@ -1,16 +1,27 @@
 <?php
 
+/**
+ * Modèle CardImage : gestion des images de carte en mode "images"
+ * Permet l'upload, la suppression, le réordonnancement et le renommage des images
+ */
 class CardImage
 {
+    /** @var PDO Connexion à la base de données */
     private $pdo;
 
+    /**
+     * @param PDO $pdo Connexion à la base de données
+     */
     public function __construct($pdo)
     {
         $this->pdo = $pdo;
     }
 
     /**
-     * Récupère toutes les images d'un administrateur
+     * Récupère toutes les images d'un admin, triées par ordre d'affichage
+     *
+     * @param int $adminId ID de l'admin
+     * @return array Liste des images
      */
     public function getAllByAdmin($adminId)
     {
@@ -24,7 +35,12 @@ class CardImage
     }
 
     /**
-     * Ajoute une nouvelle image
+     * Ajoute une nouvelle image avec un ordre d'affichage auto-incrémenté
+     *
+     * @param int    $adminId      ID de l'admin
+     * @param string $filename     Nom du fichier sur le serveur
+     * @param string $originalName Nom original du fichier uploadé
+     * @return bool Succès
      */
     public function add($adminId, $filename, $originalName)
     {
@@ -46,7 +62,11 @@ class CardImage
     }
 
     /**
-     * Supprime une image (méthode améliorée)
+     * Supprime une image de la BDD (vérifie l'appartenance à l'admin)
+     *
+     * @param int $id      ID de l'image
+     * @param int $adminId ID de l'admin
+     * @return bool true si supprimée
      */
     public function delete($id, $adminId)
     {
@@ -71,7 +91,11 @@ class CardImage
     }
 
     /**
-     * Récupère une image par son ID
+     * Récupère une image par son ID (vérifie l'appartenance)
+     *
+     * @param int $id      ID de l'image
+     * @param int $adminId ID de l'admin
+     * @return array|false Données image ou false
      */
     public function getById($id, $adminId)
     {
@@ -97,7 +121,12 @@ class CardImage
     }
 
     /**
-     * Met à jour l'ordre d'une image spécifique
+     * Met à jour l'ordre d'affichage d'une image
+     *
+     * @param int $id      ID de l'image
+     * @param int $adminId ID de l'admin
+     * @param int $order   Nouvel ordre
+     * @return bool Succès
      */
     public function updateOrder($id, $adminId, $order)
     {
@@ -110,7 +139,11 @@ class CardImage
     }
 
     /**
-     * Réorganise automatiquement les images (par ordre alphabétique)
+     * Réorganise automatiquement les images par nom original (alphabétique)
+     *
+     * @param int $adminId ID de l'admin
+     * @return bool Succès
+     * @throws Exception Si erreur lors de la transaction
      */
     public function reorderImages($adminId)
     {
@@ -144,7 +177,12 @@ class CardImage
     }
 
     /**
-     * NOUVELLE MÉTHODE : Met à jour l'ordre des images selon un tableau spécifique
+     * Met à jour l'ordre des images depuis un tableau d'IDs (drag & drop)
+     *
+     * @param int   $adminId    ID de l'admin
+     * @param array $imageOrder Tableau ordonné d'IDs d'images
+     * @return bool Succès
+     * @throws Exception Si tableau invalide ou erreur transaction
      */
     public function updateImageOrder($adminId, $imageOrder)
     {
@@ -207,7 +245,11 @@ class CardImage
     }
 
     /**
-     * Télécharge une image sur le serveur
+     * Upload une image sur le serveur (max 5MB, JPG/PNG/GIF/WebP/PDF)
+     *
+     * @param array $file Fichier $_FILES
+     * @return string Chemin relatif du fichier uploadé
+     * @throws Exception Si validation ou déplacement échoue
      */
     public function uploadImage($file)
     {
@@ -244,7 +286,10 @@ class CardImage
     }
 
     /**
-     * Supprime un fichier image du serveur
+     * Supprime un fichier image physique du serveur
+     *
+     * @param string $filepath Chemin du fichier
+     * @return bool true si supprimé
      */
     public function deleteImageFile($filepath)
     {
@@ -255,7 +300,10 @@ class CardImage
     }
 
     /**
-     * Récupère l'ordre maximum actuel
+     * Récupère l'ordre d'affichage maximum actuel
+     *
+     * @param int $adminId ID de l'admin
+     * @return int Ordre maximum (0 si aucune image)
      */
     public function getMaxOrder($adminId)
     {
@@ -270,7 +318,12 @@ class CardImage
     }
 
     /**
-     * Met à jour le nom d'une image
+     * Met à jour le nom original d'une image
+     *
+     * @param int    $id      ID de l'image
+     * @param int    $adminId ID de l'admin
+     * @param string $newName Nouveau nom
+     * @return bool Succès
      */
     public function updateName($id, $adminId, $newName)
     {

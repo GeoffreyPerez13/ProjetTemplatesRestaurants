@@ -1,0 +1,18 @@
+/* ==================== Variables spécifiques à la vitrine ==================== */
+:root {
+  /* Dimensions images */
+  --img-category-size: 80px;
+  --img-plat-size: 90px;
+  --img-card-height: 240px;
+  --img-logo-max-height: 50px;
+  --img-banner-min-height: 480px;
+
+  /* Ratios d'images */
+  --img-plat-ratio: 1 / 1;
+  --img-category-ratio: 1 / 1;
+  --img-card-ratio: 4 / 3;
+
+  /* Layout */
+  --max-width: 1200px;
+  --header-height: 70px;
+}

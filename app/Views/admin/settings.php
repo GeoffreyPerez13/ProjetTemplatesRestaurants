@@ -12,7 +12,7 @@ $created_at = !empty($user['created_at']) ? (new \DateTime($user['created_at']))
 $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['last_card_update']))->format('d/m/Y') : 'Jamais modifiée';
 ?>
 
-<a class="btn-back" href="?page=dashboard">Retour au dashboard</a>
+<a class="btn-back" href="?page=dashboard">Retour</a>
 
 <!-- Boutons de navigation haut/bas -->
 <div class="page-navigation-buttons">

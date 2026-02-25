@@ -2,10 +2,18 @@
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../Models/OptionModel.php';
 
+/**
+ * Contrôleur de gestion des services, moyens de paiement et réseaux sociaux
+ * Les données sont stockées sous forme de clé/valeur dans la table admin_options
+ */
 class ServicesController extends BaseController
 {
+    /** @var OptionModel Modèle pour lire/écrire les options admin */
     private $optionModel;
 
+    /**
+     * @param PDO $pdo Connexion à la base de données
+     */
     public function __construct($pdo)
     {
         parent::__construct($pdo);
@@ -112,7 +120,10 @@ class ServicesController extends BaseController
     }
 
     /**
-     * Extrait les options de services
+     * Extrait les options de services depuis le tableau global des options
+     *
+     * @param array $options Tableau clé/valeur de toutes les options
+     * @return array Services avec valeurs par défaut à '0'
      */
     private function extractServices($options)
     {
@@ -129,7 +140,10 @@ class ServicesController extends BaseController
     }
 
     /**
-     * Extrait les options de paiement
+     * Extrait les options de paiement depuis le tableau global des options
+     *
+     * @param array $options Tableau clé/valeur de toutes les options
+     * @return array Paiements avec valeurs par défaut à '0'
      */
     private function extractPayments($options)
     {
@@ -144,7 +158,10 @@ class ServicesController extends BaseController
     }
 
     /**
-     * Extrait les options de réseaux sociaux
+     * Extrait les URLs de réseaux sociaux depuis le tableau global des options
+     *
+     * @param array $options Tableau clé/valeur de toutes les options
+     * @return array Réseaux sociaux avec valeurs par défaut vides
      */
     private function extractSocials($options)
     {
