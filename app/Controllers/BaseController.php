@@ -73,7 +73,7 @@ class BaseController
         // Vérification de l'état de connexion
         if (!$this->isLogged()) {
             // Si non connecté, redirection vers la page de connexion
-            header('Location: login.php'); // En-tête HTTP 302 (redirection temporaire)
+            header('Location: ?page=login'); // En-tête HTTP 302 (redirection temporaire)
             exit; // Arrêt immédiat pour éviter que le reste du code s'exécute
         }
         // Si connecté, le code continue après cette méthode

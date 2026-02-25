@@ -162,7 +162,7 @@ class Category
     public function getAll()
     {
         $stmt = $this->pdo->query("SELECT * FROM categories");
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     // --- Récupérer les catégories d'un restaurant (front-office) ---
@@ -172,7 +172,7 @@ class Category
             "SELECT * FROM categories WHERE restaurant_id = ? ORDER BY id ASC"
         );
         $stmt->execute([$restaurantId]);
-        return $stmt->fetchAll(PDO::FETCH_OBJ);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**

@@ -18,7 +18,7 @@ class DisplayController extends BaseController
     {
         if (empty($slug)) {
             http_response_code(404);
-            echo "Restaurant introuvable";
+            require __DIR__ . '/../Views/errors/404.php';
             return;
         }
 
@@ -27,7 +27,7 @@ class DisplayController extends BaseController
 
         if (!$restaurant) {
             http_response_code(404);
-            echo "Restaurant introuvable";
+            require __DIR__ . '/../Views/errors/404.php';
             return;
         }
 
@@ -37,7 +37,7 @@ class DisplayController extends BaseController
 
         if (!$admin) {
             http_response_code(500);
-            echo "Erreur de configuration du restaurant";
+            require __DIR__ . '/../Views/errors/404.php';
             return;
         }
 
@@ -113,6 +113,15 @@ class DisplayController extends BaseController
         // Vérifier si le site est en ligne
         $siteOnline = $restaurantModel->isSiteOnline($adminId);
 
+        // Mode preview : l'admin connecté propriétaire du restaurant peut voir son site même en maintenance
+        $isPreview = false;
+        if (!$siteOnline && isset($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true) {
+            if (isset($_SESSION['admin_id']) && $_SESSION['admin_id'] == $adminId) {
+                $siteOnline = true;
+                $isPreview = true;
+            }
+        }
+
         $this->render('display', [
             'restaurant'   => $restaurant,
             'logo'         => $logo,
@@ -122,6 +131,7 @@ class DisplayController extends BaseController
             'cardImages'   => $cardImages,
             'contact'      => $contact,
             'siteOnline'   => $siteOnline,
+            'isPreview'    => $isPreview,
             'lastUpdated'  => $lastUpdated,
             'services'     => $services,
             'payments'     => $payments,

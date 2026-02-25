@@ -124,26 +124,17 @@ class AdminController extends BaseController
             // Validation améliorée avec messages spécifiques
             if (empty($username) || empty($password) || empty($confirmPassword)) {
                 $error = "Tous les champs sont obligatoires.";
-            } elseif ($password !== $confirmPassword) {
-                $error = "Les mots de passe ne correspondent pas.";
-            } elseif (strlen($password) < 8) {
-                $error = "Le mot de passe doit contenir au moins 8 caractères.";
-            } elseif (!preg_match('/[a-zA-Z]/', $password)) {
-                $error = "Le mot de passe doit contenir au moins une lettre.";
-            } elseif (!preg_match('/[A-Z]/', $password)) {
-                $error = "Le mot de passe doit contenir au moins une majuscule.";
-            } elseif (!preg_match('/\d/', $password)) {
-                $error = "Le mot de passe doit contenir au moins un chiffre.";
-            } elseif (!preg_match('/[^a-zA-Z0-9]/', $password)) {
-                $error = "Le mot de passe doit contenir au moins un caractère spécial (ex: @$!%*?&).";
+            } else {
+                $passwordErrors = Validator::validatePassword($password, $confirmPassword);
+                if (!empty($passwordErrors)) {
+                    $error = implode('<br>', $passwordErrors);
+                }
             }
 
             if ($error) {
-                // Conserver les données saisies
+                // Conserver les données saisies (sauf mots de passe pour la sécurité)
                 $_SESSION['form_data'] = [
-                    'username' => $username,
-                    'password' => $password,
-                    'confirm_password' => $confirmPassword
+                    'username' => $username
                 ];
                 $this->addErrorMessage($error, '');
                 header('Location: ?page=register&token=' . urlencode($token));
@@ -234,11 +225,12 @@ class AdminController extends BaseController
      */
     public function logout()
     {
-        // Message de déconnexion
-        $_SESSION['success_message'] = "Vous avez été déconnecté avec succès.";
-
         // Destruction de la session
         session_destroy();
+
+        // Démarrer une nouvelle session pour le message flash
+        session_start();
+        $_SESSION['success_message'] = "Vous avez été déconnecté avec succès.";
 
         // Redirection vers la page de connexion
         header('Location: ?page=login');
@@ -343,26 +335,8 @@ class AdminController extends BaseController
                 $newPassword = $_POST['new_password'] ?? '';
                 $confirmPassword = $_POST['confirm_password'] ?? '';
 
-                // Validation côté serveur (identique à celle du formulaire d'inscription)
-                $errors = [];
-                if (strlen($newPassword) < 8) {
-                    $errors[] = "Le mot de passe doit contenir au moins 8 caractères.";
-                }
-                if (!preg_match('/[A-Z]/', $newPassword)) {
-                    $errors[] = "Le mot de passe doit contenir au moins une majuscule.";
-                }
-                if (!preg_match('/[a-z]/', $newPassword)) {
-                    $errors[] = "Le mot de passe doit contenir au moins une minuscule.";
-                }
-                if (!preg_match('/[0-9]/', $newPassword)) {
-                    $errors[] = "Le mot de passe doit contenir au moins un chiffre.";
-                }
-                if (!preg_match('/[^a-zA-Z0-9]/', $newPassword)) {
-                    $errors[] = "Le mot de passe doit contenir au moins un caractère spécial.";
-                }
-                if ($newPassword !== $confirmPassword) {
-                    $errors[] = "Les mots de passe ne correspondent pas.";
-                }
+                // Validation côté serveur via Validator centralisé
+                $errors = Validator::validatePassword($newPassword, $confirmPassword);
 
                 if (!empty($errors)) {
                     $_SESSION['error_message'] = implode('<br>', $errors);

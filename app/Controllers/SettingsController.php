@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/BaseController.php';
+require_once __DIR__ . '/../Helpers/Validator.php';
 
 class SettingsController extends BaseController
 {
@@ -186,26 +187,9 @@ class SettingsController extends BaseController
             if (empty($new_password)) {
                 $errors[] = "Le nouveau mot de passe est requis";
             } else {
-                // Validation robuste du mot de passe (comme dans register)
-                if (strlen($new_password) < 8) {
-                    $errors[] = "Le mot de passe doit contenir au moins 8 caractères";
-                }
-                if (!preg_match('/[A-Z]/', $new_password)) {
-                    $errors[] = "Le mot de passe doit contenir au moins une majuscule";
-                }
-                if (!preg_match('/[a-z]/', $new_password)) {
-                    $errors[] = "Le mot de passe doit contenir au moins une minuscule";
-                }
-                if (!preg_match('/[0-9]/', $new_password)) {
-                    $errors[] = "Le mot de passe doit contenir au moins un chiffre";
-                }
-                if (!preg_match('/[^A-Za-z0-9]/', $new_password)) {
-                    $errors[] = "Le mot de passe doit contenir au moins un caractère spécial";
-                }
-            }
-
-            if ($new_password !== $confirm_password) {
-                $errors[] = "Les mots de passe ne correspondent pas";
+                // Validation via Validator centralisé
+                $passwordErrors = Validator::validatePassword($new_password, $confirm_password);
+                $errors = array_merge($errors, $passwordErrors);
             }
 
             // Vérifier que le nouveau mot de passe est différent de l'ancien
@@ -568,7 +552,8 @@ class SettingsController extends BaseController
                 // Déconnecter l'utilisateur
                 session_destroy();
 
-                // Rediriger vers la page d'accueil avec un message
+                // Démarrer une nouvelle session pour le message flash
+                session_start();
                 $_SESSION['success_message'] = 'Votre compte a été supprimé avec succès.';
                 header('Location: ?page=login');
                 exit;

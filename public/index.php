@@ -119,7 +119,7 @@ switch ($page) {
         $slug = $_GET['slug'] ?? '';
         if (empty($slug)) {
             http_response_code(404);
-            echo "Slug manquant";
+            require __DIR__ . '/../app/Views/errors/404.php';
             break;
         }
         $controller = new DisplayController($pdo);
@@ -133,6 +133,6 @@ switch ($page) {
 
     default:
         http_response_code(404);
-        echo "Page non trouvée";  // Page inexistante
+        require __DIR__ . '/../app/Views/errors/404.php';
         break;
 }

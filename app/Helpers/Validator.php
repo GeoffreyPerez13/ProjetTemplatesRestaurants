@@ -105,4 +105,38 @@ class Validator
     {
         return isset($this->errors[$field]);
     }
+
+    /**
+     * Valide un mot de passe selon les règles de sécurité du site
+     * Méthode statique réutilisable partout (register, reset, settings)
+     * 
+     * @param string $password Le mot de passe à valider
+     * @param string|null $confirmPassword Le mot de passe de confirmation (optionnel)
+     * @return array Tableau des messages d'erreur (vide si valide)
+     */
+    public static function validatePassword($password, $confirmPassword = null)
+    {
+        $errors = [];
+
+        if (strlen($password) < 8) {
+            $errors[] = "Le mot de passe doit contenir au moins 8 caractères.";
+        }
+        if (!preg_match('/[A-Z]/', $password)) {
+            $errors[] = "Le mot de passe doit contenir au moins une majuscule.";
+        }
+        if (!preg_match('/[a-z]/', $password)) {
+            $errors[] = "Le mot de passe doit contenir au moins une minuscule.";
+        }
+        if (!preg_match('/[0-9]/', $password)) {
+            $errors[] = "Le mot de passe doit contenir au moins un chiffre.";
+        }
+        if (!preg_match('/[^a-zA-Z0-9]/', $password)) {
+            $errors[] = "Le mot de passe doit contenir au moins un caractère spécial.";
+        }
+        if ($confirmPassword !== null && $password !== $confirmPassword) {
+            $errors[] = "Les mots de passe ne correspondent pas.";
+        }
+
+        return $errors;
+    }
 }

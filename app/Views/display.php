@@ -4,7 +4,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($restaurant->name) ?></title>
+    <title><?= htmlspecialchars($restaurant->name) ?> — Restaurant</title>
+
+    <?php
+    // Construire la description SEO dynamique
+    $seoDescription = htmlspecialchars($restaurant->name) . ' — Découvrez notre carte et nos plats.';
+    if ($contact && !empty($contact['adresse'])) {
+        $seoDescription .= ' ' . htmlspecialchars($contact['adresse']) . '.';
+    }
+    // URL canonique
+    $canonicalUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+        . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    // Image OG : bannière > logo > fallback
+    $ogImage = '';
+    if ($banner && !empty($banner['url'])) {
+        $ogImage = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+            . '://' . $_SERVER['HTTP_HOST'] . $banner['url'];
+    } elseif ($logo && !empty($logo['url'])) {
+        $ogImage = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+            . '://' . $_SERVER['HTTP_HOST'] . $logo['url'];
+    }
+    ?>
+
+    <!-- SEO Meta -->
+    <meta name="description" content="<?= $seoDescription ?>">
+    <meta name="robots" content="<?= (!empty($isPreview) || (isset($siteOnline) && !$siteOnline)) ? 'noindex, nofollow' : 'index, follow' ?>">
+    <link rel="canonical" href="<?= htmlspecialchars($canonicalUrl) ?>">
+
+    <!-- Open Graph (Facebook, LinkedIn) -->
+    <meta property="og:type" content="restaurant">
+    <meta property="og:title" content="<?= htmlspecialchars($restaurant->name) ?>">
+    <meta property="og:description" content="<?= $seoDescription ?>">
+    <meta property="og:url" content="<?= htmlspecialchars($canonicalUrl) ?>">
+    <?php if ($ogImage): ?>
+        <meta property="og:image" content="<?= htmlspecialchars($ogImage) ?>">
+    <?php endif; ?>
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:site_name" content="MenuMiam">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= htmlspecialchars($restaurant->name) ?>">
+    <meta name="twitter:description" content="<?= $seoDescription ?>">
+    <?php if ($ogImage): ?>
+        <meta name="twitter:image" content="<?= htmlspecialchars($ogImage) ?>">
+    <?php endif; ?>
+
+    <!-- Schema.org JSON-LD (Données structurées Restaurant) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Restaurant",
+        "name": <?= json_encode($restaurant->name) ?>,
+        "url": <?= json_encode($canonicalUrl) ?>
+        <?php if ($logo && !empty($logo['url'])): ?>
+        ,"image": <?= json_encode((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . $logo['url']) ?>
+        <?php endif; ?>
+        <?php if ($contact && !empty($contact['adresse'])): ?>
+        ,"address": {
+            "@type": "PostalAddress",
+            "streetAddress": <?= json_encode($contact['adresse']) ?>
+        }
+        <?php endif; ?>
+        <?php if ($contact && !empty($contact['telephone'])): ?>
+        ,"telephone": <?= json_encode($contact['telephone']) ?>
+        <?php endif; ?>
+        <?php if ($contact && !empty($contact['email'])): ?>
+        ,"email": <?= json_encode($contact['email']) ?>
+        <?php endif; ?>
+        <?php if ($contact && !empty($contact['horaires'])): ?>
+        ,"openingHours": <?= json_encode($contact['horaires']) ?>
+        <?php endif; ?>
+        <?php if ($carteMode === 'editable' && !empty($categories)): ?>
+        ,"hasMenu": {
+            "@type": "Menu",
+            "hasMenuSection": [
+                <?php foreach ($categories as $i => $cat): ?>
+                <?= $i > 0 ? ',' : '' ?>
+                {
+                    "@type": "MenuSection",
+                    "name": <?= json_encode($cat['name']) ?>
+                    <?php if (!empty($cat['plats'])): ?>
+                    ,"hasMenuItem": [
+                        <?php foreach ($cat['plats'] as $j => $plat): ?>
+                        <?= $j > 0 ? ',' : '' ?>
+                        {
+                            "@type": "MenuItem",
+                            "name": <?= json_encode($plat['name']) ?>,
+                            "offers": {
+                                "@type": "Offer",
+                                "price": <?= json_encode(number_format((float)$plat['price'], 2, '.', '')) ?>,
+                                "priceCurrency": "EUR"
+                            }
+                            <?php if (!empty($plat['description'])): ?>
+                            ,"description": <?= json_encode($plat['description']) ?>
+                            <?php endif; ?>
+                        }
+                        <?php endforeach; ?>
+                    ]
+                    <?php endif; ?>
+                }
+                <?php endforeach; ?>
+            ]
+        }
+        <?php endif; ?>
+    }
+    </script>
+
+    <!-- Google Font Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <link rel="stylesheet" href="/assets/css/display/display.css">
 </head>
@@ -65,6 +176,14 @@
             </div>
         </div>
 
+        <!-- Bandeau de prévisualisation pour l'admin -->
+        <?php if (!empty($isPreview)): ?>
+            <div class="preview-banner">
+                <i class="fas fa-eye"></i> Mode prévisualisation — Ce site est actuellement <strong>hors ligne</strong> pour vos clients.
+                <a href="?page=settings&section=options">Modifier</a>
+            </div>
+        <?php endif; ?>
+
         <!-- Site normal -->
         <header>
             <div class="container header-content">
@@ -101,7 +220,7 @@
                     </div>
                 </div>
             <?php else: ?>
-                <div class="banner" style="background-color: #007bff;">
+                <div class="banner banner-fallback">
                     <div class="banner-content">
                         <h2><?= htmlspecialchars($restaurant->name) ?></h2>
                     </div>

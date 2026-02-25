@@ -98,7 +98,11 @@ class LogoBannerController extends BaseController
      */
     private function getCurrentMedia($admin_id, $table)
     {
-        // Ajoutez 'text' à la sélection pour la table banners
+        // Whitelist des tables autorisées pour éviter les injections SQL
+        $allowedTables = ['logos', 'banners'];
+        if (!in_array($table, $allowedTables)) {
+            throw new \InvalidArgumentException("Table non autorisée: $table");
+        }
         $stmt = $this->pdo->prepare("SELECT * FROM $table WHERE admin_id = ?");
         $stmt->execute([$admin_id]);
         $media = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -197,6 +201,10 @@ class LogoBannerController extends BaseController
      */
     private function cleanupMissingMedia($admin_id, $table)
     {
+        $allowedTables = ['logos', 'banners'];
+        if (!in_array($table, $allowedTables)) {
+            throw new \InvalidArgumentException("Table non autorisée: $table");
+        }
         $stmt = $this->pdo->prepare("DELETE FROM $table WHERE admin_id = ?");
         $stmt->execute([$admin_id]);
     }
@@ -362,6 +370,10 @@ class LogoBannerController extends BaseController
      */
     private function saveMediaToDatabase($admin_id, $filename, $table)
     {
+        $allowedTables = ['logos', 'banners'];
+        if (!in_array($table, $allowedTables)) {
+            throw new \InvalidArgumentException("Table non autorisée: $table");
+        }
         $stmt = $this->pdo->prepare("
             INSERT INTO $table (admin_id, filename, uploaded_at)
             VALUES (?, ?, NOW())

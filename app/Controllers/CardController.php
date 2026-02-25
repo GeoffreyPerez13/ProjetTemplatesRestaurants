@@ -1,10 +1,4 @@
 <?php
-// ====== DEBUG TEMPORAIRE ======
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-// ==============================
-
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../Models/Category.php';
 require_once __DIR__ . '/../Models/Dish.php';

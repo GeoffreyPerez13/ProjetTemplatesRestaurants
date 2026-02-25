@@ -53,6 +53,6 @@ class Contact
         LIMIT 1
     ");
         $stmt->execute([$restaurantId]);
-        return $stmt->fetch(PDO::FETCH_OBJ);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }

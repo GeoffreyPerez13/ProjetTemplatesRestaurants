@@ -164,11 +164,10 @@ class Dish
     public function getByCategory($categoryId)
     {
         $stmt = $this->pdo->prepare(
-            "SELECT * FROM dishes WHERE category_id = ? AND restaurant_id = ? ORDER BY id ASC"
+            "SELECT * FROM plats WHERE category_id = ? ORDER BY id ASC"
         );
-        // Note : s'assurer que la table dishes contient la colonne restaurant_id
-        $stmt->execute([$categoryId, $_SESSION['current_restaurant_id'] ?? 0]);
-        return $stmt->fetchAll(PDO::FETCH_OBJ); // Retourne un tableau d'objets
+        $stmt->execute([$categoryId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
