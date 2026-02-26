@@ -30,9 +30,6 @@
       );
     }
 
-    // ==================== GESTION DES MESSAGES ====================
-    setupMessageHandlers();
-
     // ==================== CONFIRMATION DE SUPPRESSION ====================
     setupDeleteConfirmations();
 
@@ -151,30 +148,6 @@
         );
       }, 800);
     }
-  }
-
-  /**
-   * Configure les gestionnaires de messages (5 secondes, pas de croix)
-   */
-  function setupMessageHandlers() {
-    const messages = document.querySelectorAll(
-      ".message-success, .message-error",
-    );
-
-    messages.forEach((message) => {
-      // Auto-dismiss après le délai configuré ou 1,5 secondes par défaut
-      const scrollDelay = window.scrollParams?.scrollDelay || 1500;
-      setTimeout(() => {
-        message.style.opacity = "0";
-        message.style.transition = "opacity 0.5s ease";
-
-        setTimeout(() => {
-          if (message.parentNode) {
-            message.parentNode.removeChild(message);
-          }
-        }, 500);
-      }, scrollDelay);
-    });
   }
 
   /**

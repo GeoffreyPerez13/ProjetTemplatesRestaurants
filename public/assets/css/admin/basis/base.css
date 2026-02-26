@@ -94,6 +94,27 @@ a:hover {
   font-size: 1.1em;
 }
 
+/* Bouton fermeture message flash */
+.flash-close-btn {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.5;
+  padding: 4px 6px;
+  line-height: 1;
+  color: inherit;
+  transition: opacity 0.2s;
+}
+
+.flash-close-btn:hover {
+  opacity: 1;
+}
+
 @keyframes slideInDown {
   from {
     opacity: 0;

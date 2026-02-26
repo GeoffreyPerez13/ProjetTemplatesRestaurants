@@ -25,6 +25,13 @@ header {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo-area:hover {
+  color: inherit;
+  opacity: 0.85;
 }
 
 .logo-area img {

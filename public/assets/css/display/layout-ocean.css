@@ -1,0 +1,171 @@
+/* ==================== LAYOUT OCÉAN ==================== */
+/* Structure uniquement — pas de couleurs. Les couleurs viennent de la palette choisie. */
+
+/* Header — bordure invisible, ombre légère */
+body.layout-ocean header {
+  border-bottom: none;
+}
+
+/* Banner — pleine hauteur écran */
+body.layout-ocean .banner {
+  min-height: 85vh;
+}
+
+body.layout-ocean .banner-content h2 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+body.layout-ocean .banner-content h2::after {
+  width: 70px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+body.layout-ocean .banner-text {
+  font-size: 1.15rem;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  max-width: 600px;
+}
+
+/* Section h2 */
+body.layout-ocean h2 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+body.layout-ocean h2::after {
+  width: 50px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+/* Carte — cards larges, pleine largeur, alternance gauche/droite */
+body.layout-ocean .plats-grid {
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+}
+
+body.layout-ocean .plat-card {
+  flex-direction: row;
+  border-radius: 16px;
+  border: none;
+  background: var(--color-bg-alt);
+  padding: 0;
+  overflow: hidden;
+  min-height: 140px;
+}
+
+body.layout-ocean .plat-card img {
+  width: 180px;
+  height: auto;
+  min-height: 140px;
+  border-radius: 0;
+  object-fit: cover;
+}
+
+body.layout-ocean .plat-info {
+  padding: var(--spacing-lg);
+}
+
+body.layout-ocean .plat-info h4 {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* Alternance visuelle pour les plats (pair/impair) */
+body.layout-ocean .plat-card:nth-child(even) {
+  flex-direction: row-reverse;
+}
+
+/* Images carte — grande grille aérée */
+body.layout-ocean .images-grid {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-xl);
+}
+
+body.layout-ocean .image-card {
+  border-radius: 16px;
+  border: none;
+  overflow: hidden;
+}
+
+body.layout-ocean .image-card img {
+  transition: transform 0.5s ease;
+}
+
+body.layout-ocean .image-card:hover img {
+  transform: scale(1.06);
+}
+
+/* Services — badges horizontaux au lieu de listes */
+body.layout-ocean .services-list,
+body.layout-ocean .payments-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+}
+
+body.layout-ocean .services-list li,
+body.layout-ocean .payments-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text);
+  transition: all var(--transition-fast);
+}
+
+body.layout-ocean .services-list li:hover,
+body.layout-ocean .payments-list li:hover {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+}
+
+body.layout-ocean .services-list li:hover i,
+body.layout-ocean .payments-list li:hover i {
+  color: #ffffff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  body.layout-ocean .banner {
+    min-height: 60vh;
+  }
+
+  body.layout-ocean .plat-card,
+  body.layout-ocean .plat-card:nth-child(even) {
+    flex-direction: column;
+  }
+
+  body.layout-ocean .plat-card img {
+    width: 100%;
+    height: 160px;
+    min-height: auto;
+  }
+
+  body.layout-ocean .images-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.layout-ocean .services-list,
+  body.layout-ocean .payments-list {
+    flex-direction: column;
+  }
+
+  body.layout-ocean .services-list li,
+  body.layout-ocean .payments-list li {
+    width: 100%;
+    justify-content: center;
+  }
+}

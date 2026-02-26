@@ -368,7 +368,6 @@ html.dark-mode .dark-mode-toggle .fa-sun {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
-    border-bottom: 2px solid var(--color-border);
 }
 
 .dashboard-desktop .dashboard-top-buttons .btn {

@@ -87,8 +87,12 @@ switch ($page) {
     case 'edit-template':
         $controller = new SettingsController($pdo);
         $action = $_GET['action'] ?? 'showTemplates';
-        if ($action === 'save-template') {
-            $controller->saveTemplate();
+        if ($action === 'save-palette') {
+            $controller->savePalette();
+        } elseif ($action === 'save-layout') {
+            $controller->saveLayout();
+        } elseif ($action === 'save-template') {
+            $controller->savePalette(); // Rétrocompatibilité
         } else {
             $controller->showTemplates();
         }
@@ -190,7 +194,7 @@ switch ($page) {
         $result = $demoTokenModel->generate($_SESSION['admin_id']);
         if ($result) {
             $demoLink = SITE_URL . '/index.php?page=demo-access&token=' . $result['token'];
-            $_SESSION['success_message'] = "Lien de démo généré (valide 3 jours) :<br><code style='user-select:all;background:#f5f5f5;padding:4px 8px;border-radius:4px;font-size:0.85em;word-break:break-all'>" . htmlspecialchars($demoLink) . "</code>";
+            $_SESSION['success_message'] = "Lien de démo généré (valide 3 jours) :<br><code style='user-select:all;padding:4px 8px;border-radius:4px;font-size:0.85em;word-break:break-all'>" . htmlspecialchars($demoLink) . "</code>";
         } else {
             $_SESSION['error_message'] = "Erreur lors de la génération du lien.";
         }

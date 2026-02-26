@@ -32,6 +32,34 @@
     margin: 0 auto;
 }
 
+/* ==================== SECTIONS ==================== */
+.template-section {
+    margin-bottom: var(--spacing-xl);
+}
+
+.template-section-title {
+    font-size: 1.15rem;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-xs);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.template-section-title i {
+    color: var(--color-primary);
+}
+
+.template-section-desc {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 /* ==================== GRILLE DES TEMPLATES ==================== */
 .templates-grid {
     display: grid;
@@ -357,6 +385,119 @@
 
 .template-preview-rose {
     background: #fdf2f8;
+}
+
+/* ==================== PREVIEW BISTRO ==================== */
+.bistro-header {
+    background: #fffbf7;
+    border-bottom-color: #e8ddd0;
+    justify-content: center;
+}
+
+.bistro-dot {
+    background: #7f1d1d;
+}
+
+.bistro-nav span {
+    background: #d4b896;
+}
+
+.bistro-banner {
+    background: linear-gradient(135deg, #5c1414 0%, #7f1d1d 50%, #991b1b 100%);
+    height: 65px;
+}
+
+.bistro-line {
+    background: #c9a96e;
+    width: 40px;
+}
+
+.bistro-sub {
+    background: rgba(255,255,255,0.5);
+    width: 30px;
+}
+
+.bistro-content {
+    background: #fffbf7;
+}
+
+.bistro-title {
+    background: #7f1d1d;
+    width: 35px;
+}
+
+.bistro-card {
+    background: #fffbf7;
+    border-color: #e8ddd0;
+    height: 20px;
+    border-radius: 2px;
+}
+
+/* Bistro: single column cards */
+.bistro-cards {
+    flex-direction: column;
+    gap: 4px;
+}
+
+.bistro-footer {
+    background: #1a0f0f;
+}
+
+.template-preview-bistro {
+    background: #faf5ef;
+}
+
+/* ==================== PREVIEW OCÉAN ==================== */
+.ocean-header {
+    background: rgba(255, 255, 255, 0.85);
+    border-bottom: none;
+}
+
+.ocean-dot {
+    background: #0d9488;
+}
+
+.ocean-nav span {
+    background: #99d5cf;
+}
+
+.ocean-banner {
+    background: linear-gradient(135deg, #042f2e 0%, #0f766e 40%, #14b8a6 100%);
+    height: 90px;
+}
+
+.ocean-line {
+    background: #14b8a6;
+    width: 50px;
+    height: 4px;
+    border-radius: 2px;
+}
+
+.ocean-content {
+    background: #f0fdfa;
+}
+
+.ocean-title {
+    background: linear-gradient(90deg, #0d9488, #14b8a6);
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+}
+
+.ocean-card {
+    background: #f0fdfa;
+    border: none;
+    border-radius: 6px;
+    height: 45px;
+    box-shadow: 0 1px 4px rgba(13, 148, 136, 0.1);
+}
+
+.ocean-footer {
+    background: #042f2e;
+}
+
+.template-preview-ocean {
+    background: #f0fdfa;
 }
 
 /* ==================== INFO TEMPLATE ==================== */

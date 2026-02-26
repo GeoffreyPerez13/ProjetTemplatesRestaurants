@@ -131,6 +131,100 @@ html.dark-mode textarea::placeholder {
   color: var(--color-text-muted);
 }
 
+/* Dark mode — sélecteur de mode (mode-card) */
+html.dark-mode .mode-option input[type="radio"]:checked + .mode-card {
+  background-color: #052e16;
+  box-shadow: 0 8px 20px rgba(21, 128, 61, 0.2);
+}
+
+/* Dark mode — boutons icône (enlarge logo/banner, etc.) */
+html.dark-mode .btn-icon {
+  background: rgba(0, 0, 0, 0.6);
+  color: #e7e5e4;
+}
+
+html.dark-mode .btn-icon:hover {
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+}
+
+/* Dark mode — zone d'upload drag & drop */
+html.dark-mode .upload-area.drag-over,
+html.dark-mode .upload-area.file-selected {
+  background: #052e16;
+}
+
+/* Dark mode — formulaires validation */
+html.dark-mode .form-group.has-error input,
+html.dark-mode .form-group.has-error textarea,
+html.dark-mode .input-group.error-field .input-group-text,
+html.dark-mode .invitation-form-group.has-error input {
+  background-color: #450a0a !important;
+  color: #fca5a5;
+}
+
+html.dark-mode input.valid-field,
+html.dark-mode textarea.valid-field,
+html.dark-mode .invitation-form-group.has-success input {
+  background-color: #052e16 !important;
+  color: #86efac;
+}
+
+/* Dark mode — invitations succès/erreur */
+html.dark-mode .invitation-success {
+  background: #052e16;
+  border-color: #14532d;
+  color: #86efac;
+}
+
+html.dark-mode .invitation-error {
+  background: #450a0a;
+  border-color: #7f1d1d;
+  color: #fca5a5;
+}
+
+/* Dark mode — template active badge */
+html.dark-mode .active-badge {
+  background: #052e16;
+  border-color: #14532d;
+}
+
+/* Dark mode — demo tokens feedback */
+html.dark-mode .demo-token-link.copied {
+  background: #052e16;
+}
+
+html.dark-mode .demo-label-input.saved {
+  background: #052e16;
+}
+
+html.dark-mode .demo-label-input.error {
+  background: #450a0a;
+}
+
+/* Dark mode — reset password messages */
+html.dark-mode .reset-password-container .message-success {
+  background: #052e16;
+  color: #86efac;
+  border-color: #14532d;
+}
+
+html.dark-mode .reset-password-container .message-error {
+  background: #450a0a;
+  color: #fca5a5;
+  border-color: #7f1d1d;
+}
+
+/* Dark mode — login password toggle */
+html.dark-mode .password-toggle-btn.showing:hover {
+  background-color: #3d2e1a;
+}
+
+/* Dark mode — drag & drop pulse animation */
+html.dark-mode .images-grid.reorder-mode .image-card {
+  border-color: var(--color-border);
+}
+
 /* Dark mode — images et médias */
 html.dark-mode img {
   opacity: 0.92;

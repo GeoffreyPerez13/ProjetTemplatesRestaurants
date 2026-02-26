@@ -1,31 +1,4 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // ========== AUTO-DISSIPATION DES MESSAGES ==========
-  const messages = document.querySelectorAll('.message-success, .message-error');
-  const scrollDelay = window.scrollParams?.scrollDelay || 1500;
-  
-  if (messages.length > 0) {
-    // Faire défiler jusqu'au message si un anchor est défini
-    const anchor = window.scrollParams?.anchor;
-    if (anchor) {
-      const targetElement = document.getElementById(anchor);
-      if (targetElement) {
-        targetElement.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-    
-    // Auto-dissipation après le délai
-    setTimeout(function() {
-      messages.forEach(function(message) {
-        message.style.transition = 'opacity 0.5s ease';
-        message.style.opacity = '0';
-        
-        setTimeout(function() {
-          message.remove();
-        }, 500);
-      });
-    }, scrollDelay);
-  }
-
   // ========== GESTION DU FORMULAIRE ==========
   const form = document.querySelector(".invitation-form");
   const submitBtn = form.querySelector(".send-invitation-btn");

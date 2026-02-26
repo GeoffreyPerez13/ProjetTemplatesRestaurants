@@ -11,6 +11,9 @@
         </div>
     </div>
 
+    <!-- Script global : auto-dismiss des messages flash -->
+    <script src="/assets/js/admin/flash-messages.js"></script>
+
     <!-- Footer avec mentions légales -->
     <footer class="admin-footer">
         <div class="footer-content">

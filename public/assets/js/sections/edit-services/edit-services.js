@@ -15,9 +15,6 @@
             handleAnchorScroll(anchor, scrollParams.scrollDelay || CONFIG.scrollDelay);
         }
 
-        // Gestion de la disparition des messages
-        setupMessageHandlers();
-
         // Configuration des boutons "Tout (dé)cocher"
         setupCheckboxesToggles();
     }
@@ -40,23 +37,6 @@
                 setTimeout(() => element.style.boxShadow = '', 1500);
             }
         }, delay);
-    }
-
-    /**
-     * Disparition automatique des messages
-     */
-    function setupMessageHandlers() {
-        const messages = document.querySelectorAll('.message-success, .message-error');
-        messages.forEach(message => {
-            const scrollDelay = window.scrollParams?.scrollDelay || 1500;
-            setTimeout(() => {
-                message.style.opacity = '0';
-                message.style.transition = 'opacity 0.5s ease';
-                setTimeout(() => {
-                    if (message.parentNode) message.parentNode.removeChild(message);
-                }, 500);
-            }, scrollDelay);
-        });
     }
 
     /**

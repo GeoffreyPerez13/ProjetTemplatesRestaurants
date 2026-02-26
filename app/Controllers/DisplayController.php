@@ -136,14 +136,24 @@ class DisplayController extends BaseController
             }
         }
 
-        // Récupérer le template choisi par l'admin
-        $templateName = $optionModel->get($adminId, 'site_template') ?: 'classic';
+        // Récupérer la palette et le layout choisis par l'admin
+        $paletteName = $optionModel->get($adminId, 'site_palette') ?: ($optionModel->get($adminId, 'site_template') ?: 'classic');
+        $layoutName  = $optionModel->get($adminId, 'site_layout') ?: 'standard';
 
-        // Permettre la prévisualisation d'un template via GET (admin connecté uniquement)
-        if (!empty($_GET['preview_template']) && isset($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true) {
-            $allowed = ['classic', 'modern', 'elegant', 'nature', 'rose'];
-            if (in_array($_GET['preview_template'], $allowed)) {
-                $templateName = $_GET['preview_template'];
+        $allowedPalettes = ['classic', 'modern', 'elegant', 'nature', 'rose', 'bistro', 'ocean'];
+        $allowedLayouts  = ['standard', 'bistro', 'ocean'];
+
+        // Permettre la prévisualisation via GET (admin connecté uniquement)
+        if (isset($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true) {
+            if (!empty($_GET['preview_palette']) && in_array($_GET['preview_palette'], $allowedPalettes)) {
+                $paletteName = $_GET['preview_palette'];
+            }
+            if (!empty($_GET['preview_layout']) && in_array($_GET['preview_layout'], $allowedLayouts)) {
+                $layoutName = $_GET['preview_layout'];
+            }
+            // Rétrocompatibilité ancien paramètre preview_template
+            if (!empty($_GET['preview_template']) && in_array($_GET['preview_template'], $allowedPalettes)) {
+                $paletteName = $_GET['preview_template'];
             }
         }
 
@@ -161,7 +171,8 @@ class DisplayController extends BaseController
             'services'     => $services,
             'payments'     => $payments,
             'socials'      => $socials,
-            'templateName' => $templateName,
+            'templateName' => $paletteName,
+            'layoutName'   => $layoutName,
         ]);
     }
 }

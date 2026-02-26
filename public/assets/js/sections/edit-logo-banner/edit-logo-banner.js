@@ -482,16 +482,6 @@
         // Gestion du texte de bannière
         setupBannerTextDelete();
 
-        const messages = document.querySelectorAll('.message-success, .message-error');
-        const delay = scrollParams.scrollDelay || 1500;
-        messages.forEach(msg => {
-            setTimeout(() => {
-                msg.style.opacity = '0';
-                msg.style.transition = 'opacity 0.5s';
-                setTimeout(() => msg.remove(), 500);
-            }, delay);
-        });
-
         if (scrollParams.anchor) {
             setTimeout(() => {
                 const el = document.getElementById(scrollParams.anchor);

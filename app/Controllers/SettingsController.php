@@ -613,7 +613,7 @@ class SettingsController extends BaseController
     }
 
     /**
-     * Affiche la page de sélection de template
+     * Affiche la page de sélection de template (palette + layout)
      */
     public function showTemplates()
     {
@@ -622,7 +622,10 @@ class SettingsController extends BaseController
 
         require_once __DIR__ . '/../Models/OptionModel.php';
         $optionModel = new OptionModel($this->pdo);
-        $currentTemplate = $optionModel->get($adminId, 'site_template') ?: 'classic';
+
+        // Rétrocompatibilité : lire site_palette, sinon site_template
+        $currentPalette = $optionModel->get($adminId, 'site_palette') ?: ($optionModel->get($adminId, 'site_template') ?: 'classic');
+        $currentLayout  = $optionModel->get($adminId, 'site_layout') ?: 'standard';
 
         // Récupérer le slug pour le lien de preview
         $slug = '';
@@ -637,8 +640,9 @@ class SettingsController extends BaseController
         $messages = $this->getFlashMessages();
 
         $this->render('admin/edit-template', [
-            'title' => 'Choisir un template',
-            'currentTemplate' => $currentTemplate,
+            'title' => 'Personnaliser le site vitrine',
+            'currentPalette' => $currentPalette,
+            'currentLayout' => $currentLayout,
             'slug' => $slug,
             'csrf_token' => $this->getCsrfToken(),
             'success_message' => $messages['success_message'],
@@ -647,9 +651,9 @@ class SettingsController extends BaseController
     }
 
     /**
-     * Sauvegarde le choix de template
+     * Sauvegarde le choix de palette de couleurs
      */
-    public function saveTemplate()
+    public function savePalette()
     {
         $this->requireLogin();
 
@@ -664,21 +668,60 @@ class SettingsController extends BaseController
             exit;
         }
 
-        $template = $_POST['template'] ?? 'classic';
-        $allowed = ['classic', 'modern', 'elegant', 'nature', 'rose'];
+        $palette = $_POST['palette'] ?? 'classic';
+        $allowed = ['classic', 'modern', 'elegant', 'nature', 'rose', 'bistro', 'ocean'];
 
-        if (!in_array($template, $allowed)) {
-            $this->addErrorMessage('Template invalide.');
+        if (!in_array($palette, $allowed)) {
+            $this->addErrorMessage('Palette invalide.');
             header('Location: ?page=edit-template');
             exit;
         }
 
         require_once __DIR__ . '/../Models/OptionModel.php';
         $optionModel = new OptionModel($this->pdo);
-        $optionModel->set($_SESSION['admin_id'], 'site_template', $template);
+        $optionModel->set($_SESSION['admin_id'], 'site_palette', $palette);
 
-        $names = ['classic' => 'Classique', 'modern' => 'Moderne', 'elegant' => 'Élégant', 'nature' => 'Nature', 'rose' => 'Rosé'];
-        $this->addSuccessMessage('Template "' . $names[$template] . '" appliqué avec succès !');
+        $names = ['classic' => 'Classique', 'modern' => 'Moderne', 'elegant' => 'Élégant', 'nature' => 'Nature', 'rose' => 'Rosé', 'bistro' => 'Bistro', 'ocean' => 'Océan'];
+        $this->addSuccessMessage('Palette "' . $names[$palette] . '" appliquée avec succès !');
+        $_SESSION['open_template_accordion'] = 'palette';
+        header('Location: ?page=edit-template');
+        exit;
+    }
+
+    /**
+     * Sauvegarde le choix de layout/design
+     */
+    public function saveLayout()
+    {
+        $this->requireLogin();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?page=edit-template');
+            exit;
+        }
+
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            $this->addErrorMessage('Token CSRF invalide.');
+            header('Location: ?page=edit-template');
+            exit;
+        }
+
+        $layout = $_POST['layout'] ?? 'standard';
+        $allowed = ['standard', 'bistro', 'ocean'];
+
+        if (!in_array($layout, $allowed)) {
+            $this->addErrorMessage('Layout invalide.');
+            header('Location: ?page=edit-template');
+            exit;
+        }
+
+        require_once __DIR__ . '/../Models/OptionModel.php';
+        $optionModel = new OptionModel($this->pdo);
+        $optionModel->set($_SESSION['admin_id'], 'site_layout', $layout);
+
+        $names = ['standard' => 'Standard', 'bistro' => 'Bistro', 'ocean' => 'Océan'];
+        $this->addSuccessMessage('Design "' . $names[$layout] . '" appliqué avec succès !');
+        $_SESSION['open_template_accordion'] = 'layout';
         header('Location: ?page=edit-template');
         exit;
     }

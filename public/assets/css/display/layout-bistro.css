@@ -1,0 +1,144 @@
+/* ==================== LAYOUT BISTRO ==================== */
+/* Structure uniquement — pas de couleurs. Les couleurs viennent de la palette choisie. */
+
+/* Header — centré, logo et nav empilés */
+body.layout-bistro .header-content {
+  flex-direction: column;
+  height: auto;
+  padding: var(--spacing-md) var(--spacing-lg);
+  gap: 4px;
+}
+
+body.layout-bistro .logo-area {
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+body.layout-bistro .logo-area h1 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+}
+
+body.layout-bistro .nav-menu ul {
+  gap: 0;
+}
+
+body.layout-bistro .nav-menu ul li a {
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+}
+
+/* Banner — plus courte */
+body.layout-bistro .banner {
+  min-height: 400px;
+}
+
+body.layout-bistro .banner-content h2 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-style: italic;
+}
+
+body.layout-bistro .banner-text {
+  font-style: italic;
+}
+
+/* Section h2 — serif */
+body.layout-bistro h2 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+}
+
+body.layout-bistro h2::after {
+  width: 40px;
+  height: 2px;
+}
+
+/* Carte — layout LISTE single-column au lieu de grid */
+body.layout-bistro .plats-grid {
+  grid-template-columns: 1fr;
+  gap: var(--spacing-md);
+}
+
+body.layout-bistro .plat-card {
+  flex-direction: row;
+  align-items: center;
+  border-radius: 8px;
+  padding: var(--spacing-md) var(--spacing-lg);
+}
+
+body.layout-bistro .plat-card img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+body.layout-bistro .plat-info h4 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: 1.05rem;
+}
+
+body.layout-bistro .category-header h3 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-style: italic;
+}
+
+/* Images carte — 2 colonnes */
+body.layout-bistro .images-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-lg);
+}
+
+body.layout-bistro .image-card {
+  border-radius: 8px;
+}
+
+/* Services */
+body.layout-bistro .services-payments-grid {
+  gap: var(--spacing-xl);
+}
+
+body.layout-bistro .services-column h3,
+body.layout-bistro .payments-column h3 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+}
+
+/* Footer — compact */
+body.layout-bistro .footer-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+  align-items: start;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  body.layout-bistro .header-content {
+    flex-direction: row;
+    height: var(--header-height);
+  }
+
+  body.layout-bistro .logo-area {
+    flex-direction: row;
+    gap: var(--spacing-sm);
+  }
+
+  body.layout-bistro .logo-area h1 {
+    font-size: 1.15rem;
+  }
+
+  body.layout-bistro .banner {
+    min-height: 300px;
+  }
+
+  body.layout-bistro .plat-card img {
+    width: 60px;
+    height: 60px;
+  }
+
+  body.layout-bistro .images-grid {
+    grid-template-columns: 1fr;
+  }
+}

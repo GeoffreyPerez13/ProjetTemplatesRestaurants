@@ -1,0 +1,128 @@
+/* ==================== PALETTE BISTRO ==================== */
+/* Couleurs uniquement — tons bordeaux/or, ambiance chaleureuse */
+
+body.template-bistro {
+  --color-primary: #7f1d1d;
+  --color-primary-dark: #5c1414;
+  --color-primary-light: #991b1b;
+  --color-bg: #fffbf7;
+  --color-bg-alt: #faf5ef;
+  --color-bg-warm: #f5ece0;
+  --color-bg-dark: #1a0f0f;
+  --color-text: #2c1810;
+  --color-text-light: #6b4c3b;
+  --color-text-muted: #a08c7a;
+  --color-border: #e8ddd0;
+  --font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-family-heading: 'Playfair Display', 'Georgia', serif;
+}
+
+/* Header */
+body.template-bistro header {
+  background: rgba(255, 251, 247, 0.97);
+  border-bottom: 1px solid #e8ddd0;
+}
+
+body.template-bistro .logo-area h1 {
+  color: #7f1d1d;
+}
+
+body.template-bistro .nav-menu ul li a {
+  color: #6b4c3b;
+}
+
+body.template-bistro .nav-menu ul li a:hover {
+  color: #7f1d1d;
+  background: rgba(127, 29, 29, 0.06);
+}
+
+/* Banner */
+body.template-bistro .banner::before {
+  background: linear-gradient(180deg, rgba(26, 15, 15, 0.25) 0%, rgba(26, 15, 15, 0.65) 100%);
+}
+
+body.template-bistro .banner-content h2::after {
+  background: #c9a96e;
+}
+
+body.template-bistro .banner-fallback {
+  background: linear-gradient(135deg, #5c1414 0%, #7f1d1d 50%, #991b1b 100%);
+}
+
+/* Section h2 */
+body.template-bistro h2::after {
+  background: #7f1d1d;
+}
+
+/* Carte */
+body.template-bistro .plat-card:hover {
+  border-color: rgba(127, 29, 29, 0.3);
+  box-shadow: 0 4px 16px rgba(127, 29, 29, 0.08);
+}
+
+body.template-bistro .plat-price {
+  color: #7f1d1d;
+}
+
+body.template-bistro .category-header h3 {
+  color: #7f1d1d;
+}
+
+body.template-bistro .image-card:hover {
+  box-shadow: 0 6px 20px rgba(127, 29, 29, 0.1);
+  border-color: rgba(127, 29, 29, 0.3);
+}
+
+/* Services */
+body.template-bistro #services {
+  background: #faf5ef;
+}
+
+body.template-bistro .services-column h3,
+body.template-bistro .payments-column h3 {
+  color: #7f1d1d;
+}
+
+/* Footer */
+body.template-bistro footer {
+  background: #1a0f0f;
+  color: #e8ddd0;
+}
+
+body.template-bistro footer h2 {
+  color: #f5ece0;
+}
+
+body.template-bistro footer h2::after {
+  background: #c9a96e;
+}
+
+body.template-bistro footer a {
+  color: #a08c7a;
+}
+
+body.template-bistro footer a:hover {
+  color: #c9a96e;
+}
+
+body.template-bistro .social-links a {
+  background: rgba(201, 169, 110, 0.1);
+  border-color: rgba(201, 169, 110, 0.2);
+  color: #c9a96e;
+}
+
+body.template-bistro .social-links a:hover {
+  background: #c9a96e;
+  color: #1a0f0f;
+  border-color: #c9a96e;
+}
+
+body.template-bistro .footer-credits {
+  background: #140b0b;
+}
+
+/* Selection */
+body.template-bistro ::selection {
+  background: #7f1d1d;
+  color: #fffbf7;
+}

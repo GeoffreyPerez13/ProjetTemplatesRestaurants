@@ -43,9 +43,6 @@
       );
     }
 
-    // ==================== GESTION DES MESSAGES ====================
-    setupMessageHandlers();
-
     // ==================== GESTION DES FORMULAIRES ====================
     setupFormHandlers();
   }
@@ -87,41 +84,6 @@
         }, 2000);
       }
     }, delay);
-  }
-
-  /**
-   * Configure les gestionnaires de messages (auto-dismiss)
-   */
-  function setupMessageHandlers() {
-    console.log("setupMessageHandlers appelé");
-
-    const messages = document.querySelectorAll(
-      ".message-success, .message-error",
-    );
-
-    console.log("Nombre de messages trouvés:", messages.length);
-
-    messages.forEach((message, index) => {
-      console.log(`Message ${index}:`, message.textContent);
-
-      // Auto-dismiss après le délai configuré ou 1,5 secondes par défaut
-      const scrollDelay =
-        window.scrollParams?.scrollDelay || CONFIG.scrollDelay;
-      console.log(`Délai pour le message ${index}: ${scrollDelay}ms`);
-
-      setTimeout(() => {
-        console.log(`Fading out message ${index}`);
-        message.style.opacity = "0";
-        message.style.transition = "opacity 0.5s ease";
-
-        setTimeout(() => {
-          console.log(`Suppression du message ${index}`);
-          if (message.parentNode) {
-            message.parentNode.removeChild(message);
-          }
-        }, 500);
-      }, scrollDelay);
-    });
   }
 
   /**

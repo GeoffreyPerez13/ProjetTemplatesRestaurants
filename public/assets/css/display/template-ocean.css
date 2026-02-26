@@ -1,0 +1,133 @@
+/* ==================== PALETTE OCÉAN ==================== */
+/* Couleurs uniquement — tons bleu-vert teal, ambiance fraîche */
+
+body.template-ocean {
+  --color-primary: #0d9488;
+  --color-primary-dark: #0f766e;
+  --color-primary-light: #14b8a6;
+  --color-bg: #ffffff;
+  --color-bg-alt: #f0fdfa;
+  --color-bg-warm: #e6f7f4;
+  --color-bg-dark: #042f2e;
+  --color-text: #134e4a;
+  --color-text-light: #4a7c78;
+  --color-text-muted: #8fb5b0;
+  --color-border: #ccfbf1;
+  --font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-family-heading: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Header */
+body.template-ocean header {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 1px 8px rgba(13, 148, 136, 0.08);
+}
+
+body.template-ocean .logo-area h1 {
+  font-weight: 800;
+  color: #0d9488;
+}
+
+body.template-ocean .nav-menu ul li a {
+  color: #4a7c78;
+}
+
+body.template-ocean .nav-menu ul li a:hover {
+  color: #0d9488;
+  background: rgba(13, 148, 136, 0.08);
+}
+
+/* Banner */
+body.template-ocean .banner::before {
+  background: linear-gradient(180deg, rgba(4, 47, 46, 0.15) 0%, rgba(4, 47, 46, 0.6) 100%);
+}
+
+body.template-ocean .banner-content h2::after {
+  background: #14b8a6;
+}
+
+body.template-ocean .banner-fallback {
+  background: linear-gradient(135deg, #042f2e 0%, #0f766e 40%, #14b8a6 100%);
+}
+
+/* Section h2 */
+body.template-ocean h2::after {
+  background: linear-gradient(90deg, #0d9488, #14b8a6);
+}
+
+/* Carte */
+body.template-ocean .plat-card:hover {
+  box-shadow: 0 12px 32px rgba(13, 148, 136, 0.12);
+}
+
+body.template-ocean .plat-price {
+  color: #0d9488;
+}
+
+body.template-ocean .category-header h3 {
+  color: #0d9488;
+}
+
+body.template-ocean .image-card {
+  box-shadow: 0 4px 16px rgba(13, 148, 136, 0.08);
+}
+
+body.template-ocean .image-card:hover {
+  box-shadow: 0 12px 40px rgba(13, 148, 136, 0.15);
+}
+
+/* Services */
+body.template-ocean #services {
+  background: #f0fdfa;
+}
+
+body.template-ocean .services-column h3,
+body.template-ocean .payments-column h3 {
+  color: #0d9488;
+}
+
+/* Footer */
+body.template-ocean footer {
+  background: #042f2e;
+  color: #ccfbf1;
+}
+
+body.template-ocean footer h2 {
+  color: #f0fdfa;
+}
+
+body.template-ocean footer h2::after {
+  background: #14b8a6;
+}
+
+body.template-ocean footer a {
+  color: #8fb5b0;
+}
+
+body.template-ocean footer a:hover {
+  color: #14b8a6;
+}
+
+body.template-ocean .social-links a {
+  background: rgba(20, 184, 166, 0.1);
+  border-color: rgba(20, 184, 166, 0.2);
+  color: #14b8a6;
+}
+
+body.template-ocean .social-links a:hover {
+  background: #14b8a6;
+  color: #042f2e;
+  border-color: #14b8a6;
+}
+
+body.template-ocean .footer-credits {
+  background: #021716;
+}
+
+/* Selection */
+body.template-ocean ::selection {
+  background: #14b8a6;
+  color: #042f2e;
+}

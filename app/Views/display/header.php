@@ -18,12 +18,12 @@
 <!-- Site normal -->
 <header>
     <div class="container header-content">
-        <div class="logo-area">
+        <a href="#accueil" class="logo-area">
             <?php if ($logo): ?>
-                <img src="<?= htmlspecialchars($logo['url']) ?>" alt="Logo <?= htmlspecialchars($restaurant->name) ?>" class="lightbox-image">
+                <img src="<?= htmlspecialchars($logo['url']) ?>" alt="Logo <?= htmlspecialchars($restaurant->name) ?>" class="logo-image">
             <?php endif; ?>
             <h1><?= htmlspecialchars($restaurant->name) ?></h1>
-        </div>
+        </a>
         <button class="hamburger" id="hamburger" aria-label="Menu">
             <span></span>
             <span></span>

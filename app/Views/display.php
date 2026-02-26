@@ -5,13 +5,13 @@
  * Variables disponibles (passées par DisplayController::show()) :
  *   $restaurant, $logo, $banner, $contact, $carteMode, $categories,
  *   $cardImages, $lastUpdated, $services, $payments, $socials,
- *   $siteOnline, $isPreview
+ *   $siteOnline, $isPreview, $templateName, $layoutName
  */
 $displayDir = __DIR__ . '/display/';
 ?>
 <?php include $displayDir . 'head.php'; ?>
 
-<body class="template-<?= htmlspecialchars($templateName ?? 'classic') ?>">
+<body class="template-<?= htmlspecialchars($templateName ?? 'classic') ?> layout-<?= htmlspecialchars($layoutName ?? 'standard') ?>">
     <?php if (isset($siteOnline) && !$siteOnline): ?>
         <!-- Page de maintenance -->
         <div class="maintenance-container">
