@@ -1,8 +1,7 @@
 <?php
 $title = $title ?? "Paramètres";
 $scripts = [
-    "js/sections/settings/settings.js",
-    "js/effects/scroll-buttons.js"
+    "js/sections/settings/settings.js"
 ];
 
 require __DIR__ . '/../partials/header.php';
@@ -13,16 +12,6 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
 ?>
 
 <a class="btn-back" href="?page=dashboard">Retour</a>
-
-<!-- Boutons de navigation haut/bas -->
-<div class="page-navigation-buttons">
-    <button type="button" class="btn-navigation scroll-to-bottom" title="Aller en bas de la page">
-        <i class="fas fa-arrow-down"></i>
-    </button>
-    <button type="button" class="btn-navigation scroll-to-top" title="Aller en haut de la page">
-        <i class="fas fa-arrow-up"></i>
-    </button>
-</div>
 
 <div class="settings-container" data-csrf-token="<?= htmlspecialchars($csrf_token ?? '') ?>">
 
@@ -52,6 +41,12 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 <li>
                     <a href="?page=settings&section=options" class="<?= $current_section === 'options' ? 'active' : '' ?>">
                         Options
+                    </a>
+                </li>
+                <li>
+                    <a href="?page=settings&section=premium" class="<?= $current_section === 'premium' ? 'active' : '' ?>">
+                        <i class="fas fa-crown"></i>
+                        <span>Fonctionnalités Premium</span>
                     </a>
                 </li>
             </ul>
@@ -84,6 +79,13 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 <a href="?page=settings&section=options"
                     class="<?= $current_section === 'options' ? 'active' : '' ?>">
                     Options
+                </a>
+            </li>
+            <li>
+                <a href="?page=settings&section=premium"
+                    class="<?= $current_section === 'premium' ? 'active' : '' ?>">
+                    <i class="fas fa-crown"></i>
+                    Fonctionnalités Premium
                 </a>
             </li>
         </ul>
@@ -330,6 +332,170 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 <div class="options-actions">
                     <button type="button" class="btn" id="save-all-options">Enregistrer toutes les options</button>
                     <button type="button" class="btn secondary" id="reset-options">Restaurer les valeurs par défaut</button>
+                </div>
+            </div>
+        <?php elseif ($current_section === 'premium'): ?>
+            <!-- Section Fonctionnalités Premium -->
+            <div class="settings-section">
+                <link rel="stylesheet" href="assets/css/admin/sections/settings/premium.css">
+                <script src="assets/js/admin/premium.js"></script>
+                <h2>Fonctionnalités Premium</h2>
+                <p class="section-description">Débloquez des fonctionnalités avancées pour votre restaurant.</p>
+
+                <?php
+                require_once __DIR__ . '/../../Models/PremiumFeature.php';
+                $premiumFeature = new PremiumFeature($pdo);
+                $availableFeatures = $premiumFeature->getAvailableFeatures();
+                $userFeatures = $premiumFeature->getAllFeatures($_SESSION['admin_id']);
+                $userFeaturesMap = array_column($userFeatures, 'is_active', 'feature_name');
+                ?>
+
+                <div class="premium-features-grid">
+                    <?php foreach ($availableFeatures as $featureKey => $feature): ?>
+                        <div class="premium-feature-card <?= $userFeaturesMap[$featureKey] ?? 0 ? 'active' : '' ?>">
+                            <div class="feature-header">
+                                <div class="feature-icon">
+                                    <i class="fas <?= $feature['icon'] ?>"></i>
+                                </div>
+                                <div class="feature-info">
+                                    <h3><?= htmlspecialchars($feature['name']) ?></h3>
+                                    <p><?= htmlspecialchars($feature['description']) ?></p>
+                                </div>
+                            </div>
+                            <div class="feature-status">
+                                <?php if ($userFeaturesMap[$featureKey] ?? 0): ?>
+                                    <span class="status-badge active">
+                                        <i class="fas fa-check-circle"></i>
+                                        Activé
+                                    </span>
+                                <?php else: ?>
+                                    <span class="status-badge inactive">
+                                        <i class="fas fa-lock"></i>
+                                        Non disponible
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="feature-actions">
+                                <?php if ($featureKey === 'google_reviews'): ?>
+                                    <?php if ($userFeaturesMap[$featureKey] ?? 0): ?>
+                                        <button type="button" class="btn btn-sm configure-google-reviews">
+                                            <i class="fas fa-cog"></i>
+                                            Configurer
+                                        </button>
+                                        <button type="button" class="btn danger btn-sm toggle-premium" 
+                                                data-feature="<?= $featureKey ?>">
+                                            <i class="fas fa-times"></i>
+                                            Désactiver
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="button" class="btn premium-btn toggle-premium" 
+                                                data-feature="<?= $featureKey ?>">
+                                            <i class="fas fa-crown"></i>
+                                            Activer Premium
+                                        </button>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <?php if ($userFeaturesMap[$featureKey] ?? 0): ?>
+                                        <button type="button" class="btn danger btn-sm toggle-premium" 
+                                                data-feature="<?= $featureKey ?>">
+                                            <i class="fas fa-times"></i>
+                                            Désactiver
+                                        </button>
+                                    <?php else: ?>
+                                        <button type="button" class="btn secondary btn-sm" disabled>
+                                            <i class="fas fa-lock"></i>
+                                            Bientôt disponible
+                                        </button>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- Configuration Google Reviews (affichée si activé) -->
+                <div id="google-reviews-config" class="google-reviews-config" style="display: none;">
+                    <div class="config-card">
+                        <h3><i class="fas fa-cog"></i> Configuration Avis Google</h3>
+                        <p class="config-description">Configurez votre restaurant pour afficher les avis Google sur votre site.</p>
+                        
+                        <form method="POST" action="?page=settings&action=update-google-reviews" class="google-config-form">
+                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                            
+                            <div class="config-grid">
+                                <div class="form-group">
+                                    <label for="google_place_id">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        Google Place ID
+                                    </label>
+                                    <input type="text" id="google_place_id" name="google_place_id"
+                                           value="<?= htmlspecialchars($options['google_place_id'] ?? '') ?>"
+                                           placeholder="ex: ChIJb8h2Y6Xu5kcRjLGLt_4nN1E"
+                                           class="form-control">
+                                    <small class="help-text">
+                                        Identifiant unique de votre lieu sur Google Maps. 
+                                        <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener">
+                                            Comment trouver mon Place ID ? <i class="fas fa-external-link-alt"></i>
+                                        </a>
+                                    </small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="google_api_key">
+                                        <i class="fas fa-key"></i>
+                                        Clé API Google (optionnel)
+                                    </label>
+                                    <input type="password" id="google_api_key" name="google_api_key"
+                                           value="<?= htmlspecialchars($options['google_api_key'] ?? '') ?>"
+                                           placeholder="AIzaSy..."
+                                           class="form-control">
+                                    <small class="help-text">
+                                        Clé API Google Places. Si non renseignée, utilise la clé globale du système.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="google_reviews_enabled" name="google_reviews_enabled"
+                                           value="1" <?= ($options['google_reviews_enabled'] ?? '0') === '1' ? 'checked' : '' ?>>
+                                    <span class="checkmark"></span>
+                                    Activer l'affichage des avis Google sur votre site
+                                </label>
+                                <small class="help-text">
+                                    Affiche la section avis Google sur votre site vitrine (sous la carte).
+                                </small>
+                            </div>
+
+                            <div class="config-actions">
+                                <button type="submit" class="btn primary-btn">
+                                    <i class="fas fa-save"></i>
+                                    Enregistrer la configuration
+                                </button>
+                                <button type="button" class="btn secondary-btn" id="test-google-api">
+                                    <i class="fas fa-flask"></i>
+                                    Tester la connexion
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Zone de test -->
+                        <div id="google-api-test-result" class="api-test-result" style="display: none;">
+                            <h4><i class="fas fa-vial"></i> Résultat du test</h4>
+                            <div id="test-content"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="premium-info">
+                    <div class="info-card">
+                        <h4><i class="fas fa-info-circle"></i> Comment ça marche ?</h4>
+                        <ul>
+                            <li>Les fonctionnalités Premium nécessitent un abonnement MenuMiam Premium</li>
+                            <li>Contactez-nous à <a href="mailto:premium@menumiam.fr">premium@menumiam.fr</a> pour souscrire</li>
+                            <li>Pour les tests : les super-admins peuvent activer/désactiver les fonctionnalités</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         <?php endif; ?>

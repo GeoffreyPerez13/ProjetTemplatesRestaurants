@@ -5,6 +5,7 @@
     </div>
     <div class="cookie-buttons">
         <button id="accept-all-cookies" class="btn-cookie accept">Accepter tous</button>
+        <button id="reject-all-cookies" class="btn-cookie reject">Refuser tous</button>
         <button id="open-cookie-preferences" class="btn-cookie preferences">Choisir mes préférences</button>
     </div>
 </div>

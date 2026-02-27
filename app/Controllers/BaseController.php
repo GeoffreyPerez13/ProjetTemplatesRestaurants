@@ -36,6 +36,14 @@ class BaseController
     public function __construct($pdo)
     {
         $this->pdo = $pdo;  // Stockage de la connexion PDO dans la propriété de classe
+
+        // Headers de sécurité (envoyés pour chaque réponse)
+        if (!headers_sent()) {
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: DENY');
+            header('X-XSS-Protection: 1; mode=block');
+            header('Referrer-Policy: strict-origin-when-cross-origin');
+        }
     }
 
     /**

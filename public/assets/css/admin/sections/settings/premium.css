@@ -1,0 +1,499 @@
+/* Styles pour la section Premium des paramètres */
+
+.premium-features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--spacing-lg);
+    margin: var(--spacing-lg) 0;
+}
+
+.premium-feature-card {
+    background: var(--color-bg-alt);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.premium-feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--color-primary), #d4a853);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.premium-feature-card.active::before {
+    opacity: 1;
+}
+
+.premium-feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: var(--color-primary);
+}
+
+.premium-feature-card.active {
+    border-color: var(--color-primary);
+    background: linear-gradient(135deg, var(--color-bg-alt), rgba(212, 168, 83, 0.05));
+}
+
+.feature-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--color-primary), #d4a853);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.feature-info h3 {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--color-text);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.feature-info p {
+    margin: 0;
+    color: var(--color-text-light);
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+
+.feature-status {
+    margin: var(--spacing-md) 0;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-badge.active {
+    background: var(--color-success);
+    color: white;
+}
+
+.status-badge.inactive {
+    background: var(--color-bg-warm);
+    color: var(--color-text-light);
+}
+
+.feature-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+    margin-top: var(--spacing-md);
+}
+
+.premium-btn {
+    background: linear-gradient(135deg, var(--color-primary), #d4a853);
+    color: white;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.premium-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.premium-btn:hover::before {
+    left: 100%;
+}
+
+.premium-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(212, 168, 83, 0.3);
+}
+
+.premium-info {
+    margin-top: var(--spacing-xl);
+}
+
+.info-card {
+    background: linear-gradient(135deg, var(--color-bg-alt), rgba(212, 168, 83, 0.1));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+}
+
+.info-card h4 {
+    margin: 0 0 var(--spacing-md) 0;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.info-card ul {
+    margin: 0;
+    padding-left: var(--spacing-lg);
+    color: var(--color-text-light);
+}
+
+.info-card li {
+    margin-bottom: var(--spacing-sm);
+}
+
+.info-card li:last-child {
+    margin-bottom: 0;
+}
+
+.info-card a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.info-card a:hover {
+    text-decoration: underline;
+}
+
+/* Configuration Google Reviews */
+.google-reviews-config {
+    margin-top: 2rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.config-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: 2px solid #e9ecef;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.config-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4285f4, #34a853, #fbbc04, #ea4335);
+}
+
+.config-card h3 {
+    color: var(--color-text);
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.config-card h3 i {
+    color: #4285f4;
+}
+
+.config-description {
+    color: var(--color-text-light);
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+}
+
+.google-config-form {
+    max-width: 800px;
+}
+
+.config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.config-grid .form-group {
+    position: relative;
+}
+
+.config-grid .form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-text);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.config-grid .form-group label i {
+    color: #4285f4;
+    font-size: 0.9rem;
+}
+
+.config-grid .form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.config-grid .form-control:focus {
+    outline: none;
+    border-color: #4285f4;
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+}
+
+.config-grid .help-text {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--color-text-light);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.config-grid .help-text a {
+    color: #4285f4;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.config-grid .help-text a:hover {
+    text-decoration: underline;
+}
+
+.checkbox-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+    cursor: pointer !important;
+    padding: 1rem !important;
+    background: #f8f9fa !important;
+    border: 2px solid #e9ecef !important;
+    border-radius: var(--radius-md) !important;
+    transition: all 0.3s ease !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.checkbox-label:hover {
+    background: #e9ecef !important;
+    border-color: #4285f4 !important;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 20px !important;
+    height: 20px !important;
+    accent-color: #4285f4 !important;
+}
+
+.checkbox-label .checkmark {
+    display: none !important;
+}
+
+.config-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, #4285f4, #1967d2);
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.primary-btn:hover {
+    background: linear-gradient(135deg, #1967d2, #1557b0);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+}
+
+.secondary-btn {
+    background: white;
+    color: #4285f4;
+    border: 2px solid #4285f4;
+    padding: 0.75rem 2rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.secondary-btn:hover {
+    background: #4285f4;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+}
+
+.api-test-result {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: var(--radius-md);
+    border-left: 4px solid #4285f4;
+}
+
+.api-test-result h4 {
+    color: var(--color-text);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.api-test-result h4 i {
+    color: #4285f4;
+}
+
+.api-test-result.success {
+    border-left-color: #34a853;
+}
+
+.api-test-result.success h4 i {
+    color: #34a853;
+}
+
+.api-test-result.error {
+    border-left-color: #ea4335;
+}
+
+.api-test-result.error h4 i {
+    color: #ea4335;
+}
+
+/* Bouton de configuration actif */
+.configure-google-reviews.active {
+    background: #4285f4 !important;
+    color: white !important;
+}
+
+.configure-google-reviews.active:hover {
+    background: #1967d2 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .premium-features-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .premium-feature-card {
+        padding: 1rem;
+    }
+    
+    .feature-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .feature-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .feature-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .premium-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .config-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .config-card {
+        padding: 1.5rem;
+    }
+    
+    .config-actions {
+        flex-direction: column;
+    }
+    
+    .config-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Dark mode */
+body.dark-mode .premium-feature-card {
+    background: var(--color-bg);
+    border-color: var(--color-border);
+}
+
+body.dark-mode .premium-feature-card.active {
+    background: linear-gradient(135deg, var(--color-bg), rgba(212, 168, 83, 0.1));
+}
+
+body.dark-mode .info-card {
+    background: linear-gradient(135deg, var(--color-bg), rgba(212, 168, 83, 0.05));
+}
+
+body.dark-mode .status-badge.inactive {
+    background: #44403c;
+    color: var(--color-text-muted);
+}

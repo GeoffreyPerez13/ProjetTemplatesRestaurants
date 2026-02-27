@@ -284,19 +284,19 @@ class LogoBannerController extends BaseController
             exit;
         }
 
-        $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mime = finfo_file($finfo, $file['tmp_name']);
         finfo_close($finfo);
 
         if (!in_array($mime, $allowedMimes)) {
-            $this->addErrorMessage("Type de fichier non autorisé. Formats acceptés: JPG, PNG, GIF, WebP, SVG.", $anchor);
+            $this->addErrorMessage("Type de fichier non autorisé. Formats acceptés: JPG, PNG, GIF, WebP.", $anchor);
             header("Location: ?page=edit-logo-banner&anchor=$anchor");
             exit;
         }
 
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        $allowedExt = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+        $allowedExt = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
         if (!in_array($ext, $allowedExt)) {
             $this->addErrorMessage("Extension de fichier non autorisée.", $anchor);
             header("Location: ?page=edit-logo-banner&anchor=$anchor");

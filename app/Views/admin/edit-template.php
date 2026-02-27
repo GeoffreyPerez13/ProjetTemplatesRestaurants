@@ -24,6 +24,12 @@ require __DIR__ . '/../partials/header.php';
         <div class="message-error"><?= htmlspecialchars($error_message) ?></div>
     <?php endif; ?>
 
+    <!-- Boutons de contrôle généraux pour tous les accordéons -->
+    <div class="global-accordion-controls">
+        <button type="button" id="expand-all-accordions" class="btn"><i class="fas fa-expand-alt"></i> Tout ouvrir</button>
+        <button type="button" id="collapse-all-accordions" class="btn"><i class="fas fa-compress-alt"></i> Tout fermer</button>
+    </div>
+
     <!-- ==================== SECTION 1 : PALETTES DE COULEURS ==================== -->
     <div class="accordion-section template-section">
         <div class="accordion-header">

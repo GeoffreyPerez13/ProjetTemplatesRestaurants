@@ -1,5 +1,15 @@
     </div> <!-- .container : fermeture du conteneur principal -->
 
+    <!-- Boutons de navigation haut/bas (global, toutes les pages) -->
+    <div class="page-navigation-buttons">
+        <button type="button" class="btn-navigation scroll-to-bottom" title="Aller en bas de la page">
+            <i class="fas fa-arrow-down"></i>
+        </button>
+        <button type="button" class="btn-navigation scroll-to-top" title="Aller en haut de la page">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+    </div>
+
     <!-- Lightbox pour afficher les images en grand -->
     <div id="image-lightbox" class="lightbox">
         <span class="lightbox-close">&times;</span>
@@ -11,8 +21,9 @@
         </div>
     </div>
 
-    <!-- Script global : auto-dismiss des messages flash -->
+    <!-- Scripts globaux -->
     <script src="/assets/js/admin/flash-messages.js"></script>
+    <script src="/assets/js/effects/scroll-buttons.js"></script>
 
     <!-- Footer avec mentions légales -->
     <footer class="admin-footer">

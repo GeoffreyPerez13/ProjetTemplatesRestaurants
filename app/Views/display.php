@@ -27,6 +27,7 @@ $displayDir = __DIR__ . '/display/';
         <?php include $displayDir . 'banner.php'; ?>
         <?php include $displayDir . 'carte.php'; ?>
         <?php include $displayDir . 'services.php'; ?>
+        <?php include $displayDir . 'reviews.php'; ?>
         <?php include $displayDir . 'footer.php'; ?>
         <?php include $displayDir . 'lightbox.php'; ?>
 

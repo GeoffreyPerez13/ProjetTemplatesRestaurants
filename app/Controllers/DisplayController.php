@@ -140,6 +140,11 @@ class DisplayController extends BaseController
         $paletteName = $optionModel->get($adminId, 'site_palette') ?: ($optionModel->get($adminId, 'site_template') ?: 'classic');
         $layoutName  = $optionModel->get($adminId, 'site_layout') ?: 'standard';
 
+        // Récupérer les options Google Reviews
+        $googlePlaceId = $optionModel->get($adminId, 'google_place_id');
+        $googleApiKey = $optionModel->get($adminId, 'google_api_key');
+        $googleReviewsEnabled = $optionModel->get($adminId, 'google_reviews_enabled') === '1';
+
         $allowedPalettes = ['classic', 'modern', 'elegant', 'nature', 'rose', 'bistro', 'ocean'];
         $allowedLayouts  = ['standard', 'bistro', 'ocean'];
 
@@ -173,6 +178,9 @@ class DisplayController extends BaseController
             'socials'      => $socials,
             'templateName' => $paletteName,
             'layoutName'   => $layoutName,
+            'googlePlaceId' => $googlePlaceId,
+            'googleApiKey' => $googleApiKey,
+            'googleReviewsEnabled' => $googleReviewsEnabled
         ]);
     }
 }

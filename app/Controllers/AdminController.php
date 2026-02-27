@@ -188,27 +188,50 @@ class AdminController extends BaseController
 
         // Traitement du formulaire
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $username = trim($_POST['username'] ?? '');
-            $password = trim($_POST['password'] ?? '');
-
-            if (empty($username) || empty($password)) {
-                $error = "Veuillez remplir tous les champs.";
+            // Rate limiting : max 5 tentatives par 15 minutes
+            if (!isset($_SESSION['login_attempts'])) {
+                $_SESSION['login_attempts'] = 0;
+                $_SESSION['login_first_attempt'] = time();
+            }
+            if ($_SESSION['login_attempts'] >= 5 && (time() - $_SESSION['login_first_attempt']) < 900) {
+                $remaining = ceil((900 - (time() - $_SESSION['login_first_attempt'])) / 60);
+                $error = "Trop de tentatives de connexion. Réessayez dans {$remaining} minute(s).";
             } else {
-                $adminModel = new Admin($this->pdo);
-                $user = $adminModel->login($username, $password);
+                // Reset du compteur si 15 minutes écoulées
+                if (isset($_SESSION['login_first_attempt']) && (time() - $_SESSION['login_first_attempt']) >= 900) {
+                    $_SESSION['login_attempts'] = 0;
+                    $_SESSION['login_first_attempt'] = time();
+                }
 
-                if ($user) {
-                    // Authentification réussie
-                    $_SESSION['admin_logged'] = true;
-                    $_SESSION['admin_id'] = $user->id;
-                    $_SESSION['admin_name'] = $user->restaurant_name;
-                    $_SESSION['username'] = $user->username;
+                $username = trim($_POST['username'] ?? '');
+                $password = trim($_POST['password'] ?? '');
 
-                    // Redirection vers le dashboard
-                    header('Location: ?page=dashboard');
-                    exit;
+                if (empty($username) || empty($password)) {
+                    $error = "Veuillez remplir tous les champs.";
                 } else {
-                    $error = "Identifiant ou mot de passe incorrect.";
+                    $adminModel = new Admin($this->pdo);
+                    $user = $adminModel->login($username, $password);
+
+                    if ($user) {
+                        // Reset rate limiting
+                        unset($_SESSION['login_attempts'], $_SESSION['login_first_attempt']);
+
+                        // Régénération de l'ID de session (anti session fixation)
+                        session_regenerate_id(true);
+
+                        // Authentification réussie
+                        $_SESSION['admin_logged'] = true;
+                        $_SESSION['admin_id'] = $user->id;
+                        $_SESSION['admin_name'] = $user->restaurant_name;
+                        $_SESSION['username'] = $user->username;
+
+                        // Redirection vers le dashboard
+                        header('Location: ?page=dashboard');
+                        exit;
+                    } else {
+                        $_SESSION['login_attempts']++;
+                        $error = "Identifiant ou mot de passe incorrect.";
+                    }
                 }
             }
         }

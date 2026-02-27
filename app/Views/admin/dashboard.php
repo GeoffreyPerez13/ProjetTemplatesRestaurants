@@ -1,6 +1,6 @@
 <?php
 $title = "Tableau de bord";
-$scripts = ["js/sections/dashboard/dashboard.js"];
+$scripts = ["js/sections/dashboard/dashboard.js", "js/effects/accordion.js"];
 
 // Formater la date si elle existe
 $formatted_date = null;
@@ -147,7 +147,20 @@ require __DIR__ . '/../partials/header.php';
                             <span class="menu-item-desc">Création de compte</span>
                         </div>
                         <div class="menu-item-arrow">
-                            <i class="fas fa-share"></i>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </a>
+
+                    <a href="?page=manage-clients" class="mobile-menu-item premium">
+                        <div class="menu-item-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="menu-item-content">
+                            <span class="menu-item-title">Gérer les clients Premium</span>
+                            <span class="menu-item-desc">Abonnements et fonctionnalités</span>
+                        </div>
+                        <div class="menu-item-arrow">
+                            <i class="fas fa-chevron-right"></i>
                         </div>
                     </a>
                 <?php endif; ?>
@@ -176,6 +189,9 @@ require __DIR__ . '/../partials/header.php';
             <div class="bottom-left">
                 <?php if ($role === 'SUPER_ADMIN'): ?>
                     <a href="?page=send-invitation" class="btn">Envoyer un lien de création de compte</a>
+                    <a href="?page=manage-clients" class="btn premium-btn">
+                        <i class="fas fa-crown"></i> Gérer les clients Premium
+                    </a>
                 <?php endif; ?>
                 <a href="?page=view-card" class="btn success">Aperçu de la carte</a>
             </div>
@@ -202,61 +218,136 @@ require __DIR__ . '/../partials/header.php';
 
                 <?php if (!empty($demoTokens)): ?>
                     <div class="demo-tokens-list">
-                        <h4>Liens actifs (<?= count($demoTokens) ?>)</h4>
-                        <table class="demo-tokens-table">
-                            <thead>
-                                <tr>
-                                    <th>Utilisateur</th>
-                                    <th>Lien</th>
-                                    <th>Expire le</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($demoTokens as $dt): ?>
-                                    <tr>
-                                        <td>
-                                            <input type="text"
-                                                   class="demo-label-input"
-                                                   data-id="<?= $dt['id'] ?>"
-                                                   value="<?= htmlspecialchars($dt['label'] ?? '') ?>"
-                                                   placeholder="Nom du client..."
-                                                   maxlength="100">
-                                        </td>
-                                        <td>
-                                            <code class="demo-token-link" title="Cliquer pour copier" onclick="navigator.clipboard.writeText(this.textContent.trim()).then(()=>this.classList.add('copied'))"><?= htmlspecialchars(SITE_URL . '/index.php?page=demo-access&token=' . $dt['token']) ?></code>
-                                        </td>
-                                        <td><?= (new DateTime($dt['expires_at']))->format('d/m/Y H:i') ?></td>
-                                        <td>
-                                            <a href="?page=delete-demo-token&id=<?= $dt['id'] ?>" class="btn danger btn-sm" title="Révoquer" onclick="return confirm('Révoquer ce lien ?')"><i class="fas fa-times"></i></a>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                        <!-- Accordion pour les liens actifs -->
+                        <div class="accordion-section demo-tokens-accordion">
+                            <div class="accordion-header">
+                                <h4><i class="fas fa-link"></i> Liens actifs (<?= count($demoTokens) ?>)</h4>
+                                <button type="button" class="accordion-toggle" data-target="demo-tokens-content"><i class="fas fa-chevron-up"></i></button>
+                            </div>
+                            <div id="demo-tokens-content" class="accordion-content expanded prevent-auto-close">
+                                <!-- Boutons d'actions en masse -->
+                                <div class="demo-bulk-actions">
+                                    <button type="button" id="demo-copy-all" class="btn btn-sm" title="Copier tous les liens"><i class="fas fa-copy"></i> Copier tous les liens</button>
+                                    <button type="button" id="demo-delete-selected" class="btn danger btn-sm" style="display:none;" title="Supprimer la sélection"><i class="fas fa-trash"></i> Supprimer la sélection (<span id="demo-selected-count">0</span>)</button>
+                                </div>
+                                <table class="demo-tokens-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="th-checkbox"><input type="checkbox" id="demo-select-all" title="Tout sélectionner"></th>
+                                            <th>Utilisateur</th>
+                                            <th>Lien</th>
+                                            <th>Expire le</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($demoTokens as $dt): ?>
+                                            <tr data-token-id="<?= $dt['id'] ?>">
+                                                <td class="td-checkbox"><input type="checkbox" class="demo-row-check" value="<?= $dt['id'] ?>"></td>
+                                                <td>
+                                                    <input type="text"
+                                                           class="demo-label-input"
+                                                           data-id="<?= $dt['id'] ?>"
+                                                           value="<?= htmlspecialchars($dt['label'] ?? '') ?>"
+                                                           placeholder="Nom du client..."
+                                                           maxlength="100">
+                                                </td>
+                                                <td>
+                                                    <code class="demo-token-link" title="Cliquer pour copier" onclick="navigator.clipboard.writeText(this.textContent.trim()).then(()=>this.classList.add('copied'))"><?= htmlspecialchars(SITE_URL . '/index.php?page=demo-access&token=' . $dt['token']) ?></code>
+                                                </td>
+                                                <td><?= (new DateTime($dt['expires_at']))->format('d/m/Y H:i') ?></td>
+                                                <td>
+                                                    <a href="?page=delete-demo-token&id=<?= $dt['id'] ?>" class="btn danger btn-sm" title="Révoquer" onclick="return confirm('Révoquer ce lien ?')"><i class="fas fa-times"></i></a>
+                                                </td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                     <script>
-                    document.querySelectorAll('.demo-label-input').forEach(function(input) {
-                        var saved = input.value;
-                        function saveLabel() {
-                            var val = input.value.trim();
-                            if (val === saved) return;
-                            saved = val;
-                            input.classList.remove('saved', 'error');
-                            fetch('?page=update-demo-label', {
-                                method: 'POST',
-                                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                                body: 'id=' + encodeURIComponent(input.dataset.id) + '&label=' + encodeURIComponent(val)
-                            })
-                            .then(function(r) { return r.json(); })
-                            .then(function(d) { input.classList.add(d.success ? 'saved' : 'error'); })
-                            .catch(function() { input.classList.add('error'); });
-                        }
-                        input.addEventListener('blur', saveLabel);
-                        input.addEventListener('keydown', function(e) {
-                            if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+                    (function() {
+                        // --- Label auto-save ---
+                        document.querySelectorAll('.demo-label-input').forEach(function(input) {
+                            var saved = input.value;
+                            function saveLabel() {
+                                var val = input.value.trim();
+                                if (val === saved) return;
+                                saved = val;
+                                input.classList.remove('saved', 'error');
+                                fetch('?page=update-demo-label', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                                    body: 'id=' + encodeURIComponent(input.dataset.id) + '&label=' + encodeURIComponent(val)
+                                })
+                                .then(function(r) { return r.json(); })
+                                .then(function(d) { input.classList.add(d.success ? 'saved' : 'error'); })
+                                .catch(function() { input.classList.add('error'); });
+                            }
+                            input.addEventListener('blur', saveLabel);
+                            input.addEventListener('keydown', function(e) {
+                                if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+                            });
                         });
-                    });
+
+                        // --- Checkbox / bulk selection ---
+                        var selectAll = document.getElementById('demo-select-all');
+                        var rowChecks = document.querySelectorAll('.demo-row-check');
+                        var deleteBtn = document.getElementById('demo-delete-selected');
+                        var countSpan = document.getElementById('demo-selected-count');
+                        var copyAllBtn = document.getElementById('demo-copy-all');
+
+                        function updateBulkUI() {
+                            var checked = document.querySelectorAll('.demo-row-check:checked');
+                            countSpan.textContent = checked.length;
+                            deleteBtn.style.display = checked.length > 0 ? 'inline-flex' : 'none';
+                            selectAll.checked = checked.length === rowChecks.length && rowChecks.length > 0;
+                            selectAll.indeterminate = checked.length > 0 && checked.length < rowChecks.length;
+                        }
+
+                        if (selectAll) {
+                            selectAll.addEventListener('change', function() {
+                                rowChecks.forEach(function(cb) { cb.checked = selectAll.checked; });
+                                updateBulkUI();
+                            });
+                        }
+
+                        rowChecks.forEach(function(cb) {
+                            cb.addEventListener('change', updateBulkUI);
+                        });
+
+                        // Suppression en masse
+                        if (deleteBtn) {
+                            deleteBtn.addEventListener('click', function() {
+                                var ids = [];
+                                document.querySelectorAll('.demo-row-check:checked').forEach(function(cb) {
+                                    ids.push(cb.value);
+                                });
+                                if (ids.length === 0) return;
+                                if (!confirm('Supprimer ' + ids.length + ' lien(s) de d\u00e9mo ?')) return;
+                                window.location.href = '?page=delete-demo-tokens-bulk&ids=' + ids.join(',');
+                            });
+                        }
+
+                        // Copier tous les liens
+                        if (copyAllBtn) {
+                            copyAllBtn.addEventListener('click', function() {
+                                var links = [];
+                                document.querySelectorAll('.demo-token-link').forEach(function(el) {
+                                    links.push(el.textContent.trim());
+                                });
+                                navigator.clipboard.writeText(links.join('\n')).then(function() {
+                                    copyAllBtn.innerHTML = '<i class="fas fa-check"></i> Copi\u00e9 !';
+                                    copyAllBtn.classList.add('copied');
+                                    setTimeout(function() {
+                                        copyAllBtn.innerHTML = '<i class="fas fa-copy"></i> Copier tous les liens';
+                                        copyAllBtn.classList.remove('copied');
+                                    }, 2000);
+                                });
+                            });
+                        }
+                    })();
                     </script>
                 <?php endif; ?>
             <?php endif; ?>

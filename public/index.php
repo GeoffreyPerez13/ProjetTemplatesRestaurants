@@ -115,6 +115,12 @@ switch ($page) {
             case 'save-options-batch':
                 $controller->saveOptionsBatch();
                 break;
+            case 'update-google-reviews':
+                $controller->updateGoogleReviews();
+                break;
+            case 'toggle-premium':
+                $controller->togglePremium();
+                break;
             default:
                 $controller->show();
                 break;
@@ -140,6 +146,30 @@ switch ($page) {
         }
         $controller = new DisplayController($pdo);
         $controller->show($slug);
+        break;
+
+    case 'manage-clients':
+        require_once __DIR__ . '/../app/Controllers/ClientManagementController.php';
+        $controller = new ClientManagementController($pdo);
+        $action = $_GET['action'] ?? 'show';
+
+        switch ($action) {
+            case 'activate-subscription':
+                $controller->activateSubscription();
+                break;
+            case 'cancel-subscription':
+                $controller->cancelSubscription();
+                break;
+            case 'extend-subscription':
+                $controller->extendSubscription();
+                break;
+            case 'get-client-details':
+                $controller->getClientDetails();
+                break;
+            default:
+                $controller->show();
+                break;
+        }
         break;
 
     case 'demo':
@@ -245,6 +275,33 @@ switch ($page) {
             $demoTokenModel = new DemoToken($pdo);
             $demoTokenModel->delete($tokenId);
             $_SESSION['success_message'] = "Lien de démo révoqué.";
+        }
+        header('Location: ?page=dashboard');
+        exit;
+
+    case 'delete-demo-tokens-bulk':
+        // Suppression en masse de tokens de démo (SUPER_ADMIN uniquement)
+        if (!isset($_SESSION['admin_logged']) || $_SESSION['admin_logged'] !== true) {
+            header('Location: ?page=login');
+            exit;
+        }
+        $adminModel = new Admin($pdo);
+        $currentAdmin = $adminModel->findById($_SESSION['admin_id']);
+        if (!$currentAdmin || $currentAdmin->role !== 'SUPER_ADMIN') {
+            $_SESSION['error_message'] = "Accès refusé.";
+            header('Location: ?page=dashboard');
+            exit;
+        }
+        $idsParam = $_GET['ids'] ?? '';
+        $ids = array_filter(array_map('intval', explode(',', $idsParam)));
+        if (!empty($ids)) {
+            $demoTokenModel = new DemoToken($pdo);
+            $count = 0;
+            foreach ($ids as $id) {
+                $demoTokenModel->delete($id);
+                $count++;
+            }
+            $_SESSION['success_message'] = "$count lien(s) de démo révoqué(s).";
         }
         header('Location: ?page=dashboard');
         exit;

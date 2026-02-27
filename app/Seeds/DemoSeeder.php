@@ -48,6 +48,8 @@ class DemoSeeder
             $this->createRestaurant();
             $this->createAdmin();
             $this->createContact();
+            $this->createLogo();
+            $this->createBanner();
             $this->createCategories();
             $this->createOptions();
 
@@ -84,14 +86,47 @@ class DemoSeeder
             $adminId = $stmt->fetchColumn();
 
             if ($adminId) {
-                // Supprimer les plats via catégories
+                $basePath = __DIR__ . '/../../public/';
+
+                // Supprimer les fichiers images des plats
                 $stmt = $this->pdo->prepare("SELECT id FROM categories WHERE admin_id = ?");
                 $stmt->execute([$adminId]);
                 $catIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
                 if ($catIds) {
                     $placeholders = str_repeat('?,', count($catIds) - 1) . '?';
+                    // Supprimer fichiers images plats
+                    $stmtImg = $this->pdo->prepare("SELECT image FROM plats WHERE category_id IN ($placeholders) AND image IS NOT NULL");
+                    $stmtImg->execute($catIds);
+                    foreach ($stmtImg->fetchAll(PDO::FETCH_COLUMN) as $img) {
+                        $file = $basePath . $img;
+                        if (file_exists($file)) @unlink($file);
+                    }
                     $this->pdo->prepare("DELETE FROM plat_allergenes WHERE plat_id IN (SELECT id FROM plats WHERE category_id IN ($placeholders))")->execute($catIds);
                     $this->pdo->prepare("DELETE FROM plats WHERE category_id IN ($placeholders)")->execute($catIds);
+                }
+
+                // Supprimer fichiers images catégories
+                $stmtCatImg = $this->pdo->prepare("SELECT image FROM categories WHERE admin_id = ? AND image IS NOT NULL");
+                $stmtCatImg->execute([$adminId]);
+                foreach ($stmtCatImg->fetchAll(PDO::FETCH_COLUMN) as $img) {
+                    $file = $basePath . $img;
+                    if (file_exists($file)) @unlink($file);
+                }
+
+                // Supprimer fichier logo
+                $stmtLogo = $this->pdo->prepare("SELECT filename FROM logos WHERE admin_id = ?");
+                $stmtLogo->execute([$adminId]);
+                $logoFile = $stmtLogo->fetchColumn();
+                if ($logoFile && file_exists($basePath . 'assets/logos/' . $logoFile)) {
+                    @unlink($basePath . 'assets/logos/' . $logoFile);
+                }
+
+                // Supprimer fichier bannière
+                $stmtBanner = $this->pdo->prepare("SELECT filename FROM banners WHERE admin_id = ?");
+                $stmtBanner->execute([$adminId]);
+                $bannerFile = $stmtBanner->fetchColumn();
+                if ($bannerFile && file_exists($basePath . 'assets/banners/' . $bannerFile)) {
+                    @unlink($basePath . 'assets/banners/' . $bannerFile);
                 }
 
                 $this->pdo->prepare("DELETE FROM categories WHERE admin_id = ?")->execute([$adminId]);
@@ -179,17 +214,205 @@ class DemoSeeder
             ],
         ];
 
-        $stmtCat = $this->pdo->prepare("INSERT INTO categories (admin_id, name, created_at, updated_at) VALUES (?, ?, NOW(), NOW())");
-        $stmtPlat = $this->pdo->prepare("INSERT INTO plats (category_id, name, price, description, created_at) VALUES (?, ?, ?, ?, NOW())");
+        $stmtCat = $this->pdo->prepare("INSERT INTO categories (admin_id, name, image, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())");
+        $stmtPlat = $this->pdo->prepare("INSERT INTO plats (category_id, name, price, description, image, created_at) VALUES (?, ?, ?, ?, ?, NOW())");
 
+        // Couleurs par catégorie pour les placeholders
+        $catColors = [
+            'Entrées'  => ['bg' => [245, 158, 11], 'icon' => 'Entrees'],
+            'Plats'     => ['bg' => [220, 38, 38],  'icon' => 'Plats'],
+            'Desserts'  => ['bg' => [168, 85, 247],  'icon' => 'Desserts'],
+            'Boissons'  => ['bg' => [14, 165, 233],  'icon' => 'Boissons'],
+        ];
+
+        $dishIndex = 0;
         foreach ($menu as $catName => $plats) {
-            $stmtCat->execute([$this->adminId, $catName]);
+            // Générer image placeholder pour la catégorie
+            $color = $catColors[$catName] ?? ['bg' => [107, 114, 128], 'icon' => $catName];
+            $catImage = $this->generatePlaceholder(600, 400, $color['bg'], $catName, 'uploads/categories/');
+            
+            $stmtCat->execute([$this->adminId, $catName, $catImage]);
             $catId = $this->pdo->lastInsertId();
 
             foreach ($plats as $plat) {
-                $stmtPlat->execute([$catId, $plat['name'], $plat['price'], $plat['description']]);
+                // Générer image placeholder pour le plat (teinte légèrement variée)
+                $shade = $this->shadeColor($color['bg'], $dishIndex * 12);
+                $dishImage = $this->generatePlaceholder(400, 300, $shade, $plat['name'], 'uploads/dishes/');
+                $stmtPlat->execute([$catId, $plat['name'], $plat['price'], $plat['description'], $dishImage]);
+                $dishIndex++;
             }
         }
+    }
+
+    /**
+     * Crée un logo placeholder pour la démo
+     */
+    private function createLogo()
+    {
+        $dir = __DIR__ . '/../../public/assets/logos/';
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+
+        $filename = 'logo_demo_' . $this->adminId . '.png';
+        $path = $dir . $filename;
+
+        $img = imagecreatetruecolor(300, 300);
+        imagesavealpha($img, true);
+        $transparent = imagecolorallocatealpha($img, 0, 0, 0, 127);
+        imagefill($img, 0, 0, $transparent);
+
+        // Cercle ambré
+        $amber = imagecolorallocate($img, 180, 83, 9);
+        imagefilledellipse($img, 150, 150, 280, 280, $amber);
+
+        // Texte "B" au centre
+        $white = imagecolorallocate($img, 255, 255, 255);
+        $fontSize = 80;
+        $fontFile = $this->getFont();
+        if ($fontFile) {
+            $bbox = imagettfbbox($fontSize, 0, $fontFile, 'B');
+            $x = 150 - ($bbox[2] - $bbox[0]) / 2;
+            $y = 150 + ($bbox[1] - $bbox[7]) / 2;
+            imagettftext($img, $fontSize, 0, (int)$x, (int)$y, $white, $fontFile, 'B');
+        } else {
+            imagestring($img, 5, 140, 140, 'B', $white);
+        }
+
+        imagepng($img, $path);
+        imagedestroy($img);
+
+        $stmt = $this->pdo->prepare("INSERT INTO logos (admin_id, filename, uploaded_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE filename = VALUES(filename), uploaded_at = NOW()");
+        $stmt->execute([$this->adminId, $filename]);
+    }
+
+    /**
+     * Crée une bannière placeholder pour la démo
+     */
+    private function createBanner()
+    {
+        $dir = __DIR__ . '/../../public/assets/banners/';
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+
+        $filename = 'banner_demo_' . $this->adminId . '.png';
+        $path = $dir . $filename;
+
+        $img = imagecreatetruecolor(1200, 400);
+
+        // Dégradé ambré → brun
+        for ($y = 0; $y < 400; $y++) {
+            $ratio = $y / 400;
+            $r = (int)(180 - $ratio * 80);
+            $g = (int)(83 - $ratio * 40);
+            $b = (int)(9 + $ratio * 20);
+            $color = imagecolorallocate($img, max(0, $r), max(0, $g), min(255, $b));
+            imageline($img, 0, $y, 1199, $y, $color);
+        }
+
+        // Texte centré
+        $white = imagecolorallocate($img, 255, 255, 255);
+        $fontFile = $this->getFont();
+        if ($fontFile) {
+            $text = 'Le Bistrot MenuMiam';
+            $bbox = imagettfbbox(36, 0, $fontFile, $text);
+            $x = (1200 - ($bbox[2] - $bbox[0])) / 2;
+            imagettftext($img, 36, 0, (int)$x, 180, $white, $fontFile, $text);
+
+            $sub = 'Cuisine francaise traditionnelle';
+            $bbox2 = imagettfbbox(18, 0, $fontFile, $sub);
+            $x2 = (1200 - ($bbox2[2] - $bbox2[0])) / 2;
+            $semi = imagecolorallocatealpha($img, 255, 255, 255, 40);
+            imagettftext($img, 18, 0, (int)$x2, 230, $semi, $fontFile, $sub);
+        } else {
+            imagestring($img, 5, 480, 180, 'Le Bistrot MenuMiam', $white);
+        }
+
+        imagepng($img, $path);
+        imagedestroy($img);
+
+        $stmt = $this->pdo->prepare("INSERT INTO banners (admin_id, filename, uploaded_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE filename = VALUES(filename), uploaded_at = NOW()");
+        $stmt->execute([$this->adminId, $filename]);
+    }
+
+    /**
+     * Génère une image placeholder PNG colorée avec texte
+     *
+     * @param int    $w     Largeur
+     * @param int    $h     Hauteur
+     * @param array  $rgb   Couleur [r, g, b]
+     * @param string $text  Texte affiché
+     * @param string $subdir Sous-dossier relatif (ex: 'uploads/dishes/')
+     * @return string Chemin relatif pour la BDD
+     */
+    private function generatePlaceholder($w, $h, $rgb, $text, $subdir)
+    {
+        $dir = __DIR__ . '/../../public/' . $subdir;
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+
+        $filename = 'demo_' . uniqid() . '.png';
+        $path = $dir . $filename;
+
+        $img = imagecreatetruecolor($w, $h);
+        $bg = imagecolorallocate($img, $rgb[0], $rgb[1], $rgb[2]);
+        imagefill($img, 0, 0, $bg);
+
+        // Overlay sombre en bas pour lisibilité du texte
+        $overlay = imagecolorallocatealpha($img, 0, 0, 0, 60);
+        imagefilledrectangle($img, 0, (int)($h * 0.6), $w, $h, $overlay);
+
+        // Icône décorative (cercle clair au centre)
+        $light = imagecolorallocatealpha($img, 255, 255, 255, 90);
+        imagefilledellipse($img, (int)($w / 2), (int)($h * 0.35), 80, 80, $light);
+
+        // Texte
+        $white = imagecolorallocate($img, 255, 255, 255);
+        $fontFile = $this->getFont();
+        // Tronquer le texte si trop long
+        $displayText = mb_strlen($text) > 25 ? mb_substr($text, 0, 22) . '...' : $text;
+
+        if ($fontFile) {
+            $fontSize = $w >= 600 ? 20 : 14;
+            $bbox = imagettfbbox($fontSize, 0, $fontFile, $displayText);
+            $x = ($w - ($bbox[2] - $bbox[0])) / 2;
+            $y = $h * 0.8;
+            imagettftext($img, $fontSize, 0, (int)$x, (int)$y, $white, $fontFile, $displayText);
+        } else {
+            $x = ($w - strlen($displayText) * 8) / 2;
+            imagestring($img, 4, max(0, (int)$x), (int)($h * 0.75), $displayText, $white);
+        }
+
+        imagepng($img, $path);
+        imagedestroy($img);
+
+        return $subdir . $filename;
+    }
+
+    /**
+     * Varie légèrement une couleur RGB
+     */
+    private function shadeColor($rgb, $offset)
+    {
+        return [
+            min(255, max(0, $rgb[0] + (int)(sin($offset * 0.5) * 30))),
+            min(255, max(0, $rgb[1] + (int)(cos($offset * 0.3) * 25))),
+            min(255, max(0, $rgb[2] + (int)(sin($offset * 0.7) * 20))),
+        ];
+    }
+
+    /**
+     * Retourne le chemin d'une police TTF disponible, ou null
+     */
+    private function getFont()
+    {
+        // Essayer Arial sur Windows (WAMP)
+        $candidates = [
+            'C:/Windows/Fonts/arial.ttf',
+            'C:/Windows/Fonts/segoeui.ttf',
+            '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+            '/usr/share/fonts/TTF/DejaVuSans.ttf',
+        ];
+        foreach ($candidates as $f) {
+            if (file_exists($f)) return $f;
+        }
+        return null;
     }
 
     private function createOptions()

@@ -58,7 +58,8 @@ class SettingsController extends BaseController
             'title' => 'Paramètres',
             'csrf_token' => $this->getCsrfToken(),
             'success_message' => $success_message,
-            'error_message' => $error_message
+            'error_message' => $error_message,
+            'pdo' => $this->pdo
         ]);
     }
 
@@ -724,5 +725,136 @@ class SettingsController extends BaseController
         $_SESSION['open_template_accordion'] = 'layout';
         header('Location: ?page=edit-template');
         exit;
+    }
+
+    /**
+     * Met à jour les paramètres Google Reviews
+     */
+    public function updateGoogleReviews()
+    {
+        $this->requireLogin();
+        $adminId = $_SESSION['admin_id'];
+
+        // Vérifier le CSRF
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            $this->addErrorMessage('Token de sécurité invalide.');
+            header('Location: ?page=settings&section=google-reviews');
+            exit;
+        }
+
+        try {
+            require_once __DIR__ . '/../Models/OptionModel.php';
+            $optionModel = new OptionModel($this->pdo);
+
+            // Sauvegarder les options Google Reviews
+            $options = [
+                'google_place_id' => $_POST['google_place_id'] ?? '',
+                'google_api_key' => $_POST['google_api_key'] ?? '',
+                'google_reviews_enabled' => ($_POST['google_reviews_enabled'] ?? '0') === '1' ? '1' : '0'
+            ];
+
+            foreach ($options as $key => $value) {
+                $optionModel->set($adminId, $key, $value);
+            }
+
+            $this->addSuccessMessage('Paramètres Google Reviews mis à jour avec succès.');
+            header('Location: ?page=settings&section=google-reviews');
+            exit;
+        } catch (Exception $e) {
+            $this->addErrorMessage('Erreur lors de la mise à jour : ' . $e->getMessage());
+            header('Location: ?page=settings&section=google-reviews');
+            exit;
+        }
+    }
+
+    /**
+     * Gère le basculement des fonctionnalités premium
+     */
+    public function togglePremium()
+    {
+        // Désactiver complètement l'affichage d'erreurs
+        error_reporting(0);
+        ini_set('display_errors', 0);
+        
+        // Capturer TOUT output depuis le début
+        ob_start();
+        
+        // Vérifier manuellement le login sans utiliser requireLogin() pour éviter les redirects
+        if (!isset($_SESSION['admin_logged']) || $_SESSION['admin_logged'] !== true) {
+            ob_clean();
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Non connecté.']);
+            exit;
+        }
+        
+        $adminId = $_SESSION['admin_id'];
+
+        // Récupérer le rôle depuis la base de données (comme dans index.php)
+        require_once __DIR__ . '/../Models/Admin.php';
+        $adminModel = new Admin($this->pdo);
+        $currentAdmin = $adminModel->findById($adminId);
+        
+        if (!$currentAdmin) {
+            ob_clean();
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Administrateur non trouvé.']);
+            exit;
+        }
+        
+        $adminRole = $currentAdmin->role;
+
+        // Nettoyer tout output potentiel
+        ob_clean();
+        
+        // Définir le header JSON APRÈS avoir nettoyé
+        header('Content-Type: application/json');
+        
+        // Debug: loguer les données reçues
+        error_log('togglePremium appelé - POST data: ' . print_r($_POST, true));
+        error_log('Admin ID: ' . $adminId . ', Rôle: ' . $adminRole);
+        
+        // Vérifier le CSRF
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            error_log('CSRF token invalide');
+            echo json_encode(['success' => false, 'message' => 'Token de sécurité invalide.']);
+            exit;
+        }
+
+        // Seuls les super-admins peuvent activer/désactiver pour le moment
+        if ($adminRole !== 'SUPER_ADMIN') {
+            error_log('Rôle non autorisé: ' . $adminRole);
+            echo json_encode(['success' => false, 'message' => 'Accès réservé aux super-administrateurs.']);
+            exit;
+        }
+
+        $featureName = $_POST['feature'] ?? '';
+        if (empty($featureName)) {
+            echo json_encode(['success' => false, 'message' => 'Fonctionnalité non spécifiée.']);
+            exit;
+        }
+
+        try {
+            error_log('Tentative de toggle pour feature: ' . $featureName . ', adminId: ' . $adminId);
+            
+            require_once __DIR__ . '/../Models/PremiumFeature.php';
+            $premiumFeature = new PremiumFeature($this->pdo);
+
+            $premiumFeature->toggle($adminId, $featureName);
+            
+            error_log('Toggle réussi pour feature: ' . $featureName);
+            
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Fonctionnalité ' . $featureName . ' mise à jour avec succès.'
+            ]);
+            exit;
+        } catch (Exception $e) {
+            error_log('Exception dans togglePremium: ' . $e->getMessage());
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Erreur lors de la mise à jour : ' . $e->getMessage()
+            ]);
+            exit;
+        }
     }
 }

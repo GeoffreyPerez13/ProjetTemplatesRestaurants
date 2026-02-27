@@ -4,7 +4,6 @@ $styles = [
     "css/sections/edit-services.css"
 ];
 $scripts = [
-    "js/effects/scroll-buttons.js",
     "js/effects/accordion.js",
     "js/sections/edit-services/edit-services.js"
 ];
@@ -19,12 +18,6 @@ require __DIR__ . '/../partials/header.php';
 </script>
 
 <a class="btn-back" href="?page=dashboard">Retour</a>
-
-<!-- Boutons de navigation haut/bas -->
-<div class="page-navigation-buttons">
-    <button type="button" class="btn-navigation scroll-to-bottom" title="Aller en bas de la page"><i class="fas fa-arrow-down"></i></button>
-    <button type="button" class="btn-navigation scroll-to-top" title="Aller en haut de la page"><i class="fas fa-arrow-up"></i></button>
-</div>
 
 <!-- Boutons de contrôle généraux pour tous les accordéons -->
 <div class="global-accordion-controls">

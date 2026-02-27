@@ -2,21 +2,10 @@
 // Titre de la page pour le header
 $title = "Modifier le contact";
 $scripts = [
-    "js/effects/scroll-buttons.js",
     "js/sections/edit-contact/edit-contact.js"
 ];
 require __DIR__ . '/../partials/header.php';
 ?>
-
-<!-- Boutons de navigation haut/bas -->
-<div class="page-navigation-buttons">
-    <button type="button" class="btn-navigation scroll-to-bottom" title="Aller en bas de la page">
-        <i class="fas fa-arrow-down"></i>
-    </button>
-    <button type="button" class="btn-navigation scroll-to-top" title="Aller en haut de la page">
-        <i class="fas fa-arrow-up"></i>
-    </button>
-</div>
 
 <!-- Script pour passer les paramètres au JavaScript -->
 <script>

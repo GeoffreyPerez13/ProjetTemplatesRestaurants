@@ -650,7 +650,63 @@ html.dark-mode .dark-mode-toggle .fa-sun {
 .demo-tokens-list h4 {
     font-size: 0.95rem;
     color: var(--color-text-light);
-    margin: 0 0 var(--spacing-sm) 0;
+    margin: 0;
+    padding-left: var(--spacing-sm);
+}
+
+.demo-tokens-accordion .accordion-header {
+    padding: var(--spacing-sm) var(--spacing-sm);
+}
+
+.demo-bulk-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: var(--spacing-md);
+    padding: 10px 16px;
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    align-items: center;
+}
+
+.demo-bulk-actions .btn.copied {
+    background: var(--color-success);
+    color: white;
+    border-color: var(--color-success);
+}
+
+#demo-delete-selected {
+    background: var(--color-danger);
+    border: 1.5px solid var(--color-danger);
+    color: white;
+}
+
+#demo-delete-selected:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
+}
+
+.th-checkbox,
+.td-checkbox {
+    width: 36px;
+    text-align: center;
+    padding-left: 10px !important;
+    padding-right: 4px !important;
+}
+
+.th-checkbox input[type="checkbox"],
+.td-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--color-primary);
+}
+
+.demo-row-check:checked ~ td,
+tr:has(.demo-row-check:checked) {
+    background: rgba(180, 83, 9, 0.04);
 }
 
 .demo-tokens-table {
@@ -780,5 +836,14 @@ html.dark-mode .dark-mode-toggle .fa-sun {
 
     .demo-token-link {
         font-size: 0.7rem;
+    }
+
+    .demo-bulk-actions {
+        flex-direction: column;
+    }
+
+    .demo-bulk-actions .btn {
+        width: 100%;
+        justify-content: center;
     }
 }
