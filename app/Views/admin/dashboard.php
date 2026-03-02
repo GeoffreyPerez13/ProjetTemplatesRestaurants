@@ -10,6 +10,8 @@ if (!empty($last_updated)) {
 }
 
 require __DIR__ . '/../partials/header.php';
+$ro = !empty($is_read_only);
+$roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
 ?>
 <div class="dashboard">
     <!-- En-tête avec titre et bouton paramètres -->
@@ -19,6 +21,22 @@ require __DIR__ . '/../partials/header.php';
             <span class="settings-icon">⚙️</span>
         </a>
     </div>
+
+    <!-- Bandeau abonnement inactif -->
+    <?php if (!empty($is_read_only)): ?>
+        <div class="readonly-banner">
+            <div class="readonly-banner-content">
+                <i class="fas fa-lock"></i>
+                <div>
+                    <strong>Votre abonnement est inactif.</strong>
+                    Vous pouvez consulter votre site mais pas le modifier.
+                </div>
+                <a href="?page=settings&section=premium" class="readonly-banner-btn">
+                    <i class="fas fa-crown"></i> Activer mon abonnement
+                </a>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <!-- Messages flash (HTML autorisé pour les liens de démo) -->
     <?php if (!empty($success_message)): ?>
@@ -58,7 +76,7 @@ require __DIR__ . '/../partials/header.php';
 
         <div class="mobile-menu-content" id="mobile-menu-content">
             <div class="mobile-menu-items">
-                <a href="?page=edit-card" class="mobile-menu-item">
+                <a href="<?= $ro ? '#' : '?page=edit-card' ?>" class="mobile-menu-item<?= $ro ? ' readonly-link' : '' ?>" <?= $ro ? $roTitle : '' ?>>
                     <div class="menu-item-icon">
                         <i class="fas fa-edit"></i>
                     </div>
@@ -71,7 +89,7 @@ require __DIR__ . '/../partials/header.php';
                     </div>
                 </a>
 
-                <a href="?page=edit-contact" class="mobile-menu-item">
+                <a href="<?= $ro ? '#' : '?page=edit-contact' ?>" class="mobile-menu-item<?= $ro ? ' readonly-link' : '' ?>" <?= $ro ? $roTitle : '' ?>>
                     <div class="menu-item-icon">
                         <i class="fas fa-address-book"></i>
                     </div>
@@ -84,7 +102,7 @@ require __DIR__ . '/../partials/header.php';
                     </div>
                 </a>
 
-                <a href="?page=edit-logo-banner" class="mobile-menu-item">
+                <a href="<?= $ro ? '#' : '?page=edit-logo-banner' ?>" class="mobile-menu-item<?= $ro ? ' readonly-link' : '' ?>" <?= $ro ? $roTitle : '' ?>>
                     <div class="menu-item-icon">
                         <i class="fas fa-image"></i>
                     </div>
@@ -98,7 +116,7 @@ require __DIR__ . '/../partials/header.php';
                 </a>
 
                 <!-- Services & Options -->
-                <a href="?page=edit-services" class="mobile-menu-item">
+                <a href="<?= $ro ? '#' : '?page=edit-services' ?>" class="mobile-menu-item<?= $ro ? ' readonly-link' : '' ?>" <?= $ro ? $roTitle : '' ?>>
                     <div class="menu-item-icon">
                         <i class="fas fa-concierge-bell"></i>
                     </div>
@@ -111,7 +129,7 @@ require __DIR__ . '/../partials/header.php';
                     </div>
                 </a>
 
-                <a href="?page=edit-template" class="mobile-menu-item">
+                <a href="<?= $ro ? '#' : '?page=edit-template' ?>" class="mobile-menu-item<?= $ro ? ' readonly-link' : '' ?>" <?= $ro ? $roTitle : '' ?>>
                     <div class="menu-item-icon">
                         <i class="fas fa-palette"></i>
                     </div>
@@ -177,11 +195,11 @@ require __DIR__ . '/../partials/header.php';
     <!-- Boutons normaux pour desktop -->
     <div class="dashboard-desktop">
         <div class="dashboard-top-buttons">
-            <a href="?page=edit-card" class="btn">Modifier la carte</a>
-            <a href="?page=edit-contact" class="btn">Modifier le contact</a>
-            <a href="?page=edit-logo-banner" class="btn">Modifier logo/bannière</a>
-            <a href="?page=edit-services" class="btn">Services, paiements & réseaux</a>
-            <a href="?page=edit-template" class="btn">Choisir un template</a>
+            <a href="<?= $ro ? '#' : '?page=edit-card' ?>" class="btn<?= $ro ? ' readonly-link' : '' ?>" <?= $ro ? $roTitle : '' ?>>Modifier la carte</a>
+            <a href="<?= $ro ? '#' : '?page=edit-contact' ?>" class="btn<?= $ro ? ' readonly-link' : '' ?>" <?= $ro ? $roTitle : '' ?>>Modifier le contact</a>
+            <a href="<?= $ro ? '#' : '?page=edit-logo-banner' ?>" class="btn<?= $ro ? ' readonly-link' : '' ?>" <?= $ro ? $roTitle : '' ?>>Modifier logo/bannière</a>
+            <a href="<?= $ro ? '#' : '?page=edit-services' ?>" class="btn<?= $ro ? ' readonly-link' : '' ?>" <?= $ro ? $roTitle : '' ?>>Services, paiements &amp; réseaux</a>
+            <a href="<?= $ro ? '#' : '?page=edit-template' ?>" class="btn<?= $ro ? ' readonly-link' : '' ?>" <?= $ro ? $roTitle : '' ?>>Choisir un template</a>
         </div>
 
         <!-- Zone du bas pour les boutons d'action desktop -->

@@ -337,81 +337,246 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
         <?php elseif ($current_section === 'premium'): ?>
             <!-- Section Fonctionnalités Premium -->
             <div class="settings-section">
-                <link rel="stylesheet" href="assets/css/admin/sections/settings/premium.css">
-                <script src="assets/js/admin/premium.js"></script>
+                <link rel="stylesheet" href="/assets/css/admin/sections/settings/premium.css">
+                <script src="/assets/js/admin/premium.js"></script>
                 <h2>Fonctionnalités Premium</h2>
                 <p class="section-description">Débloquez des fonctionnalités avancées pour votre restaurant.</p>
 
                 <?php
                 require_once __DIR__ . '/../../Models/PremiumFeature.php';
+                require_once __DIR__ . '/../../Models/Admin.php';
                 $premiumFeature = new PremiumFeature($pdo);
+                $adminModel = new Admin($pdo);
+                $currentAdmin = $adminModel->findById($_SESSION['admin_id']);
+                $isSuperAdmin = ($currentAdmin && $currentAdmin->role === 'SUPER_ADMIN');
+
                 $availableFeatures = $premiumFeature->getAvailableFeatures();
                 $userFeatures = $premiumFeature->getAllFeatures($_SESSION['admin_id']);
                 $userFeaturesMap = array_column($userFeatures, 'is_active', 'feature_name');
+                $subscription = $premiumFeature->hasActiveSubscription($_SESSION['admin_id']);
+                $hasPremiumSubscription = !empty($subscription);
+
+                // Récupérer l'abonnement basique
+                $basicSub = null;
+                try {
+                    $stmtB = $pdo->prepare("SELECT * FROM client_subscriptions WHERE admin_id = ? LIMIT 1");
+                    $stmtB->execute([$_SESSION['admin_id']]);
+                    $basicSub = $stmtB->fetch(PDO::FETCH_ASSOC);
+                } catch (Exception $e) { $basicSub = null; }
+                $hasActiveSub = $basicSub && $basicSub['status'] === 'active';
                 ?>
 
-                <div class="premium-features-grid">
-                    <?php foreach ($availableFeatures as $featureKey => $feature): ?>
-                        <div class="premium-feature-card <?= $userFeaturesMap[$featureKey] ?? 0 ? 'active' : '' ?>">
-                            <div class="feature-header">
-                                <div class="feature-icon">
-                                    <i class="fas <?= $feature['icon'] ?>"></i>
-                                </div>
-                                <div class="feature-info">
-                                    <h3><?= htmlspecialchars($feature['name']) ?></h3>
-                                    <p><?= htmlspecialchars($feature['description']) ?></p>
-                                </div>
-                            </div>
-                            <div class="feature-status">
-                                <?php if ($userFeaturesMap[$featureKey] ?? 0): ?>
-                                    <span class="status-badge active">
-                                        <i class="fas fa-check-circle"></i>
-                                        Activé
-                                    </span>
-                                <?php else: ?>
-                                    <span class="status-badge inactive">
-                                        <i class="fas fa-lock"></i>
-                                        Non disponible
-                                    </span>
-                                <?php endif; ?>
-                            </div>
-                            <div class="feature-actions">
-                                <?php if ($featureKey === 'google_reviews'): ?>
-                                    <?php if ($userFeaturesMap[$featureKey] ?? 0): ?>
-                                        <button type="button" class="btn btn-sm configure-google-reviews">
-                                            <i class="fas fa-cog"></i>
-                                            Configurer
-                                        </button>
-                                        <button type="button" class="btn danger btn-sm toggle-premium" 
-                                                data-feature="<?= $featureKey ?>">
-                                            <i class="fas fa-times"></i>
-                                            Désactiver
-                                        </button>
-                                    <?php else: ?>
-                                        <button type="button" class="btn premium-btn toggle-premium" 
-                                                data-feature="<?= $featureKey ?>">
-                                            <i class="fas fa-crown"></i>
-                                            Activer Premium
-                                        </button>
-                                    <?php endif; ?>
-                                <?php else: ?>
-                                    <?php if ($userFeaturesMap[$featureKey] ?? 0): ?>
-                                        <button type="button" class="btn danger btn-sm toggle-premium" 
-                                                data-feature="<?= $featureKey ?>">
-                                            <i class="fas fa-times"></i>
-                                            Désactiver
-                                        </button>
-                                    <?php else: ?>
-                                        <button type="button" class="btn secondary btn-sm" disabled>
-                                            <i class="fas fa-lock"></i>
-                                            Bientôt disponible
-                                        </button>
-                                    <?php endif; ?>
-                                <?php endif; ?>
+                <?php if ($isSuperAdmin): ?>
+                    <div class="admin-notice">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Mode Super-Admin : vous pouvez activer toutes les fonctionnalités sans abonnement.</span>
+                    </div>
+                <?php elseif ($hasPremiumSubscription): ?>
+                    <div class="subscription-badge">
+                        <i class="fas fa-crown"></i>
+                        <span>Abonnement <strong><?= htmlspecialchars(ucfirst($subscription['plan_type'])) ?></strong> actif
+                        <?php if ($subscription['expires_at']): ?>
+                            — expire le <?= (new DateTime($subscription['expires_at']))->format('d/m/Y') ?>
+                        <?php endif; ?>
+                        </span>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Abonnement Basique -->
+                <?php if (!$isSuperAdmin): ?>
+                <div class="basique-sub-card <?= $hasActiveSub ? 'active' : 'inactive' ?>">
+                    <div class="basique-sub-header">
+                        <div class="basique-sub-icon">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <div class="basique-sub-info">
+                            <h3>Abonnement Basique</h3>
+                            <p class="basique-sub-price">9€<span>/mois</span> <small>ou 7€/mois en annuel</small></p>
+                        </div>
+                        <span class="status-badge <?= $hasActiveSub ? 'active' : 'locked' ?>">
+                            <i class="fas <?= $hasActiveSub ? 'fa-check-circle' : 'fa-lock' ?>"></i>
+                            <?= $hasActiveSub ? 'Actif' : 'Inactif' ?>
+                        </span>
+                    </div>
+                    <ul class="basique-sub-features">
+                        <li><i class="fas fa-check"></i> Site vitrine avec URL personnalisée</li>
+                        <li><i class="fas fa-check"></i> Carte en ligne modifiable</li>
+                        <li><i class="fas fa-check"></i> Horaires, contact &amp; Google Maps</li>
+                        <li><i class="fas fa-check"></i> 7 palettes de couleurs &amp; 3 layouts</li>
+                        <li><i class="fas fa-check"></i> Logo, bannière &amp; photos</li>
+                        <li><i class="fas fa-check"></i> SEO, RGPD &amp; mentions légales</li>
+                    </ul>
+                    <?php if (!$hasActiveSub): ?>
+                    <div class="basique-sub-actions">
+                        <a href="?page=stripe-checkout" class="btn btn-primary">
+                            <i class="fab fa-stripe-s"></i> Payer et activer — 9€/mois
+                        </a>
+                        <p class="basique-sub-note">
+                            <i class="fas fa-lock"></i>
+                            Paiement sécurisé par Stripe. Carte de test : <strong>4242 4242 4242 4242</strong> / exp. 12/26 / CVV 123
+                        </p>
+                    </div>
+                    <?php endif; ?>
+                </div>
+
+                <?php if ($hasActiveSub): ?>
+                <!-- Gestion des abonnements actifs -->
+                <?php $activePremiumFeatures = array_filter($userFeaturesMap, fn($v) => (int)$v === 1); ?>
+                <div class="subscription-management">
+                    <h3><i class="fas fa-sliders-h"></i> Gérer mes abonnements</h3>
+
+                    <div class="manage-sub-item">
+                        <div class="manage-sub-info">
+                            <span class="manage-sub-icon"><i class="fas fa-store"></i></span>
+                            <div>
+                                <strong>Abonnement Basique</strong>
+                                <span>9€/mois — actif</span>
                             </div>
                         </div>
+                        <form method="POST" action="?page=cancel-subscription"
+                              class="cancel-form"
+                              data-confirm="Attention : résilier l'abonnement Basique désactivera aussi toutes vos options premium. Confirmer ?">
+                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                            <input type="hidden" name="type" value="basique">
+                            <button type="submit" class="btn btn-sm btn-danger-outline">
+                                <i class="fas fa-times-circle"></i> Résilier
+                            </button>
+                        </form>
+                    </div>
+
+                    <?php foreach ($activePremiumFeatures as $featureKey => $_ignore): ?>
+                        <?php $featureDef = $availableFeatures[$featureKey] ?? null; if (!$featureDef) continue; ?>
+                        <div class="manage-sub-item manage-sub-premium">
+                            <div class="manage-sub-info">
+                                <span class="manage-sub-icon premium-icon"><i class="fas <?= $featureDef['icon'] ?>"></i></span>
+                                <div>
+                                    <strong><?= htmlspecialchars($featureDef['name']) ?></strong>
+                                    <span>+<?= (int)$featureDef['price_monthly'] ?>€/mois</span>
+                                </div>
+                            </div>
+                            <form method="POST" action="?page=cancel-subscription"
+                                  class="cancel-form"
+                                  data-confirm="Supprimer l'option «<?= htmlspecialchars($featureDef['name']) ?>» ?">
+                                <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                                <input type="hidden" name="type" value="premium">
+                                <input type="hidden" name="feature" value="<?= htmlspecialchars($featureKey) ?>">
+                                <button type="submit" class="btn btn-sm btn-danger-outline">
+                                    <i class="fas fa-trash-alt"></i> Supprimer
+                                </button>
+                            </form>
+                        </div>
                     <?php endforeach; ?>
+
+                    <?php if (empty($activePremiumFeatures)): ?>
+                    <p class="manage-sub-empty">
+                        <i class="fas fa-info-circle"></i>
+                        Aucune option premium active pour le moment.
+                    </p>
+                    <?php endif; ?>
                 </div>
+                <?php endif; ?>
+                <?php endif; ?>
+
+                <div class="premium-section-divider">
+                    <span><i class="fas fa-bolt"></i> Options premium à la carte</span>
+                </div>
+
+                <form method="POST" action="?page=stripe-checkout" id="premium-cart-form">
+                    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+
+                    <div class="premium-features-grid">
+                        <?php foreach ($availableFeatures as $featureKey => $feature): ?>
+                            <?php
+                            $isActive           = (int)($userFeaturesMap[$featureKey] ?? 0) === 1;
+                            $canActivateDirectly = $isSuperAdmin && !$isActive;
+                            $isSelectable       = !$isSuperAdmin && $hasActiveSub && !$isActive;
+                            $isLocked           = !$isSuperAdmin && !$hasActiveSub && !$isActive;
+                            $cardClass          = $isActive ? 'active' : ($isSelectable ? 'selectable' : '');
+                            ?>
+                            <div class="premium-feature-card <?= $cardClass ?>"
+                                 <?= $isSelectable ? 'data-price="' . (int)$feature['price_monthly'] . '" data-feature="' . htmlspecialchars($featureKey) . '"' : '' ?>>
+                                <div class="feature-header">
+                                    <div class="feature-icon">
+                                        <i class="fas <?= $feature['icon'] ?>"></i>
+                                    </div>
+                                    <div class="feature-info">
+                                        <h3><?= htmlspecialchars($feature['name']) ?></h3>
+                                        <p><?= htmlspecialchars($feature['description']) ?></p>
+                                    </div>
+                                </div>
+
+                                <?php if (!$isActive): ?>
+                                <div class="feature-price">
+                                    <span class="feature-price-monthly">+<?= (int)$feature['price_monthly'] ?>€<small>/mois</small></span>
+                                    <span class="feature-price-annual">+<?= (int)$feature['price_annual'] ?>€<small>/mois en annuel</small></span>
+                                </div>
+                                <?php endif; ?>
+
+                                <div class="feature-status">
+                                    <?php if ($isActive): ?>
+                                        <span class="status-badge active">
+                                            <i class="fas fa-check-circle"></i> Activé
+                                        </span>
+                                    <?php elseif ($canActivateDirectly || $isSelectable): ?>
+                                        <span class="status-badge available">
+                                            <i class="fas fa-unlock"></i> Disponible
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="status-badge locked">
+                                            <i class="fas fa-lock"></i> Basique requis
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+
+                                <div class="feature-actions">
+                                    <?php if ($isActive): ?>
+                                        <?php if ($featureKey === 'google_reviews'): ?>
+                                            <button type="button" class="btn btn-sm configure-google-reviews">
+                                                <i class="fas fa-cog"></i> Configurer
+                                            </button>
+                                        <?php endif; ?>
+                                        <button type="button" class="btn danger btn-sm toggle-premium"
+                                                data-feature="<?= $featureKey ?>">
+                                            <i class="fas fa-times"></i> Désactiver
+                                        </button>
+                                    <?php elseif ($canActivateDirectly): ?>
+                                        <button type="button" class="btn premium-btn toggle-premium"
+                                                data-feature="<?= $featureKey ?>">
+                                            <i class="fas fa-bolt"></i> Activer
+                                        </button>
+                                    <?php elseif ($isSelectable): ?>
+                                        <label class="feature-select-label">
+                                            <input type="checkbox" name="features[]"
+                                                   value="<?= htmlspecialchars($featureKey) ?>"
+                                                   class="feature-checkbox">
+                                            <span class="feature-checkmark"></span>
+                                            Sélectionner
+                                        </label>
+                                    <?php else: ?>
+                                        <button type="button" class="btn premium-btn btn-sm" disabled>
+                                            <i class="fas fa-lock"></i> Basique requis
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <?php if ($hasActiveSub && !$isSuperAdmin): ?>
+                    <div class="premium-cart-bar" id="premium-cart-bar">
+                        <div class="cart-info">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span><strong id="cart-count">0</strong> option(s) sélectionnée(s)</span>
+                            <span class="cart-sep">·</span>
+                            <span>Total : <strong id="cart-total">0€</strong>/mois</span>
+                        </div>
+                        <button type="submit" class="btn btn-primary cart-checkout-btn"
+                                id="cart-checkout-btn" disabled>
+                            <i class="fab fa-stripe-s"></i> Payer et activer
+                        </button>
+                    </div>
+                    <?php endif; ?>
+                </form>
 
                 <!-- Configuration Google Reviews (affichée si activé) -->
                 <div id="google-reviews-config" class="google-reviews-config" style="display: none;">
@@ -491,9 +656,9 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                     <div class="info-card">
                         <h4><i class="fas fa-info-circle"></i> Comment ça marche ?</h4>
                         <ul>
-                            <li>Les fonctionnalités Premium nécessitent un abonnement MenuMiam Premium</li>
-                            <li>Contactez-nous à <a href="mailto:premium@menumiam.fr">premium@menumiam.fr</a> pour souscrire</li>
-                            <li>Pour les tests : les super-admins peuvent activer/désactiver les fonctionnalités</li>
+                            <li>Souscrivez un abonnement Premium pour débloquer les fonctionnalités</li>
+                            <li>Activez et configurez les fonctionnalités directement depuis cette page</li>
+                            <li>Contactez-nous à <a href="mailto:premium@menumiam.fr">premium@menumiam.fr</a> pour souscrire ou pour toute question</li>
                         </ul>
                     </div>
                 </div>

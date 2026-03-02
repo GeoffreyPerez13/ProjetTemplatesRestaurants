@@ -102,6 +102,87 @@
     color: var(--color-text-light);
 }
 
+.status-badge.available {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.status-badge.locked {
+    background: var(--color-bg-warm);
+    color: var(--color-text-muted);
+}
+
+/* Carte disponible (abonnement ok, pas encore activé) */
+.premium-feature-card.available {
+    border-color: #93c5fd;
+    background: linear-gradient(135deg, var(--color-bg-alt), rgba(59, 130, 246, 0.03));
+}
+
+.premium-feature-card.available::before {
+    opacity: 0.5;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+/* Bandeau Super-Admin */
+.admin-notice {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 1px solid #f59e0b;
+    border-radius: var(--radius-md);
+    color: #92400e;
+    font-size: 0.9rem;
+    margin-bottom: var(--spacing-lg);
+}
+
+.admin-notice i {
+    color: #d97706;
+    font-size: 1.1rem;
+}
+
+/* Badge abonnement */
+.subscription-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: linear-gradient(135deg, rgba(212, 168, 83, 0.1), rgba(212, 168, 83, 0.05));
+    border: 1px solid #d4a853;
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-size: 0.9rem;
+    margin-bottom: var(--spacing-lg);
+}
+
+.subscription-badge i {
+    color: #d4a853;
+    font-size: 1.1rem;
+}
+
+/* Dark mode */
+body.dark-mode .admin-notice {
+    background: linear-gradient(135deg, #451a03, #78350f);
+    border-color: #b45309;
+    color: #fde68a;
+}
+
+body.dark-mode .subscription-badge {
+    background: linear-gradient(135deg, rgba(212, 168, 83, 0.15), rgba(212, 168, 83, 0.05));
+    border-color: #b8860b;
+}
+
+body.dark-mode .status-badge.available {
+    background: #1e3a5f;
+    color: #93c5fd;
+}
+
+body.dark-mode .status-badge.locked {
+    background: var(--color-bg-warm);
+    color: var(--color-text-muted);
+}
+
 .feature-actions {
     display: flex;
     gap: var(--spacing-sm);
@@ -479,6 +560,177 @@
     }
 }
 
+/* ==================== ABONNEMENT BASIQUE CARD ==================== */
+.basique-sub-card {
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    background: var(--color-bg-alt);
+    transition: all 0.3s ease;
+}
+
+.basique-sub-card.active {
+    border-color: var(--color-success);
+    background: linear-gradient(135deg, var(--color-bg-alt), rgba(22, 163, 74, 0.04));
+}
+
+.basique-sub-card.inactive {
+    border-color: #f59e0b;
+    background: linear-gradient(135deg, var(--color-bg-alt), rgba(245, 158, 11, 0.04));
+}
+
+.basique-sub-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.basique-sub-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--color-primary), #d4a853);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.basique-sub-icon i {
+    font-size: 1.3rem;
+    color: white;
+}
+
+.basique-sub-info {
+    flex: 1;
+}
+
+.basique-sub-info h3 {
+    margin: 0 0 4px 0;
+    font-size: 1.1rem;
+    color: var(--color-text);
+}
+
+.basique-sub-price {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.basique-sub-price span {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--color-text-muted);
+}
+
+.basique-sub-price small {
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    margin-left: 6px;
+}
+
+.basique-sub-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--spacing-md) 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 6px 20px;
+}
+
+.basique-sub-features li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    color: var(--color-text-light);
+}
+
+.basique-sub-features li i {
+    color: var(--color-success);
+    font-size: 0.78rem;
+    flex-shrink: 0;
+}
+
+.basique-sub-actions {
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border);
+}
+
+.basique-sub-actions .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.basique-sub-actions .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(180, 83, 9, 0.3);
+}
+
+.basique-sub-note {
+    margin: 10px 0 0 0;
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.basique-sub-note i {
+    color: var(--color-primary);
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+/* Séparateur entre Basique et options premium */
+.premium-section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: var(--spacing-lg) 0 var(--spacing-sm) 0;
+    color: var(--color-text-muted);
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.premium-section-divider::before,
+.premium-section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border);
+}
+
+.premium-section-divider span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    padding: 0 4px;
+}
+
+.premium-section-divider i {
+    color: var(--color-primary);
+}
+
 /* Dark mode */
 body.dark-mode .premium-feature-card {
     background: var(--color-bg);
@@ -496,4 +748,320 @@ body.dark-mode .info-card {
 body.dark-mode .status-badge.inactive {
     background: #44403c;
     color: var(--color-text-muted);
+}
+
+/* ───────────────────────────────────────────────
+   Bouton désactivé (Basique requis)
+─────────────────────────────────────────────── */
+.btn.premium-btn:disabled,
+.btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(60%);
+}
+
+/* ───────────────────────────────────────────────
+   Prix sur les cartes options premium
+─────────────────────────────────────────────── */
+.feature-price {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: var(--spacing-xs) 0 var(--spacing-sm) 0;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--color-bg-warm, #fef7ed);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--color-primary);
+}
+
+.feature-price-monthly {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.feature-price-monthly small,
+.feature-price-annual small {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    margin-left: 2px;
+}
+
+.feature-price-annual {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+}
+
+/* ───────────────────────────────────────────────
+   Carte sélectionnable / sélectionnée
+─────────────────────────────────────────────── */
+.premium-feature-card.selectable {
+    cursor: pointer;
+    border-style: dashed;
+    border-color: var(--color-border);
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.premium-feature-card.selectable:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.1);
+}
+
+.premium-feature-card.selected {
+    border-color: var(--color-primary) !important;
+    border-style: solid !important;
+    background: linear-gradient(135deg, #fff, rgba(180, 83, 9, 0.05));
+    box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.15), var(--shadow-md);
+}
+
+/* ───────────────────────────────────────────────
+   Checkbox personnalisée "Sélectionner"
+─────────────────────────────────────────────── */
+.feature-select-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    padding: 8px 14px;
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    transition: background 0.15s, color 0.15s;
+    user-select: none;
+}
+
+.feature-select-label:hover {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.feature-checkbox {
+    display: none;
+}
+
+.feature-checkmark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid currentColor;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.feature-checkbox:checked + .feature-checkmark::after {
+    content: '';
+    width: 10px;
+    height: 6px;
+    border-left: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: rotate(-45deg) translateY(-1px);
+    display: block;
+}
+
+/* Quand coché : fond plein sur le label */
+.feature-checkbox:checked ~ .feature-checkmark,
+.feature-select-label:has(.feature-checkbox:checked) {
+    background: var(--color-primary);
+    color: #fff;
+    border-color: var(--color-primary);
+}
+
+/* ───────────────────────────────────────────────
+   Barre de panier flottante
+─────────────────────────────────────────────── */
+.premium-cart-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    position: sticky;
+    bottom: 20px;
+    z-index: 100;
+    margin-top: var(--spacing-lg);
+    padding: 14px 20px;
+    background: var(--color-bg-alt, #fff);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl, 0 10px 40px rgba(0,0,0,0.15));
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity 0.25s, transform 0.25s;
+}
+
+.premium-cart-bar.cart-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.cart-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.92rem;
+    color: var(--color-text);
+    flex-wrap: wrap;
+}
+
+.cart-info i {
+    color: var(--color-primary);
+    font-size: 1rem;
+}
+
+.cart-info strong {
+    color: var(--color-primary);
+}
+
+.cart-sep {
+    color: var(--color-text-muted);
+}
+
+.cart-checkout-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* ───────────────────────────────────────────────
+   Section gestion des abonnements actifs
+─────────────────────────────────────────────── */
+.subscription-management {
+    background: var(--color-bg-alt, #fff);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.subscription-management h3 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 var(--spacing-sm) 0;
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.manage-sub-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.manage-sub-item:last-child,
+.manage-sub-item:last-of-type {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.manage-sub-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.manage-sub-icon {
+    width: 30px;
+    height: 30px;
+    background: var(--color-bg-warm, #fef7ed);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--color-primary);
+    font-size: 0.78rem;
+}
+
+.manage-sub-icon.premium-icon {
+    background: rgba(180, 83, 9, 0.08);
+}
+
+.manage-sub-info > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.manage-sub-info strong {
+    font-size: 0.88rem;
+    color: var(--color-text);
+    line-height: 1.2;
+}
+
+.manage-sub-info span {
+    font-size: 0.76rem;
+    color: var(--color-text-muted);
+}
+
+.manage-sub-empty {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 0 0 0;
+    margin: 0;
+}
+
+/* Bouton danger outline */
+.btn-danger-outline {
+    background: transparent;
+    color: #dc2626;
+    border: 1.5px solid #dc2626;
+    padding: 5px 12px;
+    border-radius: var(--radius-md);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+
+.btn-danger-outline:hover {
+    background: #dc2626;
+    color: #fff;
+}
+
+/* Dark mode additions */
+body.dark-mode .feature-price {
+    background: var(--color-bg);
+}
+
+body.dark-mode .premium-feature-card.selected {
+    background: linear-gradient(135deg, var(--color-bg), rgba(180, 83, 9, 0.1));
+}
+
+body.dark-mode .premium-cart-bar {
+    background: var(--color-bg-alt);
+    border-color: var(--color-primary);
+}
+
+@media (max-width: 600px) {
+    .premium-cart-bar {
+        flex-direction: column;
+        align-items: stretch;
+        bottom: 10px;
+    }
+    .cart-checkout-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }

@@ -14,7 +14,7 @@ try {
     $sql = "CREATE TABLE IF NOT EXISTS client_subscriptions (
         id INT AUTO_INCREMENT PRIMARY KEY,
         admin_id INT NOT NULL,
-        plan_type ENUM('free', 'premium', 'pro') NOT NULL DEFAULT 'free',
+        plan_type ENUM('basique') NOT NULL DEFAULT 'basique',
         status ENUM('active', 'inactive', 'cancelled', 'expired') NOT NULL DEFAULT 'inactive',
         price_per_month DECIMAL(10,2) DEFAULT 0.00,
         features_enabled JSON DEFAULT NULL,
@@ -40,31 +40,31 @@ try {
         'google_reviews' => [
             'name' => 'Avis Google',
             'description' => 'Affichage des avis Google sur la vitrine',
-            'price_per_month' => 19.00
+            'price_per_month' => 5.00
         ],
         'advanced_analytics' => [
             'name' => 'Statistiques avancées',
             'description' => 'Analytics détaillés du trafic et performances',
-            'price_per_month' => 15.00
+            'price_per_month' => 5.00
         ],
         'online_booking' => [
             'name' => 'Réservations en ligne',
             'description' => 'Système de réservation intégré',
-            'price_per_month' => 25.00
+            'price_per_month' => 8.00
         ],
         'delivery_integration' => [
             'name' => 'Intégration livraison',
             'description' => 'Connexion Uber Eats, Deliveroo, etc.',
-            'price_per_month' => 20.00
+            'price_per_month' => 7.00
         ]
     ];
 
-    // Insérer les abonnements existants comme 'free'
-    $sql = "INSERT IGNORE INTO client_subscriptions (admin_id, plan_type, status, features_enabled) 
-            SELECT id, 'free', 'active', NULL FROM admins";
+    // Insérer les abonnements existants comme 'basique' actif
+    $sql = "INSERT IGNORE INTO client_subscriptions (admin_id, plan_type, status, price_per_month, started_at) 
+            SELECT id, 'basique', 'active', 9.00, NOW() FROM admins WHERE role = 'ADMIN'";
     $pdo->exec($sql);
 
-    echo "Abonnements initialisés pour tous les admins !\n";
+    echo "Abonnements basiques initialisés pour tous les admins existants !\n";
 
 } catch (Exception $e) {
     echo "Erreur : " . $e->getMessage() . "\n";

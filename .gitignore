@@ -5,6 +5,7 @@
 # ============================================================
 
 # --- Fichiers sensibles (⚠️ à ne jamais versionner)
+config.php
 config/config.php
 config/database.php
 config/cron_secrets.php

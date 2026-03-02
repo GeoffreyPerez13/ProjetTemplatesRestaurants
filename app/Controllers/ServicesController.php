@@ -54,6 +54,7 @@ class ServicesController extends BaseController
     public function save()
     {
         $this->requireLogin();
+        $this->requireActiveSubscription();
         $admin_id = $_SESSION['admin_id'];
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

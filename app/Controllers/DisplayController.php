@@ -164,6 +164,7 @@ class DisplayController extends BaseController
 
         $this->render('display', [
             'restaurant'   => $restaurant,
+            'adminId'      => $adminId,
             'logo'         => $logo,
             'banner'       => $banner,
             'carteMode'    => $carteMode,

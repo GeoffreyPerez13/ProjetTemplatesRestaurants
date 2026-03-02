@@ -80,6 +80,143 @@ class AdminController extends BaseController
     }
 
     /**
+     * Inscription libre depuis la page vitrine (sans invitation)
+     */
+    public function autoRegister()
+    {
+        // Si déjà connecté, rediriger vers le dashboard
+        if (isset($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true) {
+            header('Location: ?page=dashboard');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Vérifier le CSRF
+            if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+                $this->addErrorMessage('Token de sécurité invalide.', '');
+                header('Location: ?page=auto-register');
+                exit;
+            }
+
+            $username = trim($_POST['username'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $restaurantName = trim($_POST['restaurant_name'] ?? '');
+            $password = trim($_POST['password'] ?? '');
+            $confirmPassword = trim($_POST['confirm_password'] ?? '');
+            $error = null;
+
+            // Validations
+            if (empty($username) || empty($email) || empty($restaurantName) || empty($password) || empty($confirmPassword)) {
+                $error = "Tous les champs sont obligatoires.";
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $error = "L'adresse email n'est pas valide.";
+            } elseif (strlen($username) < 3) {
+                $error = "Le nom d'utilisateur doit contenir au moins 3 caractères.";
+            } elseif (strlen($restaurantName) < 2) {
+                $error = "Le nom du restaurant doit contenir au moins 2 caractères.";
+            } else {
+                $passwordErrors = Validator::validatePassword($password, $confirmPassword);
+                if (!empty($passwordErrors)) {
+                    $error = implode('<br>', $passwordErrors);
+                }
+            }
+
+            if ($error) {
+                $_SESSION['form_data'] = [
+                    'username' => $username,
+                    'email' => $email,
+                    'restaurant_name' => $restaurantName
+                ];
+                $this->addErrorMessage($error, '');
+                header('Location: ?page=auto-register');
+                exit;
+            }
+
+            // Créer le compte
+            $adminModel = new Admin($this->pdo);
+            $adminId = $adminModel->createAccountDirect($username, $email, $restaurantName, $password);
+
+            if ($adminId) {
+                // Créer l'abonnement basique (inactif par défaut, activé après paiement)
+                try {
+                    $stmt = $this->pdo->prepare("
+                        INSERT INTO client_subscriptions (admin_id, plan_type, status, price_per_month, started_at)
+                        VALUES (?, 'basique', 'inactive', 9.00, NULL)
+                    ");
+                    $stmt->execute([$adminId]);
+                } catch (Exception $e) {
+                    error_log("Erreur création abonnement: " . $e->getMessage());
+                }
+
+                $this->addSuccessMessage("Compte créé ! Un email de confirmation vous a été envoyé. Cliquez sur le lien dans le mail pour activer votre compte.", '');
+                header('Location: ?page=login');
+                exit;
+            } else {
+                $_SESSION['form_data'] = [
+                    'username' => $username,
+                    'email' => $email,
+                    'restaurant_name' => $restaurantName
+                ];
+                $this->addErrorMessage("Erreur lors de la création du compte. Le nom d'utilisateur ou l'email existe peut-être déjà.", '');
+                header('Location: ?page=auto-register');
+                exit;
+            }
+        }
+
+        // Affichage du formulaire
+        $messages = $this->getFlashMessages();
+        $form_data = $_SESSION['form_data'] ?? [];
+        unset($_SESSION['form_data']);
+
+        $this->render('admin/auto-register', [
+            'success_message' => $messages['success_message'],
+            'error_message' => $messages['error_message'],
+            'csrf_token' => $this->getCsrfToken(),
+            'form_data' => $form_data
+        ]);
+    }
+
+    /**
+     * Vérifie le token de confirmation d'email et active le compte
+     */
+    public function verifyEmail()
+    {
+        $token = trim($_GET['token'] ?? '');
+
+        if (empty($token)) {
+            $this->addErrorMessage('Lien de confirmation invalide.');
+            header('Location: ?page=login');
+            exit;
+        }
+
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT id, username FROM admins
+                WHERE verification_token = ? AND email_verified = 0
+            ");
+            $stmt->execute([$token]);
+            $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            $admin = null;
+        }
+
+        if (!$admin) {
+            $this->addErrorMessage('Ce lien est invalide ou a déjà été utilisé.');
+            header('Location: ?page=login');
+            exit;
+        }
+
+        // Marquer l'email comme vérifié
+        $this->pdo->prepare("
+            UPDATE admins SET email_verified = 1, verification_token = NULL WHERE id = ?
+        ")->execute([$admin['id']]);
+
+        $this->addSuccessMessage('Votre email a été confirmé ! Vous pouvez maintenant vous connecter.');
+        header('Location: ?page=login');
+        exit;
+    }
+
+    /**
      * Inscription via un lien d'invitation
      */
     public function register()
@@ -212,7 +349,10 @@ class AdminController extends BaseController
                     $adminModel = new Admin($this->pdo);
                     $user = $adminModel->login($username, $password);
 
-                    if ($user) {
+                    if ($user === 'NOT_VERIFIED') {
+                        $_SESSION['login_attempts']++;
+                        $error = "Veuillez confirmer votre adresse email avant de vous connecter. Vérifiez votre boîte mail (et vos spams).";
+                    } elseif ($user) {
                         // Reset rate limiting
                         unset($_SESSION['login_attempts'], $_SESSION['login_first_attempt']);
 
@@ -338,6 +478,7 @@ class AdminController extends BaseController
             'restaurant_id' => $restaurant_id,
             'slug' => $slug,
             'is_demo' => $this->isDemoMode(),
+            'is_read_only' => $this->isReadOnly(),
             'demoTokens' => $demoTokens,
             'demoExists' => $demoExists,
         ]);

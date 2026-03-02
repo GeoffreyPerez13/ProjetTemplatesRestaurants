@@ -1,3 +1,77 @@
+/* ==================== READ-ONLY BANNER ==================== */
+.readonly-banner {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 1.5px solid #f59e0b;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.readonly-banner-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.readonly-banner-content > i {
+    font-size: 1.3rem;
+    color: #d97706;
+    flex-shrink: 0;
+}
+
+.readonly-banner-content > div {
+    flex: 1;
+    min-width: 200px;
+    color: #92400e;
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.readonly-banner-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    color: white;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.readonly-banner-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);
+}
+
+html.dark-mode .readonly-banner {
+    background: linear-gradient(135deg, #451a03, #78350f);
+    border-color: #b45309;
+}
+
+html.dark-mode .readonly-banner-content > i {
+    color: #fbbf24;
+}
+
+html.dark-mode .readonly-banner-content > div {
+    color: #fde68a;
+}
+
+/* ==================== READ-ONLY LINKS ==================== */
+.readonly-link,
+.readonly-link:hover {
+    opacity: 0.42 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    filter: grayscale(55%) !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
 /* ==================== DASHBOARD ==================== */
 .dashboard {
     display: flex;

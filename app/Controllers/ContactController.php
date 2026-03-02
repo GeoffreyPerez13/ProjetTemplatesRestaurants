@@ -33,6 +33,7 @@ class ContactController extends BaseController
 
         // 3. Traitement du formulaire POST
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->requireActiveSubscription();
             // Récupérer l'ancre du formulaire
             $anchor = $_POST['anchor'] ?? 'edit-contact-form';
             

@@ -34,6 +34,10 @@ class Admin
     public $reset_token;
     /** @var string|null Date d'expiration du token de reset */
     public $reset_token_expiry;
+    /** @var int Email vérifié (0 = non, 1 = oui) */
+    public $email_verified = 1;
+    /** @var string|null Token de vérification d'email */
+    public $verification_token;
 
     /**
      * @param PDO $pdo Connexion à la base de données
@@ -193,6 +197,74 @@ class Admin
             $this->pdo->rollBack();
             error_log("Erreur création compte: " . $e->getMessage());
             error_log("Trace: " . $e->getTraceAsString());
+            return false;
+        }
+    }
+
+    /**
+     * Crée un compte directement (inscription libre depuis la page vitrine)
+     * Sans invitation, l'utilisateur fournit tous les champs
+     *
+     * @param string $username       Nom d'utilisateur
+     * @param string $email          Email
+     * @param string $restaurantName Nom du restaurant
+     * @param string $password       Mot de passe en clair (sera hashé)
+     * @return int|false             ID de l'admin créé ou false en cas d'erreur
+     */
+    public function createAccountDirect($username, $email, $restaurantName, $password)
+    {
+        try {
+            $this->pdo->beginTransaction();
+
+            // Vérifier si le username existe déjà
+            $stmt = $this->pdo->prepare("SELECT id FROM admins WHERE username = ?");
+            $stmt->execute([$username]);
+            if ($stmt->fetch()) {
+                $this->pdo->rollBack();
+                return false;
+            }
+
+            // Vérifier si l'email existe déjà
+            $stmt = $this->pdo->prepare("SELECT id FROM admins WHERE email = ?");
+            $stmt->execute([$email]);
+            if ($stmt->fetch()) {
+                $this->pdo->rollBack();
+                return false;
+            }
+
+            // 1. Créer le restaurant
+            $slug = $this->generateSlug($restaurantName);
+
+            $stmt = $this->pdo->prepare("
+                INSERT INTO restaurants (name, slug, created_at, updated_at) 
+                VALUES (?, ?, NOW(), NOW())
+            ");
+            $stmt->execute([$restaurantName, $slug]);
+            $restaurantId = $this->pdo->lastInsertId();
+
+            // 2. Créer l'admin avec token de vérification email
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $verificationToken = bin2hex(random_bytes(32));
+
+            $stmt = $this->pdo->prepare("
+                INSERT INTO admins (username, email, email_verified, verification_token, password, restaurant_name, restaurant_id, role) 
+                VALUES (?, ?, 0, ?, ?, ?, ?, 'ADMIN')
+            ");
+            $stmt->execute([$username, $email, $verificationToken, $hashedPassword, $restaurantName, $restaurantId]);
+            $adminId = $this->pdo->lastInsertId();
+
+            // 3. Créer les options par défaut
+            $this->createDefaultOptions($adminId);
+
+            $this->pdo->commit();
+
+            // 4. Envoyer l'email de confirmation (hors transaction)
+            $this->sendVerificationEmail($email, $username, $verificationToken);
+
+            return $adminId;
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            error_log("Erreur création compte direct: " . $e->getMessage());
             return false;
         }
     }
@@ -368,10 +440,50 @@ class Admin
     public function login($username, $password)
     {
         $admin = $this->findByUsername($username);
-        if ($admin && $admin->verifyPassword($password)) {
-            return $admin;
+        if (!$admin || !$admin->verifyPassword($password)) {
+            return null;
         }
-        return null;
+        if (isset($admin->email_verified) && !(int)$admin->email_verified) {
+            return 'NOT_VERIFIED';
+        }
+        return $admin;
+    }
+
+    /**
+     * Envoie un email de confirmation de compte
+     *
+     * @param string $email Email du destinataire
+     * @param string $username Nom d'utilisateur
+     * @param string $token Token de vérification
+     * @return bool
+     */
+    public function sendVerificationEmail($email, $username, $token)
+    {
+        $verifyLink = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
+            . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')
+            . '/ProjetTemplatesRestaurants/?page=verify-email&token=' . urlencode($token);
+
+        $subject = "Confirmez votre adresse email — MenuMiam";
+        $body = "
+        <html><body style='font-family: Arial, sans-serif; color: #1c1917; max-width: 600px; margin: 0 auto;'>
+            <div style='background: linear-gradient(135deg, #b45309, #d4a853); padding: 24px; border-radius: 12px 12px 0 0; text-align: center;'>
+                <h1 style='color: white; margin: 0; font-size: 1.5rem;'>🍽️ MenuMiam</h1>
+            </div>
+            <div style='background: #fef7ed; padding: 32px; border-radius: 0 0 12px 12px; border: 1px solid #fde68a;'>
+                <h2 style='color: #92400e; margin-top: 0;'>Confirmez votre adresse email</h2>
+                <p>Bonjour <strong>" . htmlspecialchars($username) . "</strong>,</p>
+                <p>Votre compte MenuMiam a été créé. Cliquez sur le bouton ci-dessous pour confirmer votre adresse email et activer votre compte.</p>
+                <div style='text-align: center; margin: 32px 0;'>
+                    <a href='$verifyLink' style='background: linear-gradient(135deg, #b45309, #d4a853); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 1rem; display: inline-block;'>Confirmer mon email</a>
+                </div>
+                <p style='color: #78716c; font-size: 0.85rem;'>Ou copiez ce lien dans votre navigateur :<br>
+                <code style='background: #fff; padding: 8px; border-radius: 4px; word-break: break-all; display: block; margin-top: 8px;'>$verifyLink</code></p>
+                <hr style='border: 1px solid #fde68a; margin: 24px 0;'>
+                <p style='color: #a8a29e; font-size: 0.8rem;'>Si vous n'avez pas créé de compte MenuMiam, ignorez cet email.</p>
+            </div>
+        </body></html>";
+
+        return $this->mailer->send($email, $subject, $body);
     }
 
     /**

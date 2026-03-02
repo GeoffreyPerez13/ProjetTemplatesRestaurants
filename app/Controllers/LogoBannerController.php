@@ -54,6 +54,7 @@ class LogoBannerController extends BaseController
     public function uploadLogo()
     {
         $this->requireLogin();
+        $this->requireActiveSubscription();
         $admin_id = $_SESSION['admin_id'];
         $anchor = $_POST['anchor'] ?? 'upload-logo';
         $this->handleUpload('logo', $admin_id, $anchor, 'logos', 'Logo');
@@ -65,6 +66,7 @@ class LogoBannerController extends BaseController
     public function deleteLogo()
     {
         $this->requireLogin();
+        $this->requireActiveSubscription();
         $admin_id = $_SESSION['admin_id'];
         $anchor = $_POST['anchor'] ?? 'current-logo';
         $this->handleDelete('logo', $admin_id, $anchor, 'logos', 'Logo');
@@ -78,6 +80,7 @@ class LogoBannerController extends BaseController
     public function uploadBanner()
     {
         $this->requireLogin();
+        $this->requireActiveSubscription();
         $admin_id = $_SESSION['admin_id'];
         $anchor = $_POST['anchor'] ?? 'upload-banner';
         $this->handleUpload('banner', $admin_id, $anchor, 'banners', 'Bannière');
@@ -89,6 +92,7 @@ class LogoBannerController extends BaseController
     public function deleteBanner()
     {
         $this->requireLogin();
+        $this->requireActiveSubscription();
         $admin_id = $_SESSION['admin_id'];
         $anchor = $_POST['anchor'] ?? 'current-banner';
         $this->handleDelete('banner', $admin_id, $anchor, 'banners', 'Bannière');
@@ -152,6 +156,7 @@ class LogoBannerController extends BaseController
     public function updateBannerText()
     {
         $this->requireLogin();
+        $this->requireActiveSubscription();
         $admin_id = $_SESSION['admin_id'];
         $anchor = 'banner-text'; // ID de l'accordéon
 
@@ -194,6 +199,7 @@ class LogoBannerController extends BaseController
     public function deleteBannerText()
     {
         $this->requireLogin();
+        $this->requireActiveSubscription();
         $admin_id = $_SESSION['admin_id'];
         $anchor = 'banner-text';
 

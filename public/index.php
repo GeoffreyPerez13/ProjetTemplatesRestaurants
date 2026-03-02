@@ -13,6 +13,7 @@ require_once __DIR__ . '/../app/Controllers/SettingsController.php';
 require_once __DIR__ . '/../app/Controllers/DisplayController.php';
 require_once __DIR__ . '/../app/Controllers/ServicesController.php';
 require_once __DIR__ . '/../app/Controllers/SitemapController.php';
+require_once __DIR__ . '/../app/Controllers/StripeController.php';
 require_once __DIR__ . '/../app/Models/DemoToken.php';
 require_once __DIR__ . '/../app/Helpers/FormHelper.php';
 require_once __DIR__ . '/../app/Helpers/Validator.php';
@@ -24,11 +25,40 @@ if (isset($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true && !i
     exit;
 }
 
-// Récupération de la page demandée
-$page = $_GET['page'] ?? 'login';
+// Récupération de la page demandée (landing par défaut pour les visiteurs)
+$page = $_GET['page'] ?? 'landing';
 
 // Router simple en fonction de la page
 switch ($page) {
+    case 'landing':
+        require __DIR__ . '/../app/Views/landing.php';
+        break;
+
+    case 'auto-register':
+        $adminController = new AdminController($pdo);
+        $adminController->autoRegister();  // Inscription libre depuis la page vitrine
+        break;
+
+    case 'verify-email':
+        $adminController = new AdminController($pdo);
+        $adminController->verifyEmail();  // Confirmation de l'adresse email après inscription
+        break;
+
+    case 'stripe-checkout':
+        $stripeController = new StripeController($pdo);
+        $stripeController->createCheckout();  // Créer une session Stripe Checkout
+        break;
+
+    case 'stripe-success':
+        $stripeController = new StripeController($pdo);
+        $stripeController->handleSuccess();  // Traiter le retour Stripe après paiement
+        break;
+
+    case 'cancel-subscription':
+        $stripeController = new StripeController($pdo);
+        $stripeController->cancelSubscription();  // Résilier un abonnement ou une option premium
+        break;
+
     case 'send-invitation':
         $adminController = new AdminController($pdo);
         $adminController->sendInvitation();  // Affiche le formulaire et gère l'envoi

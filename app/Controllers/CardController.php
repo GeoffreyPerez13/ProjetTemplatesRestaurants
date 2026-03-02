@@ -87,6 +87,7 @@ class CardController extends BaseController
         error_log("Current mode: $currentMode");
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->requireActiveSubscription();
             error_log("=== POST REQUEST ===");
             error_log("POST data: " . print_r($_POST, true));
 

@@ -14,6 +14,17 @@ class ClientManagementController extends BaseController
     }
 
     /**
+     * Vérifie si l'admin connecté est SUPER_ADMIN (via BDD)
+     */
+    private function isSuperAdmin(): bool
+    {
+        require_once __DIR__ . '/../Models/Admin.php';
+        $adminModel = new Admin($this->pdo);
+        $currentAdmin = $adminModel->findById($_SESSION['admin_id']);
+        return $currentAdmin && $currentAdmin->role === 'SUPER_ADMIN';
+    }
+
+    /**
      * Afficher la page de gestion des clients
      */
     public function show()
@@ -21,7 +32,7 @@ class ClientManagementController extends BaseController
         $this->requireLogin();
         
         // Seuls les super-admins peuvent accéder
-        if ($_SESSION['admin_role'] !== 'SUPER_ADMIN') {
+        if (!$this->isSuperAdmin()) {
             $this->addErrorMessage('Accès réservé aux super-administrateurs.');
             header('Location: ?page=dashboard');
             exit;
@@ -38,7 +49,7 @@ class ClientManagementController extends BaseController
     {
         $this->requireLogin();
         
-        if ($_SESSION['admin_role'] !== 'SUPER_ADMIN') {
+        if (!$this->isSuperAdmin()) {
             $this->jsonResponse(['success' => false, 'message' => 'Accès non autorisé']);
             return;
         }
@@ -94,7 +105,7 @@ class ClientManagementController extends BaseController
     {
         $this->requireLogin();
         
-        if ($_SESSION['admin_role'] !== 'SUPER_ADMIN') {
+        if (!$this->isSuperAdmin()) {
             $this->jsonResponse(['success' => false, 'message' => 'Accès non autorisé']);
             return;
         }
@@ -135,7 +146,7 @@ class ClientManagementController extends BaseController
     {
         $this->requireLogin();
         
-        if ($_SESSION['admin_role'] !== 'SUPER_ADMIN') {
+        if (!$this->isSuperAdmin()) {
             $this->jsonResponse(['success' => false, 'message' => 'Accès non autorisé']);
             return;
         }
@@ -181,7 +192,7 @@ class ClientManagementController extends BaseController
     {
         $this->requireLogin();
         
-        if ($_SESSION['admin_role'] !== 'SUPER_ADMIN') {
+        if (!$this->isSuperAdmin()) {
             $this->jsonResponse(['success' => false, 'message' => 'Accès non autorisé']);
             return;
         }

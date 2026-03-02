@@ -657,6 +657,7 @@ class SettingsController extends BaseController
     public function savePalette()
     {
         $this->requireLogin();
+        $this->requireActiveSubscription();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ?page=edit-template');
@@ -695,6 +696,7 @@ class SettingsController extends BaseController
     public function saveLayout()
     {
         $this->requireLogin();
+        $this->requireActiveSubscription();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ?page=edit-template');
@@ -738,7 +740,7 @@ class SettingsController extends BaseController
         // Vérifier le CSRF
         if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
             $this->addErrorMessage('Token de sécurité invalide.');
-            header('Location: ?page=settings&section=google-reviews');
+            header('Location: ?page=settings&section=premium');
             exit;
         }
 
@@ -758,72 +760,54 @@ class SettingsController extends BaseController
             }
 
             $this->addSuccessMessage('Paramètres Google Reviews mis à jour avec succès.');
-            header('Location: ?page=settings&section=google-reviews');
+            header('Location: ?page=settings&section=premium');
             exit;
         } catch (Exception $e) {
             $this->addErrorMessage('Erreur lors de la mise à jour : ' . $e->getMessage());
-            header('Location: ?page=settings&section=google-reviews');
+            header('Location: ?page=settings&section=premium');
             exit;
         }
     }
 
     /**
-     * Gère le basculement des fonctionnalités premium
+     * Gère le basculement des fonctionnalités premium (réponse JSON pour AJAX)
+     * 
+     * Logique d'accès :
+     * - SUPER_ADMIN : peut tout activer/désactiver (bypass abonnement)
+     * - ADMIN : peut activer/désactiver uniquement si son abonnement le permet
      */
     public function togglePremium()
     {
-        // Désactiver complètement l'affichage d'erreurs
-        error_reporting(0);
-        ini_set('display_errors', 0);
-        
-        // Capturer TOUT output depuis le début
+        // Capturer tout output potentiel (erreurs PHP, warnings...)
         ob_start();
-        
-        // Vérifier manuellement le login sans utiliser requireLogin() pour éviter les redirects
+
+        // Vérifier le login manuellement (pas de redirect pour une requête AJAX)
         if (!isset($_SESSION['admin_logged']) || $_SESSION['admin_logged'] !== true) {
             ob_clean();
             header('Content-Type: application/json');
             echo json_encode(['success' => false, 'message' => 'Non connecté.']);
             exit;
         }
-        
+
         $adminId = $_SESSION['admin_id'];
 
-        // Récupérer le rôle depuis la base de données (comme dans index.php)
+        // Récupérer le rôle depuis la base de données
         require_once __DIR__ . '/../Models/Admin.php';
         $adminModel = new Admin($this->pdo);
         $currentAdmin = $adminModel->findById($adminId);
-        
+
+        // Nettoyer tout output avant d'envoyer le JSON
+        ob_clean();
+        header('Content-Type: application/json');
+
         if (!$currentAdmin) {
-            ob_clean();
-            header('Content-Type: application/json');
             echo json_encode(['success' => false, 'message' => 'Administrateur non trouvé.']);
             exit;
         }
-        
-        $adminRole = $currentAdmin->role;
 
-        // Nettoyer tout output potentiel
-        ob_clean();
-        
-        // Définir le header JSON APRÈS avoir nettoyé
-        header('Content-Type: application/json');
-        
-        // Debug: loguer les données reçues
-        error_log('togglePremium appelé - POST data: ' . print_r($_POST, true));
-        error_log('Admin ID: ' . $adminId . ', Rôle: ' . $adminRole);
-        
         // Vérifier le CSRF
         if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
-            error_log('CSRF token invalide');
             echo json_encode(['success' => false, 'message' => 'Token de sécurité invalide.']);
-            exit;
-        }
-
-        // Seuls les super-admins peuvent activer/désactiver pour le moment
-        if ($adminRole !== 'SUPER_ADMIN') {
-            error_log('Rôle non autorisé: ' . $adminRole);
-            echo json_encode(['success' => false, 'message' => 'Accès réservé aux super-administrateurs.']);
             exit;
         }
 
@@ -834,25 +818,34 @@ class SettingsController extends BaseController
         }
 
         try {
-            error_log('Tentative de toggle pour feature: ' . $featureName . ', adminId: ' . $adminId);
-            
             require_once __DIR__ . '/../Models/PremiumFeature.php';
             $premiumFeature = new PremiumFeature($this->pdo);
 
+            // SUPER_ADMIN : accès libre (peut tout tester)
+            $isSuperAdmin = ($currentAdmin->role === 'SUPER_ADMIN');
+
+            if (!$isSuperAdmin) {
+                // ADMIN : vérifier que la feature est incluse dans son abonnement
+                if (!$premiumFeature->isFeatureInSubscription($adminId, $featureName)) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Cette fonctionnalité nécessite un abonnement Premium. Contactez-nous à premium@menumiam.fr pour souscrire.'
+                    ]);
+                    exit;
+                }
+            }
+
             $premiumFeature->toggle($adminId, $featureName);
-            
-            error_log('Toggle réussi pour feature: ' . $featureName);
-            
+
             echo json_encode([
-                'success' => true, 
-                'message' => 'Fonctionnalité ' . $featureName . ' mise à jour avec succès.'
+                'success' => true,
+                'message' => 'Fonctionnalité mise à jour avec succès.'
             ]);
             exit;
         } catch (Exception $e) {
-            error_log('Exception dans togglePremium: ' . $e->getMessage());
             echo json_encode([
-                'success' => false, 
-                'message' => 'Erreur lors de la mise à jour : ' . $e->getMessage()
+                'success' => false,
+                'message' => 'Erreur : ' . $e->getMessage()
             ]);
             exit;
         }

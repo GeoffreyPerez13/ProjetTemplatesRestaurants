@@ -135,6 +135,64 @@ class BaseController
     }
 
     /**
+     * Vérifie si l'admin connecté est en mode lecture seule (pas d'abonnement basique actif)
+     * Le SUPER_ADMIN est toujours exempté.
+     *
+     * @return bool true si l'admin est en lecture seule
+     */
+    protected function isReadOnly()
+    {
+        if (!$this->isLogged()) {
+            return false;
+        }
+
+        $adminId = $_SESSION['admin_id'] ?? null;
+        if (!$adminId) {
+            return true;
+        }
+
+        // SUPER_ADMIN : jamais en lecture seule
+        require_once __DIR__ . '/../Models/Admin.php';
+        $adminModel = new Admin($this->pdo);
+        $admin = $adminModel->findById($adminId);
+        if ($admin && $admin->role === 'SUPER_ADMIN') {
+            return false;
+        }
+
+        // Mode démo : jamais en lecture seule
+        if ($this->isDemoMode()) {
+            return false;
+        }
+
+        // Vérifier l'abonnement basique actif
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT id FROM client_subscriptions 
+                WHERE admin_id = ? AND status = 'active' 
+                AND (expires_at IS NULL OR expires_at > NOW())
+            ");
+            $stmt->execute([$adminId]);
+            return !$stmt->fetch();
+        } catch (Exception $e) {
+            // Table n'existe pas encore → ne pas bloquer
+            return false;
+        }
+    }
+
+    /**
+     * Bloque les modifications si l'admin n'a pas d'abonnement actif
+     * Redirige vers les paramètres avec un message explicatif
+     */
+    protected function requireActiveSubscription()
+    {
+        if ($this->isReadOnly()) {
+            $this->addErrorMessage("Votre abonnement est inactif. Réactivez-le depuis vos paramètres pour modifier votre site.");
+            header('Location: ?page=settings&section=premium');
+            exit;
+        }
+    }
+
+    /**
      * Fonction utilitaire pour charger et afficher une vue
      * 
      * @param string $view Chemin du fichier PHP à afficher (ex: "admin/login")

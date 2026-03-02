@@ -1,21 +1,25 @@
 <?php
 /**
  * Section des avis Google sur la page vitrine
+ * $adminId est passé par DisplayController (ID de l'admin propriétaire du restaurant)
  */
 
-// Vérifier si les avis Google sont activés et si la fonctionnalité premium est disponible
+// Vérifier si les avis Google sont activés
 if (!($googleReviewsEnabled ?? false)) {
     return;
 }
 
-// Vérifier si la fonctionnalité premium Google Reviews est activée
+// Vérifier si la fonctionnalité premium Google Reviews est activée pour cet admin
+$restaurantAdminId = $adminId ?? null;
+if (!$restaurantAdminId) {
+    return;
+}
+
 require_once __DIR__ . '/../../Models/PremiumFeature.php';
 $premiumFeature = new PremiumFeature($pdo);
-$adminId = $_SESSION['admin_id'] ?? null;
 
-if (!$adminId || !$premiumFeature->isEnabled($adminId, 'google_reviews')) {
-    // Afficher la carte premium upgrade au lieu des vrais avis
-    include 'reviews-premium-upgrade.php';
+if (!$premiumFeature->isEnabled($restaurantAdminId, 'google_reviews')) {
+    // Côté public, on n'affiche simplement rien si le premium n'est pas activé
     return;
 }
 
@@ -58,7 +62,7 @@ if ($googlePlaceId) {
                 </div>
                 <div class="restaurant-name">
                     <h3><?= htmlspecialchars($restaurantInfo['name']) ?></h3>
-                    <a href="https://search.google.com/local/reviews?placeid=<?= urlencode($placeId) ?>" 
+                    <a href="https://search.google.com/local/reviews?placeid=<?= urlencode($googlePlaceId) ?>" 
                        target="_blank" rel="noopener" class="see-all-reviews">
                         Voir tous les avis <i class="fas fa-external-link-alt"></i>
                     </a>
@@ -103,7 +107,7 @@ if ($googlePlaceId) {
 
         <!-- Lien vers Google -->
         <div class="reviews-footer">
-            <a href="https://search.google.com/local/reviews?placeid=<?= urlencode($placeId) ?>" 
+            <a href="https://search.google.com/local/reviews?placeid=<?= urlencode($googlePlaceId) ?>" 
                target="_blank" rel="noopener" class="btn btn-outline">
                 <i class="fab fa-google"></i> Laisser un avis sur Google
             </a>

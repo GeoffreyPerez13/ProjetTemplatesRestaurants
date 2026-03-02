@@ -5,13 +5,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('.settings-container')?.dataset?.csrfToken || '';
     
-    // Debug: vérifier si le token est disponible
-    if (!csrfToken) {
-        console.error('CSRF token non trouvé dans .settings-container');
-    } else {
-        console.log('CSRF token trouvé:', csrfToken.substring(0, 20) + '...');
-    }
-
     // Fonction pour attacher les événements toggle (évite les doublons)
     function attachToggleEvents() {
         // Supprimer tous les event listeners existants
@@ -50,8 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const card = button.closest('.premium-feature-card');
         const isActive = card.classList.contains('active');
 
-        console.log('Toggle clicked - feature:', feature, 'isActive:', isActive);
-
         // Confirmer l'action
         const confirmMessage = isActive 
             ? 'Êtes-vous sûr de vouloir désactiver cette fonctionnalité ?' 
@@ -77,21 +68,15 @@ document.addEventListener('DOMContentLoaded', function() {
             })
         })
         .then(response => {
-            console.log('Response status:', response.status);
-            console.log('Content-Type:', response.headers.get('content-type'));
-            
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
                 return response.text().then(text => {
-                    console.log('Réponse brute du serveur:', text);
                     throw new Error('Réponse serveur invalide: ' + text.substring(0, 200));
                 });
             }
             return response.json();
         })
         .then(data => {
-            console.log('Response data:', data);
-            
             if (data.success) {
                 showNotification(data.message || 'Fonctionnalité mise à jour avec succès !', 'success');
                 
@@ -120,8 +105,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const button = e.currentTarget;
         const configDiv = document.getElementById('google-reviews-config');
-        
-        console.log('Configure clicked');
         
         // Toggle l'affichage de la configuration
         if (configDiv.style.display === 'none') {
@@ -178,4 +161,82 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialiser les événements
     attachToggleEvents();
     attachConfigureEvents();
+    initPremiumCart();
+    initCancelForms();
+
+    // ----------------------------------------------------------------
+    // Panier multi-sélection (options premium à la carte)
+    // ----------------------------------------------------------------
+    function initPremiumCart() {
+        const cartBar      = document.getElementById('premium-cart-bar');
+        const cartCount    = document.getElementById('cart-count');
+        const cartTotal    = document.getElementById('cart-total');
+        const checkoutBtn  = document.getElementById('cart-checkout-btn');
+
+        if (!cartBar) return; // pas affiché si pas d'abonnement basique
+
+        function updateCart() {
+            const checked = document.querySelectorAll('.feature-checkbox:checked');
+            let total = 0;
+
+            // Retirer la classe selected de toutes les cartes
+            document.querySelectorAll('.premium-feature-card.selectable').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            checked.forEach(cb => {
+                const card = cb.closest('.premium-feature-card');
+                if (card) {
+                    card.classList.add('selected');
+                    total += parseInt(card.dataset.price || 0, 10);
+                }
+            });
+
+            const count = checked.length;
+            cartCount.textContent = count;
+            cartTotal.textContent = total + '€';
+
+            if (count > 0) {
+                cartBar.classList.add('cart-visible');
+                checkoutBtn.disabled = false;
+            } else {
+                cartBar.classList.remove('cart-visible');
+                checkoutBtn.disabled = true;
+            }
+        }
+
+        // Clic sur le label ou la carte entière bascule la sélection
+        document.querySelectorAll('.premium-feature-card.selectable').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Ne pas intercepter si on clique directement sur le label/checkbox
+                if (e.target.closest('.feature-select-label')) return;
+                const cb = card.querySelector('.feature-checkbox');
+                if (cb) {
+                    cb.checked = !cb.checked;
+                    updateCart();
+                }
+            });
+
+            const cb = card.querySelector('.feature-checkbox');
+            if (cb) {
+                cb.addEventListener('change', updateCart);
+            }
+        });
+
+        updateCart(); // état initial
+    }
+
+    // ----------------------------------------------------------------
+    // Confirmation avant résiliation d'un abonnement
+    // ----------------------------------------------------------------
+    function initCancelForms() {
+        document.querySelectorAll('.cancel-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const msg = form.dataset.confirm || 'Confirmer la résiliation ?';
+                if (!confirm(msg)) {
+                    e.preventDefault();
+                }
+            });
+        });
+    }
 });
