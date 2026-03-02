@@ -41,7 +41,7 @@ require __DIR__ . '/../partials/header.php';
         <div class="accordion-section services-accordion" id="services">
             <div class="accordion-header">
                 <h2><i class="fas fa-concierge-bell"></i> Services proposés</h2>
-                <button type="button" class="accordion-toggle" data-target="services-content"><i class="fas fa-chevron-up"></i></button>
+                <button type="button" class="accordion-toggle" data-target="services-content"><i class="fas fa-chevron-down"></i></button>
             </div>
             <div id="services-content" class="accordion-content expanded">
                 <!-- Bouton tout cocher/décocher -->
@@ -102,7 +102,7 @@ require __DIR__ . '/../partials/header.php';
         <div class="accordion-section payments-accordion" id="payments">
             <div class="accordion-header">
                 <h2><i class="fas fa-credit-card"></i> Moyens de paiement acceptés</h2>
-                <button type="button" class="accordion-toggle" data-target="payments-content"><i class="fas fa-chevron-up"></i></button>
+                <button type="button" class="accordion-toggle" data-target="payments-content"><i class="fas fa-chevron-down"></i></button>
             </div>
             <div id="payments-content" class="accordion-content expanded">
                 <!-- Bouton tout cocher/décocher -->
@@ -150,7 +150,7 @@ require __DIR__ . '/../partials/header.php';
         <div class="accordion-section socials-accordion" id="socials">
             <div class="accordion-header">
                 <h2><i class="fas fa-share-alt"></i> Réseaux sociaux</h2>
-                <button type="button" class="accordion-toggle" data-target="socials-content"><i class="fas fa-chevron-up"></i></button>
+                <button type="button" class="accordion-toggle" data-target="socials-content"><i class="fas fa-chevron-down"></i></button>
             </div>
             <div id="socials-content" class="accordion-content expanded">
                 <div class="socials-grid">

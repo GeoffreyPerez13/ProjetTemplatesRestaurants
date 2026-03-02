@@ -243,17 +243,6 @@
 
     accordion.classList.remove("collapsed");
     accordion.classList.add("expanded");
-
-    const toggle = document.querySelector(
-      `.accordion-toggle[data-target="${accordionId}"]`,
-    );
-    if (toggle) {
-      const icon = toggle.querySelector("i");
-      if (icon) {
-        icon.classList.remove("fa-chevron-up"); // ← CHANGÉ (était fa-chevron-down)
-        icon.classList.add("fa-chevron-down"); // ← CHANGÉ (était fa-chevron-up)
-      }
-    }
   }
 
   /**
@@ -265,17 +254,6 @@
 
     accordion.classList.remove("expanded");
     accordion.classList.add("collapsed");
-
-    const toggle = document.querySelector(
-      `.accordion-toggle[data-target="${accordionId}"]`,
-    );
-    if (toggle) {
-      const icon = toggle.querySelector("i");
-      if (icon) {
-        icon.classList.remove("fa-chevron-down"); // ← CHANGÉ (était fa-chevron-up)
-        icon.classList.add("fa-chevron-up"); // ← CHANGÉ (était fa-chevron-down)
-      }
-    }
   }
 
   /**
@@ -288,17 +266,6 @@
     accordion.classList.remove("collapsed");
     accordion.classList.add("expanded");
     accordion.style.display = "block";
-
-    const toggle = document.querySelector(
-      `.dish-accordion-toggle[data-target="${accordionId}"]`,
-    );
-    if (toggle) {
-      const icon = toggle.querySelector("i");
-      if (icon) {
-        icon.classList.remove("fa-chevron-up"); // ← CHANGÉ (était fa-chevron-down)
-        icon.classList.add("fa-chevron-down"); // ← CHANGÉ (était fa-chevron-up)
-      }
-    }
   }
 
   /**
@@ -311,17 +278,6 @@
     accordion.classList.remove("expanded");
     accordion.classList.add("collapsed");
     accordion.style.display = "none";
-
-    const toggle = document.querySelector(
-      `.dish-accordion-toggle[data-target="${accordionId}"]`,
-    );
-    if (toggle) {
-      const icon = toggle.querySelector("i");
-      if (icon) {
-        icon.classList.remove("fa-chevron-down"); // ← CHANGÉ (était fa-chevron-up)
-        icon.classList.add("fa-chevron-up"); // ← CHANGÉ (était fa-chevron-down)
-      }
-    }
   }
 
   /**

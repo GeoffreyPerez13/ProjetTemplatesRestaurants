@@ -17,11 +17,28 @@
 }
 
 #reorder-buttons {
-  display: none;
-  gap: 15px;
-  margin-top: 15px;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: none !important;
+  flex-direction: row !important;
+  gap: 15px !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+#reorder-buttons.active,
+#reorder-buttons[style*="display: flex"],
+#reorder-buttons[style*="display:flex"],
+#reorder-buttons[style*="display: block"] {
+  display: flex !important;
+  flex-direction: row !important;
+}
+
+#reorder-buttons .btn {
+  flex: 0 1 auto !important;
+  min-width: 180px !important;
+  max-width: 300px !important;
+  width: auto !important;
+  display: inline-flex !important;
 }
 
 .reorder-instructions {
@@ -47,7 +64,6 @@
 .reorder-controls {
   display: none;
   gap: 10px;
-  margin-top: 15px;
   justify-content: center;
   padding: 15px;
   background: var(--color-bg-alt);

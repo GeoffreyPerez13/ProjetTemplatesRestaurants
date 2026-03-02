@@ -338,9 +338,20 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
             <!-- Section Fonctionnalités Premium -->
             <div class="settings-section">
                 <link rel="stylesheet" href="/assets/css/admin/sections/settings/premium.css">
+                <script src="/assets/js/effects/accordion.js"></script>
                 <script src="/assets/js/admin/premium.js"></script>
                 <h2>Fonctionnalités Premium</h2>
                 <p class="section-description">Débloquez des fonctionnalités avancées pour votre restaurant.</p>
+
+                <!-- Boutons de contrôle global des accordéons -->
+                <div class="global-accordion-controls">
+                    <button type="button" id="expand-all-accordions" class="btn small">
+                        <i class="fas fa-expand-alt"></i> Tout ouvrir
+                    </button>
+                    <button type="button" id="collapse-all-accordions" class="btn small">
+                        <i class="fas fa-compress-alt"></i> Tout fermer
+                    </button>
+                </div>
 
                 <?php
                 require_once __DIR__ . '/../../Models/PremiumFeature.php';
@@ -422,8 +433,14 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 <?php if ($hasActiveSub): ?>
                 <!-- Gestion des abonnements actifs -->
                 <?php $activePremiumFeatures = array_filter($userFeaturesMap, fn($v) => (int)$v === 1); ?>
-                <div class="subscription-management">
-                    <h3><i class="fas fa-sliders-h"></i> Gérer mes abonnements</h3>
+                <div class="accordion-section subscription-management-accordion">
+                    <div class="accordion-header">
+                        <h3><i class="fas fa-sliders-h"></i> Gérer mes abonnements</h3>
+                        <button type="button" class="accordion-toggle" data-target="subscription-management-content">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div id="subscription-management-content" class="accordion-content collapsed">
 
                     <div class="manage-sub-item">
                         <div class="manage-sub-info">
@@ -473,13 +490,20 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                         Aucune option premium active pour le moment.
                     </p>
                     <?php endif; ?>
+                    </div>
                 </div>
                 <?php endif; ?>
                 <?php endif; ?>
 
-                <div class="premium-section-divider">
-                    <span><i class="fas fa-bolt"></i> Options premium à la carte</span>
-                </div>
+
+                <div class="accordion-section premium-options-accordion">
+                    <div class="accordion-header">
+                        <h3><i class="fas fa-bolt"></i> Options premium à la carte</h3>
+                        <button type="button" class="accordion-toggle" data-target="premium-options-content">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div id="premium-options-content" class="accordion-content expanded">
 
                 <form method="POST" action="?page=stripe-checkout" id="premium-cart-form">
                     <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
@@ -505,12 +529,10 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                                     </div>
                                 </div>
 
-                                <?php if (!$isActive): ?>
                                 <div class="feature-price">
                                     <span class="feature-price-monthly">+<?= (int)$feature['price_monthly'] ?>€<small>/mois</small></span>
                                     <span class="feature-price-annual">+<?= (int)$feature['price_annual'] ?>€<small>/mois en annuel</small></span>
                                 </div>
-                                <?php endif; ?>
 
                                 <div class="feature-status">
                                     <?php if ($isActive): ?>
@@ -535,10 +557,6 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                                                 <i class="fas fa-cog"></i> Configurer
                                             </button>
                                         <?php endif; ?>
-                                        <button type="button" class="btn danger btn-sm toggle-premium"
-                                                data-feature="<?= $featureKey ?>">
-                                            <i class="fas fa-times"></i> Désactiver
-                                        </button>
                                     <?php elseif ($canActivateDirectly): ?>
                                         <button type="button" class="btn premium-btn toggle-premium"
                                                 data-feature="<?= $featureKey ?>">
@@ -577,6 +595,8 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                     </div>
                     <?php endif; ?>
                 </form>
+                    </div>
+                </div>
 
                 <!-- Configuration Google Reviews (affichée si activé) -->
                 <div id="google-reviews-config" class="google-reviews-config" style="display: none;">

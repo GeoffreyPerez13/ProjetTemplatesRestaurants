@@ -117,10 +117,11 @@
 
 .accordion-toggle i {
   transition: transform 0.3s ease;
+  transform: rotate(180deg);
 }
 
-.accordion-content.expanded ~ .accordion-header .accordion-toggle i {
-  transform: rotate(180deg);
+.accordion-section:has(.accordion-content.expanded) .accordion-toggle i {
+  transform: rotate(0deg);
 }
 
 .accordion-content {
@@ -144,6 +145,38 @@
   display: block;
   max-height: 5000px;
   opacity: 1;
+}
+
+/* Upload actions buttons */
+.upload-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.upload-actions .btn {
+  flex: 1;
+  min-width: 200px;
+  justify-content: center;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.upload-actions .btn i {
+  margin-right: 8px;
+}
+
+@media (max-width: 768px) {
+  .upload-actions {
+    flex-direction: column;
+  }
+  
+  .upload-actions .btn {
+    width: 100%;
+  }
 }
 
 /* Contrôles globaux d'accordéon */
@@ -315,6 +348,15 @@
 .dish-accordion-toggle:hover {
   background-color: var(--color-bg-warm);
   color: var(--color-text);
+}
+
+.dish-accordion-toggle i {
+  transition: transform 0.3s ease;
+  transform: rotate(180deg);
+}
+
+.dish-accordion-content.expanded ~ .dish-accordion-header .dish-accordion-toggle i {
+  transform: rotate(0deg);
 }
 
 .dish-accordion-content {
@@ -727,6 +769,13 @@
   .btn {
     width: 100%;
     justify-content: center;
+  }
+
+  /* Exception pour les boutons de réorganisation */
+  #reorder-buttons .btn {
+    width: auto;
+    min-width: 150px;
+    flex: 1;
   }
 
   .category-buttons,

@@ -43,20 +43,41 @@ document.addEventListener('DOMContentLoaded', function() {
         const card = button.closest('.premium-feature-card');
         const isActive = card.classList.contains('active');
 
-        // Confirmer l'action
+        // Confirmer l'action avec SweetAlert
         const confirmMessage = isActive 
             ? 'Êtes-vous sûr de vouloir désactiver cette fonctionnalité ?' 
             : 'Êtes-vous sûr de vouloir activer cette fonctionnalité ?';
         
-        if (!confirm(confirmMessage)) {
-            return;
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Confirmer l\'action',
+                text: confirmMessage,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: isActive ? '#d33' : '#3085d6',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: isActive ? 'Oui, désactiver' : 'Oui, activer',
+                cancelButtonText: 'Annuler',
+                backdrop: true,
+                allowOutsideClick: false,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    performToggle(button, feature, card, isActive);
+                }
+            });
+        } else {
+            if (confirm(confirmMessage)) {
+                performToggle(button, feature, card, isActive);
+            }
         }
+    }
 
-        // Désactiver le bouton
+    // Fonction pour effectuer le toggle
+    function performToggle(button, feature, card, isActive) {
+
         button.disabled = true;
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
 
-        // Envoyer la requête
         fetch('?page=settings&action=toggle-premium', {
             method: 'POST',
             headers: {
@@ -232,9 +253,30 @@ document.addEventListener('DOMContentLoaded', function() {
     function initCancelForms() {
         document.querySelectorAll('.cancel-form').forEach(form => {
             form.addEventListener('submit', function(e) {
+                e.preventDefault();
                 const msg = form.dataset.confirm || 'Confirmer la résiliation ?';
-                if (!confirm(msg)) {
-                    e.preventDefault();
+                
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Confirmer la résiliation',
+                        text: msg,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Oui, résilier',
+                        cancelButtonText: 'Annuler',
+                        backdrop: true,
+                        allowOutsideClick: false,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                } else {
+                    if (confirm(msg)) {
+                        form.submit();
+                    }
                 }
             });
         });

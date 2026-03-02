@@ -507,13 +507,15 @@ require __DIR__ . '/../partials/header.php';
                         <p><small>Taille maximale par fichier : 5MB</small></p>
                     </div>
 
-                    <button type="submit" name="upload_images" class="btn success" id="uploadButton" disabled>
-                        <i class="fas fa-upload"></i> Télécharger les images (<span id="uploadCount">0</span>)
-                    </button>
+                    <div class="upload-actions">
+                        <button type="submit" name="upload_images" class="btn success" id="uploadButton" disabled>
+                            <i class="fas fa-upload"></i> Télécharger les images (<span id="uploadCount">0</span>)
+                        </button>
 
-                    <button type="button" class="btn danger" id="clearSelection">
-                        <i class="fas fa-times"></i> Annuler la sélection
-                    </button>
+                        <button type="button" class="btn danger" id="clearSelection">
+                            <i class="fas fa-times"></i> Annuler la sélection
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

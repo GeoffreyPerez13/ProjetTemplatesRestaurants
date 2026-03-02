@@ -57,6 +57,25 @@ class DisplayController extends BaseController
 
         $adminId = $admin->id;
 
+        // Vérifier l'abonnement Basique (sauf pour SUPER_ADMIN et démo)
+        $hasActiveBasique = false;
+        if ($admin->role !== 'SUPER_ADMIN' && !isset($_SESSION['demo_mode'])) {
+            try {
+                $stmt = $this->pdo->prepare(
+                    "SELECT status FROM client_subscriptions WHERE admin_id = ? LIMIT 1"
+                );
+                $stmt->execute([$adminId]);
+                $sub = $stmt->fetch(PDO::FETCH_ASSOC);
+                $hasActiveBasique = $sub && $sub['status'] === 'active';
+            } catch (Exception $e) {
+                // Table absente ou erreur : on considère pas d'abonnement
+                $hasActiveBasique = false;
+            }
+        } else {
+            // SUPER_ADMIN et démo : toujours actif
+            $hasActiveBasique = true;
+        }
+
         // Récupérer les données additionnelles
         $logo = $restaurantModel->getLogo($adminId);
         $banner = $restaurantModel->getBanner($adminId);
@@ -126,6 +145,11 @@ class DisplayController extends BaseController
 
         // Vérifier si le site est en ligne
         $siteOnline = $restaurantModel->isSiteOnline($adminId);
+
+        // Si pas d'abonnement Basique actif, forcer le site hors ligne
+        if (!$hasActiveBasique) {
+            $siteOnline = false;
+        }
 
         // Mode preview : l'admin connecté propriétaire du restaurant peut voir son site même en maintenance
         $isPreview = false;
