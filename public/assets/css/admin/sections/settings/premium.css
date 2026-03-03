@@ -1,5 +1,104 @@
 /* Styles pour la section Premium des paramètres */
 
+/* Subscription Total Card */
+.subscription-total-card {
+    background: var(--color-bg-alt);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin: var(--spacing-lg) 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.subscription-total-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.subscription-total-header i {
+    color: var(--color-primary);
+    font-size: 1.2em;
+}
+
+.subscription-total-header h3 {
+    margin: 0;
+    font-size: 1.1em;
+    color: var(--color-text);
+}
+
+.subscription-total-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.subscription-total-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm);
+    background: var(--color-bg);
+    border-radius: var(--radius-sm);
+}
+
+.breakdown-item.premium-item {
+    background: rgba(212, 168, 83, 0.05);
+}
+
+.breakdown-item span:first-child {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--color-text);
+}
+
+.breakdown-item.premium-item i {
+    color: var(--color-primary);
+}
+
+.breakdown-price {
+    font-weight: 600;
+    color: var(--color-text-light);
+}
+
+.subscription-total-amount {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md);
+    background: linear-gradient(135deg, var(--color-primary), #d4a853);
+    border-radius: var(--radius-md);
+    margin-top: var(--spacing-sm);
+}
+
+.subscription-total-amount span:first-child {
+    font-weight: 600;
+    color: white;
+    font-size: 1.1em;
+}
+
+.total-price {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: white;
+}
+
+.total-price small {
+    font-size: 0.5em;
+    font-weight: 400;
+    opacity: 0.9;
+}
+
 .premium-features-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));

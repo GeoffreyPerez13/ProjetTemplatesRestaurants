@@ -229,8 +229,10 @@
 
     if (isExpanded) {
       closeDishAccordion(target.id);
+      if (toggle) toggle.classList.remove("expanded");
     } else {
       openDishAccordion(target.id);
+      if (toggle) toggle.classList.add("expanded");
     }
   }
 

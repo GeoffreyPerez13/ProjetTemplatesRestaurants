@@ -195,7 +195,8 @@ html.dark-mode .dark-mode-toggle-floating .fa-sun {
   .category-block,
   .reset-password-container,
   .register-container {
-    padding: var(--spacing-xl);
+    padding-left: var(--spacing-xl);
+    padding-right: var(--spacing-xl);
     max-width: 850px;
   }
 }

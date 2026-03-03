@@ -249,10 +249,11 @@
       });
 
     // ==================== 3. FORMULAIRES DE SUPPRESSION DE CATÉGORIES ====================
+    // 3a. Bouton X (category-delete-form) + 3b. Bouton dans accordéon (inline-form)
     document
-      .querySelectorAll('form.inline-form input[name="delete_category"]')
-      .forEach((input) => {
-        const form = input.closest("form");
+      .querySelectorAll('form.category-delete-form, form.inline-form input[name="delete_category"]')
+      .forEach((element) => {
+        const form = element.tagName === 'FORM' ? element : element.closest("form");
         if (!form) return;
 
         form.addEventListener("submit", function (e) {
@@ -301,6 +302,47 @@
       });
 
     // ==================== 4. FORMULAIRES DE SUPPRESSION DE PLATS ====================
+    // 4a. Bouton X dans le header (dish-delete-form)
+    document
+      .querySelectorAll('form.dish-delete-form')
+      .forEach((form) => {
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const dishHeader = form.closest(".dish-accordion-header");
+          const dishName = dishHeader?.querySelector("h4")?.textContent?.trim() || "ce plat";
+          // Extraire juste le nom sans le prix
+          const cleanDishName = dishName.split(" - ")[0].replace(/^.*?\s/, "").trim();
+
+          if (typeof Swal !== "undefined") {
+            Swal.fire({
+              title: "Confirmer la suppression",
+              text: `Voulez-vous vraiment supprimer le plat "${cleanDishName}" ?`,
+              icon: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#d33",
+              cancelButtonColor: "#3085d6",
+              confirmButtonText: "Oui, supprimer",
+              cancelButtonText: "Annuler",
+              backdrop: true,
+              allowOutsideClick: false,
+            }).then((result) => {
+              if (result.isConfirmed) {
+                showLoading("Suppression en cours...");
+                setTimeout(() => form.submit(), 100);
+              }
+            });
+          } else {
+            if (
+              confirm(`Voulez-vous vraiment supprimer le plat "${cleanDishName}" ?`)
+            ) {
+              form.submit();
+            }
+          }
+        });
+      });
+
+    // 4b. Bouton dans le formulaire (inline-form) - si encore présent
     document
       .querySelectorAll('form.inline-form input[name="delete_dish"]')
       .forEach((input) => {

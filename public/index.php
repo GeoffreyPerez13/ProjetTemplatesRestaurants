@@ -81,7 +81,12 @@ switch ($page) {
 
     case 'edit-card':
         $controller = new CardController($pdo);
-        $controller->edit();  // Gestion de la carte (catégories + plats)
+        $action = $_GET['action'] ?? '';
+        if ($action === 'update-category-order') {
+            $controller->updateCategoryOrder();
+        } else {
+            $controller->edit();  // Gestion de la carte (catégories + plats)
+        }
         break;
 
     case 'view-card':

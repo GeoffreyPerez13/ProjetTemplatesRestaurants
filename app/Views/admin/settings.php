@@ -46,7 +46,13 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 <li>
                     <a href="?page=settings&section=premium" class="<?= $current_section === 'premium' ? 'active' : '' ?>">
                         <i class="fas fa-crown"></i>
-                        <span>Fonctionnalités Premium</span>
+                        <span>Fonctionnalités</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="?page=settings&section=subscriptions" class="<?= $current_section === 'subscriptions' ? 'active' : '' ?>">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Abonnements</span>
                     </a>
                 </li>
             </ul>
@@ -85,7 +91,14 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 <a href="?page=settings&section=premium"
                     class="<?= $current_section === 'premium' ? 'active' : '' ?>">
                     <i class="fas fa-crown"></i>
-                    Fonctionnalités Premium
+                    Fonctionnalités
+                </a>
+            </li>
+            <li>
+                <a href="?page=settings&section=subscriptions"
+                    class="<?= $current_section === 'subscriptions' ? 'active' : '' ?>">
+                    <i class="fas fa-credit-card"></i>
+                    Abonnements
                 </a>
             </li>
         </ul>
@@ -335,12 +348,12 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 </div>
             </div>
         <?php elseif ($current_section === 'premium'): ?>
-            <!-- Section Fonctionnalités Premium -->
+            <!-- Section Fonctionnalités -->
             <div class="settings-section">
                 <link rel="stylesheet" href="/assets/css/admin/sections/settings/premium.css">
                 <script src="/assets/js/effects/accordion.js"></script>
                 <script src="/assets/js/admin/premium.js"></script>
-                <h2>Fonctionnalités Premium</h2>
+                <h2>Fonctionnalités</h2>
                 <p class="section-description">Débloquez des fonctionnalités avancées pour votre restaurant.</p>
 
                 <!-- Boutons de contrôle global des accordéons -->
@@ -429,72 +442,49 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                     </div>
                     <?php endif; ?>
                 </div>
+                <?php endif; ?>
 
                 <?php if ($hasActiveSub): ?>
-                <!-- Gestion des abonnements actifs -->
-                <?php $activePremiumFeatures = array_filter($userFeaturesMap, fn($v) => (int)$v === 1); ?>
-                <div class="accordion-section subscription-management-accordion">
-                    <div class="accordion-header">
-                        <h3><i class="fas fa-sliders-h"></i> Gérer mes abonnements</h3>
-                        <button type="button" class="accordion-toggle" data-target="subscription-management-content">
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
+                <!-- Total de l'abonnement en cours -->
+                <?php
+                $totalMonthly = 9; // Abonnement basique
+                $activePremiumFeatures = array_filter($userFeaturesMap, fn($v) => (int)$v === 1);
+                foreach ($activePremiumFeatures as $featureKey => $_ignore) {
+                    $featureDef = $availableFeatures[$featureKey] ?? null;
+                    if ($featureDef) {
+                        $totalMonthly += (int)$featureDef['price_monthly'];
+                    }
+                }
+                ?>
+                <div class="subscription-total-card">
+                    <div class="subscription-total-header">
+                        <i class="fas fa-calculator"></i>
+                        <h3>Total de votre abonnement</h3>
                     </div>
-                    <div id="subscription-management-content" class="accordion-content collapsed">
-
-                    <div class="manage-sub-item">
-                        <div class="manage-sub-info">
-                            <span class="manage-sub-icon"><i class="fas fa-store"></i></span>
-                            <div>
-                                <strong>Abonnement Basique</strong>
-                                <span>9€/mois — actif</span>
+                    <div class="subscription-total-content">
+                        <div class="subscription-total-breakdown">
+                            <div class="breakdown-item">
+                                <span>Abonnement Basique</span>
+                                <span class="breakdown-price">9€/mois</span>
                             </div>
-                        </div>
-                        <form method="POST" action="?page=cancel-subscription"
-                              class="cancel-form"
-                              data-confirm="Attention : résilier l'abonnement Basique désactivera aussi toutes vos options premium. Confirmer ?">
-                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
-                            <input type="hidden" name="type" value="basique">
-                            <button type="submit" class="btn btn-sm btn-danger-outline">
-                                <i class="fas fa-times-circle"></i> Résilier
-                            </button>
-                        </form>
-                    </div>
-
-                    <?php foreach ($activePremiumFeatures as $featureKey => $_ignore): ?>
-                        <?php $featureDef = $availableFeatures[$featureKey] ?? null; if (!$featureDef) continue; ?>
-                        <div class="manage-sub-item manage-sub-premium">
-                            <div class="manage-sub-info">
-                                <span class="manage-sub-icon premium-icon"><i class="fas <?= $featureDef['icon'] ?>"></i></span>
-                                <div>
-                                    <strong><?= htmlspecialchars($featureDef['name']) ?></strong>
-                                    <span>+<?= (int)$featureDef['price_monthly'] ?>€/mois</span>
+                            <?php foreach ($activePremiumFeatures as $featureKey => $_ignore): ?>
+                                <?php $featureDef = $availableFeatures[$featureKey] ?? null; if (!$featureDef) continue; ?>
+                                <div class="breakdown-item premium-item">
+                                    <span>
+                                        <i class="fas <?= $featureDef['icon'] ?>"></i>
+                                        <?= htmlspecialchars($featureDef['name']) ?>
+                                    </span>
+                                    <span class="breakdown-price">+<?= (int)$featureDef['price_monthly'] ?>€/mois</span>
                                 </div>
-                            </div>
-                            <form method="POST" action="?page=cancel-subscription"
-                                  class="cancel-form"
-                                  data-confirm="Supprimer l'option «<?= htmlspecialchars($featureDef['name']) ?>» ?">
-                                <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
-                                <input type="hidden" name="type" value="premium">
-                                <input type="hidden" name="feature" value="<?= htmlspecialchars($featureKey) ?>">
-                                <button type="submit" class="btn btn-sm btn-danger-outline">
-                                    <i class="fas fa-trash-alt"></i> Supprimer
-                                </button>
-                            </form>
+                            <?php endforeach; ?>
                         </div>
-                    <?php endforeach; ?>
-
-                    <?php if (empty($activePremiumFeatures)): ?>
-                    <p class="manage-sub-empty">
-                        <i class="fas fa-info-circle"></i>
-                        Aucune option premium active pour le moment.
-                    </p>
-                    <?php endif; ?>
+                        <div class="subscription-total-amount">
+                            <span>Total mensuel</span>
+                            <span class="total-price"><?= $totalMonthly ?>€<small>/mois</small></span>
+                        </div>
                     </div>
                 </div>
                 <?php endif; ?>
-                <?php endif; ?>
-
 
                 <div class="accordion-section premium-options-accordion">
                     <div class="accordion-header">
@@ -682,6 +672,115 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                         </ul>
                     </div>
                 </div>
+            </div>
+        <?php elseif ($current_section === 'subscriptions'): ?>
+            <!-- Section Abonnements -->
+            <div class="settings-section">
+                <link rel="stylesheet" href="/assets/css/admin/sections/settings/premium.css">
+                <script src="/assets/js/effects/accordion.js"></script>
+                <h2>Abonnements</h2>
+                <p class="section-description">Gérez vos abonnements et options actives.</p>
+
+                <?php
+                require_once __DIR__ . '/../../Models/PremiumFeature.php';
+                require_once __DIR__ . '/../../Models/Admin.php';
+                $premiumFeature = new PremiumFeature($pdo);
+                $adminModel = new Admin($pdo);
+                $currentAdmin = $adminModel->findById($_SESSION['admin_id']);
+                $isSuperAdmin = ($currentAdmin && $currentAdmin->role === 'SUPER_ADMIN');
+
+                $availableFeatures = $premiumFeature->getAvailableFeatures();
+                $userFeatures = $premiumFeature->getAllFeatures($_SESSION['admin_id']);
+                $userFeaturesMap = array_column($userFeatures, 'is_active', 'feature_name');
+
+                // Récupérer l'abonnement basique
+                $basicSub = null;
+                try {
+                    $stmtB = $pdo->prepare("SELECT * FROM client_subscriptions WHERE admin_id = ? LIMIT 1");
+                    $stmtB->execute([$_SESSION['admin_id']]);
+                    $basicSub = $stmtB->fetch(PDO::FETCH_ASSOC);
+                } catch (Exception $e) { $basicSub = null; }
+                $hasActiveSub = $basicSub && $basicSub['status'] === 'active';
+                ?>
+
+                <?php if ($isSuperAdmin): ?>
+                    <div class="admin-notice">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Mode Super-Admin : vous avez accès à toutes les fonctionnalités.</span>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (!$isSuperAdmin && $hasActiveSub): ?>
+                <!-- Gestion des abonnements actifs -->
+                <?php $activePremiumFeatures = array_filter($userFeaturesMap, fn($v) => (int)$v === 1); ?>
+                <div class="accordion-section subscription-management-accordion">
+                    <div class="accordion-header">
+                        <h3><i class="fas fa-sliders-h"></i> Gérer mes abonnements</h3>
+                        <button type="button" class="accordion-toggle" data-target="subscription-management-content">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div id="subscription-management-content" class="accordion-content expanded">
+
+                    <div class="manage-sub-item">
+                        <div class="manage-sub-info">
+                            <span class="manage-sub-icon"><i class="fas fa-store"></i></span>
+                            <div>
+                                <strong>Abonnement Basique</strong>
+                                <span>9€/mois — actif</span>
+                            </div>
+                        </div>
+                        <form method="POST" action="?page=cancel-subscription"
+                              class="cancel-form"
+                              data-confirm="Attention : résilier l'abonnement Basique désactivera aussi toutes vos options premium. Confirmer ?">
+                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                            <input type="hidden" name="type" value="basique">
+                            <button type="submit" class="btn btn-sm btn-danger-outline">
+                                <i class="fas fa-times-circle"></i> Résilier
+                            </button>
+                        </form>
+                    </div>
+
+                    <?php foreach ($activePremiumFeatures as $featureKey => $_ignore): ?>
+                        <?php $featureDef = $availableFeatures[$featureKey] ?? null; if (!$featureDef) continue; ?>
+                        <div class="manage-sub-item manage-sub-premium">
+                            <div class="manage-sub-info">
+                                <span class="manage-sub-icon premium-icon"><i class="fas <?= $featureDef['icon'] ?>"></i></span>
+                                <div>
+                                    <strong><?= htmlspecialchars($featureDef['name']) ?></strong>
+                                    <span>+<?= (int)$featureDef['price_monthly'] ?>€/mois</span>
+                                </div>
+                            </div>
+                            <form method="POST" action="?page=cancel-subscription"
+                                  class="cancel-form"
+                                  data-confirm="Supprimer l'option «<?= htmlspecialchars($featureDef['name']) ?>» ?">
+                                <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                                <input type="hidden" name="type" value="premium">
+                                <input type="hidden" name="feature" value="<?= htmlspecialchars($featureKey) ?>">
+                                <button type="submit" class="btn btn-sm btn-danger-outline">
+                                    <i class="fas fa-trash-alt"></i> Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    <?php endforeach; ?>
+
+                    <?php if (empty($activePremiumFeatures)): ?>
+                    <p class="manage-sub-empty">
+                        <i class="fas fa-info-circle"></i>
+                        Aucune option premium active pour le moment.
+                    </p>
+                    <?php endif; ?>
+                    </div>
+                </div>
+                <?php elseif (!$isSuperAdmin): ?>
+                    <div class="subscription-notice">
+                        <i class="fas fa-info-circle"></i>
+                        <p>Vous devez avoir un abonnement Basique actif pour gérer vos abonnements.</p>
+                        <a href="?page=settings&section=premium" class="btn primary">
+                            <i class="fas fa-crown"></i> Voir les fonctionnalités
+                        </a>
+                    </div>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
     </div>

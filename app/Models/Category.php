@@ -16,6 +16,8 @@ class Category
     public $name;
     /** @var string|null Chemin relatif de l'image (ex: 'uploads/categories/cat_xxx.jpg') */
     public $image;
+    /** @var int Ordre d'affichage de la catégorie */
+    public $display_order = 0;
 
     /**
      * @param PDO $pdo Connexion à la base de données
@@ -35,15 +37,23 @@ class Category
      */
     public function create($admin_id, $name, $image = null)
     {
-        $stmt = $this->pdo->prepare(
-            "INSERT INTO categories (admin_id, name, image) VALUES (?, ?, ?)"
+        // Auto-incrémenter le display_order pour ce nouvel admin
+        $stmtOrder = $this->pdo->prepare(
+            "SELECT COALESCE(MAX(display_order), 0) + 1 FROM categories WHERE admin_id = ?"
         );
-        $stmt->execute([$admin_id, $name, $image]);
+        $stmtOrder->execute([$admin_id]);
+        $nextOrder = (int)$stmtOrder->fetchColumn();
+
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO categories (admin_id, name, image, display_order) VALUES (?, ?, ?, ?)"
+        );
+        $stmt->execute([$admin_id, $name, $image, $nextOrder]);
 
         $this->id = $this->pdo->lastInsertId();
         $this->admin_id = $admin_id;
         $this->name = $name;
         $this->image = $image;
+        $this->display_order = $nextOrder;
 
         return $this;
     }
@@ -147,10 +157,61 @@ class Category
     public function getAllByAdmin($admin_id)
     {
         $stmt = $this->pdo->prepare(
-            "SELECT * FROM categories WHERE admin_id = ? ORDER BY id ASC"
+            "SELECT * FROM categories WHERE admin_id = ? ORDER BY display_order ASC, id ASC"
         );
         $stmt->execute([$admin_id]);
         return $stmt->fetchAll(); // Retourne un tableau associatif
+    }
+
+    /**
+     * Met à jour l'ordre d'affichage d'une catégorie
+     *
+     * @param int $categoryId ID de la catégorie
+     * @param int $adminId    ID de l'admin (sécurité)
+     * @param int $order      Nouvel ordre
+     * @return bool
+     */
+    public function updateDisplayOrder($categoryId, $adminId, $order)
+    {
+        // Récupérer l'ordre actuel de la catégorie cible
+        $stmt = $this->pdo->prepare(
+            "SELECT display_order FROM categories WHERE id = ? AND admin_id = ?"
+        );
+        $stmt->execute([$categoryId, $adminId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) return false;
+        $currentOrder = (int)$row['display_order'];
+
+        // Chercher si une autre catégorie a déjà cet ordre
+        $stmt = $this->pdo->prepare(
+            "SELECT id FROM categories WHERE admin_id = ? AND display_order = ? AND id != ?"
+        );
+        $stmt->execute([$adminId, $order, $categoryId]);
+        $conflict = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        try {
+            $this->pdo->beginTransaction();
+
+            if ($conflict) {
+                // Permuter : l'autre catégorie prend l'ancien ordre de la cible
+                $stmt = $this->pdo->prepare(
+                    "UPDATE categories SET display_order = ? WHERE id = ?"
+                );
+                $stmt->execute([$currentOrder, $conflict['id']]);
+            }
+
+            // Mettre à jour l'ordre de la catégorie cible
+            $stmt = $this->pdo->prepare(
+                "UPDATE categories SET display_order = ? WHERE id = ? AND admin_id = ?"
+            );
+            $stmt->execute([$order, $categoryId, $adminId]);
+
+            $this->pdo->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            return false;
+        }
     }
 
     /**
@@ -228,7 +289,7 @@ class Category
     public function getByRestaurant($restaurantId)
     {
         $stmt = $this->pdo->prepare(
-            "SELECT * FROM categories WHERE restaurant_id = ? ORDER BY id ASC"
+            "SELECT * FROM categories WHERE restaurant_id = ? ORDER BY display_order ASC, id ASC"
         );
         $stmt->execute([$restaurantId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

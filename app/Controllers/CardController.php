@@ -180,7 +180,11 @@ class CardController extends BaseController
     {
         error_log("Handling editable mode actions");
 
-        if (isset($_POST['new_category'])) {
+        if (isset($_POST['batch_add_categories'])) {
+            $this->handleBatchAddCategories($categoryModel, $admin_id, $anchor);
+        } elseif (isset($_POST['batch_add_dishes'])) {
+            $this->handleBatchAddDishes($dishModel, $anchor);
+        } elseif (isset($_POST['new_category'])) {
             $this->handleAddCategory($categoryModel, $admin_id, $anchor);
         } elseif (isset($_POST['edit_category'])) {
             $this->handleEditCategory($categoryModel, $admin_id, $anchor);
@@ -367,6 +371,10 @@ class CardController extends BaseController
             $this->addSuccessMessage("Catégorie ajoutée avec succès.", 'category-' . $categoryId);
             $_SESSION['close_accordion'] = 'mode-selector-content';
             $_SESSION['close_accordion_secondary'] = 'new-category-content';
+            
+            // Nettoyer les anciennes valeurs pour éviter qu'elles restent dans le formulaire
+            unset($_SESSION['old_input']);
+            unset($_SESSION['error_fields']);
         } catch (Exception $e) {
             $this->addErrorMessage("Erreur: " . $e->getMessage(), 'new-category');
         }
@@ -419,6 +427,10 @@ class CardController extends BaseController
             $this->addSuccessMessage("Catégorie modifiée avec succès.", 'category-' . $category_id);
             $_SESSION['close_accordion'] = 'mode-selector-content';
             $_SESSION['close_accordion_secondary'] = 'edit-category-' . $category_id;
+            
+            // Nettoyer les anciennes valeurs
+            unset($_SESSION['old_input']);
+            unset($_SESSION['error_fields']);
         } catch (Exception $e) {
             $this->addErrorMessage("Erreur: " . $e->getMessage(), 'category-' . $category_id);
         }
@@ -545,6 +557,10 @@ class CardController extends BaseController
             $_SESSION['open_accordion'] = 'edit-dishes-' . $category_id;
             $_SESSION['close_dish_accordion'] = 'dish-' . $dishId;
             $_SESSION['close_accordion_secondary'] = 'add-dish-' . $category_id;
+            
+            // Nettoyer les anciennes valeurs
+            unset($_SESSION['old_input']);
+            unset($_SESSION['error_fields']);
         } catch (Exception $e) {
             $this->addErrorMessage("Erreur: " . $e->getMessage(), 'category-' . $category_id);
         }
@@ -619,6 +635,10 @@ class CardController extends BaseController
             $_SESSION['close_accordion'] = 'mode-selector-content';
             $_SESSION['close_dish_accordion'] = 'dish-' . $dish_id;
             $_SESSION['open_accordion'] = 'edit-dishes-' . $current_category_id;
+            
+            // Nettoyer les anciennes valeurs
+            unset($_SESSION['old_input']);
+            unset($_SESSION['error_fields']);
         } catch (Exception $e) {
             $this->addErrorMessage("Erreur: " . $e->getMessage(), 'dish-' . $dish_id);
         }
@@ -807,6 +827,7 @@ class CardController extends BaseController
         foreach ($categories as &$cat) {
             $cat['plats'] = $dishModel->getAllByCategory($cat['id']);
         }
+        unset($cat); // Indispensable : casse la référence laissée par le foreach &$cat
 
         // Récupération des allergènes
         require_once __DIR__ . '/../Models/Allergene.php';
@@ -820,8 +841,6 @@ class CardController extends BaseController
                 $platsAllergenes[$plat['id']] = $allergeneModel->getForDish($plat['id']);
             }
         }
-
-        $_SESSION['categories_cache'] = $categories;
 
         return [
             'currentMode' => 'editable',
@@ -881,6 +900,62 @@ class CardController extends BaseController
     }
 
     /**
+     * Endpoint AJAX : met à jour le display_order d'une catégorie
+     */
+    public function updateCategoryOrder()
+    {
+        $this->requireLogin();
+        header('Content-Type: application/json');
+
+        $admin_id    = $_SESSION['admin_id'];
+        $categoryId  = (int)($_POST['category_id'] ?? 0);
+        $order       = (int)($_POST['display_order'] ?? 0);
+
+        if ($categoryId <= 0 || $order < 1) {
+            echo json_encode(['success' => false, 'message' => 'Paramètres invalides']);
+            exit;
+        }
+
+        $categoryModel = new Category($this->pdo);
+
+        // Trouver la catégorie en conflit AVANT le swap pour la retourner au JS
+        $swappedCategoryId   = null;
+        $swappedCategoryOrder = null;
+        $stmt = $this->pdo->prepare(
+            "SELECT id, display_order FROM categories WHERE admin_id = ? AND display_order = ? AND id != ?"
+        );
+        $stmt->execute([$admin_id, $order, $categoryId]);
+        $conflict = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($conflict) {
+            // L'autre catégorie va recevoir l'ordre actuel de $categoryId
+            $stmtCurrent = $this->pdo->prepare(
+                "SELECT display_order FROM categories WHERE id = ? AND admin_id = ?"
+            );
+            $stmtCurrent->execute([$categoryId, $admin_id]);
+            $currentRow = $stmtCurrent->fetch(PDO::FETCH_ASSOC);
+            $swappedCategoryId    = (int)$conflict['id'];
+            $swappedCategoryOrder = $currentRow ? (int)$currentRow['display_order'] : null;
+        }
+
+        $ok = $categoryModel->updateDisplayOrder($categoryId, $admin_id, $order);
+
+        if ($ok) {
+            $this->updateRestaurantTimestamp();
+        }
+
+        $response = ['success' => $ok];
+        if ($ok && $swappedCategoryId !== null) {
+            $response['swapped'] = [
+                'id'    => $swappedCategoryId,
+                'order' => $swappedCategoryOrder,
+            ];
+        }
+
+        echo json_encode($response);
+        exit;
+    }
+
+    /**
      * Page d'aperçu de la carte
      */
     public function view()
@@ -900,7 +975,6 @@ class CardController extends BaseController
             foreach ($categories as &$cat) {
                 $cat['plats'] = $dishModel->getAllByCategory($cat['id']);
             }
-            $_SESSION['categories_cache'] = $categories;
             $data = [
                 'currentMode' => $currentMode,
                 'categories' => $categories
@@ -914,5 +988,184 @@ class CardController extends BaseController
         }
 
         $this->render('admin/view-card', $data);
+    }
+
+    /**
+     * Gestion de l'ajout rapide de plusieurs catégories
+     */
+    private function handleBatchAddCategories($categoryModel, $admin_id, $anchor)
+    {
+        $categories = $_POST['categories'] ?? [];
+        
+        if (empty($categories)) {
+            $this->addErrorMessage("Aucune catégorie à ajouter", $anchor);
+            return;
+        }
+
+        $added = 0;
+        $errors = [];
+
+        foreach ($categories as $index => $catData) {
+            $name = trim($catData['name'] ?? '');
+            $order = (int)($catData['order'] ?? 0);
+
+            if (empty($name)) {
+                $errors[] = "Ligne " . ($index + 1) . ": le nom est requis";
+                continue;
+            }
+
+            if (strlen($name) > 100) {
+                $errors[] = "Ligne " . ($index + 1) . ": le nom est trop long (max 100 caractères)";
+                continue;
+            }
+
+            // Gérer l'upload d'image si présente
+            $imagePath = null;
+            if (isset($_FILES['category_images']['name'][$index]) && !empty($_FILES['category_images']['name'][$index]) && $_FILES['category_images']['error'][$index] === UPLOAD_ERR_OK) {
+                $file = [
+                    'name' => $_FILES['category_images']['name'][$index],
+                    'type' => $_FILES['category_images']['type'][$index],
+                    'tmp_name' => $_FILES['category_images']['tmp_name'][$index],
+                    'error' => $_FILES['category_images']['error'][$index],
+                    'size' => $_FILES['category_images']['size'][$index]
+                ];
+
+                try {
+                    $imagePath = $categoryModel->uploadImage($file);
+                } catch (Exception $e) {
+                    $errors[] = "Ligne " . ($index + 1) . ": " . $e->getMessage();
+                    continue;
+                }
+            }
+
+            try {
+                $categoryModel->create($admin_id, $name, $imagePath, $order);
+                $added++;
+            } catch (Exception $e) {
+                $errors[] = "Ligne " . ($index + 1) . ": " . $e->getMessage();
+                // Supprimer l'image si la création échoue
+                if ($imagePath && file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+        }
+
+        if ($added > 0) {
+            $this->updateRestaurantTimestamp();
+            $message = $added === 1 ? "1 catégorie créée" : "$added catégories créées";
+            $this->addSuccessMessage($message, 'categories-grid');
+            $_SESSION['close_accordion'] = 'quick-add-categories-content';
+        }
+
+        if (!empty($errors)) {
+            $this->addErrorMessage(implode("<br>", $errors), $anchor);
+        }
+    }
+
+    /**
+     * Gestion de l'ajout rapide de plusieurs plats
+     */
+    private function handleBatchAddDishes($dishModel, $anchor)
+    {
+        $target_category_id = (int)($_POST['target_category_id'] ?? 0);
+        $dishes = $_POST['dishes'] ?? [];
+
+        if ($target_category_id <= 0) {
+            $this->addErrorMessage("Veuillez sélectionner une catégorie cible", $anchor);
+            return;
+        }
+
+        if (empty($dishes)) {
+            $this->addErrorMessage("Aucun plat à ajouter", $anchor);
+            return;
+        }
+
+        $added = 0;
+        $errors = [];
+
+        foreach ($dishes as $index => $dishData) {
+            $name = trim($dishData['name'] ?? '');
+            $price = trim($dishData['price'] ?? '');
+            $description = trim($dishData['description'] ?? '');
+            $allergens = $dishData['allergens'] ?? [];
+
+            if (empty($name)) {
+                $errors[] = "Ligne " . ($index + 1) . ": le nom est requis";
+                continue;
+            }
+
+            if (strlen($name) > 100) {
+                $errors[] = "Ligne " . ($index + 1) . ": le nom est trop long (max 100 caractères)";
+                continue;
+            }
+
+            if (empty($price) || !is_numeric($price)) {
+                $errors[] = "Ligne " . ($index + 1) . ": le prix doit être un nombre valide";
+                continue;
+            }
+
+            $priceFloat = (float)$price;
+            if ($priceFloat < 0.01 || $priceFloat > 999.99) {
+                $errors[] = "Ligne " . ($index + 1) . ": le prix doit être entre 0.01 et 999.99";
+                continue;
+            }
+
+            if (!empty($description) && strlen($description) > 500) {
+                $errors[] = "Ligne " . ($index + 1) . ": la description est trop longue (max 500 caractères)";
+                continue;
+            }
+
+            // Gérer l'upload d'image si présente
+            $imagePath = null;
+            if (isset($_FILES['dish_images']['name'][$index]) && !empty($_FILES['dish_images']['name'][$index]) && $_FILES['dish_images']['error'][$index] === UPLOAD_ERR_OK) {
+                $file = [
+                    'name' => $_FILES['dish_images']['name'][$index],
+                    'type' => $_FILES['dish_images']['type'][$index],
+                    'tmp_name' => $_FILES['dish_images']['tmp_name'][$index],
+                    'error' => $_FILES['dish_images']['error'][$index],
+                    'size' => $_FILES['dish_images']['size'][$index]
+                ];
+
+                try {
+                    $imagePath = $dishModel->uploadImage($file);
+                } catch (Exception $e) {
+                    $errors[] = "Ligne " . ($index + 1) . ": " . $e->getMessage();
+                    continue;
+                }
+            }
+
+            try {
+                $dish_id = $dishModel->create($target_category_id, $name, $description, $priceFloat, $imagePath);
+                
+                // Ajouter les allergènes si présents
+                if (!empty($allergens) && is_array($allergens)) {
+                    foreach ($allergens as $allergene_id) {
+                        $allergene_id = (int)$allergene_id;
+                        if ($allergene_id > 0) {
+                            $dishModel->addAllergen($dish_id, $allergene_id);
+                        }
+                    }
+                }
+                
+                $added++;
+            } catch (Exception $e) {
+                $errors[] = "Ligne " . ($index + 1) . ": " . $e->getMessage();
+                // Supprimer l'image si la création échoue
+                if ($imagePath && file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+        }
+
+        if ($added > 0) {
+            $this->updateRestaurantTimestamp();
+            $message = $added === 1 ? "1 plat créé" : "$added plats créés";
+            $this->addSuccessMessage($message, "category-$target_category_id");
+            $_SESSION['close_accordion'] = 'quick-add-dishes-content';
+        }
+
+        if (!empty($errors)) {
+            $this->addErrorMessage(implode("<br>", $errors), $anchor);
+        }
     }
 }

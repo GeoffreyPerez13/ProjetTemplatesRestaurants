@@ -9,6 +9,10 @@ $scripts = [
 if ($currentMode === 'images') {
     $scripts[] = "js/sections/edit-card/images-mode.js";
     $scripts[] = "js/sections/edit-card/drag-and-drop.js";
+} elseif ($currentMode === 'editable') {
+    $scripts[] = "js/sections/edit-card/category-order.js";
+    $scripts[] = "js/sections/edit-card/quick-add.js";
+    $scripts[] = "js/sections/edit-card/allergens-accordion.js";
 }
 
 // Récupérer les paramètres de session pour les accordéons
@@ -112,35 +116,160 @@ require __DIR__ . '/../partials/header.php';
     <!-- ==================== MODE ÉDITABLE ==================== -->
     <div class="edit-carte-container">
 
-        <!-- Bloc Ajouter une catégorie (accordéon) -->
-        <div class="accordion-section new-category-accordion" id="new-category">
+        <!-- Bloc Ajout rapide de catégories (accordéon) -->
+        <div class="accordion-section quick-add-categories-accordion" id="quick-add-categories">
             <div class="accordion-header">
-                <h2><i class="fas fa-plus-circle"></i> Ajouter une nouvelle catégorie</h2>
-                <button type="button" class="accordion-toggle" data-target="new-category-content">
+                <h2><i class="fas fa-layer-group"></i> Ajout rapide de catégories</h2>
+                <button type="button" class="accordion-toggle" data-target="quick-add-categories-content">
                     <i class="fas fa-chevron-down"></i>
                 </button>
             </div>
 
-            <div id="new-category-content" class="accordion-content collapsed">
-                <form method="post" enctype="multipart/form-data" class="new-category-form">
-                    <input type="hidden" name="anchor" value="new-category">
+            <div id="quick-add-categories-content" class="accordion-content collapsed">
+                <form method="post" enctype="multipart/form-data" class="quick-add-form" id="quick-add-categories-form">
+                    <input type="hidden" name="batch_add_categories" value="1">
+                    <input type="hidden" name="anchor" value="quick-add-categories">
 
-                    <div class="form-group <?= isset($error_fields['new_category']) ? 'has-error' : '' ?>">
-                        <input type="text" name="new_category" placeholder="Nom de la catégorie" required
-                            value="<?= htmlspecialchars($old_input['new_category'] ?? '') ?>"
-                            class="<?= isset($error_fields['new_category']) ? 'error-field' : '' ?>">
-                        <?php if (isset($error_fields['new_category'])): ?>
-                            <div class="field-error-message">Le nom de la catégorie est requis (max 100 caractères)</div>
-                        <?php endif; ?>
+                    <div class="quick-add-header">
+                        <p class="quick-add-description">
+                            <i class="fas fa-info-circle"></i>
+                            Ajoutez plusieurs catégories en une seule fois avec leurs images (optionnelles).
+                        </p>
                     </div>
 
-                    <div class="image-upload-container">
-                        <label for="category_image">Image de la catégorie (optionnel) :</label>
-                        <input type="file" name="category_image" id="category_image" accept="image/jpeg, image/png, image/gif, image/webp">
-                        <small>Formats acceptés: JPEG, PNG, GIF, WebP (max 2MB)</small>
+                    <div class="quick-add-table">
+                        <div class="quick-add-table-header">
+                            <div class="quick-add-col-name">Nom de la catégorie</div>
+                            <div class="quick-add-col-order">Ordre</div>
+                            <div class="quick-add-col-image">Image</div>
+                            <div class="quick-add-col-actions">Actions</div>
+                        </div>
+                        <div id="categories-rows-container">
+                            <!-- Ligne initiale -->
+                            <div class="quick-add-row">
+                                <div class="quick-add-col-name">
+                                    <input type="text" name="categories[0][name]" placeholder="Ex: Entrées" required class="quick-add-input">
+                                </div>
+                                <div class="quick-add-col-order">
+                                    <input type="number" name="categories[0][order]" value="1" min="1" class="quick-add-input-small">
+                                </div>
+                                <div class="quick-add-col-image">
+                                    <input type="file" name="category_images[0]" accept="image/jpeg,image/png,image/gif,image/webp" class="quick-add-file">
+                                </div>
+                                <div class="quick-add-col-actions">
+                                    <button type="button" class="btn-icon btn-remove-row" title="Supprimer cette ligne" disabled>
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn success">Ajouter la catégorie</button>
+                    <div class="quick-add-actions">
+                        <button type="button" class="btn btn-add-row" id="add-category-row">
+                            <i class="fas fa-plus"></i> Ajouter une ligne
+                        </button>
+                        <button type="submit" class="btn success">
+                            <i class="fas fa-check"></i> Créer les catégories
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bloc Ajout rapide de plats (accordéon) -->
+        <div class="accordion-section quick-add-dishes-accordion" id="quick-add-dishes">
+            <div class="accordion-header">
+                <h2><i class="fas fa-utensils"></i> Ajout rapide de plats</h2>
+                <button type="button" class="accordion-toggle" data-target="quick-add-dishes-content">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+
+            <div id="quick-add-dishes-content" class="accordion-content collapsed">
+                <form method="post" enctype="multipart/form-data" class="quick-add-form" id="quick-add-dishes-form">
+                    <input type="hidden" name="batch_add_dishes" value="1">
+                    <input type="hidden" name="anchor" value="quick-add-dishes">
+
+                    <div class="quick-add-header">
+                        <p class="quick-add-description">
+                            <i class="fas fa-info-circle"></i>
+                            Ajoutez plusieurs plats en une seule fois avec leurs images et allergènes (optionnels).
+                        </p>
+                        <div class="form-group">
+                            <label for="target-category">Catégorie cible :</label>
+                            <select name="target_category_id" id="target-category" required class="quick-add-select">
+                                <option value="">-- Sélectionnez une catégorie --</option>
+                                <?php foreach ($categories as $cat): ?>
+                                    <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="quick-add-table">
+                        <div class="quick-add-table-header">
+                            <div class="quick-add-col-dish-name">Nom du plat</div>
+                            <div class="quick-add-col-price">Prix (€)</div>
+                            <div class="quick-add-col-description">Description</div>
+                            <div class="quick-add-col-image">Image</div>
+                            <div class="quick-add-col-allergens">Allergènes</div>
+                            <div class="quick-add-col-actions">Actions</div>
+                        </div>
+                        <div id="dishes-rows-container">
+                            <!-- Ligne initiale -->
+                            <div class="quick-add-row">
+                                <div class="quick-add-col-dish-name">
+                                    <input type="text" name="dishes[0][name]" placeholder="Ex: Salade César" required class="quick-add-input">
+                                </div>
+                                <div class="quick-add-col-price">
+                                    <input type="number" name="dishes[0][price]" step="0.01" min="0.01" placeholder="12.50" required class="quick-add-input-small">
+                                </div>
+                                <div class="quick-add-col-description">
+                                    <input type="text" name="dishes[0][description]" placeholder="Description courte (optionnel)" class="quick-add-input">
+                                </div>
+                                <div class="quick-add-col-image">
+                                    <input type="file" name="dish_images[0]" accept="image/jpeg,image/png,image/gif,image/webp" class="quick-add-file">
+                                </div>
+                                <div class="quick-add-col-allergens">
+                                    <button type="button" class="btn-allergens-toggle" data-row="0" title="Sélectionner les allergènes">
+                                        <i class="fas fa-exclamation-triangle"></i> <span class="allergens-count">0</span>
+                                    </button>
+                                    <div class="allergens-popup" data-row="0" style="display: none;">
+                                        <div class="allergens-popup-header">
+                                            <span>Allergènes</span>
+                                            <button type="button" class="btn-close-popup"><i class="fas fa-times"></i></button>
+                                        </div>
+                                        <div class="allergens-popup-grid">
+                                            <?php foreach ($allergenes as $allergene): ?>
+                                                <label class="allergen-checkbox-compact" data-allergen-name="<?= htmlspecialchars($allergene['nom']) ?>">
+                                                    <input type="checkbox" name="dishes[0][allergens][]" value="<?= $allergene['id'] ?>">
+                                                    <?php if (!empty($allergene['icone'])): ?>
+                                                        <i class="fas <?= htmlspecialchars($allergene['icone']) ?>"></i>
+                                                    <?php endif; ?>
+                                                    <span><?= htmlspecialchars($allergene['nom']) ?></span>
+                                                </label>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="quick-add-col-actions">
+                                    <button type="button" class="btn-icon btn-remove-row" title="Supprimer cette ligne" disabled>
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-add-actions">
+                        <button type="button" class="btn btn-add-row" id="add-dish-row">
+                            <i class="fas fa-plus"></i> Ajouter une ligne
+                        </button>
+                        <button type="submit" class="btn success">
+                            <i class="fas fa-check"></i> Créer les plats
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -149,6 +278,43 @@ require __DIR__ . '/../partials/header.php';
         <div class="categories-grid">
             <?php foreach ($categories as $cat): ?>
                 <div class="category-block" id="category-<?= $cat['id'] ?>">
+                    <div class="category-header">
+                        <!-- Colonne gauche : ordre en haut, nom en dessous -->
+                        <div class="category-left">
+                            <div class="category-order-control">
+                                <i class="fas fa-sort-numeric-up category-order-icon" title="Ordre d'affichage"></i>
+                                <span class="category-order-label">Ordre d'affichage</span>
+                                <input type="number"
+                                    class="category-order-input"
+                                    min="1"
+                                    value="<?= (int)($cat['display_order'] ?? 0) ?>"
+                                    data-category-id="<?= $cat['id'] ?>"
+                                    title="Ordre d'affichage de la catégorie">
+                                <span class="category-order-status" data-category-id="<?= $cat['id'] ?>"></span>
+                            </div>
+                            <strong><i class="fas fa-folder"></i> <?= htmlspecialchars($cat['name']) ?></strong>
+                        </div>
+
+                        <!-- Colonne droite : X en haut, boutons accordéon en dessous -->
+                        <div class="category-right">
+                            <form method="post" class="category-delete-form">
+                                <input type="hidden" name="delete_category" value="<?= $cat['id'] ?>">
+                                <input type="hidden" name="anchor" value="categories-grid">
+                                <button type="submit" class="category-delete-btn" title="Supprimer cette catégorie">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
+                            <div class="category-accordion-controls">
+                                <button type="button" class="btn small expand-category" data-category-id="<?= $cat['id'] ?>">
+                                    <i class="fas fa-expand-alt"></i> Tout ouvrir
+                                </button>
+                                <button type="button" class="btn small collapse-category" data-category-id="<?= $cat['id'] ?>">
+                                    <i class="fas fa-compress-alt"></i> Tout fermer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Affichage de l'image de la catégorie -->
                     <?php if (!empty($cat['image'])): ?>
                         <div class="current-image">
@@ -159,20 +325,6 @@ require __DIR__ . '/../partials/header.php';
                                 data-caption="<?= htmlspecialchars($cat['name']) ?>">
                         </div>
                     <?php endif; ?>
-
-                    <div class="category-header">
-                        <strong><i class="fas fa-folder"></i> <?= htmlspecialchars($cat['name']) ?></strong>
-
-                        <!-- Contrôles d'accordéon pour cette catégorie -->
-                        <div class="category-accordion-controls">
-                            <button type="button" class="btn small expand-category" data-category-id="<?= $cat['id'] ?>">
-                                <i class="fas fa-expand-alt"></i> Tout ouvrir
-                            </button>
-                            <button type="button" class="btn small collapse-category" data-category-id="<?= $cat['id'] ?>">
-                                <i class="fas fa-compress-alt"></i> Tout fermer
-                            </button>
-                        </div>
-                    </div>
 
                     <!-- Section Modifier la catégorie (accordéon) -->
                     <div class="accordion-section">
@@ -189,44 +341,35 @@ require __DIR__ . '/../partials/header.php';
                                 <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
 
                                 <div class="form-group <?= isset($error_fields['edit_category_name']) ? 'has-error' : '' ?>">
-                                    <input type="text" name="edit_category_name"
+                                    <label for="edit_category_name_<?= $cat['id'] ?>">Nom de la catégorie</label>
+                                    <input type="text" name="edit_category_name" id="edit_category_name_<?= $cat['id'] ?>"
                                         value="<?= htmlspecialchars($old_input['edit_category_name'] ?? $cat['name']) ?>"
-                                        placeholder="Nom de la catégorie" required
+                                        placeholder="Ex: Entrées" required
                                         class="<?= isset($error_fields['edit_category_name']) ? 'error-field' : '' ?>">
                                     <?php if (isset($error_fields['edit_category_name'])): ?>
                                         <div class="field-error-message">Le nom de la catégorie est requis (max 100 caractères)</div>
                                     <?php endif; ?>
                                 </div>
 
-                                <div class="image-upload-container">
+                                <div class="form-group">
                                     <label for="edit_category_image_<?= $cat['id'] ?>">
-                                        <?= empty($cat['image']) ? 'Ajouter une image' : 'Changer l\'image' ?> (optionnel) :
+                                        <i class="fas fa-image"></i> <?= empty($cat['image']) ? 'Ajouter une image' : 'Changer l\'image' ?> (optionnel)
                                     </label>
                                     <input type="file" name="edit_category_image" id="edit_category_image_<?= $cat['id'] ?>"
                                         accept="image/jpeg, image/png, image/gif, image/webp">
                                     <small>Formats acceptés: JPEG, PNG, GIF, WebP (max 2MB)</small>
                                 </div>
 
-                                <div class="category-buttons">
-                                    <button type="submit" name="edit_category" class="btn">Modifier catégorie</button>
-
+                                <div class="form-actions">
+                                    <button type="submit" name="edit_category" class="btn primary">
+                                        <i class="fas fa-save"></i> Enregistrer
+                                    </button>
                                     <?php if (!empty($cat['image'])): ?>
-                                        <form method="post" class="inline-form">
-                                            <input type="hidden" name="remove_category_image" value="<?= $cat['id'] ?>">
-                                            <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
-                                            <button type="submit" class="btn danger">
-                                                Supprimer l'image
-                                            </button>
-                                        </form>
+                                        <button type="submit" name="remove_category_image" value="<?= $cat['id'] ?>" class="btn secondary">
+                                            <i class="fas fa-trash-alt"></i> Supprimer l'image
+                                        </button>
                                     <?php endif; ?>
                                 </div>
-                            </form>
-
-                            <!-- Formulaire pour supprimer la catégorie -->
-                            <form method="post" class="inline-form">
-                                <input type="hidden" name="delete_category" value="<?= $cat['id'] ?>">
-                                <input type="hidden" name="anchor" value="categories-grid">
-                                <button type="submit" class="btn danger">Supprimer catégorie</button>
                             </form>
                         </div>
                     </div>
@@ -282,28 +425,31 @@ require __DIR__ . '/../partials/header.php';
                                     <small>Formats acceptés: JPEG, PNG, GIF, WebP (max 2MB)</small>
                                 </div>
 
-                                <!-- Allergènes pour le nouveau plat -->
-                                <div class="allergenes-section">
-                                    <label><i class="fas fa-exclamation-triangle"></i> Allergènes présents dans le plat (optionnel) :</label>
-
-                                    <div class="allergenes-controls">
-                                        <button type="button" class="btn-allergenes-toggle" data-target="allergenes-add-<?= $cat['id'] ?>">
-                                            <i class="fas fa-check-double"></i> Tout (dé)cocher
-                                        </button>
+                                <!-- Allergènes pour le nouveau plat (accordéon) -->
+                                <div class="allergenes-accordion">
+                                    <button type="button" class="allergenes-accordion-toggle" data-target="allergenes-add-<?= $cat['id'] ?>">
+                                        <span><i class="fas fa-exclamation-triangle"></i> Allergènes (optionnel)</span>
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                    <div class="allergenes-accordion-content collapsed" id="allergenes-add-<?= $cat['id'] ?>">
+                                        <div class="allergenes-controls">
+                                            <button type="button" class="btn-allergenes-toggle" data-target="allergenes-add-<?= $cat['id'] ?>">
+                                                <i class="fas fa-check-double"></i> Tout (dé)cocher
+                                            </button>
+                                        </div>
+                                        <div class="allergenes-grid">
+                                            <?php foreach ($allergenes as $allergene): ?>
+                                                <label class="allergene-checkbox">
+                                                    <input type="checkbox" name="allergenes[]" value="<?= $allergene['id'] ?>">
+                                                    <?php if (!empty($allergene['icone'])): ?>
+                                                        <i class="fas <?= htmlspecialchars($allergene['icone']) ?>"></i>
+                                                    <?php endif; ?>
+                                                    <?= htmlspecialchars($allergene['nom']) ?>
+                                                </label>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <small>Sélectionnez les allergènes présents dans ce plat.</small>
                                     </div>
-
-                                    <div class="allergenes-grid" id="allergenes-add-<?= $cat['id'] ?>">
-                                        <?php foreach ($allergenes as $allergene): ?>
-                                            <label class="allergene-checkbox">
-                                                <input type="checkbox" name="allergenes[]" value="<?= $allergene['id'] ?>">
-                                                <?php if (!empty($allergene['icone'])): ?>
-                                                    <i class="fas <?= htmlspecialchars($allergene['icone']) ?>"></i>
-                                                <?php endif; ?>
-                                                <?= htmlspecialchars($allergene['nom']) ?>
-                                            </label>
-                                        <?php endforeach; ?>
-                                    </div>
-                                    <small>Sélectionnez les allergènes présents dans ce plat.</small>
                                 </div>
 
                                 <button type="submit" name="new_dish" class="btn success">Ajouter plat</button>
@@ -329,11 +475,21 @@ require __DIR__ . '/../partials/header.php';
                                             <!-- En-tête du plat (accordéon) -->
                                             <div class="dish-accordion-header">
                                                 <h4><i class="fas fa-utensil-spoon"></i> <?= htmlspecialchars($plat['name']) ?> - <?= htmlspecialchars($plat['price']) ?>€</h4>
-                                                <button type="button" class="dish-accordion-toggle"
-                                                    data-target="dish-<?= $plat['id'] ?>"
-                                                    data-category="<?= $cat['id'] ?>">
-                                                    <i class="fas fa-chevron-down"></i>
-                                                </button>
+                                                <div class="dish-header-actions">
+                                                    <form method="post" class="dish-delete-form">
+                                                        <input type="hidden" name="delete_dish" value="<?= $plat['id'] ?>">
+                                                        <input type="hidden" name="current_category_id" value="<?= $cat['id'] ?>">
+                                                        <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
+                                                        <button type="submit" class="dish-delete-btn" title="Supprimer ce plat">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </form>
+                                                    <button type="button" class="dish-accordion-toggle"
+                                                        data-target="dish-<?= $plat['id'] ?>"
+                                                        data-category="<?= $cat['id'] ?>">
+                                                        <i class="fas fa-chevron-down"></i>
+                                                    </button>
+                                                </div>
                                             </div>
 
                                             <!-- Contenu du plat -->
@@ -343,6 +499,26 @@ require __DIR__ . '/../partials/header.php';
                                                         <input type="hidden" name="dish_id" value="<?= $plat['id'] ?>">
                                                         <input type="hidden" name="current_category_id" value="<?= $cat['id'] ?>">
                                                         <input type="hidden" name="anchor" value="dish-<?= $plat['id'] ?>">
+
+                                                        <!-- Section Image -->
+                                                        <?php if (!empty($plat['image'])): ?>
+                                                            <div class="dish-current-image-container">
+                                                                <label>Image actuelle :</label>
+                                                                <img src="/<?= htmlspecialchars($plat['image']) ?>"
+                                                                    alt="<?= htmlspecialchars($plat['name']) ?>"
+                                                                    class="dish-image-preview lightbox-image"
+                                                                    data-caption="<?= htmlspecialchars($plat['name']) ?> - <?= htmlspecialchars($plat['price']) ?>€">
+                                                            </div>
+                                                        <?php endif; ?>
+
+                                                        <div class="form-group">
+                                                            <label for="edit_dish_image_<?= $plat['id'] ?>">
+                                                                <i class="fas fa-image"></i> <?= empty($plat['image']) ? 'Ajouter une image' : 'Changer l\'image' ?> (optionnel)
+                                                            </label>
+                                                            <input type="file" name="dish_image" id="edit_dish_image_<?= $plat['id'] ?>"
+                                                                accept="image/jpeg, image/png, image/gif, image/webp">
+                                                            <small>Formats acceptés: JPEG, PNG, GIF, WebP (max 2MB)</small>
+                                                        </div>
 
                                                         <!-- Nom + Prix -->
                                                         <div class="dish-name-price-row">
@@ -379,77 +555,47 @@ require __DIR__ . '/../partials/header.php';
                                                             <?php endif; ?>
                                                         </div>
 
-                                                        <!-- Section Image -->
-                                                        <?php if (!empty($plat['image'])): ?>
-                                                            <div class="dish-current-image-container">
-                                                                <label>Image actuelle :</label>
-                                                                <img src="/<?= htmlspecialchars($plat['image']) ?>"
-                                                                    alt="<?= htmlspecialchars($plat['name']) ?>"
-                                                                    class="dish-image-preview lightbox-image"
-                                                                    data-caption="<?= htmlspecialchars($plat['name']) ?> - <?= htmlspecialchars($plat['price']) ?>€">
-                                                            </div>
-                                                        <?php endif; ?>
-
-                                                        <div class="image-upload-container">
-                                                            <label for="edit_dish_image_<?= $plat['id'] ?>">
-                                                                <?= empty($plat['image']) ? 'Ajouter une image' : 'Changer l\'image' ?> (optionnel) :
-                                                            </label>
-                                                            <input type="file" name="dish_image" id="edit_dish_image_<?= $plat['id'] ?>"
-                                                                accept="image/jpeg, image/png, image/gif, image/webp">
-                                                            <small>Formats acceptés: JPEG, PNG, GIF, WebP (max 2MB)</small>
-                                                        </div>
-
-                                                        <!-- Allergènes pour ce plat -->
-                                                        <div class="allergenes-section">
-                                                            <label><i class="fas fa-exclamation-triangle"></i> Allergènes :</label>
-
-                                                            <div class="allergenes-controls">
-                                                                <button type="button" class="btn-allergenes-toggle" data-target="allergenes-edit-<?= $plat['id'] ?>">
-                                                                    <i class="fas fa-check-double"></i> Tout (dé)cocher
-                                                                </button>
-                                                            </div>
-
-                                                            <div class="allergenes-grid" id="allergenes-edit-<?= $plat['id'] ?>">
-                                                                <?php
-                                                                $allergenesDuPlat = $platsAllergenes[$plat['id']] ?? [];
-                                                                foreach ($allergenes as $allergene):
-                                                                ?>
-                                                                    <label class="allergene-checkbox">
-                                                                        <input type="checkbox" name="allergenes_<?= $plat['id'] ?>[]" value="<?= $allergene['id'] ?>"
-                                                                            <?= in_array($allergene['id'], $allergenesDuPlat) ? 'checked' : '' ?>>
-                                                                        <?php if (!empty($allergene['icone'])): ?>
-                                                                            <i class="fas <?= htmlspecialchars($allergene['icone']) ?>"></i>
-                                                                        <?php endif; ?>
-                                                                        <?= htmlspecialchars($allergene['nom']) ?>
-                                                                    </label>
-                                                                <?php endforeach; ?>
-                                                            </div>
-                                                            <small>Cochez les allergènes présents.</small>
-                                                        </div>
-
-                                                        <!-- Boutons pour l'image -->
-                                                        <div class="dish-image-buttons-row">
-                                                            <button type="submit" name="edit_dish" class="btn">Modifier le plat</button>
-
-                                                            <?php if (!empty($plat['image'])): ?>
-                                                                <form method="post" class="inline-form">
-                                                                    <input type="hidden" name="remove_dish_image" value="<?= $plat['id'] ?>">
-                                                                    <input type="hidden" name="current_category_id" value="<?= $cat['id'] ?>">
-                                                                    <input type="hidden" name="anchor" value="dish-<?= $plat['id'] ?>">
-                                                                    <button type="submit" class="btn danger">
-                                                                        Supprimer l'image
+                                                        <!-- Allergènes pour ce plat (accordéon) -->
+                                                        <div class="allergenes-accordion">
+                                                            <button type="button" class="allergenes-accordion-toggle" data-target="allergenes-edit-<?= $plat['id'] ?>">
+                                                                <span><i class="fas fa-exclamation-triangle"></i> Allergènes</span>
+                                                                <i class="fas fa-chevron-down"></i>
+                                                            </button>
+                                                            <div class="allergenes-accordion-content collapsed" id="allergenes-edit-<?= $plat['id'] ?>">
+                                                                <div class="allergenes-controls">
+                                                                    <button type="button" class="btn-allergenes-toggle" data-target="allergenes-edit-<?= $plat['id'] ?>">
+                                                                        <i class="fas fa-check-double"></i> Tout (dé)cocher
                                                                     </button>
-                                                                </form>
+                                                                </div>
+                                                                <div class="allergenes-grid">
+                                                                    <?php
+                                                                    $allergenesDuPlat = $platsAllergenes[$plat['id']] ?? [];
+                                                                    foreach ($allergenes as $allergene):
+                                                                    ?>
+                                                                        <label class="allergene-checkbox">
+                                                                            <input type="checkbox" name="allergenes_<?= $plat['id'] ?>[]" value="<?= $allergene['id'] ?>"
+                                                                                <?= in_array($allergene['id'], $allergenesDuPlat) ? 'checked' : '' ?>>
+                                                                            <?php if (!empty($allergene['icone'])): ?>
+                                                                                <i class="fas <?= htmlspecialchars($allergene['icone']) ?>"></i>
+                                                                            <?php endif; ?>
+                                                                            <?= htmlspecialchars($allergene['nom']) ?>
+                                                                        </label>
+                                                                    <?php endforeach; ?>
+                                                                </div>
+                                                                <small>Cochez les allergènes présents.</small>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-actions">
+                                                            <button type="submit" name="edit_dish" class="btn primary">
+                                                                <i class="fas fa-save"></i> Enregistrer
+                                                            </button>
+                                                            <?php if (!empty($plat['image'])): ?>
+                                                                <button type="submit" name="remove_dish_image" value="<?= $plat['id'] ?>" class="btn secondary">
+                                                                    <i class="fas fa-trash-alt"></i> Supprimer l'image
+                                                                </button>
                                                             <?php endif; ?>
                                                         </div>
-                                                    </form>
-
-                                                    <!-- Bouton Supprimer le plat -->
-                                                    <form method="post" class="inline-form">
-                                                        <input type="hidden" name="delete_dish" value="<?= $plat['id'] ?>">
-                                                        <input type="hidden" name="current_category_id" value="<?= $cat['id'] ?>">
-                                                        <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
-                                                        <button type="submit" class="btn danger">Supprimer le plat</button>
                                                     </form>
                                                 </div>
                                             </div>

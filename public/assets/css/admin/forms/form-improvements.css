@@ -1,0 +1,381 @@
+/* ==================== FORM IMPROVEMENTS ==================== */
+
+/* Form groups with better spacing */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 8px;
+  font-size: 0.9em;
+}
+
+.form-group label i {
+  margin-right: 6px;
+  color: var(--color-primary);
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="email"],
+.form-group input[type="file"],
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.95em;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+
+.form-group small {
+  display: block;
+  margin-top: 6px;
+  color: var(--color-text-muted);
+  font-size: 0.85em;
+}
+
+/* Form actions - buttons row */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.form-actions .btn {
+  flex: 1;
+  justify-content: center;
+}
+
+.form-actions .btn.primary {
+  flex: 2;
+}
+
+/* Danger Zone */
+.danger-zone {
+  margin-top: 32px;
+  padding: 20px;
+  border: 2px solid #fca5a5;
+  border-radius: var(--radius-md);
+  background: linear-gradient(to bottom, #fef2f2, var(--color-bg));
+}
+
+.danger-zone h4 {
+  margin: 0 0 12px 0;
+  color: #dc2626;
+  font-size: 1em;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.danger-zone h4 i {
+  font-size: 1.1em;
+}
+
+.danger-zone p {
+  margin: 0 0 16px 0;
+  color: var(--color-text-light);
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+.danger-zone form {
+  margin: 0;
+}
+
+.danger-zone .btn.danger {
+  width: 100%;
+  justify-content: center;
+  font-weight: 600;
+}
+
+/* Improved spacing for dish forms */
+.new-dish-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.new-dish-form .form-group {
+  margin-bottom: 0;
+}
+
+.new-dish-form .image-upload-container {
+  margin: 20px 0;
+}
+
+/* Allergenes accordion */
+.allergenes-accordion {
+  margin: 12px 0 8px 0;
+}
+
+.allergenes-accordion-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  color: var(--color-text);
+  font-size: 0.9em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.allergenes-accordion-toggle.expanded {
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.allergenes-accordion-content.collapsed + .allergenes-accordion-toggle,
+.allergenes-accordion-toggle:not(.expanded) {
+  border-radius: var(--radius-sm);
+}
+
+.allergenes-accordion-toggle:hover {
+  background: var(--color-bg-alt);
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.allergenes-accordion-toggle span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.allergenes-accordion-toggle span i {
+  color: #f59e0b;
+}
+
+.allergenes-accordion-toggle > i {
+  transition: transform 0.3s ease;
+  color: var(--color-text-muted);
+  transform: rotate(180deg);
+}
+
+.allergenes-accordion-toggle.expanded > i {
+  transform: rotate(0deg);
+}
+
+.allergenes-accordion-content {
+  max-height: 1000px;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+  opacity: 1;
+  padding: 16px;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  margin-top: -1px;
+}
+
+.allergenes-accordion-content small {
+  display: block;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.allergenes-accordion-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+  padding: 0 16px;
+  border: none;
+}
+
+.allergenes-controls {
+  margin-bottom: 14px;
+}
+
+.btn-allergenes-toggle {
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.8em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-allergenes-toggle:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.btn-allergenes-toggle i {
+  font-size: 0.9em;
+}
+
+.allergenes-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+
+.allergene-checkbox {
+  flex: 0 0 calc(50% - 4px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 0.9em;
+}
+
+.allergene-checkbox:hover {
+  background: var(--color-bg-warm);
+  border-color: var(--color-primary);
+}
+
+.allergene-checkbox input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.allergene-checkbox input[type="checkbox"]:checked ~ i,
+.allergene-checkbox input[type="checkbox"]:checked ~ span {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.allergene-checkbox i {
+  font-size: 1em;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* Edit dish form spacing */
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.inline-form.edit-form {
+  gap: 0;
+}
+
+.edit-form .form-group label {
+  margin-top: 15px;
+}
+
+.edit-form .form-group {
+  margin-bottom: 8px;
+}
+
+.edit-form textarea[name="dish_description"] {
+  margin-bottom: 0;
+}
+
+.edit-form .form-actions {
+  margin-top: 8px;
+  padding-top: 12px;
+}
+
+/* Edit category form improvements */
+.edit-category-form .form-group {
+  margin-bottom: 20px;
+}
+
+/* Responsive adjustments */
+/* Dish header actions */
+.dish-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dish-delete-form {
+  margin: 0;
+  padding: 0;
+}
+
+.dish-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  padding: 0;
+  border: 1.5px solid #f87171;
+  border-radius: 50%;
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: 0.7em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dish-delete-btn:hover {
+  background: #dc2626;
+  color: #fff;
+  border-color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .new-dish-form .form-row {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .form-actions .btn {
+    width: 100%;
+  }
+  
+  .allergenes-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .allergenes-accordion-content {
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .allergenes-grid {
+    grid-template-columns: 1fr;
+  }
+}

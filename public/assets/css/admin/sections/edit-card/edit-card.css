@@ -235,7 +235,7 @@
 .category-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 20px;
   padding-bottom: 15px;
   border-bottom: 2px solid var(--color-border);
@@ -352,15 +352,15 @@
 
 .dish-accordion-toggle i {
   transition: transform 0.3s ease;
-  transform: rotate(180deg);
-}
-
-.dish-accordion-content.expanded ~ .dish-accordion-header .dish-accordion-toggle i {
   transform: rotate(0deg);
 }
 
+.dish-accordion-toggle.expanded i {
+  transform: rotate(180deg);
+}
+
 .dish-accordion-content {
-  padding: 20px 0;
+  padding: 0 0 20px 0;
   width: 100%;
   box-sizing: border-box;
   transition: all 0.3s ease-in-out;
@@ -368,7 +368,7 @@
 
 .dish-edit-container {
   background: var(--color-bg-alt);
-  border-radius: var(--radius-md);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;

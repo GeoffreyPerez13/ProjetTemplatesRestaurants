@@ -21,6 +21,8 @@
 @import url("admin/forms/categories.css");
 @import url("admin/forms/dishes.css");
 @import url("admin/forms/images.css");
+@import url("admin/forms/quick-add.css");
+@import url("admin/forms/form-improvements.css");
 
 /* CSS des différentes sections admin */
 /* Section dashboard */

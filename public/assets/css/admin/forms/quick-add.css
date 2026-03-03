@@ -1,0 +1,486 @@
+/* ==================== QUICK ADD FORMS ==================== */
+
+.quick-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.quick-add-header {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.quick-add-description {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 15px;
+  background: var(--color-bg-warm);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-light);
+  font-size: 0.9em;
+  margin: 0;
+}
+
+.quick-add-description i {
+  color: var(--color-primary);
+  font-size: 1.1em;
+}
+
+.quick-add-select {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.95em;
+  transition: border-color 0.2s ease;
+}
+
+.quick-add-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+/* Table structure */
+.quick-add-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--color-bg-alt);
+  padding: 15px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.quick-add-table-header {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  background: var(--color-bg-warm);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.85em;
+  color: var(--color-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Categories table columns */
+.quick-add-categories-accordion .quick-add-table-header {
+  grid-template-columns: 1fr 100px 150px 60px;
+}
+
+.quick-add-categories-accordion .quick-add-row {
+  grid-template-columns: 1fr 100px 150px 60px;
+}
+
+/* Dishes table columns */
+.quick-add-dishes-accordion .quick-add-table-header {
+  grid-template-columns: 1.5fr 100px 1.5fr 150px 120px 60px;
+}
+
+.quick-add-dishes-accordion .quick-add-row {
+  grid-template-columns: 1.5fr 100px 1.5fr 150px 120px 60px;
+}
+
+.quick-add-row {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  align-items: center;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.quick-add-row:hover {
+  background: var(--color-bg-warm);
+  border-color: var(--color-primary-light);
+}
+
+/* Inputs */
+.quick-add-input,
+.quick-add-input-small {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.9em;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quick-add-input:focus,
+.quick-add-input-small:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.quick-add-input-small {
+  text-align: center;
+}
+
+/* File input */
+.quick-add-file {
+  width: 100%;
+  padding: 5px 8px;
+  font-size: 0.85em;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.quick-add-file::-webkit-file-upload-button {
+  padding: 3px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-alt);
+  color: var(--color-text);
+  font-size: 0.8em;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+.quick-add-file::-webkit-file-upload-button:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+/* Allergens column */
+.quick-add-col-allergens {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-self: center;
+  height: 100%;
+}
+
+.btn-allergens-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-alt);
+  color: var(--color-text);
+  font-size: 0.85em;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.btn-allergens-toggle:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.btn-allergens-toggle i {
+  color: #f59e0b;
+}
+
+.btn-allergens-toggle:hover i {
+  color: white;
+}
+
+.allergens-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: var(--color-primary);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.75em;
+  font-weight: 600;
+}
+
+/* Allergens popup */
+.allergens-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  max-height: 450px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.allergens-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--color-bg-warm);
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.btn-close-popup {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-close-popup:hover {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.allergens-popup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 12px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.allergen-checkbox-compact {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-alt);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 0.85em;
+  position: relative;
+}
+
+.allergen-checkbox-compact:hover {
+  background: var(--color-bg-warm);
+  border-color: var(--color-primary);
+}
+
+.allergen-checkbox-compact input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.allergen-checkbox-compact input[type="checkbox"]:checked + i,
+.allergen-checkbox-compact input[type="checkbox"]:checked ~ span {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.allergen-checkbox-compact i {
+  font-size: 1em;
+  color: var(--color-text-muted);
+  width: 16px;
+  text-align: center;
+}
+
+.allergen-checkbox-compact span {
+  display: none;
+}
+
+/* Tooltip on hover */
+.allergen-checkbox-compact:hover::after {
+  content: attr(data-allergen-name);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: var(--color-text);
+  color: var(--color-bg);
+  font-size: 0.75em;
+  white-space: nowrap;
+  border-radius: var(--radius-sm);
+  margin-bottom: 4px;
+  z-index: 1001;
+  pointer-events: none;
+}
+
+.allergen-checkbox-compact:hover::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 4px solid transparent;
+  border-top-color: var(--color-text);
+  margin-bottom: -4px;
+  z-index: 1001;
+  pointer-events: none;
+}
+
+/* Column specific styles */
+.quick-add-col-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Action buttons */
+.quick-add-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
+}
+
+.btn-add-row {
+  background: var(--color-bg-alt);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn-add-row:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn-icon:hover:not(:disabled) {
+  background: #fca5a5;
+  color: #dc2626;
+}
+
+.btn-icon:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .quick-add-table-header {
+    font-size: 0.75em;
+    padding: 8px;
+  }
+
+  .quick-add-row {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .quick-add-input,
+  .quick-add-input-small {
+    padding: 6px 8px;
+    font-size: 0.85em;
+  }
+
+  /* Stack categories on mobile */
+  .quick-add-categories-accordion .quick-add-table-header,
+  .quick-add-categories-accordion .quick-add-row {
+    grid-template-columns: 1fr 80px 50px;
+  }
+
+  /* Stack dishes on mobile */
+  .quick-add-dishes-accordion .quick-add-table-header {
+    display: none;
+  }
+
+  .quick-add-dishes-accordion .quick-add-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .quick-add-col-dish-name::before {
+    content: "Nom : ";
+    font-weight: 600;
+    color: var(--color-text-light);
+  }
+
+  .quick-add-col-price::before {
+    content: "Prix : ";
+    font-weight: 600;
+    color: var(--color-text-light);
+  }
+
+  .quick-add-col-description::before {
+    content: "Description : ";
+    font-weight: 600;
+    color: var(--color-text-light);
+  }
+
+  .quick-add-actions {
+    flex-direction: column;
+  }
+
+  .quick-add-actions .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-add-categories-accordion .quick-add-table-header {
+    display: none;
+  }
+
+  .quick-add-categories-accordion .quick-add-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .quick-add-col-name::before {
+    content: "Nom : ";
+    font-weight: 600;
+    color: var(--color-text-light);
+  }
+
+  .quick-add-col-order::before {
+    content: "Ordre : ";
+    font-weight: 600;
+    color: var(--color-text-light);
+  }
+
+  .quick-add-col-actions {
+    justify-content: flex-start;
+  }
+}
