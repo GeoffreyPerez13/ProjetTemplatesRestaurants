@@ -31,9 +31,20 @@ $displayDir = __DIR__ . '/display/';
         <?php include $displayDir . 'footer.php'; ?>
         <?php include $displayDir . 'lightbox.php'; ?>
 
+        <!-- Flèches de navigation scroll -->
+        <div class="page-navigation-buttons">
+            <button type="button" id="scroll-to-bottom" class="btn-navigation scroll-to-bottom" title="Aller en bas de la page">
+                <i class="fas fa-arrow-down"></i>
+            </button>
+            <button type="button" id="scroll-to-top" class="btn-navigation scroll-to-top" title="Aller en haut de la page">
+                <i class="fas fa-arrow-up"></i>
+            </button>
+        </div>
+
         <script src="/assets/js/display/navigation.js"></script>
         <script src="/assets/js/display/lightbox.js"></script>
         <script src="/assets/js/display/cookies.js"></script>
+        <script src="/assets/js/display/scroll-arrows.js"></script>
     <?php endif; ?>
 </body>
 

@@ -185,7 +185,7 @@
   font-size: 13px;
   background-color: var(--color-bg-alt);
   border: 1px solid var(--color-border);
-  color: var(--color-text-light);
+  color: var(--color-text);
 }
 
 .global-accordion-controls .btn.small:hover {
@@ -253,6 +253,42 @@
   white-space: nowrap;
 }
 
+/* Styles pour l'infobulle dans category-order-control */
+.category-order-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-left: 30px;
+}
+
+.category-order-control .option-tooltip {
+  position: absolute;
+  top: -8px;
+  left: 0;
+}
+
+.category-order-control .tooltip-content {
+  width: 220px;
+  white-space: normal;
+  left: 100%;
+  right: auto;
+  margin-left: 8px;
+}
+
+.category-order-label {
+  flex-shrink: 0;
+}
+
+.category-order-input {
+  flex-shrink: 0;
+}
+
+.category-order-status {
+  flex-shrink: 0;
+}
+
 .category-accordion-controls {
   display: flex;
   gap: 10px;
@@ -263,7 +299,7 @@
   padding: 6px 12px;
   font-size: 0.85em;
   background-color: var(--color-bg-alt);
-  color: var(--color-text-muted);
+  color: var(--color-text);
   border: 1px solid var(--color-border);
   transition: all var(--transition-fast);
 }
@@ -670,11 +706,13 @@
 @media (max-width: 768px) {
   .categories-grid {
     flex-direction: column;
+    max-width: 100%;
   }
 
   .category-block {
     flex: 1 1 100%;
     width: 100%;
+    max-width: 100%;
   }
 
   .form-row {
@@ -730,13 +768,11 @@
   }
 
   .category-header {
-    flex-direction: column;
     align-items: flex-start;
-    gap: 15px;
+    gap: 10px;
   }
 
   .category-accordion-controls {
-    width: 100%;
     justify-content: flex-start;
   }
 
@@ -752,11 +788,12 @@
 
   .category-accordion-controls {
     flex-wrap: wrap;
+    justify-content: flex-start;
   }
 
   .category-accordion-controls .btn.small {
-    flex: 1;
-    min-width: 120px;
+    font-size: 0.8em;
+    padding: 5px 8px;
   }
 
   /* Adaptation allergènes sur mobile */

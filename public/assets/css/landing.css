@@ -639,6 +639,72 @@ body {
     color: #3730a3;
 }
 
+/* Infobulles des feature-cards (style settings) */
+.feature-card .option-tooltip {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: inline-block;
+}
+
+.feature-card .tooltip-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: var(--lp-primary);
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 20px;
+    font-size: 13px;
+    font-style: italic;
+    cursor: help;
+    transition: background-color 0.3s ease;
+}
+
+.feature-card .tooltip-icon:hover {
+    background: var(--lp-primary-dark);
+}
+
+.feature-card .tooltip-content {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    width: 280px;
+    background: var(--lp-bg);
+    border: 1px solid var(--lp-border);
+    border-radius: var(--lp-radius);
+    padding: 12px;
+    box-shadow: var(--lp-shadow-lg);
+    z-index: 1000;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.feature-card .tooltip-icon:hover + .tooltip-content {
+    display: block;
+}
+
+.feature-card .tooltip-content p {
+    margin: 0;
+    color: var(--lp-text-light);
+}
+
+/* Responsive : infobulle en dessous sur mobile */
+@media (max-width: 768px) {
+    .feature-card .tooltip-content {
+        width: 250px;
+        right: auto;
+        left: 0;
+        bottom: auto;
+        top: 100%;
+        margin-top: 8px;
+        margin-bottom: 0;
+    }
+}
+
 /* ==================== HOW IT WORKS ==================== */
 .how-it-works {
     padding: 100px 0;
@@ -1569,5 +1635,185 @@ body {
     .footer-grid {
         grid-template-columns: 1fr;
         gap: 32px;
+    }
+}
+
+/* ==================== MODE SOMBRE ==================== */
+html.dark-mode {
+    --lp-text: #e7e5e4;
+    --lp-text-light: #a8a29e;
+    --lp-text-muted: #78716c;
+    --lp-bg: #1c1917;
+    --lp-bg-alt: #292524;
+    --lp-bg-warm: #2c2218;
+    --lp-border: #44403c;
+    --lp-primary: #d97706;
+    --lp-primary-dark: #b45309;
+    --lp-primary-light: #f59e0b;
+    --lp-shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
+    --lp-shadow-md: 0 4px 20px rgba(0,0,0,0.5);
+    --lp-shadow-lg: 0 12px 40px rgba(0,0,0,0.6);
+    --lp-shadow-xl: 0 20px 60px rgba(0,0,0,0.7);
+    color-scheme: dark;
+}
+
+html.dark-mode img {
+    opacity: 0.92;
+}
+
+/* Header en mode dark : meilleur contraste */
+html.dark-mode .landing-nav {
+    background: rgba(28, 25, 23, 0.9);
+    border-bottom-color: var(--lp-border);
+}
+
+html.dark-mode .landing-nav.scrolled {
+    background: rgba(28, 25, 23, 0.95);
+}
+
+html.dark-mode .nav-links a {
+    color: var(--lp-text-light);
+}
+
+html.dark-mode .nav-links a:hover {
+    color: var(--lp-primary-light);
+}
+
+html.dark-mode .nav-btn-outline {
+    color: var(--lp-text);
+    border-color: var(--lp-border);
+}
+
+html.dark-mode .nav-btn-outline:hover {
+    color: var(--lp-primary-light);
+    border-color: var(--lp-primary-light);
+}
+
+/* ==================== BOUTON DARK MODE ==================== */
+.dark-mode-toggle-fixed {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--lp-bg-alt);
+    border: 2px solid var(--lp-border);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--lp-shadow-lg);
+    z-index: 1000;
+}
+
+.dark-mode-toggle-fixed:hover {
+    background: var(--lp-bg-warm);
+    border-color: var(--lp-primary);
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode-toggle-fixed i {
+    font-size: 1.3rem;
+    transition: opacity 0.3s ease;
+    position: absolute;
+}
+
+.dark-mode-toggle-fixed .fa-moon {
+    opacity: 1;
+    color: var(--lp-text);
+}
+
+.dark-mode-toggle-fixed .fa-sun {
+    opacity: 0;
+    color: var(--lp-primary);
+}
+
+html.dark-mode .dark-mode-toggle-fixed .fa-moon {
+    opacity: 0;
+}
+
+html.dark-mode .dark-mode-toggle-fixed .fa-sun {
+    opacity: 1;
+}
+
+/* ==================== FLÈCHES SCROLL ==================== */
+.page-navigation-buttons {
+    position: fixed;
+    right: 30px;
+    bottom: 100px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 10px;
+}
+
+.btn-navigation {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--lp-primary);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    box-shadow: var(--lp-shadow-md);
+    transition: all 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.btn-navigation.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.btn-navigation:hover {
+    background: var(--lp-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--lp-shadow-lg);
+}
+
+.btn-navigation:active {
+    transform: translateY(0);
+}
+
+.scroll-to-top {
+    background: var(--lp-success);
+}
+
+.scroll-to-top:hover {
+    background: #116932;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dark-mode-toggle-fixed {
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+    }
+
+    .dark-mode-toggle-fixed i {
+        font-size: 1.1rem;
+    }
+
+    .page-navigation-buttons {
+        right: 20px;
+        bottom: 80px;
+    }
+
+    .btn-navigation {
+        width: 40px;
+        height: 40px;
+        font-size: 0.9rem;
     }
 }

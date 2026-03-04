@@ -30,22 +30,130 @@
   font-size: 1.1em;
 }
 
-.quick-add-select {
+/* Custom category dropdown */
+.custom-category-select {
+  position: relative;
   width: 100%;
   max-width: 400px;
-  padding: 10px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-size: 0.95em;
-  transition: border-color 0.2s ease;
 }
 
-.quick-add-select:focus {
-  outline: none;
+.custom-category-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-alt);
+  color: var(--color-text);
+  font-size: 0.95em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.custom-category-toggle:hover {
+  background: var(--color-bg-alt);
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.custom-category-toggle.open {
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  border-color: var(--color-primary);
+  border-bottom-color: var(--color-border);
+}
+
+.custom-category-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-light);
+}
+
+.custom-category-value.selected {
+  color: var(--color-text);
+}
+
+.custom-category-value i {
+  color: var(--color-primary);
+}
+
+.custom-category-chevron {
+  transition: transform 0.25s ease;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.custom-category-toggle.open .custom-category-chevron {
+  transform: rotate(180deg);
+}
+
+.custom-category-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-primary);
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  overflow: hidden;
+  z-index: 100;
+  display: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.custom-category-dropdown.open {
+  display: block;
+}
+
+.custom-category-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 0.95em;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-top: 1px solid var(--color-border);
+}
+
+.custom-category-option:first-child {
+  border-top: none;
+}
+
+.custom-category-option:hover {
+  background: var(--color-bg-warm);
+}
+
+.custom-category-option.selected {
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.custom-category-option i {
+  color: var(--color-primary);
+  opacity: 0.7;
+  width: 14px;
+}
+
+.custom-category-option.selected i {
+  opacity: 1;
+}
+
+.custom-category-error {
+  margin: 6px 0 0 0;
+  font-size: 0.85em;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 /* Table structure */
@@ -74,11 +182,11 @@
 
 /* Categories table columns */
 .quick-add-categories-accordion .quick-add-table-header {
-  grid-template-columns: 1fr 100px 150px 60px;
+  grid-template-columns: 1fr 100px 120px 60px;
 }
 
 .quick-add-categories-accordion .quick-add-row {
-  grid-template-columns: 1fr 100px 150px 60px;
+  grid-template-columns: 1fr 100px 120px 60px;
 }
 
 /* Dishes table columns */
@@ -166,21 +274,21 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  align-self: center;
-  height: 100%;
+  margin: 8px 0 15px;
 }
 
 .btn-allergens-toggle {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 7px 10px;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  min-width: 65px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--color-bg-alt);
   color: var(--color-text);
-  font-size: 0.85em;
-  line-height: 1.2;
+  font-size: 0.9em;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -207,7 +315,8 @@
   justify-content: center;
   min-width: 18px;
   height: 18px;
-  padding: 0 4px;
+  line-height: 1;
+  padding: 0 5px;
   background: var(--color-primary);
   color: white;
   border-radius: 50%;
@@ -266,7 +375,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  padding: 12px;
+  padding: 35px 12px 12px 12px;
   max-height: 280px;
   overflow-y: auto;
 }
@@ -349,6 +458,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 8px 0 15px;
 }
 
 /* Action buttons */
@@ -379,9 +489,9 @@
   width: 32px;
   height: 32px;
   padding: 0;
-  border: none;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  background: transparent;
+  background: var(--color-bg-alt);
   color: var(--color-text-muted);
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
@@ -390,11 +500,14 @@
 .btn-icon:hover:not(:disabled) {
   background: #fca5a5;
   color: #dc2626;
+  border-color: #dc2626;
 }
 
 .btn-icon:disabled {
-  opacity: 0.3;
+  opacity: 0.5;
   cursor: not-allowed;
+  background: var(--color-border);
+  border-color: var(--color-border);
 }
 
 /* Responsive */
@@ -415,10 +528,10 @@
     font-size: 0.85em;
   }
 
-  /* Stack categories on mobile */
+  /* Stack categories on mobile : 4 colonnes correctes */
   .quick-add-categories-accordion .quick-add-table-header,
   .quick-add-categories-accordion .quick-add-row {
-    grid-template-columns: 1fr 80px 50px;
+    grid-template-columns: 1fr 70px 1fr 46px;
   }
 
   /* Stack dishes on mobile */
@@ -463,24 +576,31 @@
     display: none;
   }
 
+  /* Grille 2 lignes : [nom | ordre | btn] puis [image pleine largeur] */
   .quick-add-categories-accordion .quick-add-row {
-    grid-template-columns: 1fr;
-    gap: 10px;
+    grid-template-columns: 1fr 70px 46px;
+    grid-template-rows: auto auto;
+    gap: 8px;
   }
 
-  .quick-add-col-name::before {
-    content: "Nom : ";
-    font-weight: 600;
-    color: var(--color-text-light);
+  .quick-add-categories-accordion .quick-add-col-name {
+    grid-column: 1;
+    grid-row: 1;
   }
 
-  .quick-add-col-order::before {
-    content: "Ordre : ";
-    font-weight: 600;
-    color: var(--color-text-light);
+  .quick-add-categories-accordion .quick-add-col-order {
+    grid-column: 2;
+    grid-row: 1;
   }
 
-  .quick-add-col-actions {
-    justify-content: flex-start;
+  .quick-add-categories-accordion .quick-add-col-actions {
+    grid-column: 3;
+    grid-row: 1;
+    justify-content: center;
+  }
+
+  .quick-add-categories-accordion .quick-add-col-image {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 }

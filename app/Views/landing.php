@@ -23,6 +23,9 @@
     
     <!-- CSS -->
     <link rel="stylesheet" href="assets/css/landing.css">
+    
+    <!-- Dark mode script (chargé tôt pour éviter le flash) -->
+    <script src="assets/js/landing/dark-mode.js"></script>
 </head>
 <body>
 
@@ -158,6 +161,12 @@
             </div>
 
             <div class="feature-card">
+                <div class="option-tooltip">
+                    <span class="tooltip-icon" title="Plus d'infos">i</span>
+                    <div class="tooltip-content">
+                        <p>Choisissez parmi 7 styles de couleurs et 3 présentations différentes pour personnaliser l'apparence de votre site.</p>
+                    </div>
+                </div>
                 <div class="feature-card-icon">
                     <i class="fas fa-palette"></i>
                 </div>
@@ -185,6 +194,12 @@
             </div>
 
             <div class="feature-card">
+                <div class="option-tooltip">
+                    <span class="tooltip-icon" title="Plus d'infos">i</span>
+                    <div class="tooltip-content">
+                        <p>Votre site est automatiquement optimisé pour apparaître dans les résultats de recherche Google.</p>
+                    </div>
+                </div>
                 <div class="feature-card-icon">
                     <i class="fas fa-search"></i>
                 </div>
@@ -194,6 +209,12 @@
             </div>
 
             <div class="feature-card">
+                <div class="option-tooltip">
+                    <span class="tooltip-icon" title="Plus d'infos">i</span>
+                    <div class="tooltip-content">
+                        <p>Toutes les pages légales obligatoires sont incluses : cookies, mentions légales et confidentialité.</p>
+                    </div>
+                </div>
                 <div class="feature-card-icon">
                     <i class="fas fa-shield-alt"></i>
                 </div>
@@ -654,6 +675,24 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<!-- Bouton dark mode (position fixed) -->
+<button id="landing-dark-mode-toggle" class="dark-mode-toggle-fixed" aria-label="Basculer le mode sombre">
+    <i class="fas fa-moon"></i>
+    <i class="fas fa-sun"></i>
+</button>
+
+<!-- Flèches de navigation scroll -->
+<div class="page-navigation-buttons">
+    <button type="button" id="scroll-to-bottom" class="btn-navigation scroll-to-bottom" title="Aller en bas de la page">
+        <i class="fas fa-arrow-down"></i>
+    </button>
+    <button type="button" id="scroll-to-top" class="btn-navigation scroll-to-top" title="Aller en haut de la page">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+</div>
+
+<script src="assets/js/landing/scroll-arrows.js"></script>
 
 </body>
 </html>

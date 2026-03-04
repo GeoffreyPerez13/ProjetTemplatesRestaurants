@@ -75,4 +75,35 @@ require __DIR__ . '/../partials/header.php';
     </button>
 </form>
 
+<!-- Définition des étapes du tour guidé pour cette page -->
+<script>
+const tourSteps = [
+    {
+        element: '.edit-contact-form',
+        title: 'Informations de contact',
+        content: '<p>Cette page vous permet de gérer toutes les informations de contact de votre restaurant.</p><p>Ces informations seront affichées sur votre site public pour que vos clients puissent vous contacter facilement.</p>'
+    },
+    {
+        element: '#telephone',
+        title: 'Numéro de téléphone',
+        content: '<p>Indiquez le numéro de téléphone principal de votre restaurant.</p><p>Vos clients pourront vous appeler directement depuis votre site.</p>'
+    },
+    {
+        element: '#email',
+        title: 'Adresse email',
+        content: '<p>Renseignez l\'email de contact de votre restaurant.</p><p>Important pour les réservations et demandes d\'information.</p>'
+    },
+    {
+        element: '#adresse',
+        title: 'Adresse complète',
+        content: '<p>Indiquez l\'adresse complète de votre restaurant.</p><p>Cette information aide vos clients à vous trouver et améliore votre référencement local.</p>'
+    },
+    {
+        element: '#horaires',
+        title: 'Horaires d\'ouverture',
+        content: '<p>Définissez vos horaires d\'ouverture jour par jour.</p><p>Vous pouvez utiliser plusieurs lignes pour une meilleure lisibilité (service midi/soir, jours spéciaux, etc.)</p>'
+    }
+];
+</script>
+
 <?php require __DIR__ . '/../partials/footer.php'; ?>

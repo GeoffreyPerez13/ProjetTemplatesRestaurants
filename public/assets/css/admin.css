@@ -15,6 +15,7 @@
 /* Effets visuels */
 @import url("admin/effects/accordion.css");
 @import url("admin/effects/lightbox.css");
+@import url("admin/effects/tour.css");
 
 /* CSS des formulaires */
 @import url("admin/forms/forms.css");

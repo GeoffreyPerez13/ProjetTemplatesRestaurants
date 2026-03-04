@@ -47,6 +47,74 @@ header {
   color: var(--color-text);
 }
 
+/* Flèches de navigation scroll (même visuel que panel admin) */
+.page-navigation-buttons {
+  position: fixed;
+  right: var(--spacing-lg);
+  bottom: var(--spacing-lg);
+  z-index: 999;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--spacing-sm);
+}
+
+.btn-navigation {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.btn-navigation.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.btn-navigation:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-navigation:active {
+  transform: translateY(0);
+}
+
+.scroll-to-top {
+  background: var(--color-success);
+}
+
+.scroll-to-top:hover {
+  background: #116932;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-navigation-buttons {
+    right: var(--spacing-md);
+    bottom: var(--spacing-md);
+  }
+
+  .btn-navigation {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+}
+
 /* Navigation links */
 .nav-menu {
   display: flex;

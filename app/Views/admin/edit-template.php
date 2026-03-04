@@ -478,4 +478,67 @@ require __DIR__ . '/../partials/header.php';
     </div>
 </div>
 
+<!-- Définition des étapes du tour guidé pour cette page -->
+<script>
+const tourSteps = [
+    {
+        element: '.template-header',
+        title: 'Personnalisation du site',
+        content: '<p>Cette page vous permet de personnaliser complètement l\'apparence de votre site vitrine.</p><p>Choisissez une palette de couleurs ET un layout pour créer un design unique !</p>'
+    },
+    {
+        element: '.global-accordion-controls',
+        title: 'Contrôles des accordéons',
+        content: '<p>Ouvrez ou fermez toutes les sections en un clic pour naviguer rapidement entre les palettes et les layouts.</p>'
+    },
+    {
+        element: '#palette-content',
+        title: 'Palettes de couleurs',
+        content: '<p>Choisissez parmi 7 palettes de couleurs différentes :</p><ul><li><strong>Classique</strong> : Tons cuivrés chaleureux</li><li><strong>Moderne</strong> : Bleu nuit minimaliste</li><li><strong>Élégant</strong> : Fond sombre avec accents dorés</li><li>Et 4 autres palettes...</li></ul>',
+        beforeShow: function() {
+            // Ouvrir l'accordéon "palette" avant d'afficher cette étape
+            const paletteAccordion = document.querySelector('#palette-content');
+            const paletteToggle = document.querySelector('[data-target="palette-content"]');
+            if (paletteAccordion && paletteAccordion.classList.contains('collapsed')) {
+                paletteToggle.click();
+            }
+        }
+    },
+    {
+        element: '#layout-content',
+        title: 'Layouts (mises en page)',
+        content: '<p>Sélectionnez la structure de votre site parmi 3 layouts :</p><ul><li><strong>Classic</strong> : Structure traditionnelle</li><li><strong>Sunset</strong> : Design moderne avec sections fluides</li><li><strong>Ocean</strong> : Mise en page aérée et spacieuse</li></ul>',
+        beforeShow: function() {
+            // Ouvrir l'accordéon "layout" avant d'afficher cette étape
+            const layoutAccordion = document.querySelector('#layout-content');
+            const layoutToggle = document.querySelector('[data-target="layout-content"]');
+            if (layoutAccordion && layoutAccordion.classList.contains('collapsed')) {
+                layoutToggle.click();
+            }
+        }
+    },
+    {
+        element: '.template-card',
+        title: 'Prévisualisation et actions',
+        content: '<p>Pour chaque option :</p><ul><li><strong>Aperçu visuel</strong> : Miniature du design</li><li><strong>Bouton Appliquer</strong> : Active immédiatement le design</li><li><strong>Bouton œil</strong> : Prévisualise en plein écran avant d\'appliquer</li></ul>',
+        beforeShow: function() {
+            // Ouvrir l'accordéon "palette" pour afficher les template-card
+            const paletteAccordion = document.querySelector('#palette-content');
+            const paletteToggle = document.querySelector('[data-target="palette-content"]');
+            if (paletteAccordion && paletteAccordion.classList.contains('collapsed')) {
+                paletteToggle.click();
+            }
+        }
+    }
+];
+
+// Fonction appelée au démarrage du tour pour fermer tous les accordéons
+window.tourBeforeStart = function() {
+    const collapseAllBtn = document.querySelector('#collapse-all-accordions');
+    if (collapseAllBtn) {
+        collapseAllBtn.click();
+    }
+};
+</script>
+
 <?php require __DIR__ . '/../partials/footer.php'; ?>

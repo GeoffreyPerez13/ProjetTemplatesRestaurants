@@ -456,12 +456,14 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                     }
                 }
                 ?>
-                <div class="subscription-total-card">
-                    <div class="subscription-total-header">
-                        <i class="fas fa-calculator"></i>
-                        <h3>Total de votre abonnement</h3>
+                <div class="accordion-section premium-total-accordion">
+                    <div class="accordion-header">
+                        <h3><i class="fas fa-calculator"></i> Total de votre abonnement</h3>
+                        <button type="button" class="accordion-toggle" data-target="subscription-total-content">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
                     </div>
-                    <div class="subscription-total-content">
+                    <div id="subscription-total-content" class="accordion-content expanded prevent-auto-close">
                         <div class="subscription-total-breakdown">
                             <div class="breakdown-item">
                                 <span>Abonnement Basique</span>
@@ -666,9 +668,9 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                     <div class="info-card">
                         <h4><i class="fas fa-info-circle"></i> Comment ça marche ?</h4>
                         <ul>
-                            <li>Souscrivez un abonnement Premium pour débloquer les fonctionnalités</li>
-                            <li>Activez et configurez les fonctionnalités directement depuis cette page</li>
-                            <li>Contactez-nous à <a href="mailto:premium@menumiam.fr">premium@menumiam.fr</a> pour souscrire ou pour toute question</li>
+                            <li>Souscrivez un abonnement Premium pour débloquer les fonctionnalités proposées par notre service.</li>
+                            <li>Activez et configurez les fonctionnalités directement depuis cette page.</li>
+                            <li>Contactez-nous à <a href="mailto:premium@menumiam.fr">premium@menumiam.fr</a> pour souscrire ou pour toute question.</li>
                         </ul>
                     </div>
                 </div>

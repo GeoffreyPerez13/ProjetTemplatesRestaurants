@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../../Helpers/CategoryIconHelper.php';
+
 $title = "Modifier la carte";
 $scripts = [
     "js/effects/accordion.js",
@@ -197,13 +199,33 @@ require __DIR__ . '/../partials/header.php';
                             Ajoutez plusieurs plats en une seule fois avec leurs images et allergènes (optionnels).
                         </p>
                         <div class="form-group">
-                            <label for="target-category">Catégorie cible :</label>
-                            <select name="target_category_id" id="target-category" required class="quick-add-select">
+                            <label>Catégorie cible :</label>
+                            <select name="target_category_id" id="target-category" style="position:absolute;opacity:0;height:0;width:0;pointer-events:none;" tabindex="-1" aria-hidden="true">
                                 <option value="">-- Sélectionnez une catégorie --</option>
                                 <?php foreach ($categories as $cat): ?>
                                     <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
                                 <?php endforeach; ?>
                             </select>
+                            <div class="custom-category-select" id="custom-category-select">
+                                <button type="button" class="custom-category-toggle" id="custom-category-toggle" aria-expanded="false">
+                                    <span class="custom-category-value">
+                                        <i class="fas fa-layer-group"></i>
+                                        Sélectionnez une catégorie
+                                    </span>
+                                    <i class="fas fa-chevron-down custom-category-chevron"></i>
+                                </button>
+                                <div class="custom-category-dropdown" id="custom-category-dropdown">
+                                    <?php foreach ($categories as $cat): ?>
+                                        <div class="custom-category-option" data-value="<?= $cat['id'] ?>">
+                                            <i class="fas <?= CategoryIconHelper::getIcon($cat['name']) ?>"></i>
+                                            <?= htmlspecialchars($cat['name']) ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                            <p class="custom-category-error" id="custom-category-error" style="display:none;">
+                                <i class="fas fa-exclamation-circle"></i> Veuillez sélectionner une catégorie
+                            </p>
                         </div>
                     </div>
 
@@ -282,7 +304,12 @@ require __DIR__ . '/../partials/header.php';
                         <!-- Colonne gauche : ordre en haut, nom en dessous -->
                         <div class="category-left">
                             <div class="category-order-control">
-                                <i class="fas fa-sort-numeric-up category-order-icon" title="Ordre d'affichage"></i>
+                                <div class="option-tooltip">
+                                    <span class="tooltip-icon" title="Plus d'infos">i</span>
+                                    <div class="tooltip-content">
+                                        <p>Définissez l'ordre d'affichage de vos catégories sur votre site. Les catégories avec un numéro plus petit apparaîtront en premier.</p>
+                                    </div>
+                                </div>
                                 <span class="category-order-label">Ordre d'affichage</span>
                                 <input type="number"
                                     class="category-order-input"
@@ -292,7 +319,7 @@ require __DIR__ . '/../partials/header.php';
                                     title="Ordre d'affichage de la catégorie">
                                 <span class="category-order-status" data-category-id="<?= $cat['id'] ?>"></span>
                             </div>
-                            <strong><i class="fas fa-folder"></i> <?= htmlspecialchars($cat['name']) ?></strong>
+                            <strong><i class="fas <?= CategoryIconHelper::getIcon($cat['name']) ?>"></i> <?= htmlspecialchars($cat['name']) ?></strong>
                         </div>
 
                         <!-- Colonne droite : X en haut, boutons accordéon en dessous -->
@@ -304,14 +331,14 @@ require __DIR__ . '/../partials/header.php';
                                     <i class="fas fa-times"></i>
                                 </button>
                             </form>
-                            <div class="category-accordion-controls">
-                                <button type="button" class="btn small expand-category" data-category-id="<?= $cat['id'] ?>">
-                                    <i class="fas fa-expand-alt"></i> Tout ouvrir
-                                </button>
-                                <button type="button" class="btn small collapse-category" data-category-id="<?= $cat['id'] ?>">
-                                    <i class="fas fa-compress-alt"></i> Tout fermer
-                                </button>
-                            </div>
+                        </div>
+                        <div class="category-accordion-controls">
+                            <button type="button" class="btn small expand-category" data-category-id="<?= $cat['id'] ?>">
+                                <i class="fas fa-expand-alt"></i> Tout ouvrir
+                            </button>
+                            <button type="button" class="btn small collapse-category" data-category-id="<?= $cat['id'] ?>">
+                                <i class="fas fa-compress-alt"></i> Tout fermer
+                            </button>
                         </div>
                     </div>
 
@@ -788,7 +815,176 @@ require __DIR__ . '/../partials/header.php';
             </div>
         </div>
     </div>
+</div>
 <?php endif; ?>
+
+<!-- Définition des étapes du tour guidé pour cette page -->
+<script>
+// Fonction pour détecter si des catégories existent
+function hasCategories() {
+    return document.querySelectorAll('.category-block').length > 0;
+}
+
+// Fonction pour détecter si des plats existent
+function hasDishes() {
+    return document.querySelectorAll('.plat-card').length > 0;
+}
+
+// Étapes du tour pour le mode éditable avec données existantes
+const editableTourSteps = [
+    {
+        element: '#mode-selector',
+        title: 'Mode Éditable',
+        content: '<p>Vous avez choisi le mode Éditable pour créer et gérer vos catégories et plats en détail.</p><p><small>Pour découvrir le mode Images, sélectionnez-le ci-dessus puis relancez le tour.</small></p>',
+        beforeShow: function() {
+            const accordion = document.querySelector('#mode-selector-content');
+            const toggle = document.querySelector('[data-target="mode-selector-content"]');
+            if (accordion && accordion.classList.contains('collapsed')) {
+                toggle.click();
+            }
+        }
+    },
+    {
+        element: '#quick-add-categories',
+        title: 'Ajout rapide de catégories',
+        content: '<p>Gagnez du temps en ajoutant plusieurs catégories d\'un coup avec leurs images.</p><p>Parfait pour créer rapidement la structure de votre carte (Entrées, Plats, Desserts, etc.)</p>'
+    },
+    {
+        element: '#quick-add-dishes',
+        title: 'Ajout rapide de plats',
+        content: '<p>Ajoutez plusieurs plats en une seule fois dans une catégorie.</p><p>Vous pouvez définir le nom, prix, description, image et allergènes pour chaque plat.</p>'
+    },
+    {
+        element: '.categories-grid',
+        title: 'Vos catégories',
+        content: '<p>Chaque catégorie peut être modifiée, supprimée ou réorganisée.</p><p>Utilisez l\'infobulle <i class="fas fa-info-circle"></i> pour comprendre l\'ordre d\'affichage.</p>'
+    },
+    {
+        element: '.category-order-control',
+        title: 'Ordre d\'affichage',
+        content: '<p>Définissez l\'ordre dans lequel vos catégories apparaissent sur votre site.</p><p>Les catégories avec un numéro plus petit s\'affichent en premier.</p>'
+    },
+    {
+        element: '.category-accordion-controls',
+        title: 'Contrôles d\'accordéon',
+        content: '<p>Utilisez ces boutons pour ouvrir ou fermer tous les accordéons d\'une catégorie en un clic.</p><p>Pratique pour naviguer rapidement dans votre carte.</p>'
+    }
+];
+
+// Étapes du tour pour le mode éditable sans données (création)
+const editableCreationSteps = [
+    {
+        element: '#mode-selector',
+        title: 'Mode Éditable',
+        content: '<p>Vous avez choisi le mode Éditable pour créer et gérer vos catégories et plats en détail.</p><p><small>Pour découvrir le mode Images, sélectionnez-le ci-dessus puis relancez le tour.</small></p>',
+        beforeShow: function() {
+            const accordion = document.querySelector('#mode-selector-content');
+            const toggle = document.querySelector('[data-target="mode-selector-content"]');
+            if (accordion && accordion.classList.contains('collapsed')) {
+                toggle.click();
+            }
+        }
+    },
+    {
+        element: '#quick-add-categories',
+        title: 'Commencez par créer des catégories',
+        content: '<p>Première étape : créez les catégories de votre carte.</p><p>Exemples : Entrées, Plats, Desserts, Boissons...</p><p>Cliquez sur "Ajouter des catégories" pour commencer.</p>',
+        beforeShow: function() {
+            const accordion = document.querySelector('#quick-add-categories-content');
+            const toggle = document.querySelector('[data-target="quick-add-categories-content"]');
+            if (accordion && accordion.classList.contains('collapsed')) {
+                toggle.click();
+            }
+        }
+    },
+    {
+        element: '#quick-add-dishes',
+        title: 'Ajoutez vos plats',
+        content: '<p>Une fois vos catégories créées, ajoutez-y vos plats.</p><p>Définissez le nom, prix, description, image et allergènes pour chaque plat.</p>',
+        beforeShow: function() {
+            const accordion = document.querySelector('#quick-add-dishes-content');
+            const toggle = document.querySelector('[data-target="quick-add-dishes-content"]');
+            if (accordion && accordion.classList.contains('collapsed')) {
+                toggle.click();
+            }
+        }
+    },
+    {
+        element: '.categories-grid',
+        title: 'Organisez votre carte',
+        content: '<p>Vos catégories et plats apparaîtront ici une fois créés.</p><p>Vous pourrez ensuite les modifier, supprimer ou réorganiser.</p>'
+    }
+];
+
+// Étapes du tour pour le mode images
+const imagesTourSteps = [
+    {
+        element: '#mode-selector',
+        title: 'Mode Images',
+        content: '<p>Vous avez choisi le mode Images pour télécharger simplement des photos de votre carte existante.</p><p><small>Pour découvrir le mode Éditable, sélectionnez-le ci-dessus puis relancez le tour.</small></p>',
+        beforeShow: function() {
+            const accordion = document.querySelector('#mode-selector-content');
+            const toggle = document.querySelector('[data-target="mode-selector-content"]');
+            if (accordion && accordion.classList.contains('collapsed')) {
+                toggle.click();
+            }
+        }
+    },
+    {
+        element: '#upload-images-content',
+        title: 'Télécharger vos images',
+        content: '<p>Glissez-déposez vos images de carte ou cliquez pour les sélectionner.</p><p>Formats acceptés : JPG, PNG, PDF, WebP (max 5MB par fichier)</p>',
+        beforeShow: function() {
+            const accordion = document.querySelector('#upload-images-content');
+            const toggle = document.querySelector('[data-target="upload-images-content"]');
+            if (accordion && accordion.classList.contains('collapsed')) {
+                toggle.click();
+            }
+        }
+    },
+    {
+        element: '#images-list-content',
+        title: 'Réorganiser vos images',
+        content: '<p>Changez l\'ordre d\'affichage de vos images en les glissant-déposant.</p><p>Vous pouvez aussi utiliser les boutons "Monter" et "Descendre".</p>',
+        beforeShow: function() {
+            const accordion = document.querySelector('#images-list-content');
+            const toggle = document.querySelector('[data-target="images-list-content"]');
+            if (accordion && accordion.classList.contains('collapsed')) {
+                toggle.click();
+            }
+        }
+    }
+];
+
+// Fonction pour déterminer les étapes du tour
+function getTourSteps() {
+    const currentMode = '<?= $currentMode ?>';
+    
+    if (currentMode === 'images') {
+        return imagesTourSteps;
+    } else if (currentMode === 'editable') {
+        // Mode éditable : vérifier s'il y a des données
+        if (hasCategories()) {
+            return editableTourSteps;
+        } else {
+            return editableCreationSteps;
+        }
+    }
+    
+    return [];
+}
+
+// Variable globale pour les étapes du tour
+let tourSteps = getTourSteps();
+
+// Fonction appelée au démarrage du tour pour fermer tous les accordéons
+window.tourBeforeStart = function() {
+    const collapseAllBtn = document.querySelector('#collapse-all-accordions');
+    if (collapseAllBtn) {
+        collapseAllBtn.click();
+    }
+};
+</script>
 
 <?php
 require __DIR__ . '/../partials/footer.php';

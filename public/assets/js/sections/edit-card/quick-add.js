@@ -10,6 +10,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         initQuickAddCategories();
         initQuickAddDishes();
+        initCustomCategorySelect();
     });
 
     /**
@@ -225,6 +226,83 @@
         });
     }
     
+    /**
+     * Initialise le custom dropdown pour la sélection de catégorie cible
+     */
+    function initCustomCategorySelect() {
+        const wrapper   = document.getElementById('custom-category-select');
+        const toggle    = document.getElementById('custom-category-toggle');
+        const dropdown  = document.getElementById('custom-category-dropdown');
+        const valueSpan = toggle && toggle.querySelector('.custom-category-value');
+        const hidden    = document.getElementById('target-category');
+        const error     = document.getElementById('custom-category-error');
+        const form      = document.getElementById('quick-add-dishes-form');
+
+        if (!wrapper || !toggle || !dropdown || !hidden) return;
+
+        // Ouvrir / fermer
+        toggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isOpen = dropdown.classList.contains('open');
+            closeDropdown();
+            if (!isOpen) openDropdown();
+        });
+
+        // Sélectionner une option
+        dropdown.querySelectorAll('.custom-category-option').forEach(function(opt) {
+            opt.addEventListener('click', function() {
+                const val  = opt.dataset.value;
+                const text = opt.textContent.trim();
+                const icon = opt.querySelector('i');
+
+                // Mettre à jour le select caché
+                hidden.value = val;
+
+                // Mettre à jour l'affichage du bouton
+                valueSpan.innerHTML = (icon ? icon.outerHTML + ' ' : '') + text;
+                valueSpan.classList.add('selected');
+
+                // Marquer l'option active
+                dropdown.querySelectorAll('.custom-category-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+
+                // Cacher l'erreur si présente
+                if (error) error.style.display = 'none';
+
+                closeDropdown();
+            });
+        });
+
+        // Fermer en cliquant à l'extérieur
+        document.addEventListener('click', function(e) {
+            if (!wrapper.contains(e.target)) closeDropdown();
+        });
+
+        // Validation avant submit : vérifier qu'une catégorie est sélectionnée
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (!hidden.value) {
+                    e.preventDefault();
+                    if (error) error.style.display = 'flex';
+                    toggle.focus();
+                    wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        }
+
+        function openDropdown() {
+            toggle.classList.add('open');
+            dropdown.classList.add('open');
+            toggle.setAttribute('aria-expanded', 'true');
+        }
+
+        function closeDropdown() {
+            toggle.classList.remove('open');
+            dropdown.classList.remove('open');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+    }
+
     // Initialiser les popups d'allergènes existants au chargement
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('#dishes-rows-container .quick-add-row').forEach(row => {

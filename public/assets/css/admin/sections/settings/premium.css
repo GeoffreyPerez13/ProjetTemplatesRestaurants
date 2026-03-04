@@ -36,6 +36,11 @@
     gap: var(--spacing-md);
 }
 
+#subscription-total-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
 .subscription-total-breakdown {
     display: flex;
     flex-direction: column;

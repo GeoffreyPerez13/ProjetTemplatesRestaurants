@@ -30,6 +30,9 @@
     <!-- Dark mode (chargé tôt pour éviter le flash) -->
     <script src="/assets/js/admin/dark-mode.js"></script>
 
+    <!-- Tour guidé -->
+    <script src="/assets/js/admin/tour.js"></script>
+
     <!-- Inclusion de scripts additionnels dynamiques si fournis -->
     <?php if (!empty($scripts)): ?>
         <?php foreach ($scripts as $script): ?>
@@ -55,11 +58,24 @@
         </div>
     <?php endif; ?>
 
-    <!-- Bouton flottant dark mode (visible sur toutes les pages) -->
-    <button id="dark-mode-toggle" class="dark-mode-toggle-floating" title="Mode sombre / clair">
-        <i class="fas fa-moon"></i>
-        <i class="fas fa-sun"></i>
-    </button>
+    <!-- Boutons flottants (dark mode + tour guidé) -->
+    <div class="floating-buttons">
+        <button id="dark-mode-toggle" class="dark-mode-toggle-floating" title="Mode sombre / clair">
+            <i class="fas fa-moon"></i>
+            <i class="fas fa-sun"></i>
+        </button>
+        
+        <?php 
+        // Afficher le bouton tour uniquement sur les pages d'édition
+        $tourPages = ['edit-card', 'edit-contact', 'edit-logo-banner', 'edit-services', 'edit-template'];
+        $currentPage = $_GET['page'] ?? '';
+        if (in_array($currentPage, $tourPages)): 
+        ?>
+        <button id="tour-toggle" class="tour-toggle-floating" title="Lancer le tour guidé">
+            <i class="fas fa-question-circle"></i>
+        </button>
+        <?php endif; ?>
+    </div>
 
     <!-- Conteneur principal de toutes les pages admin -->
     <div class="container">

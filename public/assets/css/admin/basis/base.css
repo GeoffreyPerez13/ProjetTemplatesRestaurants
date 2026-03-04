@@ -126,12 +126,18 @@ a:hover {
   }
 }
 
-/* ==================== BOUTON FLOTTANT DARK MODE ==================== */
-.dark-mode-toggle-floating {
+/* ==================== BOUTONS FLOTTANTS (DARK MODE + TOUR) ==================== */
+.floating-buttons {
   position: fixed;
   top: 20px;
   right: 20px;
   z-index: 9999;
+  display: flex;
+  gap: 10px;
+}
+
+.dark-mode-toggle-floating,
+.tour-toggle-floating {
   width: 42px;
   height: 42px;
   border-radius: var(--radius-full);
@@ -148,11 +154,23 @@ a:hover {
   transition: all var(--transition-normal);
 }
 
-.dark-mode-toggle-floating:hover {
+.dark-mode-toggle-floating:hover,
+.tour-toggle-floating:hover {
   color: var(--color-primary);
   border-color: var(--color-primary-light);
   box-shadow: var(--shadow-lg);
   transform: scale(1.1);
+}
+
+.tour-toggle-floating {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.tour-toggle-floating:hover {
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+  color: white;
 }
 
 .dark-mode-toggle-floating .fa-sun {

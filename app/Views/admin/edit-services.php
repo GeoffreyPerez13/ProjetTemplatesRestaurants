@@ -184,4 +184,51 @@ require __DIR__ . '/../partials/header.php';
     </form>
 </div>
 
+<!-- Définition des étapes du tour guidé pour cette page -->
+<script>
+const tourSteps = [
+    {
+        element: '.global-accordion-controls',
+        title: 'Contrôles des accordéons',
+        content: '<p>Ouvrez ou fermez toutes les sections en un clic pour naviguer rapidement.</p>'
+    },
+    {
+        element: '#services',
+        title: 'Services proposés',
+        content: '<p>Indiquez les services que vous proposez à vos clients.</p><p>Sur place, à emporter, livraison (Uber Eats ou par vos soins), WiFi, climatisation, accessibilité PMR...</p>'
+    },
+    {
+        element: '#payments',
+        title: 'Moyens de paiement',
+        content: '<p>Sélectionnez les moyens de paiement acceptés dans votre restaurant.</p><p>Ces informations aident vos clients à savoir comment ils peuvent payer.</p>'
+    },
+    {
+        element: '#socials',
+        title: 'Réseaux sociaux',
+        content: '<p>Ajoutez les liens vers vos réseaux sociaux.</p><p>Vos clients pourront vous suivre directement depuis votre site pour rester informés de vos actualités.</p>'
+    },
+    {
+        element: '.btn-allergenes-toggle',
+        title: 'Tout cocher/décocher',
+        content: '<p>Utilisez ce bouton pour sélectionner ou désélectionner rapidement toutes les options d\'une section.</p>',
+        beforeShow: function() {
+            // Ouvrir l'accordéon "services proposés" avant d'afficher cette étape
+            const servicesAccordion = document.querySelector('#services-content');
+            const servicesToggle = document.querySelector('[data-target="services-content"]');
+            if (servicesAccordion && servicesAccordion.classList.contains('collapsed')) {
+                servicesToggle.click();
+            }
+        }
+    }
+];
+
+// Fonction appelée au démarrage du tour pour fermer tous les accordéons
+window.tourBeforeStart = function() {
+    const collapseAllBtn = document.querySelector('#collapse-all-accordions');
+    if (collapseAllBtn) {
+        collapseAllBtn.click();
+    }
+};
+</script>
+
 <?php require __DIR__ . '/../partials/footer.php'; ?>
