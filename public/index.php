@@ -156,6 +156,12 @@ switch ($page) {
             case 'toggle-premium':
                 $controller->togglePremium();
                 break;
+            case 'get-closure-dates':
+                $controller->getClosureDates();
+                break;
+            case 'save-closure-dates':
+                $controller->saveClosureDates();
+                break;
             default:
                 $controller->show();
                 break;

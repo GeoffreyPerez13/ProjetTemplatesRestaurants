@@ -186,7 +186,12 @@ class StripeController extends BaseController
             }
         }
 
-        header('Location: ?page=settings&section=premium');
+        // Redirection selon le type d'abonnement résilié
+        if ($type === 'basique') {
+            header('Location: ?page=settings&section=subscriptions');
+        } else {
+            header('Location: ?page=settings&section=premium');
+        }
         exit;
     }
 

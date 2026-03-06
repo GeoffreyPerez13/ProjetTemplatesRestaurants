@@ -43,6 +43,24 @@ class SettingsController extends BaseController
 
         $options = array_merge($defaultOptions, $userOptions);
 
+        // Récupérer les dates de fermeture exceptionnelles
+        $closureDates = [];
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT option_value 
+                FROM admin_options 
+                WHERE admin_id = ? AND option_name = 'closure_dates'
+            ");
+            $stmt->execute([$_SESSION['admin_id']]);
+            $closureDatesValue = $stmt->fetchColumn();
+            if ($closureDatesValue) {
+                $closureDates = json_decode($closureDatesValue, true) ?: [];
+            }
+        } catch (Exception $e) {
+            error_log("Erreur récupération dates fermeture: " . $e->getMessage());
+            $closureDates = [];
+        }
+
         // Section par défaut
         $section = $_GET['section'] ?? 'profile';
 
@@ -54,6 +72,7 @@ class SettingsController extends BaseController
         $this->render('admin/settings', [
             'user' => $user,
             'options' => $options,
+            'closure_dates' => $closureDates,
             'current_section' => $section,
             'title' => 'Paramètres',
             'csrf_token' => $this->getCsrfToken(),
@@ -849,5 +868,102 @@ class SettingsController extends BaseController
             ]);
             exit;
         }
+    }
+
+    /**
+     * Récupère les dates de fermeture exceptionnelles (AJAX)
+     */
+    public function getClosureDates()
+    {
+        $this->requireLogin();
+        
+        header('Content-Type: application/json');
+        
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT option_value 
+                FROM admin_options 
+                WHERE admin_id = ? AND option_name = 'closure_dates'
+            ");
+            $stmt->execute([$_SESSION['admin_id']]);
+            $closureDatesValue = $stmt->fetchColumn();
+            
+            $dates = [];
+            if ($closureDatesValue) {
+                $dates = json_decode($closureDatesValue, true) ?: [];
+            }
+            
+            echo json_encode([
+                'success' => true,
+                'dates' => $dates
+            ]);
+        } catch (Exception $e) {
+            error_log("Erreur récupération dates fermeture: " . $e->getMessage());
+            echo json_encode([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération des dates'
+            ]);
+        }
+        exit;
+    }
+
+    /**
+     * Sauvegarde les dates de fermeture exceptionnelles (AJAX)
+     */
+    public function saveClosureDates()
+    {
+        $this->requireLogin();
+        
+        // Validation CSRF
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            $this->addErrorMessage('Token de sécurité invalide', 'closure-dates-section');
+            header('Location: ?page=settings&section=options');
+            exit;
+        }
+        
+        $dates = $_POST['dates'] ?? [];
+        
+        // Si c'est une chaîne JSON, la décoder
+        if (is_string($dates)) {
+            $dates = json_decode($dates, true) ?: [];
+        }
+        
+        if (!is_array($dates)) {
+            $this->addErrorMessage('Données invalides', 'closure-dates-section');
+            header('Location: ?page=settings&section=options');
+            exit;
+        }
+        
+        // Valider et nettoyer les dates
+        $validDates = [];
+        foreach ($dates as $date) {
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+                $validDates[] = $date;
+            }
+        }
+        
+        try {
+            $datesJson = json_encode($validDates);
+            
+            $stmt = $this->pdo->prepare("
+                INSERT INTO admin_options (admin_id, option_name, option_value, created_at, updated_at) 
+                VALUES (?, 'closure_dates', ?, NOW(), NOW())
+                ON DUPLICATE KEY UPDATE option_value = ?, updated_at = NOW()
+            ");
+            
+            $result = $stmt->execute([$_SESSION['admin_id'], $datesJson, $datesJson]);
+            
+            if ($result) {
+                $this->addSuccessMessage('Dates de fermeture enregistrées avec succès', 'closure-dates-section');
+            } else {
+                $this->addErrorMessage('Erreur lors de l\'enregistrement', 'closure-dates-section');
+            }
+        } catch (Exception $e) {
+            error_log("Erreur sauvegarde dates fermeture: " . $e->getMessage());
+            $this->addErrorMessage('Erreur lors de la sauvegarde des dates', 'closure-dates-section');
+        }
+        
+        header('Location: ?page=settings&section=options');
+        exit;
     }
 }

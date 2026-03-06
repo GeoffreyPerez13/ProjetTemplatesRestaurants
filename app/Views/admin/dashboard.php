@@ -52,11 +52,17 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
         <p>Bienvenue <strong><?= htmlspecialchars($username) ?></strong>.</p>
         <p>Vous gérez le restaurant : <strong><?= htmlspecialchars($restaurant_name) ?></strong>.</p>
 
-        <?php if (!empty($slug)): ?>
+        <?php if (!empty($slug) && !($is_read_only ?? false)): ?>
             <p class="visit-site">
                 <a href="?page=display&slug=<?= urlencode($slug) ?>" target="_blank" class="btn btn-outline">
                     <i class="fas fa-external-link-alt"></i> Aller sur le site
                 </a>
+            </p>
+        <?php elseif (!empty($slug) && ($is_read_only ?? false)): ?>
+            <p class="visit-site">
+                <div class="btn btn-outline disabled" style="opacity: 0.6; cursor: not-allowed;">
+                    <i class="fas fa-lock"></i> Aller sur le site (Abonnement requis)
+                </div>
             </p>
         <?php endif; ?>
 

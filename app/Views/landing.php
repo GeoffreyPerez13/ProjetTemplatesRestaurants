@@ -26,6 +26,9 @@
     
     <!-- Dark mode script (chargé tôt pour éviter le flash) -->
     <script src="assets/js/landing/dark-mode.js"></script>
+    
+    <!-- Cookies -->
+    <script src="assets/js/display/cookies.js"></script>
 </head>
 <body>
 
@@ -51,6 +54,9 @@
         </button>
     </div>
 </nav>
+
+<!-- ========== COOKIES BANNER ========== -->
+<?php include __DIR__ . '/display/cookies.php'; ?>
 
 <!-- ========== HERO ========== -->
 <section class="hero">

@@ -146,6 +146,67 @@ class DisplayController extends BaseController
         // Vérifier si le site est en ligne
         $siteOnline = $restaurantModel->isSiteOnline($adminId);
 
+        // Récupérer les options Google Reviews
+        $googlePlaceId = $optionModel->get($adminId, 'google_place_id');
+        $googleApiKey = $optionModel->get($adminId, 'google_api_key');
+        $googleReviewsEnabled = $optionModel->get($adminId, 'google_reviews_enabled') === '1';
+
+        // Vérifier les dates de fermeture exceptionnelles
+        $closureDates = [];
+        $todayClosureDate = null;
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT option_value 
+                FROM admin_options 
+                WHERE admin_id = ? AND option_name = 'closure_dates'
+            ");
+            $stmt->execute([$adminId]);
+            $closureDatesValue = $stmt->fetchColumn();
+            if ($closureDatesValue) {
+                $closureDates = json_decode($closureDatesValue, true) ?: [];
+                
+                // Vérifier si aujourd'hui est une date de fermeture
+                $today = date('Y-m-d');
+                if (in_array($today, $closureDates)) {
+                    $todayClosureDate = $today;
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Erreur vérification dates fermeture: " . $e->getMessage());
+            $closureDates = [];
+        }
+
+        // Gérer les avis Google
+        $googleReviewsData = null;
+        if ($googleReviewsEnabled && $googlePlaceId && $googleApiKey) {
+            try {
+                // Vérifier si la fonctionnalité premium est activée
+                require_once __DIR__ . '/../Models/PremiumFeature.php';
+                $premiumFeature = new PremiumFeature($this->pdo);
+                
+                if ($premiumFeature->isEnabled($adminId, 'google_reviews')) {
+                    // Récupérer les avis
+                    require_once __DIR__ . '/../Models/GoogleReviews.php';
+                    $googleReviews = new GoogleReviews($this->pdo, $googleApiKey);
+                    $data = $googleReviews->getReviews($googlePlaceId, 5);
+                    
+                    if ($data) {
+                        $googleReviewsData = [
+                            'restaurant_info' => [
+                                'name' => $data['name'] ?? '',
+                                'rating' => $data['rating'] ?? 0,
+                                'total_reviews' => count($data['reviews'] ?? [])
+                            ],
+                            'reviews' => $data['reviews'] ?? []
+                        ];
+                    }
+                }
+            } catch (Exception $e) {
+                error_log("Erreur récupération avis Google: " . $e->getMessage());
+                $googleReviewsData = null;
+            }
+        }
+
         // Si pas d'abonnement Basique actif, forcer le site hors ligne
         if (!$hasActiveBasique) {
             $siteOnline = false;
@@ -163,11 +224,6 @@ class DisplayController extends BaseController
         // Récupérer la palette et le layout choisis par l'admin
         $paletteName = $optionModel->get($adminId, 'site_palette') ?: ($optionModel->get($adminId, 'site_template') ?: 'classic');
         $layoutName  = $optionModel->get($adminId, 'site_layout') ?: 'standard';
-
-        // Récupérer les options Google Reviews
-        $googlePlaceId = $optionModel->get($adminId, 'google_place_id');
-        $googleApiKey = $optionModel->get($adminId, 'google_api_key');
-        $googleReviewsEnabled = $optionModel->get($adminId, 'google_reviews_enabled') === '1';
 
         $allowedPalettes = ['classic', 'modern', 'elegant', 'nature', 'rose', 'bistro', 'ocean'];
         $allowedLayouts  = ['standard', 'bistro', 'ocean'];
@@ -205,7 +261,9 @@ class DisplayController extends BaseController
             'layoutName'   => $layoutName,
             'googlePlaceId' => $googlePlaceId,
             'googleApiKey' => $googleApiKey,
-            'googleReviewsEnabled' => $googleReviewsEnabled
+            'googleReviewsEnabled' => $googleReviewsEnabled,
+            'todayClosureDate' => $todayClosureDate,
+            'googleReviewsData' => $googleReviewsData
         ]);
     }
 }

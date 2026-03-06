@@ -1,7 +1,8 @@
 <?php
 $title = $title ?? "Paramètres";
 $scripts = [
-    "js/sections/settings/settings.js"
+    "js/sections/settings/settings.js",
+    "js/sections/settings/closure-dates.js"
 ];
 
 require __DIR__ . '/../partials/header.php';
@@ -290,6 +291,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
 
         <?php elseif ($current_section === 'options'): ?>
             <!-- Section Options -->
+            <link rel="stylesheet" href="/assets/css/admin/sections/settings/closure-dates.css">
             <div class="settings-section" id="options-form">
                 <h2>Options du compte</h2>
                 <p class="section-description">Configurez les paramètres de votre compte et de votre site.</p>
@@ -347,6 +349,55 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                     <button type="button" class="btn secondary" id="reset-options">Restaurer les valeurs par défaut</button>
                 </div>
             </div>
+
+            <!-- Section Fermetures Exceptionnelles -->
+            <div class="settings-section" id="closure-dates-section">
+                <h2>Fermetures Exceptionnelles</h2>
+                <p class="section-description">Programmez des dates de fermeture exceptionnelles. Un bandeau d'information s'affichera automatiquement pour vos visiteurs les jours concernés.</p>
+
+                <div class="closure-dates-container">
+                    <div class="closure-dates-header">
+                        <div class="closure-dates-info">
+                            <i class="fas fa-calendar-times"></i>
+                            <span>Cliquez sur les dates dans le calendrier pour ajouter des fermetures exceptionnelles</span>
+                        </div>
+                        <button type="button" class="btn small" id="clear-all-closure-dates">
+                            <i class="fas fa-trash"></i> Tout effacer
+                        </button>
+                    </div>
+
+                    <!-- Calendrier -->
+                    <div class="closure-calendar-container">
+                        <div class="calendar-header">
+                            <button type="button" class="btn small" id="prev-month">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <h3 id="current-month-year">Mars 2026</h3>
+                            <button type="button" class="btn small" id="next-month">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                        <div class="calendar-grid" id="closure-calendar">
+                            <!-- Généré par JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Liste des dates sélectionnées -->
+                    <div class="selected-dates-container">
+                        <h4>Dates de fermeture programmées (<span id="selected-count">0</span>)</h4>
+                        <div class="selected-dates-list" id="selected-dates-list">
+                            <p class="no-dates">Aucune date de fermeture programmée</p>
+                        </div>
+                    </div>
+
+                    <div class="closure-dates-actions">
+                        <button type="button" class="btn primary" id="save-closure-dates">
+                            <i class="fas fa-save"></i> Enregistrer les dates
+                        </button>
+                    </div>
+                </div>
+            </div>
+
         <?php elseif ($current_section === 'premium'): ?>
             <!-- Section Fonctionnalités -->
             <div class="settings-section">
@@ -734,7 +785,8 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                         </div>
                         <form method="POST" action="?page=cancel-subscription"
                               class="cancel-form"
-                              data-confirm="Attention : résilier l'abonnement Basique désactivera aussi toutes vos options premium. Confirmer ?">
+                              data-subscription-type="basique"
+                              data-feature-name="Abonnement Basique">
                             <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                             <input type="hidden" name="type" value="basique">
                             <button type="submit" class="btn btn-sm btn-danger-outline">
@@ -755,7 +807,8 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                             </div>
                             <form method="POST" action="?page=cancel-subscription"
                                   class="cancel-form"
-                                  data-confirm="Supprimer l'option «<?= htmlspecialchars($featureDef['name']) ?>» ?">
+                                  data-subscription-type="premium"
+                                  data-feature-name="<?= htmlspecialchars($featureDef['name']) ?>">
                                 <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                                 <input type="hidden" name="type" value="premium">
                                 <input type="hidden" name="feature" value="<?= htmlspecialchars($featureKey) ?>">

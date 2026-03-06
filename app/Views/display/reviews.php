@@ -1,45 +1,19 @@
 <?php
 /**
  * Section des avis Google sur la page vitrine
- * $adminId est passé par DisplayController (ID de l'admin propriétaire du restaurant)
+ * Les données sont préparées par DisplayController et passées dans $googleReviewsData
  */
 
-// Vérifier si les avis Google sont activés
-if (!($googleReviewsEnabled ?? false)) {
+// Si aucune donnée d'avis, ne rien afficher
+if (!($googleReviewsData ?? null)) {
     return;
 }
 
-// Vérifier si la fonctionnalité premium Google Reviews est activée pour cet admin
-$restaurantAdminId = $adminId ?? null;
-if (!$restaurantAdminId) {
+$restaurantInfo = $googleReviewsData['restaurant_info'] ?? null;
+$reviews = $googleReviewsData['reviews'] ?? [];
+
+if (!$reviews || !$restaurantInfo) {
     return;
-}
-
-require_once __DIR__ . '/../../Models/PremiumFeature.php';
-$premiumFeature = new PremiumFeature($pdo);
-
-if (!$premiumFeature->isEnabled($restaurantAdminId, 'google_reviews')) {
-    // Côté public, on n'affiche simplement rien si le premium n'est pas activé
-    return;
-}
-
-// Récupérer les avis
-$reviews = null;
-$restaurantInfo = null;
-
-if ($googlePlaceId) {
-    require_once __DIR__ . '/../../Models/GoogleReviews.php';
-    $googleReviews = new GoogleReviews($pdo, $googleApiKey);
-    $data = $googleReviews->getReviews($googlePlaceId, 5);
-    
-    if ($data) {
-        $restaurantInfo = [
-            'name' => $data['name'] ?? '',
-            'rating' => $data['rating'] ?? 0,
-            'total_reviews' => count($data['reviews'] ?? [])
-        ];
-        $reviews = $data['reviews'] ?? [];
-    }
 }
 ?>
 

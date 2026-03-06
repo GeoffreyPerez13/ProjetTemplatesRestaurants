@@ -969,6 +969,9 @@ class CardController extends BaseController
         $carteImageModel = new CardImage($this->pdo);
 
         $currentMode = $adminModel->getCarteMode($admin_id);
+        
+        // Vérifier si l'utilisateur a un abonnement actif
+        $isReadOnly = $this->isReadOnly();
 
         if ($currentMode === 'editable') {
             $categories = $categoryModel->getAllByAdmin($admin_id);
@@ -977,13 +980,15 @@ class CardController extends BaseController
             }
             $data = [
                 'currentMode' => $currentMode,
-                'categories' => $categories
+                'categories' => $categories,
+                'isReadOnly' => $isReadOnly
             ];
         } else {
             $carteImages = $carteImageModel->getAllByAdmin($admin_id);
             $data = [
                 'currentMode' => $currentMode,
-                'carteImages' => $carteImages
+                'carteImages' => $carteImages,
+                'isReadOnly' => $isReadOnly
             ];
         }
 

@@ -110,8 +110,14 @@ document.addEventListener("DOMContentLoaded", function () {
         return response.json();
       })
       .then((options) => {
-        // Mettre à jour les boutons selon les options
+        // Mettre à jour les boutons selon les options (uniquement pour les options standards)
+        const standardOptions = ['site_online', 'mail_reminder', 'email_notifications'];
         Object.keys(options).forEach((option) => {
+          // Ignorer les options qui ne sont pas des boutons (comme closure_dates)
+          if (!standardOptions.includes(option)) {
+            return;
+          }
+          
           const button = document.querySelector(
             `.option-btn[data-option="${option}"][data-value="${options[option]}"]`,
           );

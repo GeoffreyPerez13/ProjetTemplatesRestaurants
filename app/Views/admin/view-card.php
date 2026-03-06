@@ -37,9 +37,15 @@ require __DIR__ . '/../partials/header.php';
         <div class="empty-state">
             <i class="fas fa-utensils"></i>
             <p class="success">Aucune catégorie pour le moment.</p>
-            <a href="?page=edit-card" class="btn primary">
-                Créer votre première catégorie
-            </a>
+            <?php if (!($isReadOnly ?? false)): ?>
+                <a href="?page=edit-card" class="btn primary">
+                    Créer votre première catégorie
+                </a>
+            <?php else: ?>
+                <div class="btn primary disabled" style="opacity: 0.6; cursor: not-allowed;">
+                    <i class="fas fa-lock"></i> Créer votre première catégorie (Abonnement requis)
+                </div>
+            <?php endif; ?>
         </div>
     <?php else: ?>
         <div class="carte-preview-grid">

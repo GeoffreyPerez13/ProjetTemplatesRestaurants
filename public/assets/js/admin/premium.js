@@ -254,26 +254,58 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.cancel-form').forEach(form => {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                const msg = form.dataset.confirm || 'Confirmer la résiliation ?';
+                
+                // Déterminer le type d'abonnement et le message approprié
+                let title, text, confirmText;
+                const subscriptionType = form.dataset.subscriptionType || '';
+                const isBasic = subscriptionType === 'basic' || subscriptionType === 'basique';
+                
+                if (isBasic) {
+                    // Abonnement basique - message plus grave car tout sera supprimé
+                    title = '⚠️ Résiliation de l\'abonnement basique';
+                    text = 'Êtes-vous sûr de vouloir résilier votre abonnement basique ?\n\n⚠️ ATTENTION : Cette action supprimera également TOUS vos abonnements premium actifs et rendra votre site inaccessible.\n\nVous pourrez réactiver un abonnement à tout moment depuis les paramètres.';
+                    confirmText = 'Oui, tout résilier';
+                } else {
+                    // Abonnement premium - message standard
+                    const featureName = form.dataset.featureName || 'cette fonctionnalité';
+                    title = 'Résiliation de l\'abonnement premium';
+                    text = `Êtes-vous sûr de vouloir résilier l'abonnement pour "${featureName}" ?\n\nVous pourrez le réactiver à tout moment depuis les paramètres.`;
+                    confirmText = 'Oui, résilier';
+                }
                 
                 if (typeof Swal !== 'undefined') {
+                    console.log('SweetAlert disponible, affichage de la popup...');
                     Swal.fire({
-                        title: 'Confirmer la résiliation',
-                        text: msg,
-                        icon: 'warning',
+                        title: title,
+                        text: text,
+                        icon: isBasic ? 'error' : 'warning',
                         showCancelButton: true,
-                        confirmButtonColor: '#d33',
+                        confirmButtonColor: isBasic ? '#d33' : '#f59e0b',
                         cancelButtonColor: '#3085d6',
-                        confirmButtonText: 'Oui, résilier',
+                        confirmButtonText: confirmText,
                         cancelButtonText: 'Annuler',
                         backdrop: true,
                         allowOutsideClick: false,
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
+                        customClass: {
+                            popup: isBasic ? 'swal2-danger' : ''
                         }
+                    }).then((result) => {
+                        console.log('Résultat SweetAlert:', result);
+                        if (result.isConfirmed) {
+                            console.log('Confirmation reçue, soumission du formulaire');
+                            form.submit();
+                        } else {
+                            console.log('Annulation par l\'utilisateur');
+                        }
+                    }).catch((error) => {
+                        console.error('Erreur SweetAlert:', error);
                     });
                 } else {
+                    console.error('SweetAlert non disponible');
+                    // Fallback si SweetAlert2 n'est pas disponible
+                    const msg = isBasic ? 
+                        'Êtes-vous sûr de vouloir résilier votre abonnement basique ? ATTENTION : Tous vos abonnements premium seront aussi supprimés !' :
+                        'Confirmer la résiliation ?';
                     if (confirm(msg)) {
                         form.submit();
                     }

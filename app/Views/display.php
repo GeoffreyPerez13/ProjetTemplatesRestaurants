@@ -22,6 +22,18 @@ $displayDir = __DIR__ . '/display/';
             </div>
         </div>
     <?php else: ?>
+        <!-- Bandeau de fermeture exceptionnelle -->
+        <?php if (!empty($todayClosureDate)): ?>
+            <link rel="stylesheet" href="/assets/css/display/closure-banner.css">
+            <div class="closure-banner">
+                <div class="closure-banner-text">
+                    <i class="fas fa-calendar-times"></i>
+                    <span>Fermeture exceptionnelle aujourd'hui</span>
+                    <span class="closure-banner-date"><?= date('d/m/Y', strtotime($todayClosureDate)) ?></span>
+                </div>
+            </div>
+        <?php endif; ?>
+        
         <?php include $displayDir . 'cookies.php'; ?>
         <?php include $displayDir . 'header.php'; ?>
         <?php include $displayDir . 'banner.php'; ?>
