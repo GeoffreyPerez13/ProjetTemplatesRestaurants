@@ -2,7 +2,10 @@
 $title = $title ?? "Paramètres";
 $scripts = [
     "js/sections/settings/settings.js",
-    "js/sections/settings/closure-dates.js"
+    "js/sections/settings/premium-cart.js",
+    "js/effects/accordion.js",
+    "js/sections/settings/closure-dates.js",
+    "js/sections/settings/subscriptions.js"
 ];
 
 require __DIR__ . '/../partials/header.php';
@@ -403,8 +406,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
             <div class="settings-section">
                 <link rel="stylesheet" href="/assets/css/admin/sections/settings/premium.css">
                 <script src="/assets/js/effects/accordion.js"></script>
-                <script src="/assets/js/admin/premium.js"></script>
-                <h2>Fonctionnalités</h2>
+                                <h2>Fonctionnalités</h2>
                 <p class="section-description">Débloquez des fonctionnalités avancées pour votre restaurant.</p>
 
                 <!-- Boutons de contrôle global des accordéons -->
@@ -459,7 +461,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
 
                 <!-- Abonnement Basique -->
                 <?php if (!$isSuperAdmin): ?>
-                <div class="basique-sub-card <?= $hasActiveSub ? 'active' : 'inactive' ?>">
+                <div class="basique-sub-card <?= $hasActiveSub ? 'active' : 'inactive' ?>" data-basique-active="<?= $hasActiveSub ? '1' : '0' ?>">
                     <div class="basique-sub-header">
                         <div class="basique-sub-icon">
                             <i class="fas fa-store"></i>
@@ -483,17 +485,130 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                     </ul>
                     <?php if (!$hasActiveSub): ?>
                     <div class="basique-sub-actions">
-                        <a href="?page=stripe-checkout" class="btn btn-primary">
-                            <i class="fab fa-stripe-s"></i> Payer et activer — 9€/mois
-                        </a>
+                        <label class="basique-select-label">
+                            <input type="checkbox" name="include_basique" value="1" class="basique-checkbox" id="basique-checkbox">
+                            <span class="basique-checkmark"></span>
+                            <span class="basique-select-text">
+                                <i class="fas fa-store"></i> Sélectionner l'abonnement Basique — 9€/mois
+                            </span>
+                        </label>
                         <p class="basique-sub-note">
-                            <i class="fas fa-lock"></i>
-                            Paiement sécurisé par Stripe. Carte de test : <strong>4242 4242 4242 4242</strong> / exp. 12/26 / CVV 123
+                            <i class="fas fa-info-circle"></i>
+                            Cochez cette case pour inclure l'abonnement Basique dans votre panier
                         </p>
                     </div>
                     <?php endif; ?>
                 </div>
-                <?php endif; ?>
+
+                <div class="accordion-section premium-options-accordion">
+                    <div class="accordion-header">
+                        <h3><i class="fas fa-bolt"></i> Options premium à la carte</h3>
+                        <button type="button" class="accordion-toggle" data-target="premium-options-content">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div id="premium-options-content" class="accordion-content expanded">
+                        <form method="POST" action="?page=stripe-checkout" id="premium-cart-form">
+                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+
+                            <div class="premium-features-grid">
+                                <?php foreach ($availableFeatures as $featureKey => $feature): ?>
+                                    <?php
+                                    $isActive           = (int)($userFeaturesMap[$featureKey] ?? 0) === 1;
+                                    $canActivateDirectly = $isSuperAdmin && !$isActive;
+                                    $isSelectable       = !$isSuperAdmin && $hasActiveSub; // Sélectionnable si on a un abonnement basique
+                                    $cardClass          = $isActive ? 'active' : ($isSelectable ? 'selectable' : '');
+                                    ?>
+                                    <div class="premium-feature-card <?= $cardClass ?>"
+                                         <?= $isSelectable ? 'data-price="' . (int)$feature['price_monthly'] . '" data-feature="' . htmlspecialchars($featureKey) . '"' : '' ?>>
+                                        <div class="feature-header">
+                                            <div class="feature-icon">
+                                                <i class="fas <?= $feature['icon'] ?>"></i>
+                                            </div>
+                                            <div class="feature-info">
+                                                <h3><?= htmlspecialchars($feature['name']) ?></h3>
+                                                <p><?= htmlspecialchars($feature['description']) ?></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="feature-price">
+                                            <span class="feature-price-monthly">+<?= (int)$feature['price_monthly'] ?>€<small>/mois</small></span>
+                                            <span class="feature-price-annual">+<?= (int)$feature['price_annual'] ?>€<small>/mois en annuel</small></span>
+                                        </div>
+
+                                        <div class="feature-status">
+                                            <?php if ($isActive): ?>
+                                                <span class="status-badge active">
+                                                    <i class="fas fa-check-circle"></i> Activé
+                                                </span>
+                                            <?php elseif ($canActivateDirectly || $isSelectable): ?>
+                                                <span class="status-badge available">
+                                                    <i class="fas fa-unlock"></i> Disponible
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="status-badge locked">
+                                                    <i class="fas fa-lock"></i> Basique requis
+                                                </span>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <div class="feature-actions">
+                                            <?php if ($isActive): ?>
+                                                <?php if ($featureKey === 'google_reviews'): ?>
+                                                    <button type="button" class="btn btn-sm configure-google-reviews">
+                                                        <i class="fas fa-cog"></i> Configurer
+                                                    </button>
+                                                <?php endif; ?>
+                                            <?php elseif ($canActivateDirectly): ?>
+                                                <button type="button" class="btn premium-btn toggle-premium"
+                                                        data-feature="<?= $featureKey ?>">
+                                                    <i class="fas fa-bolt"></i> Activer
+                                                </button>
+                                            <?php elseif ($isSelectable): ?>
+                                                <label class="feature-select-label">
+                                                    <input type="checkbox" name="features[]"
+                                                           value="<?= htmlspecialchars($featureKey) ?>"
+                                                           class="feature-checkbox">
+                                                    <span class="feature-checkmark"></span>
+                                                    Sélectionner
+                                                </label>
+                                            <?php else: ?>
+                                                <button type="button" class="btn premium-btn btn-sm" disabled>
+                                                    <i class="fas fa-lock"></i> Basique requis
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+
+                            <?php if ($hasActiveSub && !$isSuperAdmin): ?>
+                            <div class="premium-cart-bar" id="premium-cart-bar">
+                                <div class="cart-info">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span><strong id="cart-count">0</strong> option(s) sélectionnée(s)</span>
+                                    <span class="cart-sep">·</span>
+                                    <span>Total : <strong id="cart-total">0€</strong>/mois</span>
+                                </div>
+                                <div class="cart-actions">
+                                    <button type="submit" form="premium-cart-form" class="btn btn-primary premium-checkout-btn" id="premium-checkout-btn" disabled>
+                                        <i class="fab fa-stripe-s"></i> Payer les options
+                                    </button>
+                                </div>
+                            </div>
+                            <?php elseif (!$hasActiveSub && !$isSuperAdmin): ?>
+                            <div class="premium-cart-bar" id="premium-cart-bar" style="display: none;">
+                                <div class="cart-info">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span><strong id="cart-count">0</strong> option(s) sélectionnée(s)</span>
+                                    <span class="cart-sep">·</span>
+                                    <span>Total : <strong id="cart-total">0€</strong>/mois</span>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                        </form>
+                    </div>
+                </div>
 
                 <?php if ($hasActiveSub): ?>
                 <!-- Total de l'abonnement en cours -->
@@ -538,108 +653,51 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                     </div>
                 </div>
                 <?php endif; ?>
+                <?php endif; ?>
 
-                <div class="accordion-section premium-options-accordion">
-                    <div class="accordion-header">
-                        <h3><i class="fas fa-bolt"></i> Options premium à la carte</h3>
-                        <button type="button" class="accordion-toggle" data-target="premium-options-content">
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
+                <!-- Panier combiné Basique + Premium (pour les utilisateurs sans abonnement) -->
+                <?php if (!$hasActiveSub && !$isSuperAdmin): ?>
+                <div class="combined-cart-section" id="combined-cart-section" style="display: none;">
+                    <div class="combined-cart-header">
+                        <h3><i class="fas fa-shopping-cart"></i> Panier d'abonnement</h3>
+                        <p>Sélectionnez votre abonnement basique et les options premium en un seul paiement</p>
                     </div>
-                    <div id="premium-options-content" class="accordion-content expanded">
-
-                <form method="POST" action="?page=stripe-checkout" id="premium-cart-form">
-                    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
-
-                    <div class="premium-features-grid">
-                        <?php foreach ($availableFeatures as $featureKey => $feature): ?>
-                            <?php
-                            $isActive           = (int)($userFeaturesMap[$featureKey] ?? 0) === 1;
-                            $canActivateDirectly = $isSuperAdmin && !$isActive;
-                            $isSelectable       = !$isSuperAdmin && $hasActiveSub && !$isActive;
-                            $isLocked           = !$isSuperAdmin && !$hasActiveSub && !$isActive;
-                            $cardClass          = $isActive ? 'active' : ($isSelectable ? 'selectable' : '');
-                            ?>
-                            <div class="premium-feature-card <?= $cardClass ?>"
-                                 <?= $isSelectable ? 'data-price="' . (int)$feature['price_monthly'] . '" data-feature="' . htmlspecialchars($featureKey) . '"' : '' ?>>
-                                <div class="feature-header">
-                                    <div class="feature-icon">
-                                        <i class="fas <?= $feature['icon'] ?>"></i>
-                                    </div>
-                                    <div class="feature-info">
-                                        <h3><?= htmlspecialchars($feature['name']) ?></h3>
-                                        <p><?= htmlspecialchars($feature['description']) ?></p>
-                                    </div>
+                    
+                    <form method="post" action="?page=stripe-checkout" class="combined-cart-form" id="combined-cart-form">
+                        <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                        
+                        <div class="cart-summary">
+                            <div class="cart-item basique-item" id="basique-cart-item" style="display: none;">
+                                <div class="item-info">
+                                    <i class="fas fa-store"></i>
+                                    <span>Abonnement Basique</span>
                                 </div>
-
-                                <div class="feature-price">
-                                    <span class="feature-price-monthly">+<?= (int)$feature['price_monthly'] ?>€<small>/mois</small></span>
-                                    <span class="feature-price-annual">+<?= (int)$feature['price_annual'] ?>€<small>/mois en annuel</small></span>
-                                </div>
-
-                                <div class="feature-status">
-                                    <?php if ($isActive): ?>
-                                        <span class="status-badge active">
-                                            <i class="fas fa-check-circle"></i> Activé
-                                        </span>
-                                    <?php elseif ($canActivateDirectly || $isSelectable): ?>
-                                        <span class="status-badge available">
-                                            <i class="fas fa-unlock"></i> Disponible
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="status-badge locked">
-                                            <i class="fas fa-lock"></i> Basique requis
-                                        </span>
-                                    <?php endif; ?>
-                                </div>
-
-                                <div class="feature-actions">
-                                    <?php if ($isActive): ?>
-                                        <?php if ($featureKey === 'google_reviews'): ?>
-                                            <button type="button" class="btn btn-sm configure-google-reviews">
-                                                <i class="fas fa-cog"></i> Configurer
-                                            </button>
-                                        <?php endif; ?>
-                                    <?php elseif ($canActivateDirectly): ?>
-                                        <button type="button" class="btn premium-btn toggle-premium"
-                                                data-feature="<?= $featureKey ?>">
-                                            <i class="fas fa-bolt"></i> Activer
-                                        </button>
-                                    <?php elseif ($isSelectable): ?>
-                                        <label class="feature-select-label">
-                                            <input type="checkbox" name="features[]"
-                                                   value="<?= htmlspecialchars($featureKey) ?>"
-                                                   class="feature-checkbox">
-                                            <span class="feature-checkmark"></span>
-                                            Sélectionner
-                                        </label>
-                                    <?php else: ?>
-                                        <button type="button" class="btn premium-btn btn-sm" disabled>
-                                            <i class="fas fa-lock"></i> Basique requis
-                                        </button>
-                                    <?php endif; ?>
+                                <span class="item-price">9€/mois</span>
+                            </div>
+                            
+                            <div class="premium-items" id="premium-items">
+                                <div class="premium-placeholder">
+                                    <p>Aucune option premium sélectionnée</p>
                                 </div>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
-
-                    <?php if ($hasActiveSub && !$isSuperAdmin): ?>
-                    <div class="premium-cart-bar" id="premium-cart-bar">
-                        <div class="cart-info">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span><strong id="cart-count">0</strong> option(s) sélectionnée(s)</span>
-                            <span class="cart-sep">·</span>
-                            <span>Total : <strong id="cart-total">0€</strong>/mois</span>
+                            
+                            <div class="cart-total">
+                                <span>Total mensuel</span>
+                                <span class="total-price" id="combined-total">0€/mois</span>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary cart-checkout-btn"
-                                id="cart-checkout-btn" disabled>
-                            <i class="fab fa-stripe-s"></i> Payer et activer
-                        </button>
-                    </div>
-                    <?php endif; ?>
-                </form>
-                    </div>
+                        
+                        <div class="combined-cart-actions">
+                            <button type="submit" class="btn btn-primary combined-checkout-btn" id="combined-checkout-btn" disabled>
+                                <i class="fab fa-stripe-s"></i> Payer et activer tout
+                            </button>
+                            <button type="button" class="btn btn-outline" id="clear-combined-cart">
+                                <i class="fas fa-trash"></i> Vider le panier
+                            </button>
+                        </div>
+                    </form>
                 </div>
+                <?php endif; ?>
 
                 <!-- Configuration Google Reviews (affichée si activé) -->
                 <div id="google-reviews-config" class="google-reviews-config" style="display: none;">
@@ -730,9 +788,151 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
             <!-- Section Abonnements -->
             <div class="settings-section">
                 <link rel="stylesheet" href="/assets/css/admin/sections/settings/premium.css">
+                <link rel="stylesheet" href="/assets/css/admin/sections/settings/subscriptions.css">
                 <script src="/assets/js/effects/accordion.js"></script>
+                
+                <style>
+                    /* Force dark mode styles for subscriptions - ULTRA SPECIFIC */
+                    .subscription-bulk-actions {
+                        background: #1f2937 !important;
+                        border: 1px solid #374151 !important;
+                    }
+                    
+                    .subscription-bulk-actions * {
+                        color: #e5e7eb !important;
+                    }
+                    
+                    /* Améliorer le bouton Tout sélectionner */
+                    .subscription-bulk-actions .checkbox-label {
+                        background: var(--color-primary) !important;
+                        border: 1px solid var(--color-primary) !important;
+                        border-radius: 6px !important;
+                        padding: 8px 16px !important;
+                        display: inline-flex !important;
+                        align-items: center !important;
+                        gap: 8px !important;
+                        cursor: pointer !important;
+                        transition: all 0.2s ease !important;
+                    }
+                    
+                    .subscription-bulk-actions .checkbox-label:hover {
+                        background: color-mix(in srgb, var(--color-primary) 80%, black) !important;
+                        border-color: color-mix(in srgb, var(--color-primary) 80%, black) !important;
+                    }
+                    
+                    .subscription-bulk-actions .checkbox-label input[type="checkbox"] {
+                        width: 18px !important;
+                        height: 18px !important;
+                        accent-color: #b45309 !important;
+                    }
+                    
+                    .subscription-bulk-actions .checkbox-label .checkmark {
+                        display: none !important;
+                    }
+                    
+                    .subscription-bulk-actions .checkbox-label span {
+                        color: #fbbf24 !important;
+                        font-weight: 500 !important;
+                        font-size: 14px !important;
+                    }
+                    
+                    /* Mode dark spécifique pour le bouton */
+                    body.dark-mode .subscription-bulk-actions .checkbox-label {
+                        background: #2c1810 !important;
+                        border: 1px solid #b45309 !important;
+                    }
+                    
+                    body.dark-mode .subscription-bulk-actions .checkbox-label:hover {
+                        background: #3d2418 !important;
+                        border-color: #d97706 !important;
+                    }
+                    
+                    body.dark-mode .subscription-bulk-actions .checkbox-label span {
+                        color: #fbbf24 !important;
+                    }
+                    
+                    .subscriptions-table {
+                        background: #1f2937 !important;
+                    }
+                    
+                    .subscriptions-table thead {
+                        background: #111827 !important;
+                    }
+                    
+                    .subscriptions-table tbody tr {
+                        background: #1f2937 !important;
+                    }
+                    
+                    .subscriptions-table tbody tr:hover {
+                        background: #374151 !important;
+                    }
+                    
+                    .subscriptions-table td {
+                        background: transparent !important;
+                        color: #e5e7eb !important;
+                        border-color: #374151 !important;
+                    }
+                    
+                    .subscriptions-table th {
+                        background: transparent !important;
+                        color: #f3f4f6 !important;
+                        border-color: #374151 !important;
+                    }
+                    
+                    /* Target specific elements in dark mode */
+                    body.dark-mode .subscription-bulk-actions {
+                        background: #1f2937 !important;
+                        border-color: #374151 !important;
+                    }
+                    
+                    body.dark-mode .subscriptions-table {
+                        background: #1f2937 !important;
+                        border: 1px solid #374151 !important;
+                    }
+                    
+                    body.dark-mode .subscriptions-table td {
+                        color: #e5e7eb !important;
+                        border-color: #374151 !important;
+                    }
+                    
+                    body.dark-mode .subscriptions-table th {
+                        color: #f3f4f6 !important;
+                        border-color: #374151 !important;
+                    }
+                    
+                    /* Force accordion content */
+                    .accordion-content .subscription-bulk-actions {
+                        background: #1f2937 !important;
+                        border: 1px solid #374151 !important;
+                    }
+                    
+                    .accordion-content .subscriptions-table {
+                        background: #1f2937 !important;
+                        border: 1px solid #374151 !important;
+                    }
+                    
+                    .accordion-content .subscriptions-table td {
+                        color: #e5e7eb !important;
+                        border-color: #374151 !important;
+                    }
+                    
+                    .accordion-content .subscriptions-table th {
+                        color: #f3f4f6 !important;
+                        border-color: #374151 !important;
+                    }
+                </style>
                 <h2>Abonnements</h2>
                 <p class="section-description">Gérez vos abonnements et options actives.</p>
+                
+                <!-- Boutons de contrôle global des accordéons -->
+                <div class="global-accordion-controls">
+                    <button type="button" id="expand-all-accordions" class="btn small">
+                        <i class="fas fa-expand-alt"></i> Tout ouvrir
+                    </button>
+                    <button type="button" id="collapse-all-accordions" class="btn small">
+                        <i class="fas fa-compress-alt"></i> Tout fermer
+                    </button>
+                </div>
 
                 <?php
                 require_once __DIR__ . '/../../Models/PremiumFeature.php';
@@ -766,6 +966,48 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 <?php if (!$isSuperAdmin && $hasActiveSub): ?>
                 <!-- Gestion des abonnements actifs -->
                 <?php $activePremiumFeatures = array_filter($userFeaturesMap, fn($v) => (int)$v === 1); ?>
+                
+                <!-- Total de l'abonnement en cours -->
+                <?php
+                $totalMonthly = 9; // Abonnement basique
+                foreach ($activePremiumFeatures as $featureKey => $_ignore) {
+                    $featureDef = $availableFeatures[$featureKey] ?? null;
+                    if ($featureDef) {
+                        $totalMonthly += (int)$featureDef['price_monthly'];
+                    }
+                }
+                ?>
+                <div class="accordion-section premium-total-accordion">
+                    <div class="accordion-header">
+                        <h3><i class="fas fa-calculator"></i> Total de votre abonnement</h3>
+                        <button type="button" class="accordion-toggle" data-target="subscription-total-content">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div id="subscription-total-content" class="accordion-content expanded prevent-auto-close">
+                        <div class="subscription-total-breakdown">
+                            <div class="breakdown-item">
+                                <span>Abonnement Basique</span>
+                                <span class="breakdown-price">9€/mois</span>
+                            </div>
+                            <?php foreach ($activePremiumFeatures as $featureKey => $_ignore): ?>
+                                <?php $featureDef = $availableFeatures[$featureKey] ?? null; if (!$featureDef) continue; ?>
+                                <div class="breakdown-item premium-item">
+                                    <span>
+                                        <i class="fas <?= $featureDef['icon'] ?>"></i>
+                                        <?= htmlspecialchars($featureDef['name']) ?>
+                                    </span>
+                                    <span class="breakdown-price">+<?= (int)$featureDef['price_monthly'] ?>€/mois</span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="subscription-total-amount">
+                            <span>Total mensuel</span>
+                            <span class="total-price"><?= $totalMonthly ?>€<small>/mois</small></span>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="accordion-section subscription-management-accordion">
                     <div class="accordion-header">
                         <h3><i class="fas fa-sliders-h"></i> Gérer mes abonnements</h3>
@@ -774,63 +1016,128 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                         </button>
                     </div>
                     <div id="subscription-management-content" class="accordion-content expanded">
-
-                    <div class="manage-sub-item">
-                        <div class="manage-sub-info">
-                            <span class="manage-sub-icon"><i class="fas fa-store"></i></span>
-                            <div>
-                                <strong>Abonnement Basique</strong>
-                                <span>9€/mois — actif</span>
+                        
+                        <!-- Actions groupées -->
+                        <div class="subscription-bulk-actions">
+                            <div class="bulk-select-all">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="select-all-subs" class="select-all-checkbox">
+                                    <span class="checkmark"></span>
+                                    Tout sélectionner
+                                </label>
                             </div>
-                        </div>
-                        <form method="POST" action="?page=cancel-subscription"
-                              class="cancel-form"
-                              data-subscription-type="basique"
-                              data-feature-name="Abonnement Basique">
-                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
-                            <input type="hidden" name="type" value="basique">
-                            <button type="submit" class="btn btn-sm btn-danger-outline">
-                                <i class="fas fa-times-circle"></i> Résilier
-                            </button>
-                        </form>
-                    </div>
-
-                    <?php foreach ($activePremiumFeatures as $featureKey => $_ignore): ?>
-                        <?php $featureDef = $availableFeatures[$featureKey] ?? null; if (!$featureDef) continue; ?>
-                        <div class="manage-sub-item manage-sub-premium">
-                            <div class="manage-sub-info">
-                                <span class="manage-sub-icon premium-icon"><i class="fas <?= $featureDef['icon'] ?>"></i></span>
-                                <div>
-                                    <strong><?= htmlspecialchars($featureDef['name']) ?></strong>
-                                    <span>+<?= (int)$featureDef['price_monthly'] ?>€/mois</span>
-                                </div>
-                            </div>
-                            <form method="POST" action="?page=cancel-subscription"
-                                  class="cancel-form"
-                                  data-subscription-type="premium"
-                                  data-feature-name="<?= htmlspecialchars($featureDef['name']) ?>">
-                                <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
-                                <input type="hidden" name="type" value="premium">
-                                <input type="hidden" name="feature" value="<?= htmlspecialchars($featureKey) ?>">
-                                <button type="submit" class="btn btn-sm btn-danger-outline">
-                                    <i class="fas fa-trash-alt"></i> Supprimer
+                            <div class="bulk-actions-buttons">
+                                <button type="button" id="bulk-cancel-subs" class="btn btn-danger" disabled>
+                                    <i class="fas fa-trash-alt"></i> Résilier la sélection
                                 </button>
-                            </form>
+                            </div>
                         </div>
-                    <?php endforeach; ?>
 
-                    <?php if (empty($activePremiumFeatures)): ?>
-                    <p class="manage-sub-empty">
-                        <i class="fas fa-info-circle"></i>
-                        Aucune option premium active pour le moment.
-                    </p>
-                    <?php endif; ?>
+                        <!-- Tableau des abonnements -->
+                        <table class="subscriptions-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-checkbox">
+                                        <!-- Vide - espace pour l'alignement -->
+                                    </th>
+                                    <th class="col-type">Type</th>
+                                    <th class="col-name">Nom</th>
+                                    <th class="col-price">Prix</th>
+                                    <th class="col-status">Statut</th>
+                                    <th class="col-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Abonnement Basique -->
+                                <tr class="subscription-row basique-row">
+                                    <td class="col-checkbox">
+                                        <input type="checkbox" class="sub-checkbox" data-type="basique" data-name="Abonnement Basique" id="sub-basique">
+                                        <label for="sub-basique" class="sub-checkbox-label"></label>
+                                    </td>
+                                    <td class="col-type">
+                                        <span class="subscription-badge basique-badge">
+                                            <i class="fas fa-store"></i>
+                                            Basique
+                                        </span>
+                                    </td>
+                                    <td class="col-name">Abonnement Basique MenuMiam</td>
+                                    <td class="col-price">9€/mois</td>
+                                    <td class="col-status">
+                                        <span class="status-badge active">
+                                            <i class="fas fa-check-circle"></i> Actif
+                                        </span>
+                                    </td>
+                                    <td class="col-actions">
+                                        <form method="POST" action="?page=cancel-subscription"
+                                              class="cancel-form"
+                                              data-subscription-type="basique"
+                                              data-feature-name="Abonnement Basique">
+                                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                                            <input type="hidden" name="type" value="basique">
+                                            <button type="submit" class="btn btn-sm btn-danger-outline">
+                                                <i class="fas fa-times-circle"></i> Résilier
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+
+                                <!-- Options Premium -->
+                                <?php foreach ($activePremiumFeatures as $featureKey => $_ignore): ?>
+                                    <?php $featureDef = $availableFeatures[$featureKey] ?? null; if (!$featureDef) continue; ?>
+                                <tr class="subscription-row premium-row">
+                                    <td class="col-checkbox">
+                                        <input type="checkbox" class="sub-checkbox" data-type="premium" data-name="<?= htmlspecialchars($featureDef['name']) ?>" id="sub-<?= htmlspecialchars($featureKey) ?>">
+                                        <label for="sub-<?= htmlspecialchars($featureKey) ?>" class="sub-checkbox-label"></label>
+                                    </td>
+                                    <td class="col-type">
+                                        <span class="subscription-badge premium-badge">
+                                            <i class="fas fa-star"></i>
+                                            Premium
+                                        </span>
+                                    </td>
+                                    <td class="col-name"><?= htmlspecialchars($featureDef['name']) ?></td>
+                                    <td class="col-price">+<?= (int)$featureDef['price_monthly'] ?>€/mois</td>
+                                    <td class="col-status">
+                                        <span class="status-badge active">
+                                            <i class="fas fa-check-circle"></i> Actif
+                                        </span>
+                                    </td>
+                                    <td class="col-actions">
+                                        <form method="POST" action="?page=cancel-subscription"
+                                              class="cancel-form"
+                                              data-subscription-type="premium"
+                                              data-feature-name="<?= htmlspecialchars($featureDef['name']) ?>">
+                                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                                            <input type="hidden" name="type" value="premium">
+                                            <input type="hidden" name="feature" value="<?= htmlspecialchars($featureKey) ?>">
+                                            <button type="submit" class="btn btn-sm btn-danger-outline">
+                                                <i class="fas fa-trash-alt"></i> Supprimer
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+
+                                <?php if (empty($activePremiumFeatures)): ?>
+                                <tr class="no-premium-row">
+                                    <td colspan="6" class="no-premium-cell">
+                                        <div class="no-premium-message">
+                                            <i class="fas fa-info-circle"></i>
+                                            <span>Aucune option premium active pour le moment.</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 <?php elseif (!$isSuperAdmin): ?>
                     <div class="subscription-notice">
-                        <i class="fas fa-info-circle"></i>
-                        <p>Vous devez avoir un abonnement Basique actif pour gérer vos abonnements.</p>
+                        <div class="subscription-notice-content">
+                            <i class="fas fa-info-circle"></i>
+                            <p>Vous devez avoir un abonnement Basique actif pour gérer vos abonnements.</p>
+                        </div>
                         <a href="?page=settings&section=premium" class="btn primary">
                             <i class="fas fa-crown"></i> Voir les fonctionnalités
                         </a>

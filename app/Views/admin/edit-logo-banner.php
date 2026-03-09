@@ -127,50 +127,6 @@ require __DIR__ . '/../partials/header.php';
         </div>
     <?php endif; ?>
 
-    <!-- ==================== SECTION TEXTE DE LA BANNIÈRE ==================== -->
-    <div class="accordion-section banner-text-accordion" id="banner-text">
-        <div class="accordion-header">
-            <h2><i class="fas fa-comment-dots"></i> Texte de la bannière</h2>
-            <button type="button" class="accordion-toggle" data-target="banner-text-content">
-                <i class="fas fa-chevron-<?= !empty($current_banner['text']) ? 'up' : 'down' ?>"></i>
-            </button>
-        </div>
-        <div id="banner-text-content" class="accordion-content <?= !empty($current_banner['text']) ? 'expanded' : 'collapsed' ?>">
-            <?php if (empty($current_banner)): ?>
-                <p class="info-message"><i class="fas fa-info-circle"></i> Vous devez d'abord uploader une bannière pour pouvoir ajouter du texte dessus.</p>
-            <?php else: ?>
-                <form method="post" action="?page=edit-logo-banner&action=updateBannerText" class="banner-text-form">
-                    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
-                    <input type="hidden" name="anchor" value="banner-text">
-
-                    <div class="form-group">
-                        <label for="banner_text">Saisissez le texte à afficher sur la bannière :</label>
-                        <textarea name="banner_text" id="banner_text" rows="3" class="form-control" placeholder="Ex : Bienvenue chez nous !"><?= htmlspecialchars($current_banner['text'] ?? '') ?></textarea>
-                        <p class="form-text text-muted"><i class="fas fa-info-circle"></i> Ce texte apparaîtra en superposition sur la bannière (position par défaut : centré).</p>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="submit" class="btn success"><i class="fas fa-save"></i> Enregistrer le texte</button>
-                        <?php if (!empty($current_banner['text'])): ?>
-                            <button type="button" class="btn danger" id="deleteBannerTextBtn" data-filename="texte">Supprimer le texte</button>
-                        <?php endif; ?>
-                    </div>
-                </form>
-
-                <?php if (!empty($current_banner['text'])): ?>
-                    <form method="post" action="?page=edit-logo-banner&action=deleteBannerText" id="deleteBannerTextForm" style="display: none;">
-                        <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
-                        <input type="hidden" name="anchor" value="banner-text">
-                    </form>
-                <?php endif; ?>
-            <?php endif; ?>
-        </div>
-    </div>
-
-    <?php if (!empty($current_banner)): ?>
-        <div class="banner-separator"><span>OU</span></div>
-    <?php endif; ?>
-
     <div class="accordion-section upload-banner-accordion" id="upload-banner">
         <div class="accordion-header">
             <h2><i class="fas fa-upload"></i> <?= !empty($current_banner) ? 'Changer la bannière' : 'Ajouter une bannière' ?></h2>
@@ -202,6 +158,57 @@ require __DIR__ . '/../partials/header.php';
             </form>
         </div>
     </div>
+
+    <!-- ==================== SECTION TEXTE DE LA BANNIÈRE (quand pas de bannière) ==================== -->
+    <?php if (empty($current_banner)): ?>
+        <div class="accordion-section banner-text-accordion" id="banner-text">
+            <div class="accordion-header">
+                <h2><i class="fas fa-comment-dots"></i> Texte de la bannière</h2>
+                <button type="button" class="accordion-toggle" data-target="banner-text-content">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+            <div id="banner-text-content" class="accordion-content collapsed">
+                <p class="info-message"><i class="fas fa-info-circle"></i> Vous devez d'abord uploader une bannière pour pouvoir ajouter du texte dessus.</p>
+            </div>
+        </div>
+    <?php else: ?>
+        <!-- ==================== SECTION TEXTE DE LA BANNIÈRE (quand bannière existe) ==================== -->
+        <div class="accordion-section banner-text-accordion" id="banner-text">
+            <div class="accordion-header">
+                <h2><i class="fas fa-comment-dots"></i> Texte de la bannière</h2>
+                <button type="button" class="accordion-toggle" data-target="banner-text-content">
+                    <i class="fas fa-chevron-<?= !empty($current_banner['text']) ? 'up' : 'down' ?>"></i>
+                </button>
+            </div>
+            <div id="banner-text-content" class="accordion-content <?= !empty($current_banner['text']) ? 'expanded' : 'collapsed' ?>">
+                <form method="post" action="?page=edit-logo-banner&action=updateBannerText" class="banner-text-form">
+                    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                    <input type="hidden" name="anchor" value="banner-text">
+
+                    <div class="form-group">
+                        <label for="banner_text">Saisissez le texte à afficher sur la bannière :</label>
+                        <textarea name="banner_text" id="banner_text" rows="3" class="form-control" placeholder="Ex : Bienvenue chez nous !"><?= htmlspecialchars($current_banner['text'] ?? '') ?></textarea>
+                        <p class="form-text text-muted"><i class="fas fa-info-circle"></i> Ce texte apparaîtra en superposition sur la bannière (position par défaut : centré).</p>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn success"><i class="fas fa-save"></i> Enregistrer le texte</button>
+                        <?php if (!empty($current_banner['text'])): ?>
+                            <button type="button" class="btn danger" id="deleteBannerTextBtn" data-filename="texte">Supprimer le texte</button>
+                        <?php endif; ?>
+                    </div>
+                </form>
+
+                <?php if (!empty($current_banner['text'])): ?>
+                    <form method="post" action="?page=edit-logo-banner&action=deleteBannerText" id="deleteBannerTextForm" style="display: none;">
+                        <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                        <input type="hidden" name="anchor" value="banner-text">
+                    </form>
+                <?php endif; ?>
+            </div>
+        </div>
+    <?php endif; ?>
 </div>
 
 <!-- Lightbox globale -->
@@ -229,19 +236,35 @@ const tourSteps = [
     {
         element: '#upload-banner',
         title: 'Bannière d\'accueil',
-        content: '<p>La bannière est l\'image principale qui accueille vos visiteurs en haut de votre site.</p><p>Format recommandé : large (1200×300 px) pour un bel effet visuel</p>'
+        content: '<p>La bannière est l\'image principale qui accueille vos visiteurs en haut de votre site.</p><p>Format recommandé : large (1200×300 px) pour un bel effet visuel</p>',
+        beforeShow: function() {
+            // Ouvrir l'accordéon "upload-banner" avant d'afficher cette étape
+            const uploadBannerAccordion = document.querySelector('#upload-banner-content');
+            const uploadBannerToggle = document.querySelector('[data-target="upload-banner-content"]');
+            if (uploadBannerAccordion && uploadBannerAccordion.classList.contains('collapsed')) {
+                uploadBannerToggle.click();
+            }
+        }
     },
     {
         element: '#banner-text',
         title: 'Texte sur la bannière',
-        content: '<p>Ajoutez un message de bienvenue ou un slogan qui s\'affichera en superposition sur votre bannière.</p><p>Exemple : "Bienvenue chez nous !", "Cuisine traditionnelle depuis 1950"</p><p><?php if (empty($current_banner)): ?>Note : Vous devez d\'abord uploader une bannière pour utiliser cette fonctionnalité.<?php endif; ?></p>'
+        content: '<p>Ajoutez un message de bienvenue ou un slogan qui s\'affichera en superposition sur votre bannière.</p><p>Exemple : "Bienvenue chez nous !", "Cuisine traditionnelle depuis 1950"</p><p><?php if (empty($current_banner)): ?>Note : Vous devez d\'abord uploader une bannière pour utiliser cette fonctionnalité.<?php endif; ?></p>',
+        beforeShow: function() {
+            // Ouvrir l'accordéon "banner-text" avant d'afficher cette étape
+            const bannerTextAccordion = document.querySelector('#banner-text-content');
+            const bannerTextToggle = document.querySelector('[data-target="banner-text-content"]');
+            if (bannerTextAccordion && bannerTextAccordion.classList.contains('collapsed')) {
+                bannerTextToggle.click();
+            }
+        }
     },
     {
         element: '#uploadBannerArea',
         title: 'Zone de téléchargement',
         content: '<p>Deux façons de télécharger vos images :</p><ul><li><strong>Glisser-déposer</strong> : Faites glisser votre fichier directement dans cette zone</li><li><strong>Cliquer</strong> : Cliquez sur "Choisir un fichier" pour parcourir vos dossiers</li></ul>',
         beforeShow: function() {
-            // Ouvrir l'accordéon "upload-banner" avant d'afficher cette étape
+            // S'assurer que l'accordéon "upload-banner" est ouvert
             const uploadBannerAccordion = document.querySelector('#upload-banner-content');
             const uploadBannerToggle = document.querySelector('[data-target="upload-banner-content"]');
             if (uploadBannerAccordion && uploadBannerAccordion.classList.contains('collapsed')) {

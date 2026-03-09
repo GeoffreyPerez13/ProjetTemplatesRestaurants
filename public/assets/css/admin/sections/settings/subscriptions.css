@@ -1,0 +1,456 @@
+/* Styles pour la gestion des abonnements */
+
+/* Actions groupées */
+.subscription-bulk-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #e2e8f0;
+}
+
+.bulk-select-all {
+    display: flex;
+    align-items: center;
+}
+
+.bulk-actions-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* Tableau des abonnements */
+.subscriptions-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.subscriptions-table thead {
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.subscriptions-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.subscriptions-table td {
+    padding: 16px;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+}
+
+/* Alignement vertical des badges */
+.col-type {
+    vertical-align: middle;
+}
+
+.subscription-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    line-height: 1;
+    height: 24px;
+    white-space: nowrap;
+    margin: 0;
+}
+
+.basique-badge {
+    margin: 0;
+}
+
+.subscriptions-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.subscriptions-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Colonnes */
+.col-checkbox {
+    width: 50px;
+    text-align: center;
+}
+
+.col-type {
+    width: 120px;
+}
+
+.col-name {
+    width: auto;
+}
+
+.col-price {
+    width: 120px;
+    font-weight: 600;
+    color: #059669;
+}
+
+.col-status {
+    width: 100px;
+}
+
+.col-actions {
+    width: 120px;
+    text-align: right;
+}
+
+/* Checkbox personnalisées pour les abonnements */
+.sub-checkbox {
+    width: 20px;
+    height: 20px;
+    opacity: 0;
+    cursor: pointer;
+    position: absolute;
+}
+
+.sub-checkbox-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    background: #ffffff;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sub-checkbox:checked + .sub-checkbox-label {
+    background: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.sub-checkbox:checked + .sub-checkbox-label::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Hover effects */
+.sub-checkbox-label:hover {
+    border-color: #3b82f6;
+    background: #f0f9ff;
+}
+
+.col-checkbox {
+    position: relative;
+}
+
+/* Badges de type */
+.subscription-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.basique-badge {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.premium-badge {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+/* Badges de statut */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    height: 24px;
+    white-space: nowrap;
+}
+
+/* Alignement vertical des statuts */
+.col-status {
+    vertical-align: middle;
+}
+
+.status-badge.active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+/* Lignes spéciales */
+.basique-row {
+    background: #f0f9ff;
+}
+
+.premium-row {
+    background: #fffbeb;
+}
+
+/* Message pour aucun premium */
+.no-premium-row {
+    background: #f9fafb;
+}
+
+.no-premium-cell {
+    padding: 20px;
+    text-align: center;
+}
+
+.no-premium-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #6b7280;
+    font-style: italic;
+}
+
+/* Boutons de résiliation */
+.btn-danger-outline {
+    background: transparent;
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-danger-outline:hover {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+/* Bouton de résiliation groupée */
+#bulk-cancel-subs {
+    transition: all 0.2s ease;
+}
+
+#bulk-cancel-subs:not(:disabled):hover {
+    background-color: #dc2626 !important;
+    border-color: #dc2626 !important;
+}
+
+#bulk-cancel-subs:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .subscription-bulk-actions {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .bulk-select-all,
+    .bulk-actions-buttons {
+        justify-content: center;
+    }
+    
+    .subscriptions-table {
+        font-size: 14px;
+    }
+    
+    .subscriptions-table th,
+    .subscriptions-table td {
+        padding: 10px 8px;
+    }
+    
+    .col-type,
+    .col-price,
+    .col-status,
+    .col-actions {
+        width: auto;
+    }
+    
+    .subscription-badge {
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+    
+    .btn-danger-outline {
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+}
+
+/* Animation pour la sélection */
+.subscription-row.selected {
+    background: #eff6ff !important;
+    position: relative;
+}
+
+.subscription-row.selected::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #3b82f6;
+}
+
+/* Mode Dark */
+body.dark-mode .subscriptions-table {
+    background: #1f2937 !important;
+    border-color: #374151;
+}
+
+body.dark-mode .subscriptions-table thead {
+    background: #111827;
+    border-bottom-color: #374151;
+}
+
+body.dark-mode .subscriptions-table th {
+    color: #f3f4f6;
+    border-bottom-color: #374151;
+}
+
+body.dark-mode .subscriptions-table td {
+    border-bottom-color: #374151;
+    color: #e5e7eb;
+}
+
+body.dark-mode .subscriptions-table tbody tr:hover {
+    background: #374151;
+}
+
+body.dark-mode .basique-row {
+    background: #1e3a5f !important;
+}
+
+body.dark-mode .premium-row {
+    background: #3e2723 !important;
+}
+
+body.dark-mode .no-premium-row {
+    background: #1f2937 !important;
+}
+
+/* Forcer toutes les lignes du tableau en mode dark */
+body.dark-mode .subscriptions-table tbody tr {
+    background: #1f2937 !important;
+}
+
+body.dark-mode .subscriptions-table tbody tr:hover {
+    background: #374151 !important;
+}
+
+/* S'assurer que le fond du tableau est bien sombre */
+body.dark-mode .subscriptions-table,
+body.dark-mode .subscriptions-table thead,
+body.dark-mode .subscriptions-table tbody,
+body.dark-mode .subscriptions-table tfoot {
+    background: #1f2937 !important;
+}
+
+/* Styles ultra-spécifiques pour écraser tout le reste */
+body.dark-mode .accordion-content .subscriptions-table {
+    background: #1f2937 !important;
+}
+
+body.dark-mode .accordion-content .subscriptions-table thead {
+    background: #111827 !important;
+}
+
+body.dark-mode .accordion-content .subscriptions-table tbody tr {
+    background: #1f2937 !important;
+}
+
+body.dark-mode .accordion-content .subscriptions-table tbody tr:hover {
+    background: #374151 !important;
+}
+
+body.dark-mode .accordion-content .subscriptions-table td {
+    background: transparent !important;
+    color: #e5e7eb !important;
+}
+
+body.dark-mode .accordion-content .subscriptions-table th {
+    background: transparent !important;
+    color: #f3f4f6 !important;
+}
+
+body.dark-mode .no-premium-message {
+    color: #9ca3af;
+}
+
+body.dark-mode .subscription-badge {
+    background: #374151;
+    color: #f3f4f6;
+}
+
+body.dark-mode .basique-badge {
+    background: #1e3a5f;
+    color: #93c5fd;
+}
+
+body.dark-mode .premium-badge {
+    background: #3e2723;
+    color: #fbbf24;
+}
+
+body.dark-mode .status-badge.active {
+    background: #065f46;
+    color: #34d399;
+}
+
+body.dark-mode .btn-danger-outline {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+body.dark-mode .btn-danger-outline:hover {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+body.dark-mode .subscription-bulk-actions {
+    background: #1f2937 !important;
+    border-color: #374151 !important;
+}
+
+body.dark-mode .subscription-bulk-actions span {
+    color: #e5e7eb !important;
+}
+
+body.dark-mode .subscription-bulk-actions * {
+    color: #e5e7eb !important;
+}

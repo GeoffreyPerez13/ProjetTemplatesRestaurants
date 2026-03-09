@@ -642,6 +642,23 @@
 }
 
 /* ==================== TEXTE DE BANNIÈRE ==================== */
+.info-message {
+    padding: 15px 20px;
+    margin: 15px 0;
+    background-color: var(--color-bg-alt);
+    border-left: 4px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.info-message i {
+    color: var(--color-primary);
+    margin-right: 8px;
+    font-size: 16px;
+}
+
 .banner-text-form {
     padding: 20px;
 }

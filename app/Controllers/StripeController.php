@@ -12,7 +12,7 @@ require_once __DIR__ . '/BaseController.php';
 class StripeController extends BaseController
 {
     /**
-     * Point d'entrée : redirige vers le checkout Basique (GET) ou premium (POST)
+     * Point d'entrée principal pour créer une session Stripe Checkout
      */
     public function createCheckout()
     {
@@ -27,8 +27,15 @@ class StripeController extends BaseController
             exit;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['features'])) {
-            $this->createPremiumFeaturesCheckout();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Vérifier si c'est un checkout basique + premium ou juste premium
+            if (isset($_POST['include_basique']) && $_POST['include_basique'] === '1') {
+                $this->createBasiqueWithPremiumCheckout();
+            } elseif (!empty($_POST['features'])) {
+                $this->createPremiumFeaturesCheckout();
+            } else {
+                $this->createBasiqueCheckout();
+            }
         } else {
             $this->createBasiqueCheckout();
         }
@@ -60,6 +67,94 @@ class StripeController extends BaseController
             'metadata[admin_id]'                                   => $_SESSION['admin_id'],
             'metadata[type]'                                       => 'basique',
         ]);
+
+        $this->redirectToStripe($postData);
+    }
+
+    /**
+     * Checkout combiné : Abonnement Basique + Options Premium
+     */
+    private function createBasiqueWithPremiumCheckout()
+    {
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            $this->addErrorMessage('Token CSRF invalide.');
+            header('Location: ?page=settings&section=premium');
+            exit;
+        }
+
+        $allowed = [
+            'google_reviews'       => ['name' => 'Avis Google',              'amount' => 500],
+            'advanced_analytics'   => ['name' => 'Statistiques avancées',    'amount' => 500],
+            'online_booking'       => ['name' => 'Réservations en ligne',     'amount' => 800],
+            'delivery_integration' => ['name' => 'Intégration livraison',     'amount' => 700],
+        ];
+
+        $selected = array_filter((array)$_POST['features'], fn($f) => isset($allowed[$f]));
+        $selected = array_values($selected);
+
+        $stmt = $this->pdo->prepare("SELECT email FROM admins WHERE id = ?");
+        $stmt->execute([$_SESSION['admin_id']]);
+        $adminEmail = $stmt->fetchColumn() ?: '';
+
+        $successUrl = SITE_URL . '/?page=stripe-success&session_id={CHECKOUT_SESSION_ID}';
+        $cancelUrl  = SITE_URL . '/?page=settings&section=premium';
+
+        // Calculer le montant total (basique + premium)
+        $totalAmount = 900; // 9€ pour l'abonnement basique
+        foreach ($selected as $feature) {
+            $totalAmount += $allowed[$feature]['amount'];
+        }
+
+        // Créer les line items avec la nouvelle API Stripe
+        $lineItems = [
+            [
+                'price_data' => [
+                    'currency' => 'eur',
+                    'unit_amount' => 900,
+                    'product_data' => [
+                        'name' => 'Abonnement Basique MenuMiam',
+                        'description' => 'Site vitrine restaurant – accès complet',
+                    ],
+                ],
+                'quantity' => 1,
+            ]
+        ];
+
+        // Ajouter les options premium sélectionnées
+        foreach ($selected as $feature) {
+            $lineItems[] = [
+                'price_data' => [
+                    'currency' => 'eur',
+                    'unit_amount' => $allowed[$feature]['amount'],
+                    'product_data' => [
+                        'name' => $allowed[$feature]['name'],
+                        'description' => 'Option premium à la carte',
+                    ],
+                ],
+                'quantity' => 1,
+            ];
+        }
+
+        // Construire les données pour Stripe avec le bon format
+        $postData = [
+            'payment_method_types[0]' => 'card',
+            'mode' => 'payment',
+            'customer_email' => $adminEmail,
+            'success_url' => $successUrl,
+            'cancel_url' => $cancelUrl,
+            'metadata[type]' => 'basique_premium',
+            'metadata[admin_id]' => $_SESSION['admin_id'],
+            'metadata[features]' => json_encode($selected),
+        ];
+
+        // Ajouter les line items au bon format pour http_build_query
+        foreach ($lineItems as $index => $item) {
+            $postData["line_items[$index][price_data][currency]"] = $item['price_data']['currency'];
+            $postData["line_items[$index][price_data][unit_amount]"] = $item['price_data']['unit_amount'];
+            $postData["line_items[$index][price_data][product_data][name]"] = $item['price_data']['product_data']['name'];
+            $postData["line_items[$index][price_data][product_data][description]"] = $item['price_data']['product_data']['description'];
+            $postData["line_items[$index][quantity]"] = $item['quantity'];
+        }
 
         $this->redirectToStripe($postData);
     }
@@ -255,26 +350,33 @@ class StripeController extends BaseController
                 'Paiement confirmé ! Option(s) activée(s) : ' . $names . '.'
             );
             header('Location: ?page=settings&section=premium');
+        } elseif ($type === 'basique_premium') {
+            // Activer l'abonnement basique ET les options premium
+            $features = json_decode($session['metadata']['features'] ?? '[]', true);
+            $this->activateSubscription($_SESSION['admin_id'], $sessionId);
+            $this->activatePremiumFeatures($_SESSION['admin_id'], $features);
+            
+            $names = implode(', ', array_map(fn($f) => ucfirst(str_replace('_', ' ', $f)), $features));
+            $this->addSuccessMessage(
+                'Paiement confirmé ! Votre abonnement Basique est actif' . 
+                ($names ? ' et option(s) premium activée(s) : ' . $names . '.' : ' !')
+            );
+            header('Location: ?page=settings&section=premium');
         } else {
             $this->activateSubscription($_SESSION['admin_id'], $sessionId);
             $this->addSuccessMessage(
                 'Paiement confirmé ! Votre abonnement Basique est maintenant actif. Bienvenue sur MenuMiam !'
             );
-            header('Location: ?page=dashboard');
+            header('Location: ?page=settings&section=premium');
         }
         exit;
     }
 
-    // ------------------------------------------------------------------
-    // Helpers privés
-    // ------------------------------------------------------------------
-
     /**
-     * Effectue une requête vers l'API Stripe via cURL
-     *
+     * Requête générique à l'API Stripe
      * @param string $method   GET ou POST
      * @param string $endpoint Ex : /v1/checkout/sessions
-     * @param string $body     Données encodées pour POST (http_build_query)
+     * @param string|array $body     Données pour POST (array pour JSON, string pour form-urlencoded)
      * @return array|null      Réponse décodée ou null en cas d'erreur cURL
      */
     private function stripeRequest($method, $endpoint, $body = '')
@@ -284,9 +386,14 @@ class StripeController extends BaseController
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_USERPWD, STRIPE_SECRET_KEY . ':');
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/x-www-form-urlencoded',
-        ]);
+        
+        // Forcer application/x-www-form-urlencoded pour Stripe
+        $headers = ['Content-Type: application/x-www-form-urlencoded'];
+        if (is_array($body)) {
+            // Convertir array en form-urlencoded
+            $body = http_build_query($body);
+        }
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
         // Certificat CA — pointe vers le bundle WAMP si disponible, sinon désactive la vérif en dev
         $caBundlePaths = [
