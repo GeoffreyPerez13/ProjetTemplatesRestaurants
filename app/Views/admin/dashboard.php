@@ -17,7 +17,7 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
     <!-- En-tête avec titre et bouton paramètres -->
     <div class="dashboard-header">
         <h2>Tableau de bord</h2>
-        <a href="?page=settings" class="settings-icon-btn" title="Paramètres">
+        <a href="?page=settings&section=account" class="settings-icon-btn" title="Paramètres">
             <span class="settings-icon">⚙️</span>
         </a>
     </div>
@@ -191,7 +191,7 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
             </div>
 
             <div class="mobile-menu-footer">
-                <a href="?page=settings" class="settings-menu-link">
+                <a href="?page=settings&section=account" class="settings-menu-link">
                     <i class="fas fa-cog"></i> Paramètres du compte
                 </a>
             </div>

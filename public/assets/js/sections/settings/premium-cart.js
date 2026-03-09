@@ -24,6 +24,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Mettre à jour l'affichage du panier
     function updateCart() {
+        console.log('=== UPDATE CART CALLED ===');
+        console.log('selectedFeatures:', Array.from(selectedFeatures));
+        console.log('basiqueSelected:', basiqueSelected);
+        
         // Calculer le total d'abord
         let total = 0;
         let count = 0;
@@ -105,9 +109,88 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Mettre à jour l'affichage du panier premium
+        // Mettre à jour l'affichage du panier premium (uniquement les options premium)
         cartCount.textContent = count;
-        cartTotal.textContent = `${total}€`;
+        
+        // Pour le panier premium, n'afficher que le coût des options premium
+        const premiumOnlyTotal = basiqueSelected ? total - 9 : total;
+        cartTotal.textContent = `${premiumOnlyTotal}€`;
+        
+        // Ajouter un récapitulatif du coût total si l'utilisateur a déjà un abonnement basique
+        // Utiliser les variables déjà déclarées plus haut
+        
+        if (hasBasiqueSubscription && selectedFeatures.size > 0) {
+            // Ajouter ou mettre à jour le récapitulatif du coût total
+            let totalSummary = document.querySelector('.premium-total-summary');
+            if (!totalSummary) {
+                totalSummary = document.createElement('div');
+                totalSummary.className = 'premium-total-summary';
+                premiumCartBar.appendChild(totalSummary);
+            }
+            
+            // Adapter les couleurs selon le mode (light/dark) à chaque mise à jour
+            // Tester plusieurs méthodes de détection du mode dark
+            const isDarkMode1 = document.body.classList.contains('dark-mode');
+            const isDarkMode2 = document.documentElement.classList.contains('dark-mode');
+            const isDarkMode3 = getComputedStyle(document.body).getPropertyValue('--color-bg') === '#1c1917';
+            const isDarkMode4 = window.getComputedStyle(document.body).backgroundColor === 'rgb(28, 25, 23)';
+            
+            // Utiliser la première méthode qui fonctionne
+            const isDarkMode = isDarkMode1 || isDarkMode2 || isDarkMode3 || isDarkMode4;
+            
+            const textColor = isDarkMode ? '#ffffff' : '#1f2937';
+            const borderColor = isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)';
+            const totalColor = isDarkMode ? '#fbbf24' : '#d97706';
+            
+            // Utiliser la vraie détection du mode
+            const useTextColor = isDarkMode ? '#ffffff' : '#1f2937';
+            const useTotalColor = isDarkMode ? '#fbbf24' : '#d97706';
+            
+            // Debug pour vérifier la détection
+            console.log('=== DEBUG MODE ===');
+            console.log('body.className:', document.body.className);
+            console.log('html.className:', document.documentElement.className);
+            console.log('--color-bg:', getComputedStyle(document.body).getPropertyValue('--color-bg'));
+            console.log('body.backgroundColor:', window.getComputedStyle(document.body).backgroundColor);
+            console.log('isDarkMode1 (body):', isDarkMode1);
+            console.log('isDarkMode2 (html):', isDarkMode2);
+            console.log('isDarkMode3 (css var):', isDarkMode3);
+            console.log('isDarkMode4 (bg color):', isDarkMode4);
+            console.log('isDarkMode final:', isDarkMode);
+            console.log('useTextColor:', useTextColor);
+            console.log('useTotalColor:', useTotalColor);
+            
+            totalSummary.style.cssText = `
+                margin-top: 10px; 
+                padding-top: 10px; 
+                border-top: 1px solid ${borderColor}; 
+                font-size: 12px; 
+                color: ${textColor};
+            `;
+            // Utiliser les variables déjà déclarées plus haut
+            
+            // Générer le HTML avec les couleurs forcées pour TEST
+            totalSummary.innerHTML = `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span style="color: ${useTextColor};">Abonnement Basique:</span>
+                    <span style="margin-left: 20px; color: ${useTextColor};">9€/mois</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span style="color: ${useTextColor};">Options premium:</span>
+                    <span style="margin-left: 20px; color: ${useTextColor};">+${premiumOnlyTotal}€/mois</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold;">
+                    <span style="color: ${useTotalColor};">Total mensuel:</span>
+                    <span style="margin-left: 20px; color: ${useTotalColor};">${total}€/mois</span>
+                </div>
+            `;
+        } else {
+            // Supprimer le récapitulatif s'il existe et n'est pas nécessaire
+            const totalSummary = document.querySelector('.premium-total-summary');
+            if (totalSummary) {
+                totalSummary.remove();
+            }
+        }
 
         // Activer/désactiver le bouton premium - nécessite des options premium sélectionnées
         if (checkoutBtn) {
@@ -289,8 +372,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData();
             formData.append('csrf_token', this.querySelector('input[name="csrf_token"]').value);
             
-            // Ajouter l'abonnement basique si sélectionné
-            if (basiqueSelected) {
+            // Ajouter l'abonnement basique si sélectionné ET si l'utilisateur n'en a pas déjà un
+            const basiqueCard = document.querySelector('.basique-sub-card');
+            const hasBasiqueSubscription = basiqueCard && basiqueCard.dataset.basiqueActive === '1';
+            
+            if (basiqueSelected && !hasBasiqueSubscription) {
                 formData.append('include_basique', '1');
             }
             
@@ -382,4 +468,38 @@ document.addEventListener('DOMContentLoaded', function() {
     updatePremiumCardsState();
     
     updateCart();
+    
+    // Écouter les changements de mode (light/dark) pour mettre à jour les couleurs
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && 
+                (mutation.attributeName === 'class' || mutation.attributeName === 'style')) {
+                // Vérifier si le mode dark a changé
+                const wasDarkMode = mutation.oldValue ? mutation.oldValue.includes('dark-mode') : false;
+                const isDarkMode = document.body.classList.contains('dark-mode') || 
+                                 document.documentElement.classList.contains('dark-mode');
+                
+                if (wasDarkMode !== isDarkMode) {
+                    // Le mode a changé, mettre à jour le récapitulatif s'il existe
+                    const totalSummary = document.querySelector('.premium-total-summary');
+                    if (totalSummary && selectedFeatures.size > 0) {
+                        console.log('Mode dark/light changé, mise à jour du récapitulatif');
+                        updateCart();
+                    }
+                }
+            }
+        });
+    });
+    
+    // Observer les changements sur le body et html
+    observer.observe(document.body, { 
+        attributes: true, 
+        attributeOldValue: true,
+        attributeFilter: ['class', 'style']
+    });
+    observer.observe(document.documentElement, { 
+        attributes: true, 
+        attributeOldValue: true,
+        attributeFilter: ['class', 'style']
+    });
 });

@@ -28,6 +28,11 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
         <div class="settings-mobile-content" id="settings-mobile-content">
             <ul class="settings-mobile-list">
                 <li>
+                    <a href="?page=settings&section=account" class="<?= $current_section === 'account' ? 'active' : '' ?>">
+                        Informations du compte
+                    </a>
+                </li>
+                <li>
                     <a href="?page=settings&section=profile" class="<?= $current_section === 'profile' ? 'active' : '' ?>">
                         Profil utilisateur
                     </a>
@@ -35,11 +40,6 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 <li>
                     <a href="?page=settings&section=password" class="<?= $current_section === 'password' ? 'active' : '' ?>">
                         Mot de passe
-                    </a>
-                </li>
-                <li>
-                    <a href="?page=settings&section=account" class="<?= $current_section === 'account' ? 'active' : '' ?>">
-                        Informations du compte
                     </a>
                 </li>
                 <li>
@@ -68,6 +68,12 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
         <h3>Paramètres</h3>
         <ul class="settings-menu">
             <li>
+                <a href="?page=settings&section=account"
+                    class="<?= $current_section === 'account' ? 'active' : '' ?>">
+                    Informations du compte
+                </a>
+            </li>
+            <li>
                 <a href="?page=settings&section=profile"
                     class="<?= $current_section === 'profile' ? 'active' : '' ?>">
                     Profil utilisateur
@@ -77,12 +83,6 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 <a href="?page=settings&section=password"
                     class="<?= $current_section === 'password' ? 'active' : '' ?>">
                     Mot de passe
-                </a>
-            </li>
-            <li>
-                <a href="?page=settings&section=account"
-                    class="<?= $current_section === 'account' ? 'active' : '' ?>">
-                    Informations du compte
                 </a>
             </li>
             <li>
@@ -689,7 +689,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                         
                         <div class="combined-cart-actions">
                             <button type="submit" class="btn btn-primary combined-checkout-btn" id="combined-checkout-btn" disabled>
-                                <i class="fab fa-stripe-s"></i> Payer et activer tout
+                                <i class="fab fa-stripe-s"></i> Payer et activer
                             </button>
                             <button type="button" class="btn btn-outline" id="clear-combined-cart">
                                 <i class="fas fa-trash"></i> Vider le panier
@@ -851,32 +851,48 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                         color: #fbbf24 !important;
                     }
                     
+                    /* Styles pour le mode light */
+                    .subscription-bulk-actions {
+                        background: #ffffff !important;
+                        border: 1px solid #d1d5db !important;
+                        border-radius: 6px !important;
+                    }
+                    
+                    .subscription-bulk-actions * {
+                        color: #1f2937 !important;
+                    }
+                    
                     .subscriptions-table {
-                        background: #1f2937 !important;
+                        background: #ffffff !important;
+                        border: 1px solid #d1d5db !important;
+                        border-radius: 6px !important;
                     }
                     
                     .subscriptions-table thead {
-                        background: #111827 !important;
+                        background: #f9fafb !important;
+                        border-bottom: 1px solid #d1d5db !important;
                     }
                     
                     .subscriptions-table tbody tr {
-                        background: #1f2937 !important;
+                        background: #ffffff !important;
+                        border-bottom: 1px solid #f1f5f9 !important;
                     }
                     
                     .subscriptions-table tbody tr:hover {
-                        background: #374151 !important;
+                        background: #f8fafc !important;
                     }
                     
                     .subscriptions-table td {
                         background: transparent !important;
-                        color: #e5e7eb !important;
-                        border-color: #374151 !important;
+                        color: #1f2937 !important;
+                        border-bottom-color: #f1f5f9 !important;
                     }
                     
                     .subscriptions-table th {
                         background: transparent !important;
-                        color: #f3f4f6 !important;
-                        border-color: #374151 !important;
+                        color: #1f2937 !important;
+                        border-bottom-color: #d1d5db !important;
+                        font-weight: 600 !important;
                     }
                     
                     /* Target specific elements in dark mode */
@@ -1147,5 +1163,46 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
         <?php endif; ?>
     </div>
 </div>
+
+<?php 
+// Afficher les messages de succès stockés dans sessionStorage (pour la résiliation AJAX)
+if ($current_section === 'subscriptions'): 
+?>
+<script>
+// Afficher le message de succès stocké dans sessionStorage
+document.addEventListener('DOMContentLoaded', function() {
+    const successMessage = sessionStorage.getItem('subscriptionSuccessMessage');
+    if (successMessage) {
+        // Créer et afficher le message de succès comme sur le reste du site
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show';
+        alertDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
+        alertDiv.innerHTML = `
+            <i class="fas fa-check-circle"></i> ${successMessage}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        // Supprimer le message du sessionStorage
+        sessionStorage.removeItem('subscriptionSuccessMessage');
+        
+        // Auto-supprimer l'alerte après 5 secondes
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        }, 5000);
+        
+        // Fermeture manuelle
+        alertDiv.querySelector('.btn-close').addEventListener('click', function() {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        });
+    }
+});
+</script>
+<?php endif; ?>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

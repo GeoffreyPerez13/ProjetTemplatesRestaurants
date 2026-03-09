@@ -227,14 +227,31 @@ class StripeController extends BaseController
         $this->requireLogin();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            // Pour les requêtes AJAX, retourner JSON
+            if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Méthode non autorisée']);
+                exit;
+            }
             header('Location: ?page=settings&section=premium');
             exit;
         }
 
         if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            // Pour les requêtes AJAX, retourner JSON
+            if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Token CSRF invalide']);
+                exit;
+            }
             $this->addErrorMessage('Token CSRF invalide.');
             header('Location: ?page=settings&section=premium');
             exit;
+        }
+
+        // Gérer la résiliation groupée
+        if (isset($_POST['bulk_cancel']) && $_POST['bulk_cancel'] === '1') {
+            return $this->cancelBulkSubscriptions();
         }
 
         $type = $_POST['type'] ?? '';
@@ -288,6 +305,103 @@ class StripeController extends BaseController
             header('Location: ?page=settings&section=premium');
         }
         exit;
+    }
+
+    /**
+     * Gère la résiliation groupée d'abonnements
+     */
+    private function cancelBulkSubscriptions()
+    {
+        try {
+            $this->pdo->beginTransaction();
+
+            $cancelledBasique = false;
+            $cancelledPremium = [];
+
+            // Vérifier si l'abonnement basique doit être résilié
+            if (isset($_POST['basique_cancel']) && $_POST['basique_cancel'] === '1') {
+                $stmt = $this->pdo->prepare(
+                    "UPDATE client_subscriptions SET status = 'cancelled' WHERE admin_id = ?"
+                );
+                $stmt->execute([$_SESSION['admin_id']]);
+                $cancelledBasique = true;
+
+                // Résilier automatiquement toutes les options premium
+                require_once __DIR__ . '/../Models/PremiumFeature.php';
+                $pf = new PremiumFeature($this->pdo);
+                foreach (array_keys($pf->getAvailableFeatures()) as $key) {
+                    $pf->disable($_SESSION['admin_id'], $key);
+                    $feature = $pf->getAvailableFeatures()[$key];
+                    $cancelledPremium[] = $feature['name'] ?? $key;
+                }
+            }
+
+            // Résilier les options premium individuelles
+            foreach ($_POST as $key => $value) {
+                if (strpos($key, 'premium_cancel_') === 0 && $value) {
+                    $featureName = $value;
+                    
+                    // Trouver la clé de la fonctionnalité à partir du nom
+                    require_once __DIR__ . '/../Models/PremiumFeature.php';
+                    $pf = new PremiumFeature($this->pdo);
+                    $availableFeatures = $pf->getAvailableFeatures();
+                    
+                    $featureKey = null;
+                    foreach ($availableFeatures as $key => $feature) {
+                        if ($feature['name'] === $featureName) {
+                            $featureKey = $key;
+                            break;
+                        }
+                    }
+                    
+                    if ($featureKey) {
+                        $pf->disable($_SESSION['admin_id'], $featureKey);
+                        $cancelledPremium[] = $featureName;
+                    }
+                }
+            }
+
+            $this->pdo->commit();
+
+            // Préparer le message de succès
+            $message = '';
+            if ($cancelledBasique) {
+                $message = 'Votre abonnement Basique';
+                if (!empty($cancelledPremium)) {
+                    $message .= ' et les options premium suivantes ont été résiliés : ' . implode(', ', $cancelledPremium);
+                } else {
+                    $message .= ' a été résilié.';
+                }
+            } elseif (!empty($cancelledPremium)) {
+                $message = 'Les options premium suivantes ont été résiliées : ' . implode(', ', $cancelledPremium);
+            } else {
+                $message = 'Aucun abonnement n\'a été résilié.';
+            }
+
+            // Ajouter le message de succès et rediriger
+            $this->addSuccessMessage($message);
+            header('Location: ?page=settings&section=subscriptions');
+            exit;
+
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            error_log('[Cancel Bulk] Error: ' . $e->getMessage());
+            
+            // Pour AJAX, retourner l'erreur JSON
+            if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Erreur lors de la résiliation groupée. Veuillez réessayer.'
+                ]);
+                exit;
+            }
+            
+            // Pour les requêtes normales, utiliser le système de messages du site
+            $this->addErrorMessage('Erreur lors de la résiliation groupée. Veuillez réessayer.');
+            header('Location: ?page=settings&section=subscriptions');
+            exit;
+        }
     }
 
     /**

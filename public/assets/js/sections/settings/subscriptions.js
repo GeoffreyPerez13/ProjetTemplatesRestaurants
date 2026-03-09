@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 cancelButtonText: 'Résilier',
                 reverseButtons: true
             }).then((result) => {
-                if (result.isConfirmed) {
+                if (result.isDismissed && result.dismiss === Swal.DismissReason.cancel) {
                     cancelBulkSubscriptions(selectedData);
                 }
             });
@@ -110,30 +110,32 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('csrf_token', csrfToken);
         formData.append('bulk_cancel', '1');
         
-        subscriptions.forEach((sub, index) => {
+        subscriptions.forEach((sub) => {
             if (sub.type === 'basique') {
                 formData.append('basique_cancel', '1');
             } else {
-                formData.append(`premium_cancel_${index}`, sub.name);
+                formData.append(`premium_cancel_`, sub.name);
             }
         });
 
         // Envoyer la requête
         fetch('?page=cancel-subscription', {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            return response.json();
+        })
         .then(data => {
+            console.log('Response data:', data);
             if (data.success) {
-                Swal.fire({
-                    title: 'Résiliation réussie',
-                    text: data.message || 'Vos abonnements ont été résiliés avec succès.',
-                    icon: 'success',
-                    confirmButtonColor: '#10b981'
-                }).then(() => {
-                    location.reload();
-                });
+                // Stocker le message de succès dans sessionStorage pour l'afficher après le rechargement
+                sessionStorage.setItem('subscriptionSuccessMessage', data.message || 'Vos abonnements ont été résiliés avec succès.');
+                location.reload();
             } else {
                 Swal.fire({
                     title: 'Erreur',
@@ -180,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 cancelButtonText: 'Résilier',
                 reverseButtons: true
             }).then((result) => {
-                if (result.isConfirmed) {
+                if (result.isDismissed && result.dismiss === Swal.DismissReason.cancel) {
                     this.submit();
                 }
             });
