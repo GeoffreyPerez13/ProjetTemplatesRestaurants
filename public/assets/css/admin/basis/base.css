@@ -231,6 +231,18 @@ html.dark-mode .dark-mode-toggle-floating .fa-sun {
     padding-top: 60px;
   }
   
+  /* Maintenir le padding pour tous les formulaires */
+  .login-container,
+  .dashboard,
+  form,
+  .category-block,
+  .reset-password-container,
+  .register-container {
+    padding-left: var(--spacing-xl);
+    padding-right: var(--spacing-xl);
+    max-width: 850px;
+  }
+  
   .message-success,
   .message-error {
     padding: var(--spacing-sm) var(--spacing-md);

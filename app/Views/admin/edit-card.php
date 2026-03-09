@@ -206,23 +206,33 @@ require __DIR__ . '/../partials/header.php';
                                     <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
                                 <?php endforeach; ?>
                             </select>
-                            <div class="custom-category-select" id="custom-category-select">
-                                <button type="button" class="custom-category-toggle" id="custom-category-toggle" aria-expanded="false">
-                                    <span class="custom-category-value">
-                                        <i class="fas fa-layer-group"></i>
-                                        Sélectionnez une catégorie
-                                    </span>
-                                    <i class="fas fa-chevron-down custom-category-chevron"></i>
-                                </button>
-                                <div class="custom-category-dropdown" id="custom-category-dropdown">
-                                    <?php foreach ($categories as $cat): ?>
-                                        <div class="custom-category-option" data-value="<?= $cat['id'] ?>">
-                                            <i class="fas <?= CategoryIconHelper::getIcon($cat['name']) ?>"></i>
-                                            <?= htmlspecialchars($cat['name']) ?>
-                                        </div>
-                                    <?php endforeach; ?>
+                            <?php if (empty($categories)): ?>
+                                <div class="custom-category-select" id="custom-category-select">
+                                    <div class="no-categories-message">
+                                        <i class="fas fa-info-circle"></i>
+                                        Aucune catégorie n'a encore été créée. 
+                                        <a href="?page=edit-card#categories-section">Créer une catégorie d'abord</a>
+                                    </div>
                                 </div>
-                            </div>
+                            <?php else: ?>
+                                <div class="custom-category-select" id="custom-category-select">
+                                    <button type="button" class="custom-category-toggle" id="custom-category-toggle" aria-expanded="false">
+                                        <span class="custom-category-value">
+                                            <i class="fas fa-layer-group"></i>
+                                            Sélectionnez une catégorie
+                                        </span>
+                                        <i class="fas fa-chevron-down custom-category-chevron"></i>
+                                    </button>
+                                    <div class="custom-category-dropdown" id="custom-category-dropdown">
+                                        <?php foreach ($categories as $cat): ?>
+                                            <div class="custom-category-option" data-value="<?= $cat['id'] ?>">
+                                                <i class="fas <?= CategoryIconHelper::getIcon($cat['name']) ?>"></i>
+                                                <?= htmlspecialchars($cat['name']) ?>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                             <p class="custom-category-error" id="custom-category-error" style="display:none;">
                                 <i class="fas fa-exclamation-circle"></i> Veuillez sélectionner une catégorie
                             </p>

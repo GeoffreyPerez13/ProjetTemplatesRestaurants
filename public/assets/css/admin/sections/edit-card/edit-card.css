@@ -555,11 +555,17 @@
   background: var(--color-bg-alt);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: 4px 12px;
+  padding: 8px 16px;
   font-size: 0.85rem;
   cursor: pointer;
   transition: background var(--transition-fast);
   color: var(--color-text-light);
+  min-height: 40px;
+  min-width: 80px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .btn-allergenes-toggle:hover {
@@ -567,7 +573,7 @@
 }
 
 .btn-allergenes-toggle i {
-  margin-right: 4px;
+  margin-right: 0;
 }
 
 .allergenes-grid {
@@ -581,14 +587,15 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 12px 16px;
   background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--transition-fast);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   line-height: 1.2;
+  min-height: 48px;
 }
 
 .allergene-checkbox:hover {
@@ -599,8 +606,8 @@
 
 .allergene-checkbox input[type="checkbox"] {
   margin: 0;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
 }
 
@@ -625,8 +632,8 @@
 .dish-edit-container .allergene-checkbox input[type="checkbox"],
 .allergenes-section .allergene-checkbox input[type="checkbox"] {
   margin: 0 !important;
-  width: 16px !important;
-  height: 16px !important;
+  width: 20px !important;
+  height: 20px !important;
   flex-shrink: 0 !important;
 }
 
@@ -800,6 +807,11 @@
   .allergenes-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* Exception pour le bouton allergenes toggle */
+  .btn-allergens-toggle {
+    width: 100% !important;
+  }
 }
 
 @media (max-width: 600px) {
@@ -813,6 +825,11 @@
     width: auto;
     min-width: 150px;
     flex: 1;
+  }
+
+  /* Exception pour le bouton "changer mode" */
+  .mode-selector-form .btn {
+    width: 100%;
   }
 
   .category-buttons,
@@ -899,4 +916,62 @@
   .allergenes-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==================== MESSAGE AUCUNE CATÉGORIE ==================== */
+.no-categories-message {
+  background: var(--color-bg-warm);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.no-categories-message i {
+  color: var(--color-warning);
+  flex-shrink: 0;
+}
+
+.no-categories-message a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.no-categories-message a:hover {
+  text-decoration: underline;
+  color: var(--color-primary-dark);
+}
+
+/* ==================== SCROLL POUR ALLERGENES ACCORDÉON ==================== */
+.allergenes-accordion-content {
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+}
+
+.allergenes-accordion-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.allergenes-accordion-content::-webkit-scrollbar-track {
+  background: var(--color-bg-alt);
+  border-radius: 4px;
+}
+
+.allergenes-accordion-content::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+  transition: background var(--transition-fast);
+}
+
+.allergenes-accordion-content::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-light);
 }
