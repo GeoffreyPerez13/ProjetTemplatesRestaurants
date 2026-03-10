@@ -298,8 +298,8 @@
   display: flex;
   gap: 15px;
   padding-top: var(--spacing-lg);
-  border-top: 1px solid var(--color-border);
   margin-left: 20px;
+  margin-right: 20px;
 }
 
 .options-actions .btn {

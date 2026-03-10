@@ -248,8 +248,23 @@
   }
 
   .calendar-header {
-    flex-direction: column;
-    gap: 15px;
+    /* Garder la structure horizontale avec flèches à gauche et à droite */
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .calendar-header .btn.small {
+    padding: 12px 8px; /* Plus haut, moins large */
+    min-width: 40px; /* Largeur fixe réduite */
+    height: 44px; /* Hauteur fixe augmentée */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9em;
+  }
+
+  .calendar-header h3 {
+    font-size: 1.1rem; /* Légèrement plus petit pour mobile */
   }
 
   .calendar-grid {

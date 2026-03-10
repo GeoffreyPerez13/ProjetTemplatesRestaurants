@@ -25,11 +25,14 @@ $displayDir = __DIR__ . '/display/';
         <!-- Bandeau de fermeture exceptionnelle -->
         <?php if (!empty($todayClosureDate)): ?>
             <link rel="stylesheet" href="/assets/css/display/closure-banner.css">
-            <div class="closure-banner">
+            <div class="closure-banner" id="closure-banner">
                 <div class="closure-banner-text">
                     <i class="fas fa-calendar-times"></i>
                     <span>Fermeture exceptionnelle aujourd'hui</span>
                     <span class="closure-banner-date"><?= date('d/m/Y', strtotime($todayClosureDate)) ?></span>
+                </div>
+                <div class="closure-banner-close" id="closure-banner-close">
+                    <i class="fas fa-times"></i>
                 </div>
             </div>
         <?php endif; ?>
@@ -57,6 +60,9 @@ $displayDir = __DIR__ . '/display/';
         <script src="/assets/js/display/lightbox.js"></script>
         <script src="/assets/js/display/cookies.js"></script>
         <script src="/assets/js/display/scroll-arrows.js"></script>
+        <?php if (!empty($todayClosureDate)): ?>
+            <script src="/assets/js/display/closure-banner.js"></script>
+        <?php endif; ?>
     <?php endif; ?>
 </body>
 

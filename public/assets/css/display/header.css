@@ -6,8 +6,13 @@ header {
   border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: 999;
   transition: box-shadow var(--transition-normal);
+}
+
+/* Ajuster le header quand la bannière de fermeture est présente */
+body:has(.closure-banner:not(.hidden)) header {
+  top: 60px; /* Hauteur approximative de la bannière de fermeture */
 }
 
 .header-content {
