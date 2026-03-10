@@ -230,11 +230,25 @@ document.addEventListener('DOMContentLoaded', function() {
     function clearAllDates() {
         if (selectedDates.size === 0) return;
         
-        if (confirm('Êtes-vous sûr de vouloir effacer toutes les dates de fermeture ?')) {
-            selectedDates.clear();
-            updateSelectedDatesList();
-            renderCalendar();
-        }
+        Swal.fire({
+            title: 'Effacer toutes les dates ?',
+            text: 'Êtes-vous sûr de vouloir effacer toutes les dates de fermeture exceptionnelles ? Cette action est irréversible.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Oui, effacer tout',
+            cancelButtonText: 'Annuler'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                selectedDates.clear();
+                updateSelectedDatesList();
+                renderCalendar();
+                
+                // Afficher un message de succès en haut de page
+                showSuccessMessage('Toutes les dates de fermeture ont été effacées avec succès.');
+            }
+        });
     }
     
     /**
@@ -280,17 +294,41 @@ document.addEventListener('DOMContentLoaded', function() {
      * Parse une date depuis le format de stockage
      */
     function parseDateFromStorage(dateString) {
-        const [year, month, day] = dateString.split('-').map(Number);
-        return new Date(year, month - 1, day);
+        return `${day}/${month}/${year}`;
     }
     
     /**
-     * Formate une date pour l'affichage (DD/MM/YYYY)
+     * Affiche un message de succès dans la zone des messages de la page settings
      */
-    function formatDateForDisplay(date) {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
+    function showSuccessMessage(message) {
+        // Trouver la zone des messages dans settings-content
+        const settingsContent = document.querySelector('.settings-content');
+        if (!settingsContent) return;
+        
+        // Supprimer les messages existants
+        const existingSuccess = settingsContent.querySelector('.message-success');
+        const existingError = settingsContent.querySelector('.message-error');
+        if (existingSuccess) existingSuccess.remove();
+        if (existingError) existingError.remove();
+        
+        // Créer le message de succès
+        const messageDiv = document.createElement('p');
+        messageDiv.className = 'message-success';
+        messageDiv.textContent = message;
+        
+        // Insérer après le h1 ou au début du settings-content
+        const h1 = settingsContent.querySelector('h1');
+        if (h1) {
+            h1.insertAdjacentElement('afterend', messageDiv);
+        } else {
+            settingsContent.insertBefore(messageDiv, settingsContent.firstChild);
+        }
+        
+        // Auto-suppression après 4 secondes
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.parentNode.removeChild(messageDiv);
+            }
+        }, 4000);
     }
 });

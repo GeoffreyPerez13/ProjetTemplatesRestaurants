@@ -295,108 +295,136 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
         <?php elseif ($current_section === 'options'): ?>
             <!-- Section Options -->
             <link rel="stylesheet" href="/assets/css/admin/sections/settings/closure-dates.css">
-            <div class="settings-section" id="options-form">
+            <div class="settings-section" id="options-section">
                 <h2>Options du compte</h2>
                 <p class="section-description">Configurez les paramètres de votre compte et de votre site.</p>
 
-                <div class="options-list">
-                    <?php foreach (['site_online', 'mail_reminder', 'email_notifications'] as $option): ?>
-                        <div class="option-item">
-                            <div class="option-header">
-                                <span class="option-label">
-                                    <?=
-                                    $option === 'site_online' ? 'Afficher le site en ligne' : ($option === 'mail_reminder' ? 'Rappel mail pour actualisation' :
-                                        'Notifications par email')
-                                    ?>
-                                </span>
-                                <div class="option-tooltip">
-                                    <span class="tooltip-icon" title="Plus d'infos">i</span>
-                                    <div class="tooltip-content">
-                                        <p>
+                <!-- Boutons de contrôle global des accordéons -->
+                <div class="global-accordion-controls">
+                    <button type="button" id="expand-options-accordions" class="btn small">
+                        <i class="fas fa-expand-alt"></i> Tout ouvrir
+                    </button>
+                    <button type="button" id="collapse-options-accordions" class="btn small">
+                        <i class="fas fa-compress-alt"></i> Tout fermer
+                    </button>
+                </div>
+
+                <!-- Accordéon Options du compte -->
+                <div class="accordion-section">
+                    <div class="accordion-header">
+                        <h3><i class="fas fa-cog"></i> Options du compte</h3>
+                        <button type="button" class="accordion-toggle" data-target="account-options-content">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+
+                    <div id="account-options-content" class="accordion-content expanded prevent-auto-close">
+                        <div class="options-list">
+                            <?php foreach (['site_online', 'mail_reminder', 'email_notifications'] as $option): ?>
+                                <div class="option-item">
+                                    <div class="option-header">
+                                        <span class="option-label">
                                             <?=
-                                            $option === 'site_online' ? 'Activez cette option pour rendre votre site visible au public. Si désactivé, votre site sera en maintenance.' : ($option === 'mail_reminder' ? 'Recevez un email de rappel tous les mois pour mettre à jour votre carte. Assurez-vous que vos plats et prix sont à jour.' :
-                                                'Recevez des notifications par email pour les mises à jour importantes et les activités sur votre compte.')
+                                            $option === 'site_online' ? 'Afficher le site en ligne' : ($option === 'mail_reminder' ? 'Rappel mail pour actualisation' :
+                                                'Notifications par email')
                                             ?>
-                                        </p>
+                                        </span>
+                                        <div class="option-tooltip">
+                                            <span class="tooltip-icon" title="Plus d'infos">i</span>
+                                            <div class="tooltip-content">
+                                                <p>
+                                                    <?=
+                                                    $option === 'site_online' ? 'Activez cette option pour rendre votre site visible au public. Si désactivé, votre site sera en maintenance.' : ($option === 'mail_reminder' ? 'Recevez un email de rappel tous les mois pour mettre à jour votre carte. Assurez-vous que vos plats et prix sont à jour.' :
+                                                        'Recevez des notifications par email pour les mises à jour importantes et les activités sur votre compte.')
+                                                    ?>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="option-buttons">
+                                        <button type="button"
+                                            class="option-btn <?= ($options[$option] ?? '1') === '1' ? 'option-active' : '' ?>"
+                                            data-option="<?= $option ?>"
+                                            data-value="1">
+                                            Actif
+                                        </button>
+                                        <button type="button"
+                                            class="option-btn <?= ($options[$option] ?? '1') === '0' ? 'option-active' : '' ?>"
+                                            data-option="<?= $option ?>"
+                                            data-value="0">
+                                            Non actif
+                                        </button>
+                                    </div>
+                                    <div class="option-description">
+                                        <small>
+                                            <?=
+                                            $option === 'site_online' ? 'Contrôle la visibilité publique de votre site.' : ($option === 'mail_reminder' ? 'Recevez des rappels mensuels pour mettre à jour votre carte.' :
+                                                'Activez les notifications importantes par email.')
+                                            ?>
+                                        </small>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="option-buttons">
-                                <button type="button"
-                                    class="option-btn <?= ($options[$option] ?? '1') === '1' ? 'option-active' : '' ?>"
-                                    data-option="<?= $option ?>"
-                                    data-value="1">
-                                    Actif
-                                </button>
-                                <button type="button"
-                                    class="option-btn <?= ($options[$option] ?? '1') === '0' ? 'option-active' : '' ?>"
-                                    data-option="<?= $option ?>"
-                                    data-value="0">
-                                    Non actif
-                                </button>
-                            </div>
-                            <div class="option-description">
-                                <small>
-                                    <?=
-                                    $option === 'site_online' ? 'Contrôle la visibilité publique de votre site.' : ($option === 'mail_reminder' ? 'Recevez des rappels mensuels pour mettre à jour votre carte.' :
-                                        'Activez les notifications importantes par email.')
-                                    ?>
-                                </small>
-                            </div>
+                            <?php endforeach; ?>
                         </div>
-                    <?php endforeach; ?>
+
+                        <div class="options-actions">
+                            <button type="button" class="btn" id="save-all-options">Enregistrer toutes les options</button>
+                            <button type="button" class="btn secondary" id="reset-options">Restaurer les valeurs par défaut</button>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="options-actions">
-                    <button type="button" class="btn" id="save-all-options">Enregistrer toutes les options</button>
-                    <button type="button" class="btn secondary" id="reset-options">Restaurer les valeurs par défaut</button>
-                </div>
-            </div>
-
-            <!-- Section Fermetures Exceptionnelles -->
-            <div class="settings-section" id="closure-dates-section">
-                <h2>Fermetures Exceptionnelles</h2>
-                <p class="section-description">Programmez des dates de fermeture exceptionnelles. Un bandeau d'information s'affichera automatiquement pour vos visiteurs les jours concernés.</p>
-
-                <div class="closure-dates-container">
-                    <div class="closure-dates-header">
-                        <div class="closure-dates-info">
-                            <i class="fas fa-calendar-times"></i>
-                            <span>Cliquez sur les dates dans le calendrier pour ajouter des fermetures exceptionnelles</span>
-                        </div>
-                        <button type="button" class="btn small" id="clear-all-closure-dates">
-                            <i class="fas fa-trash"></i> Tout effacer
+                <!-- Accordéon Fermetures Exceptionnelles -->
+                <div class="accordion-section">
+                    <div class="accordion-header">
+                        <h3><i class="fas fa-calendar-times"></i> Fermetures Exceptionnelles</h3>
+                        <button type="button" class="accordion-toggle" data-target="closure-dates-content">
+                            <i class="fas fa-chevron-down"></i>
                         </button>
                     </div>
 
-                    <!-- Calendrier -->
-                    <div class="closure-calendar-container">
-                        <div class="calendar-header">
-                            <button type="button" class="btn small" id="prev-month">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <h3 id="current-month-year">Mars 2026</h3>
-                            <button type="button" class="btn small" id="next-month">
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
-                        </div>
-                        <div class="calendar-grid" id="closure-calendar">
-                            <!-- Généré par JavaScript -->
-                        </div>
-                    </div>
+                    <div id="closure-dates-content" class="accordion-content collapsed">
+                        <div class="closure-dates-container">
+                            <div class="closure-dates-header">
+                                <div class="closure-dates-info">
+                                    <i class="fas fa-calendar-times"></i>
+                                    <span>Cliquez sur les dates dans le calendrier pour ajouter des fermetures exceptionnelles</span>
+                                </div>
+                                <button type="button" class="btn small" id="clear-all-closure-dates">
+                                    <i class="fas fa-trash"></i> Tout effacer
+                                </button>
+                            </div>
 
-                    <!-- Liste des dates sélectionnées -->
-                    <div class="selected-dates-container">
-                        <h4>Dates de fermeture programmées (<span id="selected-count">0</span>)</h4>
-                        <div class="selected-dates-list" id="selected-dates-list">
-                            <p class="no-dates">Aucune date de fermeture programmée</p>
-                        </div>
-                    </div>
+                            <!-- Calendrier -->
+                            <div class="closure-calendar-container">
+                                <div class="calendar-header">
+                                    <button type="button" class="btn small" id="prev-month">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <h3 id="current-month-year">Mars 2026</h3>
+                                    <button type="button" class="btn small" id="next-month">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                                <div class="calendar-grid" id="closure-calendar">
+                                    <!-- Généré par JavaScript -->
+                                </div>
+                            </div>
 
-                    <div class="closure-dates-actions">
-                        <button type="button" class="btn primary" id="save-closure-dates">
-                            <i class="fas fa-save"></i> Enregistrer les dates
-                        </button>
+                            <!-- Liste des dates sélectionnées -->
+                            <div class="selected-dates-container">
+                                <h4>Dates de fermeture programmées (<span id="selected-count">0</span>)</h4>
+                                <div class="selected-dates-list" id="selected-dates-list">
+                                    <p class="no-dates">Aucune date de fermeture programmée</p>
+                                </div>
+                            </div>
+
+                            <div class="closure-dates-actions">
+                                <button type="button" class="btn primary" id="save-closure-dates">
+                                    <i class="fas fa-save"></i> Enregistrer les dates
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

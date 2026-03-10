@@ -172,11 +172,8 @@
 
 /* Styles pour les options */
 .options-list {
-  background: var(--color-bg-alt);
-  border-radius: var(--radius-md);
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-xl);
-  border: 1px solid var(--color-border);
 }
 
 .option-item {
@@ -302,6 +299,7 @@
   gap: 15px;
   padding-top: var(--spacing-lg);
   border-top: 1px solid var(--color-border);
+  margin-left: 20px;
 }
 
 .options-actions .btn {

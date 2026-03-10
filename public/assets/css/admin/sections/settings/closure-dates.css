@@ -2,21 +2,26 @@
 
 .closure-dates-container {
   background: var(--color-bg);
-  border-radius: var(--radius-lg);
   padding: 25px;
-  border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
 }
 
 .closure-dates-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 20px;
   padding: 15px;
   background: var(--color-bg-warm);
   border-radius: var(--radius-md);
   border-left: 4px solid var(--color-primary);
+}
+
+.closure-dates-header .btn.small {
+  flex-shrink: 0;  /* Empêche le bouton de rétrécir */
+  white-space: nowrap;  /* Empêche le texte du bouton de se casser */
+  margin-top: 0;
+  align-self: flex-start;  /* Aligne le bouton en haut */
 }
 
 .closure-dates-info {
@@ -30,6 +35,21 @@
   color: var(--color-primary);
   font-size: 1.1em;
 }
+
+/* Responsive pour les écrans plus petits */
+@media (max-width: 1000px) {
+  .closure-dates-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .closure-dates-header .btn.small {
+    align-self: center;
+    margin-top: 15px;
+  }
+}
+
 
 /* Calendrier */
 .closure-calendar-container {

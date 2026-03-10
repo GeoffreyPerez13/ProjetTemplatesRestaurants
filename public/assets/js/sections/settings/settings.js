@@ -549,6 +549,50 @@ document.addEventListener("DOMContentLoaded", function () {
   // Gestion du délai de défilement pour les boutons haut/bas
   // (assurez-vous que scroll-buttons.js est inclus)
 
+  // ==================== GESTION DES ACCORDÉONS OPTIONS ====================
+  const expandOptionsBtn = document.getElementById("expand-options-accordions");
+  const collapseOptionsBtn = document.getElementById("collapse-options-accordions");
+
+  if (expandOptionsBtn && collapseOptionsBtn) {
+    expandOptionsBtn.addEventListener("click", function () {
+      // Ouvrir tous les accordéons dans la section options
+      const optionsAccordions = document.querySelectorAll("#options-section .accordion-content");
+      optionsAccordions.forEach(function (content) {
+        content.classList.remove("collapsed");
+        content.classList.add("expanded");
+        
+        // Mettre à jour les boutons toggle
+        const toggle = content.previousElementSibling?.querySelector(".accordion-toggle");
+        if (toggle) {
+          const icon = toggle.querySelector("i");
+          if (icon) {
+            icon.classList.remove("fa-chevron-down");
+            icon.classList.add("fa-chevron-up");
+          }
+        }
+      });
+    });
+
+    collapseOptionsBtn.addEventListener("click", function () {
+      // Fermer tous les accordéons dans la section options
+      const optionsAccordions = document.querySelectorAll("#options-section .accordion-content");
+      optionsAccordions.forEach(function (content) {
+        content.classList.remove("expanded");
+        content.classList.add("collapsed");
+        
+        // Mettre à jour les boutons toggle
+        const toggle = content.previousElementSibling?.querySelector(".accordion-toggle");
+        if (toggle) {
+          const icon = toggle.querySelector("i");
+          if (icon) {
+            icon.classList.remove("fa-chevron-up");
+            icon.classList.add("fa-chevron-down");
+          }
+        }
+      });
+    });
+  }
+
   // Vérifier si scroll-buttons.js est chargé
   if (typeof window.scrollToWithDelay === "undefined") {
     // Définir une fonction de repli si scroll-buttons.js n'est pas chargé
