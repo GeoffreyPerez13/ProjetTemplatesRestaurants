@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../Helpers/Validator.php';
+require_once __DIR__ . '/../Models/OptionModel.php';
+require_once __DIR__ . '/../Models/Admin.php';
+require_once __DIR__ . '/../Models/PremiumFeature.php';
 
 /**
  * Contrôleur des paramètres de l'administrateur
@@ -69,6 +72,45 @@ class SettingsController extends BaseController
         $success_message = $messages['success_message'];
         $error_message = $messages['error_message'];
 
+        // Vérifier les options premium de l'utilisateur
+        $premiumFeatureStatuses = [];
+        $restaurantName = $user['restaurant_name'] ?? '';
+        $slug = null;
+        try {
+            $pf = new PremiumFeature($this->pdo);
+            $adminModel = new Admin($this->pdo);
+            $admin = $adminModel->findById($_SESSION['admin_id']);
+            $isSuperAdmin = $admin && ($admin->role === 'SUPER_ADMIN');
+
+            $featureKeys = ['google_reviews', 'advanced_analytics', 'online_booking', 'delivery_integration'];
+            foreach ($featureKeys as $key) {
+                $premiumFeatureStatuses[$key] = $isSuperAdmin || $pf->isEnabled($_SESSION['admin_id'], $key);
+            }
+
+            if ($admin && $admin->restaurant_id) {
+                $stmtSlug = $this->pdo->prepare("SELECT slug FROM restaurants WHERE id = ?");
+                $stmtSlug->execute([$admin->restaurant_id]);
+                $slug = $stmtSlug->fetchColumn() ?: null;
+            }
+        } catch (Exception $e) {
+            foreach (['google_reviews', 'advanced_analytics', 'online_booking', 'delivery_integration'] as $key) {
+                $premiumFeatureStatuses[$key] = false;
+            }
+        }
+
+        // Mapping section → feature key pour protéger l'accès
+        $sectionToFeature = [
+            'stats'            => 'advanced_analytics',
+            'google-reviews'   => 'google_reviews',
+            'online-booking'   => 'online_booking',
+            'delivery'         => 'delivery_integration',
+        ];
+        if (isset($sectionToFeature[$section]) && empty($premiumFeatureStatuses[$sectionToFeature[$section]])) {
+            $this->addErrorMessage('Cette fonctionnalité nécessite un abonnement premium.');
+            header('Location: ?page=settings&section=premium');
+            exit;
+        }
+
         $this->render('admin/settings', [
             'user' => $user,
             'options' => $options,
@@ -78,7 +120,11 @@ class SettingsController extends BaseController
             'csrf_token' => $this->getCsrfToken(),
             'success_message' => $success_message,
             'error_message' => $error_message,
-            'pdo' => $this->pdo
+            'pdo' => $this->pdo,
+            'premium_statuses' => $premiumFeatureStatuses,
+            'has_advanced_stats' => $premiumFeatureStatuses['advanced_analytics'] ?? false,
+            'restaurant_name_display' => $restaurantName,
+            'slug' => $slug,
         ]);
     }
 
@@ -522,17 +568,6 @@ class SettingsController extends BaseController
     }
 
     /**
-     * Détecte si la requête courante est une requête AJAX (XMLHttpRequest)
-     *
-     * @return bool true si requête AJAX
-     */
-    private function isAjaxRequest()
-    {
-        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
-            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
-    }
-
-    /**
      * Supprime le compte admin et toutes ses données associées
      * Requiert le mot de passe et la saisie de "SUPPRIMER" comme confirmation
      */
@@ -640,7 +675,6 @@ class SettingsController extends BaseController
         $this->requireLogin();
         $adminId = $_SESSION['admin_id'];
 
-        require_once __DIR__ . '/../Models/OptionModel.php';
         $optionModel = new OptionModel($this->pdo);
 
         // Rétrocompatibilité : lire site_palette, sinon site_template
@@ -698,7 +732,6 @@ class SettingsController extends BaseController
             exit;
         }
 
-        require_once __DIR__ . '/../Models/OptionModel.php';
         $optionModel = new OptionModel($this->pdo);
         $optionModel->set($_SESSION['admin_id'], 'site_palette', $palette);
 
@@ -737,7 +770,6 @@ class SettingsController extends BaseController
             exit;
         }
 
-        require_once __DIR__ . '/../Models/OptionModel.php';
         $optionModel = new OptionModel($this->pdo);
         $optionModel->set($_SESSION['admin_id'], 'site_layout', $layout);
 
@@ -764,7 +796,6 @@ class SettingsController extends BaseController
         }
 
         try {
-            require_once __DIR__ . '/../Models/OptionModel.php';
             $optionModel = new OptionModel($this->pdo);
 
             // Sauvegarder les options Google Reviews
@@ -811,7 +842,6 @@ class SettingsController extends BaseController
         $adminId = $_SESSION['admin_id'];
 
         // Récupérer le rôle depuis la base de données
-        require_once __DIR__ . '/../Models/Admin.php';
         $adminModel = new Admin($this->pdo);
         $currentAdmin = $adminModel->findById($adminId);
 
@@ -837,7 +867,6 @@ class SettingsController extends BaseController
         }
 
         try {
-            require_once __DIR__ . '/../Models/PremiumFeature.php';
             $premiumFeature = new PremiumFeature($this->pdo);
 
             // SUPER_ADMIN : accès libre (peut tout tester)

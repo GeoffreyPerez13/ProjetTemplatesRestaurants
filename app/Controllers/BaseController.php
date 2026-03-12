@@ -212,15 +212,28 @@ class BaseController
      */
     protected function render($view, $data = [])
     {
-        // Transforme les clés du tableau en variables
-        // Ex: $data['title'] devient $title, $data['user'] devient $user, etc.
-        extract($data);
+        // Protection contre le path traversal
+        $view = str_replace(['..', "\0"], '', $view);
+        $viewPath = __DIR__ . "/../Views/$view.php";
+        $realViewPath = realpath($viewPath);
+        $viewsDir = realpath(__DIR__ . '/../Views');
+
+        if ($realViewPath === false || strpos($realViewPath, $viewsDir) !== 0) {
+            http_response_code(404);
+            include __DIR__ . "/../Views/errors/404.php";
+            return;
+        }
+
+        // Content-Security-Policy (uniquement pour les pages rendues avec HTML)
+        if (!headers_sent()) {
+            header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://code.jquery.com https://cdn.jsdelivr.net https://js.stripe.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: blob:; frame-src https://js.stripe.com; connect-src 'self'");
+        }
+
+        // Transforme les clés du tableau en variables (EXTR_SKIP évite d'écraser des variables existantes)
+        extract($data, EXTR_SKIP);
         
         // Inclusion du fichier de vue
-        // __DIR__: répertoire où se trouve ce fichier (BaseController.php)
-        // "/../Views/": remonte d'un répertoire et entre dans Views/
-        // "$view.php": ajoute l'extension .php au nom de la vue
-        include __DIR__ . "/../Views/$view.php";
+        include $realViewPath;
     }
 
     /**
@@ -259,67 +272,63 @@ class BaseController
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
 
-        // Étape 4: Retour du token (stocké dans la session pour cette visite)
         return $_SESSION['csrf_token'];
     }
 
     /**
      * Vérifie que le token CSRF soumis correspond à celui stocké en session
-     * Protège contre les attaques CSRF où un site malveillant tente d'exécuter des actions
-     * au nom d'un utilisateur authentifié
-     * 
-     * @param string|null $token Token CSRF à vérifier (peut être null)
-     * @return bool true si le token est valide, false sinon
-     * 
-     * Explication détaillée pas à pas:
-     * 1. Vérifie que la session est active (comme dans getCsrfToken)
-     * 2. Vérifie trois conditions avec ET logique (&&):
-     *    a. !empty($token): Le token fourni n'est pas vide
-     *    b. !empty($_SESSION['csrf_token']): Un token existe dans la session
-     *    c. hash_equals($_SESSION['csrf_token'], $token): Comparaison sécurisée des tokens
-     * 3. hash_equals() est une comparaison "temps constant":
-     *    - Prend toujours le même temps quelle que soit l'entrée
-     *    - Évite les attaques par analyse de temps (timing attacks)
-     *    - Compare les chaînes caractère par caractère sans court-circuit
-     * 
-     * Retourne false si une des conditions échoue
+     *
+     * @param string|null $token Token CSRF à vérifier
+     * @return bool true si le token est valide
      */
     protected function verifyCsrfToken(?string $token): bool
     {
-        // Étape 1: Vérification et démarrage de la session (comme dans getCsrfToken)
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
 
-        // Étape 2: Validation en trois parties (toutes doivent être vraies)
-        // Condition 1: $token n'est pas vide (vérifie que quelque chose a été soumis)
-        // Condition 2: $_SESSION['csrf_token'] existe (doit avoir été créé par getCsrfToken)
-        // Condition 3: Comparaison sécurisée avec hash_equals() (évite les attaques temporelles)
-        return !empty($token)
+        $valid = !empty($token)
             && !empty($_SESSION['csrf_token'])
             && hash_equals($_SESSION['csrf_token'], $token);
+
+        // Rotation : régénérer le token après validation réussie
+        // Sauf pour les requêtes AJAX (le token dans le DOM deviendrait invalide)
+        if ($valid && !$this->isAjaxRequest()) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+
+        return $valid;
+    }
+
+    /**
+     * Version publique de verifyCsrfToken pour usage dans index.php (routes inline)
+     *
+     * @param string|null $token Token CSRF à vérifier
+     * @return bool true si le token est valide
+     */
+    public function verifyCsrfTokenPublic(?string $token): bool
+    {
+        return $this->verifyCsrfToken($token);
+    }
+
+    /**
+     * Détecte si la requête courante est une requête AJAX (XMLHttpRequest)
+     *
+     * @return bool true si requête AJAX
+     */
+    protected function isAjaxRequest(): bool
+    {
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 
     /**
      * Définit le délai global de défilement pour tous les messages
-     * Permet de personnaliser le temps d'affichage du message avant le scroll automatique
-     * 
-     * @param int $delay Délai en millisecondes (ex: 3500 pour 3,5 secondes)
-     * 
-     * Explication détaillée:
-     * 1. Modifie la propriété $this->scrollDelay qui est utilisée par addSuccessMessage() et addErrorMessage()
-     * 2. La valeur est exprimée en millisecondes (1000 ms = 1 seconde)
-     * 3. Cette méthode peut être appelée dans le constructeur des contrôleurs enfants
-     *    pour personnaliser le délai selon les besoins spécifiques de chaque page
-     * 4. Utilisation typique: $this->setScrollDelay(3500) dans le constructeur du contrôleur
-     * 
-     * Note: Cette méthode utilise la fonction max() pour garantir que le délai
-     *       n'est jamais inférieur à 500ms (demi-seconde) pour éviter des scrolls trop rapides
+     *
+     * @param int $delay Délai en millisecondes
      */
     public function setScrollDelay($delay)
     {
-        // Utilisation de max() pour garantir un délai minimum de 500ms
-        // Empêche les valeurs trop basses qui rendraient l'UX désagréable
         $this->scrollDelay = max(500, (int)$delay);
     }
 

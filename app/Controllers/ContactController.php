@@ -36,7 +36,14 @@ class ContactController extends BaseController
             $this->requireActiveSubscription();
             // Récupérer l'ancre du formulaire
             $anchor = $_POST['anchor'] ?? 'edit-contact-form';
-            
+
+            // Vérification CSRF
+            if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+                $this->addErrorMessage("Token de sécurité invalide.", $anchor);
+                header('Location: ?page=edit-contact&anchor=' . urlencode($anchor));
+                exit;
+            }
+
             // Validation des données
             $telephone = trim($_POST['telephone'] ?? '');
             $email = trim($_POST['email'] ?? '');
@@ -75,7 +82,8 @@ class ContactController extends BaseController
             'success_message' => $messages['success_message'] ?? null,
             'error_message' => $messages['error_message'] ?? null,
             'scroll_delay' => $messages['scroll_delay'] ?? $this->scrollDelay,
-            'anchor' => $messages['anchor'] ?? null
+            'anchor' => $messages['anchor'] ?? null,
+            'csrf_token' => $this->getCsrfToken()
         ];
 
         // 7. Affichage de la vue

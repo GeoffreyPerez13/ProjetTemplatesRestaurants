@@ -148,6 +148,21 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                     </div>
                 </a>
 
+                <?php if (!empty($has_advanced_stats)): ?>
+                <a href="?page=stats" class="mobile-menu-item premium">
+                    <div class="menu-item-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="menu-item-content">
+                        <span class="menu-item-title">Statistiques avancées</span>
+                        <span class="menu-item-desc">Trafic et performances</span>
+                    </div>
+                    <div class="menu-item-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+                <?php endif; ?>
+
                 <a href="?page=view-card" class="mobile-menu-item success">
                     <div class="menu-item-icon">
                         <i class="fas fa-eye"></i>
@@ -217,6 +232,11 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                         <i class="fas fa-crown"></i> Gérer les clients Premium
                     </a>
                 <?php endif; ?>
+                <?php if (!empty($has_advanced_stats)): ?>
+                    <a href="?page=stats" class="btn premium-btn">
+                        <i class="fas fa-chart-line"></i> Statistiques avancées
+                    </a>
+                <?php endif; ?>
                 <a href="?page=view-card" class="btn success">Aperçu de la carte</a>
             </div>
             <div class="bottom-right">
@@ -281,7 +301,11 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                                                 </td>
                                                 <td><?= (new DateTime($dt['expires_at']))->format('d/m/Y H:i') ?></td>
                                                 <td>
-                                                    <a href="?page=delete-demo-token&id=<?= $dt['id'] ?>" class="btn danger btn-sm" title="Révoquer" onclick="return confirm('Révoquer ce lien ?')"><i class="fas fa-times"></i></a>
+                                                    <form method="POST" action="?page=delete-demo-token" style="display:inline" onsubmit="return confirm('Révoquer ce lien ?')">
+                                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">
+                                                        <input type="hidden" name="id" value="<?= $dt['id'] ?>">
+                                                        <button type="submit" class="btn danger btn-sm" title="Révoquer"><i class="fas fa-times"></i></button>
+                                                    </form>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -303,7 +327,7 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                                 fetch('?page=update-demo-label', {
                                     method: 'POST',
                                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                                    body: 'id=' + encodeURIComponent(input.dataset.id) + '&label=' + encodeURIComponent(val)
+                                    body: 'id=' + encodeURIComponent(input.dataset.id) + '&label=' + encodeURIComponent(val) + '&csrf_token=' + encodeURIComponent('<?= htmlspecialchars($csrf_token ?? '') ?>')
                                 })
                                 .then(function(r) { return r.json(); })
                                 .then(function(d) { input.classList.add(d.success ? 'saved' : 'error'); })
@@ -350,7 +374,12 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                                 });
                                 if (ids.length === 0) return;
                                 if (!confirm('Supprimer ' + ids.length + ' lien(s) de d\u00e9mo ?')) return;
-                                window.location.href = '?page=delete-demo-tokens-bulk&ids=' + ids.join(',');
+                                var form = document.createElement('form');
+                                form.method = 'POST';
+                                form.action = '?page=delete-demo-tokens-bulk';
+                                form.innerHTML = '<input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? '') ?>"><input type="hidden" name="ids" value="' + ids.join(',') + '">';
+                                document.body.appendChild(form);
+                                form.submit();
                             });
                         }
 

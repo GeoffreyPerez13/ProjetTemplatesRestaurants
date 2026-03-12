@@ -6,6 +6,9 @@ require_once __DIR__ . '/../Models/Dish.php';
 require_once __DIR__ . '/../Models/Contact.php';
 require_once __DIR__ . '/../Models/Admin.php';
 require_once __DIR__ . '/../Models/OptionModel.php';
+require_once __DIR__ . '/../Models/PremiumFeature.php';
+require_once __DIR__ . '/../Models/GoogleReviews.php';
+require_once __DIR__ . '/../Models/SiteVisit.php';
 
 /**
  * Contrôleur de la vitrine publique du restaurant
@@ -181,12 +184,10 @@ class DisplayController extends BaseController
         if ($googleReviewsEnabled && $googlePlaceId && $googleApiKey) {
             try {
                 // Vérifier si la fonctionnalité premium est activée
-                require_once __DIR__ . '/../Models/PremiumFeature.php';
                 $premiumFeature = new PremiumFeature($this->pdo);
                 
                 if ($premiumFeature->isEnabled($adminId, 'google_reviews')) {
                     // Récupérer les avis
-                    require_once __DIR__ . '/../Models/GoogleReviews.php';
                     $googleReviews = new GoogleReviews($this->pdo, $googleApiKey);
                     $data = $googleReviews->getReviews($googlePlaceId, 5);
                     
@@ -239,6 +240,23 @@ class DisplayController extends BaseController
             // Rétrocompatibilité ancien paramètre preview_template
             if (!empty($_GET['preview_template']) && in_array($_GET['preview_template'], $allowedPalettes)) {
                 $paletteName = $_GET['preview_template'];
+            }
+        }
+
+        // Tracker la visite (uniquement si le site est en ligne et pas un preview admin)
+        if ($siteOnline && !$isPreview) {
+            try {
+                $siteVisit = new SiteVisit($this->pdo);
+                $siteVisit->track(
+                    $adminId,
+                    $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',
+                    $_SERVER['HTTP_USER_AGENT'] ?? '',
+                    $_SERVER['HTTP_REFERER'] ?? '',
+                    '/' . $slug
+                );
+            } catch (Exception $e) {
+                // Silencieux — le tracking ne doit jamais bloquer l'affichage
+                error_log('[SiteVisit] Tracking error: ' . $e->getMessage());
             }
         }
 

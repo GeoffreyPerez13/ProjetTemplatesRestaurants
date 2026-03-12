@@ -1,4 +1,7 @@
 <?php
+require_once __DIR__ . '/../Models/ClientSubscription.php';
+require_once __DIR__ . '/../Models/Admin.php';
+
 /**
  * Controller pour la gestion des clients Premium
  */
@@ -9,7 +12,6 @@ class ClientManagementController extends BaseController
     public function __construct($pdo)
     {
         parent::__construct($pdo);
-        require_once __DIR__ . '/../Models/ClientSubscription.php';
         $this->subscriptionModel = new ClientSubscription($pdo);
     }
 
@@ -18,7 +20,6 @@ class ClientManagementController extends BaseController
      */
     private function isSuperAdmin(): bool
     {
-        require_once __DIR__ . '/../Models/Admin.php';
         $adminModel = new Admin($this->pdo);
         $currentAdmin = $adminModel->findById($_SESSION['admin_id']);
         return $currentAdmin && $currentAdmin->role === 'SUPER_ADMIN';

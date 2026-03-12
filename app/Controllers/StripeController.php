@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/BaseController.php';
+require_once __DIR__ . '/../Models/PremiumFeature.php';
 
 /**
  * Contrôleur Stripe : gère le paiement d'activation de l'abonnement Basique
@@ -263,7 +264,6 @@ class StripeController extends BaseController
                 );
                 $stmt->execute([$_SESSION['admin_id']]);
 
-                require_once __DIR__ . '/../Models/PremiumFeature.php';
                 $pf = new PremiumFeature($this->pdo);
                 foreach (array_keys($pf->getAvailableFeatures()) as $key) {
                     $pf->disable($_SESSION['admin_id'], $key);
@@ -287,7 +287,6 @@ class StripeController extends BaseController
             }
 
             try {
-                require_once __DIR__ . '/../Models/PremiumFeature.php';
                 $pf = new PremiumFeature($this->pdo);
                 $pf->disable($_SESSION['admin_id'], $featureKey);
                 $name = $pf->getAvailableFeatures()[$featureKey]['name'] ?? $featureKey;
@@ -298,12 +297,8 @@ class StripeController extends BaseController
             }
         }
 
-        // Redirection selon le type d'abonnement résilié
-        if ($type === 'basique') {
-            header('Location: ?page=settings&section=subscriptions');
-        } else {
-            header('Location: ?page=settings&section=premium');
-        }
+        // Redirection vers le total de l'abonnement
+        header('Location: ?page=settings&section=subscriptions#subscription-total');
         exit;
     }
 
@@ -327,7 +322,6 @@ class StripeController extends BaseController
                 $cancelledBasique = true;
 
                 // Résilier automatiquement toutes les options premium
-                require_once __DIR__ . '/../Models/PremiumFeature.php';
                 $pf = new PremiumFeature($this->pdo);
                 foreach (array_keys($pf->getAvailableFeatures()) as $key) {
                     $pf->disable($_SESSION['admin_id'], $key);
@@ -342,7 +336,6 @@ class StripeController extends BaseController
                     $featureName = $value;
                     
                     // Trouver la clé de la fonctionnalité à partir du nom
-                    require_once __DIR__ . '/../Models/PremiumFeature.php';
                     $pf = new PremiumFeature($this->pdo);
                     $availableFeatures = $pf->getAvailableFeatures();
                     
@@ -380,7 +373,7 @@ class StripeController extends BaseController
 
             // Ajouter le message de succès et rediriger
             $this->addSuccessMessage($message);
-            header('Location: ?page=settings&section=subscriptions');
+            header('Location: ?page=settings&section=subscriptions#subscription-total');
             exit;
 
         } catch (Exception $e) {
@@ -399,7 +392,7 @@ class StripeController extends BaseController
             
             // Pour les requêtes normales, utiliser le système de messages du site
             $this->addErrorMessage('Erreur lors de la résiliation groupée. Veuillez réessayer.');
-            header('Location: ?page=settings&section=subscriptions');
+            header('Location: ?page=settings&section=subscriptions#subscription-total');
             exit;
         }
     }
@@ -463,7 +456,7 @@ class StripeController extends BaseController
             $this->addSuccessMessage(
                 'Paiement confirmé ! Option(s) activée(s) : ' . $names . '.'
             );
-            header('Location: ?page=settings&section=premium');
+            header('Location: ?page=settings&section=subscriptions#subscription-total');
         } elseif ($type === 'basique_premium') {
             // Activer l'abonnement basique ET les options premium
             $features = json_decode($session['metadata']['features'] ?? '[]', true);
@@ -475,13 +468,13 @@ class StripeController extends BaseController
                 'Paiement confirmé ! Votre abonnement Basique est actif' . 
                 ($names ? ' et option(s) premium activée(s) : ' . $names . '.' : ' !')
             );
-            header('Location: ?page=settings&section=premium');
+            header('Location: ?page=settings&section=subscriptions#subscription-total');
         } else {
             $this->activateSubscription($_SESSION['admin_id'], $sessionId);
             $this->addSuccessMessage(
                 'Paiement confirmé ! Votre abonnement Basique est maintenant actif. Bienvenue sur MenuMiam !'
             );
-            header('Location: ?page=settings&section=premium');
+            header('Location: ?page=settings&section=subscriptions#subscription-total');
         }
         exit;
     }
@@ -555,6 +548,166 @@ class StripeController extends BaseController
     }
 
     /**
+     * Webhook Stripe : reçoit les notifications de paiement serveur-à-serveur
+     * 
+     * Stripe envoie un POST à cette URL quand un événement se produit (ex: paiement réussi).
+     * Contrairement à handleSuccess() qui dépend du retour du navigateur,
+     * le webhook est appelé directement par les serveurs Stripe, même si l'utilisateur
+     * ferme son navigateur après le paiement.
+     * 
+     * Configuration requise :
+     * 1. Créer un webhook dans le Dashboard Stripe → Developers → Webhooks
+     * 2. URL : https://votre-domaine.com/?page=stripe-webhook
+     * 3. Événement à écouter : checkout.session.completed
+     * 4. Copier le "Signing secret" (whsec_...) dans config.php → STRIPE_WEBHOOK_SECRET
+     */
+    public function handleWebhook()
+    {
+        // 1. Lire le corps brut de la requête (pas $_POST, Stripe envoie du JSON)
+        $payload = file_get_contents('php://input');
+        $sigHeader = $_SERVER['HTTP_STRIPE_SIGNATURE'] ?? '';
+
+        // 2. Vérifier la signature pour s'assurer que c'est bien Stripe qui envoie
+        if (defined('STRIPE_WEBHOOK_SECRET') && STRIPE_WEBHOOK_SECRET !== '') {
+            $event = $this->verifyWebhookSignature($payload, $sigHeader, STRIPE_WEBHOOK_SECRET);
+            if (!$event) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Signature invalide']);
+                exit;
+            }
+        } else {
+            // Sans secret configuré, on parse quand même (dev uniquement)
+            $event = json_decode($payload, true);
+            if (!$event) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Payload JSON invalide']);
+                exit;
+            }
+            error_log('[Stripe Webhook] ATTENTION : STRIPE_WEBHOOK_SECRET non configuré, signature non vérifiée');
+        }
+
+        // 3. Traiter l'événement selon son type
+        $type = $event['type'] ?? '';
+
+        if ($type === 'checkout.session.completed') {
+            $session = $event['data']['object'] ?? [];
+            $this->processCompletedCheckout($session);
+        }
+        // Autres événements possibles à gérer plus tard :
+        // - payment_intent.payment_failed → notifier l'admin
+        // - customer.subscription.deleted → désactiver l'abonnement
+
+        // 4. Toujours répondre 200 à Stripe (sinon il réessaie)
+        http_response_code(200);
+        echo json_encode(['received' => true]);
+        exit;
+    }
+
+    /**
+     * Vérifie la signature du webhook Stripe (HMAC SHA-256)
+     * 
+     * Stripe signe chaque webhook avec un secret partagé. Cela garantit que
+     * la requête vient bien de Stripe et n'a pas été falsifiée.
+     *
+     * @param string $payload    Corps brut de la requête
+     * @param string $sigHeader  Contenu du header Stripe-Signature
+     * @param string $secret     Clé secrète du webhook (whsec_...)
+     * @return array|null        Événement décodé ou null si signature invalide
+     */
+    private function verifyWebhookSignature(string $payload, string $sigHeader, string $secret): ?array
+    {
+        // Le header contient : t=timestamp,v1=signature
+        $parts = [];
+        foreach (explode(',', $sigHeader) as $part) {
+            [$key, $value] = explode('=', $part, 2);
+            $parts[$key] = $value;
+        }
+
+        $timestamp = $parts['t'] ?? '';
+        $signature = $parts['v1'] ?? '';
+
+        if (empty($timestamp) || empty($signature)) {
+            error_log('[Stripe Webhook] Header Stripe-Signature malformé');
+            return null;
+        }
+
+        // Protection contre les attaques par rejeu (tolérance : 5 minutes)
+        if (abs(time() - (int)$timestamp) > 300) {
+            error_log('[Stripe Webhook] Timestamp trop ancien (possible replay attack)');
+            return null;
+        }
+
+        // Recalculer la signature attendue
+        $signedPayload = $timestamp . '.' . $payload;
+        $expectedSignature = hash_hmac('sha256', $signedPayload, $secret);
+
+        // Comparaison en temps constant (anti timing attack)
+        if (!hash_equals($expectedSignature, $signature)) {
+            error_log('[Stripe Webhook] Signature invalide');
+            return null;
+        }
+
+        return json_decode($payload, true);
+    }
+
+    /**
+     * Traite un checkout.session.completed reçu via webhook
+     * 
+     * C'est ici que l'activation réelle de l'abonnement se fait.
+     * La méthode est idempotente : appeler 2 fois avec la même session
+     * n'active pas l'abonnement 2 fois.
+     *
+     * @param array $session Objet session Stripe
+     */
+    private function processCompletedCheckout(array $session)
+    {
+        $paymentStatus = $session['payment_status'] ?? '';
+        if ($paymentStatus !== 'paid') {
+            error_log('[Stripe Webhook] Session non payée, status: ' . $paymentStatus);
+            return;
+        }
+
+        $adminId = (int)($session['metadata']['admin_id'] ?? 0);
+        $type = $session['metadata']['type'] ?? 'basique';
+        $sessionId = $session['id'] ?? '';
+
+        if ($adminId <= 0) {
+            error_log('[Stripe Webhook] admin_id invalide dans metadata');
+            return;
+        }
+
+        // Vérifier si cette session a déjà été traitée (idempotence)
+        try {
+            $stmt = $this->pdo->prepare(
+                "SELECT status, notes FROM client_subscriptions WHERE admin_id = ?"
+            );
+            $stmt->execute([$adminId]);
+            $existing = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($existing && str_contains($existing['notes'] ?? '', $sessionId)) {
+                error_log('[Stripe Webhook] Session déjà traitée: ' . $sessionId);
+                return;
+            }
+        } catch (Exception $e) {
+            // Table peut ne pas exister en dev
+        }
+
+        // Activer selon le type de paiement
+        if ($type === 'basique' || $type === 'basique_premium') {
+            $this->activateSubscription($adminId, $sessionId);
+            error_log('[Stripe Webhook] Abonnement basique activé pour admin #' . $adminId);
+        }
+
+        if ($type === 'premium' || $type === 'basique_premium') {
+            $features = json_decode($session['metadata']['features'] ?? '[]', true);
+            if (!empty($features)) {
+                $this->activatePremiumFeatures($adminId, $features);
+                error_log('[Stripe Webhook] Options premium activées pour admin #' . $adminId . ': ' . implode(', ', $features));
+            }
+        }
+    }
+
+    /**
      * Active (ou réactive) l'abonnement basique d'un admin
      */
     private function activateSubscription($adminId, $stripeSessionId)
@@ -591,7 +744,6 @@ class StripeController extends BaseController
             return;
         }
         try {
-            require_once __DIR__ . '/../Models/PremiumFeature.php';
             $premiumFeature = new PremiumFeature($this->pdo);
             foreach ($features as $featureKey) {
                 $premiumFeature->enable($adminId, $featureKey);

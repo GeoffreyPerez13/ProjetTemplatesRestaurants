@@ -1,9 +1,14 @@
 <?php
-ini_set('SMTP', 'localhost');   // Pour l'envoi de mails en dev
-ini_set('smtp_port', 1025);     // Port du serveur SMTP local (ex : MailHog)
-define('DEV_SHOW_LINK', true);   // Constante dev pour afficher les liens directs
-
 require_once __DIR__ . '/../config.php';
+
+// Configuration SMTP (valeurs définies dans config.php, sinon fallback dev)
+ini_set('SMTP', defined('SMTP_HOST') ? SMTP_HOST : 'localhost');
+ini_set('smtp_port', defined('SMTP_PORT') ? SMTP_PORT : 1025);
+
+if (!defined('DEV_SHOW_LINK')) {
+    define('DEV_SHOW_LINK', false);
+}
+
 require_once __DIR__ . '/../app/Controllers/AdminController.php';
 require_once __DIR__ . '/../app/Controllers/CardController.php';
 require_once __DIR__ . '/../app/Controllers/ContactController.php';
@@ -14,6 +19,7 @@ require_once __DIR__ . '/../app/Controllers/DisplayController.php';
 require_once __DIR__ . '/../app/Controllers/ServicesController.php';
 require_once __DIR__ . '/../app/Controllers/SitemapController.php';
 require_once __DIR__ . '/../app/Controllers/StripeController.php';
+require_once __DIR__ . '/../app/Controllers/StatsController.php';
 require_once __DIR__ . '/../app/Models/DemoToken.php';
 require_once __DIR__ . '/../app/Helpers/FormHelper.php';
 require_once __DIR__ . '/../app/Helpers/Validator.php';
@@ -52,6 +58,11 @@ switch ($page) {
     case 'stripe-success':
         $stripeController = new StripeController($pdo);
         $stripeController->handleSuccess();  // Traiter le retour Stripe après paiement
+        break;
+
+    case 'stripe-webhook':
+        $stripeController = new StripeController($pdo);
+        $stripeController->handleWebhook();  // Webhook Stripe (serveur-à-serveur, activation fiable)
         break;
 
     case 'cancel-subscription':
@@ -102,7 +113,8 @@ switch ($page) {
     case 'edit-logo-banner':
         $controller = new LogoBannerController($pdo);
         $action = $_GET['action'] ?? 'show';
-        if (method_exists($controller, $action)) {
+        $allowed = ['show', 'uploadLogo', 'uploadBanner', 'deleteLogo', 'deleteBanner', 'updateBannerText', 'deleteBannerText'];
+        if (in_array($action, $allowed)) {
             $controller->$action();
         } else {
             $controller->show();
@@ -112,7 +124,8 @@ switch ($page) {
     case 'edit-services':
         $controller = new ServicesController($pdo);
         $action = $_GET['action'] ?? 'show';
-        if (method_exists($controller, $action)) {
+        $allowed = ['show', 'save'];
+        if (in_array($action, $allowed)) {
             $controller->$action();
         } else {
             $controller->show();
@@ -287,6 +300,12 @@ switch ($page) {
             echo json_encode(['success' => false, 'message' => 'Accès refusé']);
             exit;
         }
+        // Vérification CSRF
+        $baseController = new BaseController($pdo);
+        if (!$baseController->verifyCsrfTokenPublic($_POST['csrf_token'] ?? null)) {
+            echo json_encode(['success' => false, 'message' => 'Token CSRF invalide']);
+            exit;
+        }
         $tokenId = $_POST['id'] ?? null;
         $label = $_POST['label'] ?? '';
         if ($tokenId) {
@@ -299,7 +318,11 @@ switch ($page) {
         exit;
 
     case 'delete-demo-token':
-        // Suppression d'un token de démo (SUPER_ADMIN uniquement)
+        // Suppression d'un token de démo (SUPER_ADMIN uniquement, POST + CSRF)
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?page=dashboard');
+            exit;
+        }
         if (!isset($_SESSION['admin_logged']) || $_SESSION['admin_logged'] !== true) {
             header('Location: ?page=login');
             exit;
@@ -311,17 +334,28 @@ switch ($page) {
             header('Location: ?page=dashboard');
             exit;
         }
-        $tokenId = $_GET['id'] ?? null;
+        // Vérification CSRF
+        $baseController = new BaseController($pdo);
+        if (!$baseController->verifyCsrfTokenPublic($_POST['csrf_token'] ?? null)) {
+            $_SESSION['error_message'] = "Token de sécurité invalide.";
+            header('Location: ?page=dashboard');
+            exit;
+        }
+        $tokenId = $_POST['id'] ?? null;
         if ($tokenId) {
             $demoTokenModel = new DemoToken($pdo);
-            $demoTokenModel->delete($tokenId);
+            $demoTokenModel->delete(intval($tokenId));
             $_SESSION['success_message'] = "Lien de démo révoqué.";
         }
         header('Location: ?page=dashboard');
         exit;
 
     case 'delete-demo-tokens-bulk':
-        // Suppression en masse de tokens de démo (SUPER_ADMIN uniquement)
+        // Suppression en masse de tokens de démo (SUPER_ADMIN uniquement, POST + CSRF)
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ?page=dashboard');
+            exit;
+        }
         if (!isset($_SESSION['admin_logged']) || $_SESSION['admin_logged'] !== true) {
             header('Location: ?page=login');
             exit;
@@ -333,7 +367,14 @@ switch ($page) {
             header('Location: ?page=dashboard');
             exit;
         }
-        $idsParam = $_GET['ids'] ?? '';
+        // Vérification CSRF
+        $baseController = new BaseController($pdo);
+        if (!$baseController->verifyCsrfTokenPublic($_POST['csrf_token'] ?? null)) {
+            $_SESSION['error_message'] = "Token de sécurité invalide.";
+            header('Location: ?page=dashboard');
+            exit;
+        }
+        $idsParam = $_POST['ids'] ?? '';
         $ids = array_filter(array_map('intval', explode(',', $idsParam)));
         if (!empty($ids)) {
             $demoTokenModel = new DemoToken($pdo);
@@ -389,6 +430,16 @@ switch ($page) {
         }
         header('Location: ?page=dashboard');
         exit;
+
+    case 'stats':
+        $controller = new StatsController($pdo);
+        $controller->show();
+        break;
+
+    case 'stats-data':
+        $controller = new StatsController($pdo);
+        $controller->getData();
+        break;
 
     case 'sitemap':
         $controller = new SitemapController($pdo);

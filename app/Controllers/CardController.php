@@ -34,32 +34,17 @@ class CardController extends BaseController
     private function updateRestaurantTimestamp()
     {
         if (isset($_SESSION['admin_id'])) {
-            error_log("updateRestaurantTimestamp: admin_id = " . $_SESSION['admin_id']);
-
             // Récupérer le restaurant_id
             $stmt = $this->pdo->prepare("SELECT restaurant_id FROM admins WHERE id = ?");
             $stmt->execute([$_SESSION['admin_id']]);
             $restaurantId = $stmt->fetchColumn();
 
             if ($restaurantId) {
-                error_log("updateRestaurantTimestamp: restaurant_id = " . $restaurantId);
-
                 // Mettre à jour le timestamp
                 $stmt2 = $this->pdo->prepare("UPDATE restaurants SET updated_at = NOW() WHERE id = ?");
                 $result = $stmt2->execute([$restaurantId]);
-
-                if ($result) {
-                    error_log("updateRestaurantTimestamp: SUCCESS");
-                } else {
-                    $errorInfo = $stmt2->errorInfo();
-                    error_log("updateRestaurantTimestamp: ERROR - " . $errorInfo[2]);
-                }
                 return $result;
-            } else {
-                error_log("updateRestaurantTimestamp: Aucun restaurant_id trouvé pour admin " . $_SESSION['admin_id']);
             }
-        } else {
-            error_log("updateRestaurantTimestamp: admin_id non défini dans la session");
         }
         return false;
     }
@@ -73,9 +58,6 @@ class CardController extends BaseController
         $this->requireLogin();
         $admin_id = $_SESSION['admin_id'];
 
-        error_log("=== EDIT CARD START ===");
-        error_log("Admin ID: $admin_id");
-
         // 2. Initialiser les modèles
         $adminModel = new Admin($this->pdo);
         $categoryModel = new Category($this->pdo);
@@ -84,12 +66,9 @@ class CardController extends BaseController
 
         // 3. Récupérer le mode actuel
         $currentMode = $adminModel->getCarteMode($admin_id);
-        error_log("Current mode: $currentMode");
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->requireActiveSubscription();
-            error_log("=== POST REQUEST ===");
-            error_log("POST data: " . print_r($_POST, true));
 
             $this->handlePostRequest($adminModel, $categoryModel, $dishModel, $carteImageModel, $admin_id, $currentMode);
         }
@@ -124,6 +103,12 @@ class CardController extends BaseController
     {
         $anchor = $_POST['anchor'] ?? '';
 
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            $this->addErrorMessage("Token CSRF invalide.", $anchor);
+            $this->redirectToEditCard($anchor);
+            return;
+        }
+
         try {
             if (isset($_POST['change_mode'])) {
                 $this->handleChangeMode($adminModel, $admin_id, $anchor);
@@ -140,7 +125,6 @@ class CardController extends BaseController
                 return;
             }
         } catch (Exception $e) {
-            error_log("Exception in handlePostRequest: " . $e->getMessage());
             $this->addErrorMessage("Erreur: " . $e->getMessage(), $anchor);
         }
 
@@ -178,8 +162,6 @@ class CardController extends BaseController
      */
     private function handleEditableModeActions($categoryModel, $dishModel, $admin_id, $anchor)
     {
-        error_log("Handling editable mode actions");
-
         if (isset($_POST['batch_add_categories'])) {
             $this->handleBatchAddCategories($categoryModel, $admin_id, $anchor);
         } elseif (isset($_POST['batch_add_dishes'])) {
@@ -214,8 +196,6 @@ class CardController extends BaseController
      */
     private function handleImagesModeActions($carteImageModel, $admin_id, $anchor)
     {
-        error_log("Handling images mode actions");
-
         if (isset($_POST['upload_images']) && isset($_FILES['card_images'])) {
             $this->handleUploadImages($carteImageModel, $admin_id, $anchor);
         } elseif (isset($_POST['delete_image'])) {
@@ -233,12 +213,8 @@ class CardController extends BaseController
     private function handleDeleteImageSimple($carteImageModel, $admin_id, $anchor)
     {
         $image_id = (int)($_POST['image_id'] ?? 0);
-        error_log("=== DELETE IMAGE PROCESS START ===");
-        error_log("Image ID from POST: $image_id");
-        error_log("Admin ID: $admin_id");
 
         if ($image_id <= 0) {
-            error_log("Invalid image ID");
             $this->addErrorMessage("ID d'image invalide.", 'images-list');
             return;
         }
@@ -249,7 +225,6 @@ class CardController extends BaseController
         $image = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$image) {
-            error_log("Image not found or doesn't belong to admin");
             $this->addErrorMessage("Image non trouvée ou vous n'avez pas les droits.", 'images-list');
             return;
         }
@@ -261,14 +236,12 @@ class CardController extends BaseController
             $rowCount = $stmt->rowCount();
 
             if ($rowCount === 0) {
-                error_log("Failed to delete from database");
                 $this->addErrorMessage("Échec de la suppression en base.", 'images-list');
                 $_SESSION['open_accordion'] = 'images-list-content';
                 $this->redirectToEditCard($anchor);
                 return;
             }
         } catch (Exception $e) {
-            error_log("Database delete error: " . $e->getMessage());
             $this->addErrorMessage("Erreur de base de données: " . $e->getMessage(), 'images-list');
             $_SESSION['open_accordion'] = 'images-list-content';
             $this->redirectToEditCard($anchor);
@@ -298,37 +271,23 @@ class CardController extends BaseController
      */
     private function deletePhysicalFile($filename)
     {
-        error_log("Attempting to delete physical file: $filename");
-
         $filepath = trim($filename);
         if (strpos($filepath, '/') === 0) {
             $filepath = substr($filepath, 1);
-            error_log("Removed leading slash, new path: $filepath");
         }
 
         $projectRoot = realpath(__DIR__ . '/../../');
         $absolutePath = $projectRoot . '/' . $filepath;
 
-        error_log("Project root: $projectRoot");
-        error_log("Absolute path: $absolutePath");
-
         if (!file_exists($absolutePath)) {
-            error_log("File does not exist at: $absolutePath");
-            return true; // On considère que c'est ok si le fichier n'existe pas
+            return true;
         }
 
         if (!is_writable($absolutePath)) {
-            error_log("File is not writable: $absolutePath");
             return false;
         }
 
-        if (unlink($absolutePath)) {
-            error_log("Physical file deleted successfully: $absolutePath");
-            return true;
-        } else {
-            error_log("Failed to delete physical file: $absolutePath");
-            return false;
-        }
+        return unlink($absolutePath);
     }
 
     /**
@@ -545,7 +504,6 @@ class CardController extends BaseController
             $dishId = $dish->getId();  // ou $this->pdo->lastInsertId()
 
             // Sauvegarde des allergènes
-            require_once __DIR__ . '/../Models/Allergene.php';
             $allergeneModel = new Allergene($this->pdo);
             $allergeneIds = $_POST['allergenes'] ?? [];
             $allergeneModel->saveForDish($dishId, $allergeneIds);
@@ -624,7 +582,6 @@ class CardController extends BaseController
             $dishModel->update($dish_id, $name, (float)$price, $description, $imagePath);
 
             // Mise à jour des allergènes
-            require_once __DIR__ . '/../Models/Allergene.php';
             $allergeneModel = new Allergene($this->pdo);
             $allergeneIds = $_POST['allergenes_' . $dish_id] ?? []; // name="allergenes_XX[]"
             $allergeneModel->saveForDish($dish_id, $allergeneIds);
@@ -729,8 +686,6 @@ class CardController extends BaseController
      */
     private function handleUploadImages($carteImageModel, $admin_id, $anchor)
     {
-        error_log("=== HANDLE UPLOAD IMAGES ===");
-
         if (!isset($_FILES['card_images']) || empty($_FILES['card_images']['name'][0])) {
             $this->addErrorMessage("Veuillez sélectionner au moins un fichier.", 'upload-images');
             $this->redirectToEditCard($anchor);
@@ -756,7 +711,6 @@ class CardController extends BaseController
                     $uploadCount++;
                 } catch (Exception $e) {
                     $errorCount++;
-                    error_log("Error uploading file $name: " . $e->getMessage());
                 }
             }
         }
@@ -830,7 +784,6 @@ class CardController extends BaseController
         unset($cat); // Indispensable : casse la référence laissée par le foreach &$cat
 
         // Récupération des allergènes
-        require_once __DIR__ . '/../Models/Allergene.php';
         $allergeneModel = new Allergene($this->pdo);
         $allergenes = $allergeneModel->getAll();
 
@@ -852,7 +805,8 @@ class CardController extends BaseController
             'error_fields' => $error_fields,
             'old_input' => $old_input,
             'anchor' => $messages['anchor'] ?? null,
-            'scroll_delay' => $messages['scroll_delay'] ?? $this->scrollDelay
+            'scroll_delay' => $messages['scroll_delay'] ?? $this->scrollDelay,
+            'csrf_token' => $this->getCsrfToken()
         ];
     }
 
@@ -869,7 +823,6 @@ class CardController extends BaseController
     private function getImagesModeData($admin_id, $carteImageModel, $messages, $error_fields, $old_input)
     {
         $carteImages = $carteImageModel->getAllByAdmin($admin_id);
-        error_log("Images loaded: " . count($carteImages));
 
         return [
             'currentMode' => 'images',
@@ -879,7 +832,8 @@ class CardController extends BaseController
             'error_fields' => $error_fields,
             'old_input' => $old_input,
             'anchor' => $messages['anchor'] ?? null,
-            'scroll_delay' => $messages['scroll_delay'] ?? $this->scrollDelay
+            'scroll_delay' => $messages['scroll_delay'] ?? $this->scrollDelay,
+            'csrf_token' => $this->getCsrfToken()
         ];
     }
 
@@ -894,7 +848,6 @@ class CardController extends BaseController
         if (!empty($anchor)) {
             $redirectUrl .= '&anchor=' . urlencode($anchor);
         }
-        error_log("Redirecting to: $redirectUrl");
         header('Location: ' . $redirectUrl);
         exit;
     }

@@ -31,121 +31,103 @@ document.addEventListener('DOMContentLoaded', function() {
         return match ? match[2] : null;
     }
 
-    // --- État initial ---
-    const consent = getCookie('cookie_consent');
-    console.log('Cookie consent found:', consent);
-
-    // Toujours cacher la modale au chargement
-    cookieModal.style.setProperty('display', 'none', 'important');
-
-    // Comportement normal
-    if (consent) {
-        console.log('Consent already given, hiding banner');
-        // Ne rien faire, la bannière reste cachée par défaut (display: none)
-    } else {
-        console.log('No consent found, showing banner');
-        cookieBanner.classList.add('show');
-    }
-
-        // --- Handlers ---
-        if (openPreferencesBtn) {
-            openPreferencesBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                console.log('Opening preferences modal');
-                cookieModal.style.setProperty('display', 'flex', 'important');
-            });
-        }
-
-        if (closeModal) {
-            closeModal.addEventListener('click', function(e) {
-                e.preventDefault();
-                cookieModal.style.setProperty('display', 'none', 'important');
-            });
-        }
-
-        window.addEventListener('click', function(event) {
-            if (event.target === cookieModal) {
-                cookieModal.style.setProperty('display', 'none', 'important');
-            }
-        });
-
-        if (acceptAllBtn) {
-            acceptAllBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                console.log('Accept all clicked');
-                setCookie('cookie_consent', 'accepted', 365);
-                setCookie('cookie_analytics', 'true', 365);
-                setCookie('cookie_marketing', 'false', 365);
-                cookieBanner.classList.remove('show');
-                cookieModal.style.setProperty('display', 'none', 'important');
-                loadAnalytics();
-            });
-        }
-
-        if (rejectAllBtn) {
-            rejectAllBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                console.log('Reject all clicked');
-                setCookie('cookie_consent', 'rejected', 365);
-                setCookie('cookie_analytics', 'false', 365);
-                setCookie('cookie_marketing', 'false', 365);
-                cookieBanner.classList.remove('show');
-                cookieModal.style.setProperty('display', 'none', 'important');
-            });
-        }
-
-        if (acceptAllFromModal) {
-            acceptAllFromModal.addEventListener('click', function(e) {
-                e.preventDefault();
-                console.log('Accept all from modal clicked');
-                setCookie('cookie_consent', 'accepted', 365);
-                setCookie('cookie_analytics', 'true', 365);
-                setCookie('cookie_marketing', 'false', 365);
-                cookieBanner.classList.remove('show');
-                cookieModal.style.setProperty('display', 'none', 'important');
-                loadAnalytics();
-            });
-        }
-
-        if (savePreferencesBtn) {
-            savePreferencesBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const analytics = document.getElementById('cookies-analytics')?.checked ? 'true' : 'false';
-                const marketing = document.getElementById('cookies-marketing')?.checked ? 'true' : 'false';
-                console.log('Saving preferences:', { analytics, marketing });
-
-                setCookie('cookie_consent', 'custom', 365);
-                setCookie('cookie_analytics', analytics, 365);
-                setCookie('cookie_marketing', marketing, 365);
-
-                cookieBanner.classList.remove('show');
-                cookieModal.style.setProperty('display', 'none', 'important');
-
-                if (analytics === 'true') {
-                    loadAnalytics();
-                }
-
-                console.log('Preferences saved and banner hidden');
-            });
-        }
-    }
-
     // --- Analytics ---
     function loadAnalytics() {
         if (getCookie('cookie_analytics') === 'true') {
             // Insérer ici le code Google Analytics ou autre outil d'analyse
-            console.log('Analytics chargés (vitrine)');
-            
-            // Exemple: Google Analytics (à remplacer par votre code réel)
             /*
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
             (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
             m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
             })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-            
+
             ga('create', 'UA-XXXXXXX-X', 'auto');
             ga('send', 'pageview');
             */
         }
+    }
+
+    // --- État initial ---
+    const consent = getCookie('cookie_consent');
+
+    cookieModal.style.setProperty('display', 'none', 'important');
+
+    if (!consent) {
+        cookieBanner.classList.add('show');
+    }
+
+    // --- Handlers ---
+    if (openPreferencesBtn) {
+        openPreferencesBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            cookieModal.style.setProperty('display', 'flex', 'important');
+        });
+    }
+
+    if (closeModal) {
+        closeModal.addEventListener('click', function(e) {
+            e.preventDefault();
+            cookieModal.style.setProperty('display', 'none', 'important');
+        });
+    }
+
+    window.addEventListener('click', function(event) {
+        if (event.target === cookieModal) {
+            cookieModal.style.setProperty('display', 'none', 'important');
+        }
+    });
+
+    if (acceptAllBtn) {
+        acceptAllBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            setCookie('cookie_consent', 'accepted', 365);
+            setCookie('cookie_analytics', 'true', 365);
+            setCookie('cookie_marketing', 'false', 365);
+            cookieBanner.classList.remove('show');
+            cookieModal.style.setProperty('display', 'none', 'important');
+            loadAnalytics();
+        });
+    }
+
+    if (rejectAllBtn) {
+        rejectAllBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            setCookie('cookie_consent', 'rejected', 365);
+            setCookie('cookie_analytics', 'false', 365);
+            setCookie('cookie_marketing', 'false', 365);
+            cookieBanner.classList.remove('show');
+            cookieModal.style.setProperty('display', 'none', 'important');
+        });
+    }
+
+    if (acceptAllFromModal) {
+        acceptAllFromModal.addEventListener('click', function(e) {
+            e.preventDefault();
+            setCookie('cookie_consent', 'accepted', 365);
+            setCookie('cookie_analytics', 'true', 365);
+            setCookie('cookie_marketing', 'false', 365);
+            cookieBanner.classList.remove('show');
+            cookieModal.style.setProperty('display', 'none', 'important');
+            loadAnalytics();
+        });
+    }
+
+    if (savePreferencesBtn) {
+        savePreferencesBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const analytics = document.getElementById('cookies-analytics')?.checked ? 'true' : 'false';
+            const marketing = document.getElementById('cookies-marketing')?.checked ? 'true' : 'false';
+
+            setCookie('cookie_consent', 'custom', 365);
+            setCookie('cookie_analytics', analytics, 365);
+            setCookie('cookie_marketing', marketing, 365);
+
+            cookieBanner.classList.remove('show');
+            cookieModal.style.setProperty('display', 'none', 'important');
+
+            if (analytics === 'true') {
+                loadAnalytics();
+            }
+        });
     }
 });

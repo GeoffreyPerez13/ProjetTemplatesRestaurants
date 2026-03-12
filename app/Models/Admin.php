@@ -48,6 +48,20 @@ class Admin
         $this->mailer = new Mailer();
     }
 
+    /**
+     * Construit l'URL de base du projet (scheme + host + path)
+     *
+     * @return string URL de base (ex: http://localhost/ProjetTemplatesRestaurants/)
+     */
+    private function getBaseUrl(): string
+    {
+        $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+        $basePath = rtrim(dirname($scriptName), '/\\');
+        return $scheme . '://' . $host . $basePath . '/';
+    }
+
     // --- INVITATIONS ---
 
     /**
@@ -68,7 +82,7 @@ class Admin
             $result = $stmt->execute([$email, $restaurantName, $token, $expiry]);
 
             if ($result) {
-                $inviteLink = "http://" . $_SERVER['HTTP_HOST'] . "?page=register&token=" . urlencode($token);
+                $inviteLink = $this->getBaseUrl() . '?page=register&token=' . urlencode($token);
 
                 $subject = "Invitation à créer votre compte restaurant";
                 $body = "
@@ -459,9 +473,7 @@ class Admin
      */
     public function sendVerificationEmail($email, $username, $token)
     {
-        $verifyLink = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http')
-            . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')
-            . '/ProjetTemplatesRestaurants/?page=verify-email&token=' . urlencode($token);
+        $verifyLink = $this->getBaseUrl() . '?page=verify-email&token=' . urlencode($token);
 
         $subject = "Confirmez votre adresse email — MenuMiam";
         $body = "

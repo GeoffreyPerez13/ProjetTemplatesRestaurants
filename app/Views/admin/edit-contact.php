@@ -32,6 +32,7 @@ require __DIR__ . '/../partials/header.php';
 <form method="post" class="edit-contact-form">
     <h2><i class="fas fa-address-book"></i> Modifier les informations de contact</h2>
 
+    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">
     <input type="hidden" name="anchor" value="edit-contact-form">
 
     <div class="form-group">

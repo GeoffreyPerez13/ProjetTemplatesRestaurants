@@ -11,8 +11,6 @@
      * Initialisation principale
      */
     function init() {
-        console.log('Drag & Drop initialisé');
-        
         // Vérifier si nous sommes en mode images
         if (!isImagesMode()) return;
         
@@ -30,7 +28,6 @@
         const cancelOrderBtn = document.getElementById('cancel-order-btn');
         
         if (startReorderBtn) startReorderBtn.addEventListener('click', enableReorderMode);
-        if (saveOrderBtn) saveOrderBtn.addEventListener('click', saveNewOrder);
         if (cancelOrderBtn) cancelOrderBtn.addEventListener('click', cancelReorder);
         
         // Boutons Monter/Descendre
@@ -79,8 +76,9 @@
         // Initialiser Sortable.js pour le drag & drop
         initSortable();
         
-        // Mettre à jour les numéros
+        // Mettre à jour les numéros et peupler l'ordre initial
         updatePositionNumbers();
+        updateOrderInput();
         
         showFeedback('Mode réorganisation activé. Glissez une image pour la déplacer.', 'info');
     }

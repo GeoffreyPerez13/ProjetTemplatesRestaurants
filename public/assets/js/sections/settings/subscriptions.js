@@ -8,8 +8,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Gérer la sélection "Tout sélectionner"
     if (selectAllCheckbox) {
         selectAllCheckbox.addEventListener('change', function() {
+            const isChecked = this.checked;
             subCheckboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
+                checkbox.checked = isChecked;
+                const card = checkbox.closest('.subscription-row');
+                if (card) card.classList.toggle('selected', isChecked);
             });
             updateBulkActionButton();
         });
@@ -18,6 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Gérer les checkboxes individuelles
     subCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
+            // Toggle .selected sur la card parente
+            const card = this.closest('.subscription-row');
+            if (card) card.classList.toggle('selected', this.checked);
             updateSelectAllCheckbox();
             updateBulkActionButton();
         });
@@ -135,7 +141,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 // Stocker le message de succès dans sessionStorage pour l'afficher après le rechargement
                 sessionStorage.setItem('subscriptionSuccessMessage', data.message || 'Vos abonnements ont été résiliés avec succès.');
-                location.reload();
+                window.location.hash = 'subscription-total';
+                window.location.reload();
             } else {
                 Swal.fire({
                     title: 'Erreur',

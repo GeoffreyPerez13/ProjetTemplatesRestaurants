@@ -101,8 +101,8 @@ class AdminController extends BaseController
             $username = trim($_POST['username'] ?? '');
             $email = trim($_POST['email'] ?? '');
             $restaurantName = trim($_POST['restaurant_name'] ?? '');
-            $password = trim($_POST['password'] ?? '');
-            $confirmPassword = trim($_POST['confirm_password'] ?? '');
+            $password = $_POST['password'] ?? '';
+            $confirmPassword = $_POST['confirm_password'] ?? '';
             $error = null;
 
             // Validations
@@ -197,6 +197,7 @@ class AdminController extends BaseController
             $stmt->execute([$token]);
             $admin = $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
+            error_log('[verifyEmail] Erreur SQL: ' . $e->getMessage());
             $admin = null;
         }
 
@@ -255,8 +256,8 @@ class AdminController extends BaseController
         // Étape 3: Traitement du formulaire d'inscription si soumis
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = trim($_POST['username'] ?? '');
-            $password = trim($_POST['password'] ?? '');
-            $confirmPassword = trim($_POST['confirm_password'] ?? '');
+            $password = $_POST['password'] ?? '';
+            $confirmPassword = $_POST['confirm_password'] ?? '';
             $error = null;
 
             // Validation améliorée avec messages spécifiques
@@ -341,7 +342,7 @@ class AdminController extends BaseController
                 }
 
                 $username = trim($_POST['username'] ?? '');
-                $password = trim($_POST['password'] ?? '');
+                $password = $_POST['password'] ?? '';
 
                 if (empty($username) || empty($password)) {
                     $error = "Veuillez remplir tous les champs.";
@@ -428,36 +429,34 @@ class AdminController extends BaseController
         $username = $admin->username ?? '';
         $restaurant_id = $admin->restaurant_id ?? null;
 
-        // Récupération du slug
+        // Récupération du slug et de la date de dernière modification
         $slug = null;
-        if ($restaurant_id) {
-            try {
-                $stmt = $this->pdo->prepare("SELECT slug FROM restaurants WHERE id = ?");
-                $stmt->execute([$restaurant_id]);
-                $slug = $stmt->fetchColumn();
-            } catch (Exception $e) {
-                error_log("Erreur récupération slug: " . $e->getMessage());
-            }
-        }
-
-        // Récupération de la date de dernière modification
         $last_updated = null;
         if ($restaurant_id) {
             try {
-                $stmt = $this->pdo->prepare("SELECT updated_at FROM restaurants WHERE id = ?");
+                $stmt = $this->pdo->prepare("SELECT slug, updated_at FROM restaurants WHERE id = ?");
                 $stmt->execute([$restaurant_id]);
                 $restaurant = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($restaurant && $restaurant['updated_at']) {
-                    $last_updated = $restaurant['updated_at'];
+                if ($restaurant) {
+                    $slug = $restaurant['slug'] ?? null;
+                    $last_updated = $restaurant['updated_at'] ?? null;
                 }
             } catch (Exception $e) {
-                error_log("Erreur récupération date mise à jour: " . $e->getMessage());
+                // Silencieux en production
             }
         }
 
         $messages = $this->getFlashMessages();
         $success_message = $messages['success_message'];
         $error_message = $messages['error_message'];
+
+        // Vérifier si l'option statistiques avancées est disponible
+        $hasAdvancedStats = false;
+        try {
+            require_once __DIR__ . '/../Models/PremiumFeature.php';
+            $pf = new PremiumFeature($this->pdo);
+            $hasAdvancedStats = ($role === 'SUPER_ADMIN') || $pf->isEnabled($_SESSION['admin_id'], 'advanced_analytics');
+        } catch (Exception $e) { /* silencieux */ }
 
         // Récupérer les tokens de démo actifs pour SUPER_ADMIN
         $demoTokens = [];
@@ -479,8 +478,10 @@ class AdminController extends BaseController
             'slug' => $slug,
             'is_demo' => $this->isDemoMode(),
             'is_read_only' => $this->isReadOnly(),
+            'has_advanced_stats' => $hasAdvancedStats,
             'demoTokens' => $demoTokens,
             'demoExists' => $demoExists,
+            'csrf_token' => $this->getCsrfToken(),
         ]);
     }
     /**

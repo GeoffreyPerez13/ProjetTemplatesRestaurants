@@ -202,7 +202,20 @@
     <?php endif; ?>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <link rel="stylesheet" href="/assets/css/display/display.css">
+
+    <!-- CSS vitrine : chargement parallèle (remplace le @import cascade de display.css) -->
+    <link rel="stylesheet" href="/assets/css/shared/_variables.css">
+    <link rel="stylesheet" href="/assets/css/display/_display-variables.css">
+    <link rel="stylesheet" href="/assets/css/display/base.css">
+    <link rel="stylesheet" href="/assets/css/display/header.css">
+    <link rel="stylesheet" href="/assets/css/display/banner.css">
+    <link rel="stylesheet" href="/assets/css/display/carte.css">
+    <link rel="stylesheet" href="/assets/css/display/services.css">
+    <link rel="stylesheet" href="/assets/css/display/footer.css">
+    <link rel="stylesheet" href="/assets/css/display/lightbox.css">
+    <link rel="stylesheet" href="/assets/css/display/cookies.css">
+    <link rel="stylesheet" href="/assets/css/display/preview.css">
+    <link rel="stylesheet" href="/assets/css/display/maintenance.css">
     <?php if (($templateName ?? 'classic') !== 'classic'): ?>
         <link rel="stylesheet" href="/assets/css/display/template-<?= htmlspecialchars($templateName) ?>.css">
     <?php endif; ?>

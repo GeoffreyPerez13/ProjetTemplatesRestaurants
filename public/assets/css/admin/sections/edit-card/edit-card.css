@@ -210,7 +210,7 @@
   flex-wrap: wrap;
   gap: 25px;
   margin-top: 30px;
-  max-width: 80%;
+  width: 100%;
 }
 
 .category-block {
@@ -703,6 +703,20 @@
 }
 
 /* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+  .categories-grid {
+    gap: 20px;
+  }
+
+  .category-block {
+    flex: 1 1 300px;
+  }
+
+  .accordion-header h2 {
+    font-size: 1.2rem;
+  }
+}
+
 @media (min-width: 601px) {
   .category-buttons .btn {
     flex: 1;

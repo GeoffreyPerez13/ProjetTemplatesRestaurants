@@ -13,8 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const saveBtn = document.getElementById('save-closure-dates');
     
     // Si les éléments n'existent pas, ne pas initialiser le calendrier
-    if (!calendar || !monthYearElement || !prevMonthBtn || !nextMonthBtn || !selectedDatesList || !selectedCountElement || !clearAllBtn || !saveBtn) {
-        console.log('Éléments du calendrier non trouvés, initialisation annulée');
+    if (!calendar || !monthYearElement || !prevMonthBtn || !nextMonthBtn || !selectedDatesList || !selectedCountElement || !saveBtn) {
         return;
     }
     
@@ -335,6 +334,9 @@ document.addEventListener('DOMContentLoaded', function() {
             settingsContent.insertBefore(messageDiv, settingsContent.firstChild);
         }
         
+        // Scroller vers le message
+        messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
         // Auto-suppression après 4 secondes
         setTimeout(() => {
             if (messageDiv.parentNode) {

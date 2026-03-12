@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../../Helpers/CategoryIconHelper.php';
 
+$csrfField = '<input type="hidden" name="csrf_token" value="' . htmlspecialchars($csrf_token ?? '') . '">';
+
 $title = "Modifier la carte";
 $scripts = [
     "js/effects/accordion.js",
@@ -85,6 +87,7 @@ require __DIR__ . '/../partials/header.php';
 
     <div id="mode-selector-content" class="accordion-content expanded">
         <form method="post" class="mode-selector-form">
+            <?= $csrfField ?>
             <input type="hidden" name="anchor" value="mode-selector">
 
             <div class="mode-options">
@@ -129,6 +132,7 @@ require __DIR__ . '/../partials/header.php';
 
             <div id="quick-add-categories-content" class="accordion-content collapsed">
                 <form method="post" enctype="multipart/form-data" class="quick-add-form" id="quick-add-categories-form">
+                    <?= $csrfField ?>
                     <input type="hidden" name="batch_add_categories" value="1">
                     <input type="hidden" name="anchor" value="quick-add-categories">
 
@@ -190,6 +194,7 @@ require __DIR__ . '/../partials/header.php';
 
             <div id="quick-add-dishes-content" class="accordion-content collapsed">
                 <form method="post" enctype="multipart/form-data" class="quick-add-form" id="quick-add-dishes-form">
+                    <?= $csrfField ?>
                     <input type="hidden" name="batch_add_dishes" value="1">
                     <input type="hidden" name="anchor" value="quick-add-dishes">
 
@@ -335,6 +340,7 @@ require __DIR__ . '/../partials/header.php';
                         <!-- Colonne droite : X en haut, boutons accordéon en dessous -->
                         <div class="category-right">
                             <form method="post" class="category-delete-form">
+                                <?= $csrfField ?>
                                 <input type="hidden" name="delete_category" value="<?= $cat['id'] ?>">
                                 <input type="hidden" name="anchor" value="categories-grid">
                                 <button type="submit" class="category-delete-btn" title="Supprimer cette catégorie">
@@ -374,6 +380,7 @@ require __DIR__ . '/../partials/header.php';
 
                         <div id="edit-category-<?= $cat['id'] ?>" class="accordion-content collapsed">
                             <form method="post" class="edit-category-form" enctype="multipart/form-data">
+                                <?= $csrfField ?>
                                 <input type="hidden" name="category_id" value="<?= $cat['id'] ?>">
                                 <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
 
@@ -422,6 +429,7 @@ require __DIR__ . '/../partials/header.php';
 
                         <div id="add-dish-<?= $cat['id'] ?>" class="accordion-content collapsed">
                             <form method="post" class="new-dish-form" enctype="multipart/form-data">
+                                <?= $csrfField ?>
                                 <input type="hidden" name="category_id" value="<?= $cat['id'] ?>">
                                 <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
 
@@ -514,6 +522,7 @@ require __DIR__ . '/../partials/header.php';
                                                 <h4><i class="fas fa-utensil-spoon"></i> <?= htmlspecialchars($plat['name']) ?> - <?= htmlspecialchars($plat['price']) ?>€</h4>
                                                 <div class="dish-header-actions">
                                                     <form method="post" class="dish-delete-form">
+                                                        <?= $csrfField ?>
                                                         <input type="hidden" name="delete_dish" value="<?= $plat['id'] ?>">
                                                         <input type="hidden" name="current_category_id" value="<?= $cat['id'] ?>">
                                                         <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
@@ -533,6 +542,7 @@ require __DIR__ . '/../partials/header.php';
                                             <div id="dish-<?= $plat['id'] ?>" class="dish-accordion-content" data-category="<?= $cat['id'] ?>">
                                                 <div class="dish-edit-container">
                                                     <form method="post" class="inline-form edit-form" enctype="multipart/form-data">
+                                                        <?= $csrfField ?>
                                                         <input type="hidden" name="dish_id" value="<?= $plat['id'] ?>">
                                                         <input type="hidden" name="current_category_id" value="<?= $cat['id'] ?>">
                                                         <input type="hidden" name="anchor" value="dish-<?= $plat['id'] ?>">
@@ -664,6 +674,7 @@ require __DIR__ . '/../partials/header.php';
 
             <div id="upload-images-content" class="accordion-content expanded">
                 <form method="post" enctype="multipart/form-data" class="upload-form">
+                    <?= $csrfField ?>
                     <input type="hidden" name="anchor" value="upload-images">
 
                     <div class="upload-area" id="uploadArea">
@@ -755,6 +766,7 @@ require __DIR__ . '/../partials/header.php';
 
                                 <div class="image-actions">
                                     <form method="post" class="inline-form delete-image-form">
+                                        <?= $csrfField ?>
                                         <input type="hidden" name="image_id" value="<?= $image['id'] ?>">
                                         <input type="hidden" name="anchor" value="images-list">
                                         <button type="submit" name="delete_image" class="btn danger delete-image-btn"
@@ -789,6 +801,7 @@ require __DIR__ . '/../partials/header.php';
 
                     <!-- Formulaire de réorganisation -->
                     <form method="post" id="reorder-form" class="reorder-form">
+                        <?= $csrfField ?>
                         <input type="hidden" name="anchor" value="images-list">
                         <input type="hidden" name="new_order" id="new-order-input">
                         <input type="hidden" name="update_image_order" value="1">

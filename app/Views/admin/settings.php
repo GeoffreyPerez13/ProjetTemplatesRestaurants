@@ -53,6 +53,32 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                         <span>Fonctionnalités</span>
                     </a>
                 </li>
+                <?php
+                $premiumSections = [
+                    ['section' => 'google-reviews',  'key' => 'google_reviews',       'icon' => 'fa-star',           'label' => 'Avis Google'],
+                    ['section' => 'stats',           'key' => 'advanced_analytics',   'icon' => 'fa-chart-line',     'label' => 'Statistiques avancées'],
+                    ['section' => 'online-booking',  'key' => 'online_booking',       'icon' => 'fa-calendar-check', 'label' => 'Réservations en ligne'],
+                    ['section' => 'delivery',        'key' => 'delivery_integration', 'icon' => 'fa-motorcycle',     'label' => 'Intégration livraison'],
+                ];
+                foreach ($premiumSections as $ps):
+                    $enabled = !empty($premium_statuses[$ps['key']]);
+                    $isActive = $current_section === $ps['section'];
+                ?>
+                <li>
+                    <?php if ($enabled): ?>
+                    <a href="?page=settings&section=<?= $ps['section'] ?>" class="settings-premium-link<?= $isActive ? ' active' : '' ?>">
+                        <i class="fas <?= $ps['icon'] ?>"></i>
+                        <span><?= $ps['label'] ?></span>
+                    </a>
+                    <?php else: ?>
+                    <span class="settings-premium-link settings-premium-locked" title="Abonnement requis pour accéder à cette fonctionnalité">
+                        <i class="fas <?= $ps['icon'] ?>"></i>
+                        <span><?= $ps['label'] ?></span>
+                        <i class="fas fa-lock settings-lock-icon"></i>
+                    </span>
+                    <?php endif; ?>
+                </li>
+                <?php endforeach; ?>
                 <li>
                     <a href="?page=settings&section=subscriptions" class="<?= $current_section === 'subscriptions' ? 'active' : '' ?>">
                         <i class="fas fa-credit-card"></i>
@@ -98,6 +124,26 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                     Fonctionnalités
                 </a>
             </li>
+            <?php foreach ($premiumSections as $ps):
+                $enabled = !empty($premium_statuses[$ps['key']]);
+                $isActive = $current_section === $ps['section'];
+            ?>
+            <li>
+                <?php if ($enabled): ?>
+                <a href="?page=settings&section=<?= $ps['section'] ?>"
+                    class="settings-premium-link<?= $isActive ? ' active' : '' ?>">
+                    <i class="fas <?= $ps['icon'] ?>"></i>
+                    <?= $ps['label'] ?>
+                </a>
+                <?php else: ?>
+                <span class="settings-premium-link settings-premium-locked" title="Abonnement requis pour accéder à cette fonctionnalité">
+                    <i class="fas <?= $ps['icon'] ?>"></i>
+                    <?= $ps['label'] ?>
+                    <i class="fas fa-lock settings-lock-icon"></i>
+                </span>
+                <?php endif; ?>
+            </li>
+            <?php endforeach; ?>
             <li>
                 <a href="?page=settings&section=subscriptions"
                     class="<?= $current_section === 'subscriptions' ? 'active' : '' ?>">
@@ -390,9 +436,6 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                                     <i class="fas fa-calendar-times"></i>
                                     <span>Cliquez sur les dates dans le calendrier pour ajouter des fermetures exceptionnelles</span>
                                 </div>
-                                <button type="button" class="btn small" id="clear-all-closure-dates">
-                                    <i class="fas fa-trash"></i> Tout effacer
-                                </button>
                             </div>
 
                             <!-- Calendrier -->
@@ -413,7 +456,12 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
 
                             <!-- Liste des dates sélectionnées -->
                             <div class="selected-dates-container">
-                                <h4>Dates de fermeture programmées (<span id="selected-count">0</span>)</h4>
+                                <div class="selected-dates-header-row">
+                                    <h4>Dates de fermeture programmées (<span id="selected-count">0</span>)</h4>
+                                    <button type="button" class="btn small btn-clear-dates" id="clear-all-closure-dates">
+                                        <i class="fas fa-trash"></i> Tout effacer
+                                    </button>
+                                </div>
                                 <div class="selected-dates-list" id="selected-dates-list">
                                     <p class="no-dates">Aucune date de fermeture programmée</p>
                                 </div>
@@ -818,153 +866,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 <link rel="stylesheet" href="/assets/css/admin/sections/settings/premium.css">
                 <link rel="stylesheet" href="/assets/css/admin/sections/settings/subscriptions.css">
                 <script src="/assets/js/effects/accordion.js"></script>
-                
-                <style>
-                    /* Force dark mode styles for subscriptions - ULTRA SPECIFIC */
-                    .subscription-bulk-actions {
-                        background: #1f2937 !important;
-                        border: 1px solid #374151 !important;
-                    }
-                    
-                    .subscription-bulk-actions * {
-                        color: #e5e7eb !important;
-                    }
-                    
-                    /* Améliorer le bouton Tout sélectionner */
-                    .subscription-bulk-actions .checkbox-label {
-                        background: var(--color-primary) !important;
-                        border: 1px solid var(--color-primary) !important;
-                        border-radius: 6px !important;
-                        padding: 8px 16px !important;
-                        display: inline-flex !important;
-                        align-items: center !important;
-                        gap: 8px !important;
-                        cursor: pointer !important;
-                        transition: all 0.2s ease !important;
-                    }
-                    
-                    .subscription-bulk-actions .checkbox-label:hover {
-                        background: color-mix(in srgb, var(--color-primary) 80%, black) !important;
-                        border-color: color-mix(in srgb, var(--color-primary) 80%, black) !important;
-                    }
-                    
-                    .subscription-bulk-actions .checkbox-label input[type="checkbox"] {
-                        width: 18px !important;
-                        height: 18px !important;
-                        accent-color: #b45309 !important;
-                    }
-                    
-                    .subscription-bulk-actions .checkbox-label .checkmark {
-                        display: none !important;
-                    }
-                    
-                    .subscription-bulk-actions .checkbox-label span {
-                        color: #fbbf24 !important;
-                        font-weight: 500 !important;
-                        font-size: 14px !important;
-                    }
-                    
-                    /* Mode dark spécifique pour le bouton */
-                    body.dark-mode .subscription-bulk-actions .checkbox-label {
-                        background: #2c1810 !important;
-                        border: 1px solid #b45309 !important;
-                    }
-                    
-                    body.dark-mode .subscription-bulk-actions .checkbox-label:hover {
-                        background: #3d2418 !important;
-                        border-color: #d97706 !important;
-                    }
-                    
-                    body.dark-mode .subscription-bulk-actions .checkbox-label span {
-                        color: #fbbf24 !important;
-                    }
-                    
-                    /* Styles pour le mode light */
-                    .subscription-bulk-actions {
-                        background: #ffffff !important;
-                        border: 1px solid #d1d5db !important;
-                        border-radius: 6px !important;
-                    }
-                    
-                    .subscription-bulk-actions * {
-                        color: #1f2937 !important;
-                    }
-                    
-                    .subscriptions-table {
-                        background: #ffffff !important;
-                        border: 1px solid #d1d5db !important;
-                        border-radius: 6px !important;
-                    }
-                    
-                    .subscriptions-table thead {
-                        background: #f9fafb !important;
-                        border-bottom: 1px solid #d1d5db !important;
-                    }
-                    
-                    .subscriptions-table tbody tr {
-                        background: #ffffff !important;
-                        border-bottom: 1px solid #f1f5f9 !important;
-                    }
-                    
-                    .subscriptions-table tbody tr:hover {
-                        background: #f8fafc !important;
-                    }
-                    
-                    .subscriptions-table td {
-                        background: transparent !important;
-                        color: #1f2937 !important;
-                        border-bottom-color: #f1f5f9 !important;
-                    }
-                    
-                    .subscriptions-table th {
-                        background: transparent !important;
-                        color: #1f2937 !important;
-                        border-bottom-color: #d1d5db !important;
-                        font-weight: 600 !important;
-                    }
-                    
-                    /* Target specific elements in dark mode */
-                    body.dark-mode .subscription-bulk-actions {
-                        background: #1f2937 !important;
-                        border-color: #374151 !important;
-                    }
-                    
-                    body.dark-mode .subscriptions-table {
-                        background: #1f2937 !important;
-                        border: 1px solid #374151 !important;
-                    }
-                    
-                    body.dark-mode .subscriptions-table td {
-                        color: #e5e7eb !important;
-                        border-color: #374151 !important;
-                    }
-                    
-                    body.dark-mode .subscriptions-table th {
-                        color: #f3f4f6 !important;
-                        border-color: #374151 !important;
-                    }
-                    
-                    /* Force accordion content */
-                    .accordion-content .subscription-bulk-actions {
-                        background: #1f2937 !important;
-                        border: 1px solid #374151 !important;
-                    }
-                    
-                    .accordion-content .subscriptions-table {
-                        background: #1f2937 !important;
-                        border: 1px solid #374151 !important;
-                    }
-                    
-                    .accordion-content .subscriptions-table td {
-                        color: #e5e7eb !important;
-                        border-color: #374151 !important;
-                    }
-                    
-                    .accordion-content .subscriptions-table th {
-                        color: #f3f4f6 !important;
-                        border-color: #374151 !important;
-                    }
-                </style>
+
                 <h2>Abonnements</h2>
                 <p class="section-description">Gérez vos abonnements et options actives.</p>
                 
@@ -998,6 +900,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                     $basicSub = $stmtB->fetch(PDO::FETCH_ASSOC);
                 } catch (Exception $e) { $basicSub = null; }
                 $hasActiveSub = $basicSub && $basicSub['status'] === 'active';
+                $basicStartedAt = !empty($basicSub['started_at']) ? (new DateTime($basicSub['started_at']))->format('d/m/Y') : null;
                 ?>
 
                 <?php if ($isSuperAdmin): ?>
@@ -1021,7 +924,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                     }
                 }
                 ?>
-                <div class="accordion-section premium-total-accordion">
+                <div class="accordion-section premium-total-accordion" id="subscription-total">
                     <div class="accordion-header">
                         <h3><i class="fas fa-calculator"></i> Total de votre abonnement</h3>
                         <button type="button" class="accordion-toggle" data-target="subscription-total-content">
@@ -1064,10 +967,9 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                         <!-- Actions groupées -->
                         <div class="subscription-bulk-actions">
                             <div class="bulk-select-all">
-                                <label class="checkbox-label">
+                                <label class="bulk-select-label">
                                     <input type="checkbox" id="select-all-subs" class="select-all-checkbox">
-                                    <span class="checkmark"></span>
-                                    Tout sélectionner
+                                    <span>Tout sélectionner</span>
                                 </label>
                             </div>
                             <div class="bulk-actions-buttons">
@@ -1077,41 +979,35 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                             </div>
                         </div>
 
-                        <!-- Tableau des abonnements -->
-                        <table class="subscriptions-table">
-                            <thead>
-                                <tr>
-                                    <th class="col-checkbox">
-                                        <!-- Vide - espace pour l'alignement -->
-                                    </th>
-                                    <th class="col-type">Type</th>
-                                    <th class="col-name">Nom</th>
-                                    <th class="col-price">Prix</th>
-                                    <th class="col-status">Statut</th>
-                                    <th class="col-actions">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Abonnement Basique -->
-                                <tr class="subscription-row basique-row">
-                                    <td class="col-checkbox">
-                                        <input type="checkbox" class="sub-checkbox" data-type="basique" data-name="Abonnement Basique" id="sub-basique">
-                                        <label for="sub-basique" class="sub-checkbox-label"></label>
-                                    </td>
-                                    <td class="col-type">
-                                        <span class="subscription-badge basique-badge">
-                                            <i class="fas fa-store"></i>
-                                            Basique
-                                        </span>
-                                    </td>
-                                    <td class="col-name">Abonnement Basique MenuMiam</td>
-                                    <td class="col-price">9€/mois</td>
-                                    <td class="col-status">
-                                        <span class="status-badge active">
-                                            <i class="fas fa-check-circle"></i> Actif
-                                        </span>
-                                    </td>
-                                    <td class="col-actions">
+                        <!-- Liste des abonnements en cards -->
+                        <div class="subscriptions-list">
+                            <!-- Abonnement Basique -->
+                            <div class="sub-card sub-card-basique subscription-row">
+                                <div class="sub-card-check">
+                                    <input type="checkbox" class="sub-checkbox" data-type="basique" data-name="Abonnement Basique" id="sub-basique">
+                                    <label for="sub-basique" class="sub-checkbox-label"></label>
+                                </div>
+                                <div class="sub-card-body">
+                                    <div class="sub-card-top">
+                                        <div class="sub-card-info">
+                                            <span class="sub-type-badge basique-badge">
+                                                <i class="fas fa-store"></i> Basique
+                                            </span>
+                                            <h4 class="sub-card-name">Abonnement Basique MenuMiam</h4>
+                                        </div>
+                                        <span class="sub-card-price">9€<small>/mois</small></span>
+                                    </div>
+                                    <div class="sub-card-bottom">
+                                        <div class="sub-card-meta">
+                                            <span class="status-badge active">
+                                                <i class="fas fa-check-circle"></i> Actif
+                                            </span>
+                                            <?php if ($basicStartedAt): ?>
+                                            <span class="sub-card-date">
+                                                <i class="fas fa-calendar-alt"></i> Depuis le <?= $basicStartedAt ?>
+                                            </span>
+                                            <?php endif; ?>
+                                        </div>
                                         <form method="POST" action="?page=cancel-subscription"
                                               class="cancel-form"
                                               data-subscription-type="basique"
@@ -1122,31 +1018,34 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                                                 <i class="fas fa-times-circle"></i> Résilier
                                             </button>
                                         </form>
-                                    </td>
-                                </tr>
+                                    </div>
+                                </div>
+                            </div>
 
-                                <!-- Options Premium -->
-                                <?php foreach ($activePremiumFeatures as $featureKey => $_ignore): ?>
-                                    <?php $featureDef = $availableFeatures[$featureKey] ?? null; if (!$featureDef) continue; ?>
-                                <tr class="subscription-row premium-row">
-                                    <td class="col-checkbox">
-                                        <input type="checkbox" class="sub-checkbox" data-type="premium" data-name="<?= htmlspecialchars($featureDef['name']) ?>" id="sub-<?= htmlspecialchars($featureKey) ?>">
-                                        <label for="sub-<?= htmlspecialchars($featureKey) ?>" class="sub-checkbox-label"></label>
-                                    </td>
-                                    <td class="col-type">
-                                        <span class="subscription-badge premium-badge">
-                                            <i class="fas fa-star"></i>
-                                            Premium
-                                        </span>
-                                    </td>
-                                    <td class="col-name"><?= htmlspecialchars($featureDef['name']) ?></td>
-                                    <td class="col-price">+<?= (int)$featureDef['price_monthly'] ?>€/mois</td>
-                                    <td class="col-status">
-                                        <span class="status-badge active">
-                                            <i class="fas fa-check-circle"></i> Actif
-                                        </span>
-                                    </td>
-                                    <td class="col-actions">
+                            <!-- Options Premium -->
+                            <?php foreach ($activePremiumFeatures as $featureKey => $_ignore): ?>
+                                <?php $featureDef = $availableFeatures[$featureKey] ?? null; if (!$featureDef) continue; ?>
+                            <div class="sub-card sub-card-premium subscription-row">
+                                <div class="sub-card-check">
+                                    <input type="checkbox" class="sub-checkbox" data-type="premium" data-name="<?= htmlspecialchars($featureDef['name']) ?>" id="sub-<?= htmlspecialchars($featureKey) ?>">
+                                    <label for="sub-<?= htmlspecialchars($featureKey) ?>" class="sub-checkbox-label"></label>
+                                </div>
+                                <div class="sub-card-body">
+                                    <div class="sub-card-top">
+                                        <div class="sub-card-info">
+                                            <span class="sub-type-badge premium-badge">
+                                                <i class="fas fa-star"></i> Premium
+                                            </span>
+                                            <h4 class="sub-card-name"><?= htmlspecialchars($featureDef['name']) ?></h4>
+                                        </div>
+                                        <span class="sub-card-price">+<?= (int)$featureDef['price_monthly'] ?>€<small>/mois</small></span>
+                                    </div>
+                                    <div class="sub-card-bottom">
+                                        <div class="sub-card-meta">
+                                            <span class="status-badge active">
+                                                <i class="fas fa-check-circle"></i> Actif
+                                            </span>
+                                        </div>
                                         <form method="POST" action="?page=cancel-subscription"
                                               class="cancel-form"
                                               data-subscription-type="premium"
@@ -1158,22 +1057,18 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                                                 <i class="fas fa-trash-alt"></i> Supprimer
                                             </button>
                                         </form>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
 
-                                <?php if (empty($activePremiumFeatures)): ?>
-                                <tr class="no-premium-row">
-                                    <td colspan="6" class="no-premium-cell">
-                                        <div class="no-premium-message">
-                                            <i class="fas fa-info-circle"></i>
-                                            <span>Aucune option premium active pour le moment.</span>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
+                            <?php if (empty($activePremiumFeatures)): ?>
+                            <div class="sub-card-empty">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Aucune option premium active pour le moment.</span>
+                            </div>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
                 <?php elseif (!$isSuperAdmin): ?>
@@ -1188,6 +1083,174 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                     </div>
                 <?php endif; ?>
             </div>
+
+        <?php elseif ($current_section === 'google-reviews' && !empty($premium_statuses['google_reviews'])): ?>
+            <!-- Section Avis Google -->
+            <div class="settings-section">
+                <h2><i class="fas fa-star"></i> Avis Google</h2>
+                <p class="section-description">Affichez les avis Google de votre restaurant directement sur votre site vitrine.</p>
+                <div class="premium-section-placeholder">
+                    <i class="fas fa-hard-hat"></i>
+                    <p>Cette fonctionnalité est en cours de développement.</p>
+                </div>
+            </div>
+
+        <?php elseif ($current_section === 'stats' && !empty($has_advanced_stats)): ?>
+            <!-- Section Statistiques avancées -->
+            <link rel="stylesheet" href="/assets/css/admin/sections/stats/stats.css">
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+            <div class="settings-section">
+                <div class="stats-page stats-page-embedded">
+                    <div class="stats-header">
+                        <div class="stats-header-left">
+                            <div>
+                                <h2><i class="fas fa-chart-line"></i> Statistiques avancées</h2>
+                                <p class="stats-subtitle">
+                                    <?= htmlspecialchars($restaurant_name_display ?? '') ?>
+                                    <?php if (!empty($slug)): ?>
+                                        — <a href="?page=display&slug=<?= htmlspecialchars($slug) ?>" target="_blank" class="stats-site-link">
+                                            <i class="fas fa-external-link-alt"></i> Voir le site
+                                        </a>
+                                    <?php endif; ?>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="stats-header-right">
+                            <div class="stats-period-selector">
+                                <button type="button" class="period-btn" data-days="7">7j</button>
+                                <button type="button" class="period-btn active" data-days="30">30j</button>
+                                <button type="button" class="period-btn" data-days="90">90j</button>
+                                <button type="button" class="period-btn" data-days="365">1an</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI Cards -->
+                    <div class="stats-kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-icon"><i class="fas fa-eye"></i></div>
+                            <div class="kpi-content">
+                                <span class="kpi-value" id="kpi-total-visits">—</span>
+                                <span class="kpi-label">Visites totales</span>
+                            </div>
+                            <div class="kpi-trend" id="kpi-trend-visits"></div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon kpi-icon-unique"><i class="fas fa-users"></i></div>
+                            <div class="kpi-content">
+                                <span class="kpi-value" id="kpi-unique-visitors">—</span>
+                                <span class="kpi-label">Visiteurs uniques</span>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon kpi-icon-avg"><i class="fas fa-chart-bar"></i></div>
+                            <div class="kpi-content">
+                                <span class="kpi-value" id="kpi-avg-daily">—</span>
+                                <span class="kpi-label">Moy. / jour</span>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon kpi-icon-device"><i class="fas fa-mobile-alt"></i></div>
+                            <div class="kpi-content">
+                                <span class="kpi-value" id="kpi-mobile-pct">—</span>
+                                <span class="kpi-label">Mobile</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Graphique principal : visites par jour -->
+                    <div class="stats-chart-card stats-chart-main">
+                        <div class="chart-card-header">
+                            <h3><i class="fas fa-chart-area"></i> Visites par jour</h3>
+                        </div>
+                        <div class="chart-container chart-container-main">
+                            <canvas id="chart-visits-per-day"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Ligne 2 : Appareils + Navigateurs -->
+                    <div class="stats-charts-row">
+                        <div class="stats-chart-card">
+                            <div class="chart-card-header">
+                                <h3><i class="fas fa-laptop"></i> Appareils</h3>
+                            </div>
+                            <div class="chart-container chart-container-sm">
+                                <canvas id="chart-devices"></canvas>
+                            </div>
+                        </div>
+                        <div class="stats-chart-card">
+                            <div class="chart-card-header">
+                                <h3><i class="fas fa-globe"></i> Navigateurs</h3>
+                            </div>
+                            <div class="chart-container chart-container-sm">
+                                <canvas id="chart-browsers"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ligne 3 : Heures de pointe + Jours de la semaine -->
+                    <div class="stats-charts-row">
+                        <div class="stats-chart-card">
+                            <div class="chart-card-header">
+                                <h3><i class="fas fa-clock"></i> Heures de pointe</h3>
+                            </div>
+                            <div class="chart-container chart-container-sm">
+                                <canvas id="chart-hours"></canvas>
+                            </div>
+                        </div>
+                        <div class="stats-chart-card">
+                            <div class="chart-card-header">
+                                <h3><i class="fas fa-calendar-week"></i> Jours de la semaine</h3>
+                            </div>
+                            <div class="chart-container chart-container-sm">
+                                <canvas id="chart-weekdays"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top référents -->
+                    <div class="stats-chart-card">
+                        <div class="chart-card-header">
+                            <h3><i class="fas fa-link"></i> Sources de trafic</h3>
+                        </div>
+                        <div class="stats-referrers-table" id="referrers-table">
+                            <div class="stats-loading"><i class="fas fa-spinner fa-spin"></i> Chargement…</div>
+                        </div>
+                    </div>
+
+                    <!-- Loader global -->
+                    <div class="stats-global-loader" id="stats-loader">
+                        <div class="stats-loader-spinner">
+                            <i class="fas fa-chart-line fa-spin"></i>
+                            <p>Chargement des statistiques…</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <script src="/assets/js/sections/stats/stats.js"></script>
+
+        <?php elseif ($current_section === 'online-booking' && !empty($premium_statuses['online_booking'])): ?>
+            <!-- Section Réservations en ligne -->
+            <div class="settings-section">
+                <h2><i class="fas fa-calendar-check"></i> Réservations en ligne</h2>
+                <p class="section-description">Permettez à vos clients de réserver une table directement depuis votre site vitrine.</p>
+                <div class="premium-section-placeholder">
+                    <i class="fas fa-hard-hat"></i>
+                    <p>Cette fonctionnalité est en cours de développement.</p>
+                </div>
+            </div>
+
+        <?php elseif ($current_section === 'delivery' && !empty($premium_statuses['delivery_integration'])): ?>
+            <!-- Section Intégration livraison -->
+            <div class="settings-section">
+                <h2><i class="fas fa-motorcycle"></i> Intégration livraison</h2>
+                <p class="section-description">Connectez Uber Eats, Deliveroo et autres plateformes de livraison à votre site.</p>
+                <div class="premium-section-placeholder">
+                    <i class="fas fa-hard-hat"></i>
+                    <p>Cette fonctionnalité est en cours de développement.</p>
+                </div>
+            </div>
+
         <?php endif; ?>
     </div>
 </div>
