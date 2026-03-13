@@ -152,6 +152,22 @@
         collapseCategory(categoryId);
       });
     });
+
+    // Contrôles plats par catégorie - Tout ouvrir
+    document.querySelectorAll(".expand-dishes").forEach((button) => {
+      button.addEventListener("click", function () {
+        const categoryId = this.getAttribute("data-category-id");
+        expandDishesInCategory(categoryId);
+      });
+    });
+
+    // Contrôles plats par catégorie - Tout fermer
+    document.querySelectorAll(".collapse-dishes").forEach((button) => {
+      button.addEventListener("click", function () {
+        const categoryId = this.getAttribute("data-category-id");
+        collapseDishesInCategory(categoryId);
+      });
+    });
   }
 
   /**
@@ -334,6 +350,42 @@
           closeDishAccordion(dishSection.id);
         });
     }, 100);
+  }
+
+  /**
+   * Ouvre tous les plats d'une catégorie
+   */
+  function expandDishesInCategory(categoryId) {
+    document
+      .querySelectorAll(
+        `.dish-accordion-content[data-category="${categoryId}"]`,
+      )
+      .forEach((dishSection) => {
+        openDishAccordion(dishSection.id);
+        // Mettre à jour l'icône du toggle correspondant
+        const toggle = document.querySelector(
+          `.dish-accordion-toggle[data-target="${dishSection.id}"]`,
+        );
+        if (toggle) toggle.classList.add("expanded");
+      });
+  }
+
+  /**
+   * Ferme tous les plats d'une catégorie
+   */
+  function collapseDishesInCategory(categoryId) {
+    document
+      .querySelectorAll(
+        `.dish-accordion-content[data-category="${categoryId}"]`,
+      )
+      .forEach((dishSection) => {
+        closeDishAccordion(dishSection.id);
+        // Mettre à jour l'icône du toggle correspondant
+        const toggle = document.querySelector(
+          `.dish-accordion-toggle[data-target="${dishSection.id}"]`,
+        );
+        if (toggle) toggle.classList.remove("expanded");
+      });
   }
 
   /**

@@ -1093,16 +1093,13 @@ class CardController extends BaseController
             }
 
             try {
-                $dish_id = $dishModel->create($target_category_id, $name, $description, $priceFloat, $imagePath);
+                $dish = $dishModel->create($target_category_id, $name, $priceFloat, $description, $imagePath);
+                $dish_id = $dish->getId();
                 
                 // Ajouter les allergènes si présents
                 if (!empty($allergens) && is_array($allergens)) {
-                    foreach ($allergens as $allergene_id) {
-                        $allergene_id = (int)$allergene_id;
-                        if ($allergene_id > 0) {
-                            $dishModel->addAllergen($dish_id, $allergene_id);
-                        }
-                    }
+                    $allergeneModel = new Allergene($this->pdo);
+                    $allergeneModel->saveForDish($dish_id, $allergens);
                 }
                 
                 $added++;

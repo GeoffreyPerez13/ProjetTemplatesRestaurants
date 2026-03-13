@@ -514,6 +514,16 @@ require __DIR__ . '/../partials/header.php';
                             </div>
 
                             <div id="edit-dishes-<?= $cat['id'] ?>" class="accordion-content collapsed">
+                                <?php if (count($plats) >= 2): ?>
+                                <div class="dish-accordion-controls">
+                                    <button type="button" class="btn small expand-dishes" data-category-id="<?= $cat['id'] ?>">
+                                        <i class="fas fa-expand-alt"></i> Tout ouvrir
+                                    </button>
+                                    <button type="button" class="btn small collapse-dishes" data-category-id="<?= $cat['id'] ?>">
+                                        <i class="fas fa-compress-alt"></i> Tout fermer
+                                    </button>
+                                </div>
+                                <?php endif; ?>
                                 <ul class="dish-list">
                                     <?php foreach ($plats as $plat): ?>
                                         <li class="dish-accordion-item">
@@ -533,7 +543,7 @@ require __DIR__ . '/../partials/header.php';
                                                     <button type="button" class="dish-accordion-toggle"
                                                         data-target="dish-<?= $plat['id'] ?>"
                                                         data-category="<?= $cat['id'] ?>">
-                                                        <i class="fas fa-chevron-down"></i>
+                                                        <i class="fas fa-chevron-up"></i>
                                                     </button>
                                                 </div>
                                             </div>
