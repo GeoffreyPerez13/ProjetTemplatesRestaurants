@@ -1,7 +1,11 @@
 <?php
 
 require_once __DIR__ . '/BaseController.php';
+require_once __DIR__ . '/../Models/Admin.php';
+require_once __DIR__ . '/../Models/Restaurant.php';
+require_once __DIR__ . '/../Helpers/Validator.php';
 require_once __DIR__ . '/../Models/PremiumFeature.php';
+require_once __DIR__ . '/../Models/BillingCycle.php';
 
 /**
  * Contrôleur Stripe : gère le paiement d'activation de l'abonnement Basique
@@ -12,6 +16,21 @@ require_once __DIR__ . '/../Models/PremiumFeature.php';
  */
 class StripeController extends BaseController
 {
+    /**
+     * Calcule le montant prorata en centimes pour Stripe
+     */
+    private function calculateProrataAmountCents($priceMonthlyEuros)
+    {
+        $now = new DateTime('today');
+        $daysInMonth = (int)$now->format('t');
+        $currentDay = (int)$now->format('j');
+        $targetMonth = $currentDay > 15 ? (int)$now->format('m') + 1 : (int)$now->format('m');
+        $targetDate = new DateTime($now->format('Y') . '-' . $targetMonth . '-15');
+        $daysRemaining = (int)$targetDate->diff($now)->days;
+        $prorata = round(($daysRemaining / $daysInMonth) * $priceMonthlyEuros, 2);
+        return (int)round($prorata * 100);
+    }
+
     /**
      * Point d'entrée principal pour créer une session Stripe Checkout
      */
@@ -57,9 +76,9 @@ class StripeController extends BaseController
         $postData = http_build_query([
             'payment_method_types[0]'                              => 'card',
             'line_items[0][price_data][currency]'                  => 'eur',
-            'line_items[0][price_data][product_data][name]'        => 'Abonnement Basique MenuMiam',
-            'line_items[0][price_data][product_data][description]' => 'Site vitrine restaurant – accès complet',
-            'line_items[0][price_data][unit_amount]'               => 900,
+            'line_items[0][price_data][product_data][name]'        => 'Abonnement Basique MenuMiam (prorata)',
+            'line_items[0][price_data][product_data][description]' => 'Site vitrine restaurant – prorata jusqu\'au 15 du mois',
+            'line_items[0][price_data][unit_amount]'               => $this->calculateProrataAmountCents(9),
             'line_items[0][quantity]'                              => 1,
             'mode'                                                 => 'payment',
             'customer_email'                                       => $adminEmail,
@@ -106,30 +125,33 @@ class StripeController extends BaseController
             $totalAmount += $allowed[$feature]['amount'];
         }
 
-        // Créer les line items avec la nouvelle API Stripe
+        // Créer les line items avec prorata
+        $basiqueProrataAmount = $this->calculateProrataAmountCents(9);
         $lineItems = [
             [
                 'price_data' => [
                     'currency' => 'eur',
-                    'unit_amount' => 900,
+                    'unit_amount' => $basiqueProrataAmount,
                     'product_data' => [
-                        'name' => 'Abonnement Basique MenuMiam',
-                        'description' => 'Site vitrine restaurant – accès complet',
+                        'name' => 'Abonnement Basique MenuMiam (prorata)',
+                        'description' => 'Prorata jusqu\'au 15 du mois – puis 9€/mois',
                     ],
                 ],
                 'quantity' => 1,
             ]
         ];
 
-        // Ajouter les options premium sélectionnées
+        // Ajouter les options premium sélectionnées au prorata
         foreach ($selected as $feature) {
+            $priceEuros = $allowed[$feature]['amount'] / 100;
+            $prorataAmount = $this->calculateProrataAmountCents($priceEuros);
             $lineItems[] = [
                 'price_data' => [
                     'currency' => 'eur',
-                    'unit_amount' => $allowed[$feature]['amount'],
+                    'unit_amount' => $prorataAmount,
                     'product_data' => [
-                        'name' => $allowed[$feature]['name'],
-                        'description' => 'Option premium à la carte',
+                        'name' => $allowed[$feature]['name'] . ' (prorata)',
+                        'description' => 'Prorata jusqu\'au 15 du mois – puis ' . $priceEuros . '€/mois',
                     ],
                 ],
                 'quantity' => 1,
@@ -205,17 +227,22 @@ class StripeController extends BaseController
             'metadata[features]'      => json_encode($selected),
         ];
 
+        $prorataTotal = 0;
         foreach ($selected as $i => $key) {
+            $priceEuros = $allowed[$key]['amount'] / 100;
+            $prorataAmount = $this->calculateProrataAmountCents($priceEuros);
+            $prorataTotal += $prorataAmount;
             $params["line_items[{$i}][price_data][currency]"]                  = 'eur';
-            $params["line_items[{$i}][price_data][product_data][name]"]        = 'MenuMiam — ' . $allowed[$key]['name'];
-            $params["line_items[{$i}][price_data][unit_amount]"]               = $allowed[$key]['amount'];
+            $params["line_items[{$i}][price_data][product_data][name]"]        = 'MenuMiam — ' . $allowed[$key]['name'] . ' (prorata)';
+            $params["line_items[{$i}][price_data][product_data][description]"] = 'Prorata jusqu\'au 15 du mois – puis ' . $priceEuros . '€/mois';
+            $params["line_items[{$i}][price_data][unit_amount]"]               = $prorataAmount;
             $params["line_items[{$i}][quantity]"]                              = 1;
         }
 
         $monthlyTotal = 9 + (int)array_sum(array_map(fn($k) => $allowed[$k]['amount'] / 100, $selected));
         $params['custom_text[submit][message]'] =
-            'Ces options s\'ajoutent à votre Abonnement Basique MenuMiam (9€/mois, déjà actif). '
-            . 'Total mensuel estimé : ' . $monthlyTotal . '€/mois.';
+            'Prorata ce mois : ' . number_format($prorataTotal / 100, 2) . '€. '
+            . 'À partir du mois prochain : ' . $monthlyTotal . '€/mois (basique inclus).';
 
         $this->redirectToStripe(http_build_query($params));
     }
@@ -349,7 +376,7 @@ class StripeController extends BaseController
                     
                     if ($featureKey) {
                         $pf->disable($_SESSION['admin_id'], $featureKey);
-                        $cancelledPremium[] = $featureName;
+                        $cancelledPremium[] = $this->translateFeatureName($featureKey);
                     }
                 }
             }
@@ -371,7 +398,17 @@ class StripeController extends BaseController
                 $message = 'Aucun abonnement n\'a été résilié.';
             }
 
-            // Ajouter le message de succès et rediriger
+            // Pour AJAX, retourner le succès JSON
+            if (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false) {
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => true,
+                    'message' => $message
+                ]);
+                exit;
+            }
+            
+            // Pour les requêtes normales, utiliser le système de messages du site
             $this->addSuccessMessage($message);
             header('Location: ?page=settings&section=subscriptions#subscription-total');
             exit;
@@ -452,7 +489,7 @@ class StripeController extends BaseController
         if ($type === 'premium') {
             $features = json_decode($session['metadata']['features'] ?? '[]', true);
             $this->activatePremiumFeatures($_SESSION['admin_id'], $features);
-            $names = implode(', ', array_map(fn($f) => ucfirst(str_replace('_', ' ', $f)), $features));
+            $names = implode(', ', array_map([$this, 'translateFeatureName'], $features));
             $this->addSuccessMessage(
                 'Paiement confirmé ! Option(s) activée(s) : ' . $names . '.'
             );
@@ -463,7 +500,7 @@ class StripeController extends BaseController
             $this->activateSubscription($_SESSION['admin_id'], $sessionId);
             $this->activatePremiumFeatures($_SESSION['admin_id'], $features);
             
-            $names = implode(', ', array_map(fn($f) => ucfirst(str_replace('_', ' ', $f)), $features));
+            $names = implode(', ', array_map([$this, 'translateFeatureName'], $features));
             $this->addSuccessMessage(
                 'Paiement confirmé ! Votre abonnement Basique est actif' . 
                 ($names ? ' et option(s) premium activée(s) : ' . $names . '.' : ' !')
@@ -715,7 +752,7 @@ class StripeController extends BaseController
         try {
             $stmt = $this->pdo->prepare(
                 "UPDATE client_subscriptions
-                 SET status = 'active', started_at = NOW(), notes = ?
+                 SET status = 'active', started_at = NOW(), expires_at = DATE_ADD(NOW(), INTERVAL 1 MONTH), notes = ?
                  WHERE admin_id = ?"
             );
             $note = 'Stripe session: ' . $stripeSessionId;
@@ -725,14 +762,29 @@ class StripeController extends BaseController
             if ($stmt->rowCount() === 0) {
                 $stmt = $this->pdo->prepare(
                     "INSERT INTO client_subscriptions
-                        (admin_id, plan_type, status, price_per_month, started_at, notes)
-                     VALUES (?, 'basique', 'active', 9.00, NOW(), ?)"
+                        (admin_id, plan_type, status, price_per_month, started_at, expires_at, notes)
+                     VALUES (?, 'basique', 'active', 9.00, NOW(), DATE_ADD(NOW(), INTERVAL 1 MONTH), ?)"
                 );
                 $stmt->execute([$adminId, $note]);
             }
         } catch (Exception $e) {
             error_log('[Stripe] Erreur activation abonnement: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Traduit les clés de fonctionnalités en noms français
+     */
+    private function translateFeatureName($featureKey)
+    {
+        $translations = [
+            'google_reviews' => 'Avis Google',
+            'advanced_analytics' => 'Statistiques avancées',
+            'online_booking' => 'Réservations en ligne',
+            'delivery_integration' => 'Intégration livraison'
+        ];
+        
+        return $translations[$featureKey] ?? ucfirst(str_replace('_', ' ', $featureKey));
     }
 
     /**
@@ -745,8 +797,17 @@ class StripeController extends BaseController
         }
         try {
             $premiumFeature = new PremiumFeature($this->pdo);
+            $billingCycle = new BillingCycle($this->pdo);
+            
             foreach ($features as $featureKey) {
                 $premiumFeature->enable($adminId, $featureKey);
+                
+                // Récupérer le prix mensuel de la feature
+                $availableFeatures = $premiumFeature->getAvailableFeatures();
+                $priceMonthly = $availableFeatures[$featureKey]['price_monthly'] ?? 0;
+                
+                // Mettre à jour le cycle de facturation avec prorata
+                $billingCycle->updateBillingForPremiumFeature($adminId, $featureKey, $priceMonthly);
             }
         } catch (Exception $e) {
             error_log('[Stripe] Erreur activation options premium: ' . $e->getMessage());

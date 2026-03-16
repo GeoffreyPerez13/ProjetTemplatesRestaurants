@@ -56,6 +56,12 @@ $displayDir = __DIR__ . '/display/';
             </button>
         </div>
 
+        <!-- TODO: Bouton dark mode — à réactiver après adaptation des couleurs par layout -->
+        <!-- <button id="landing-dark-mode-toggle" class="dark-mode-toggle-fixed" aria-label="Basculer le mode sombre">
+            <i class="fas fa-moon"></i>
+            <i class="fas fa-sun"></i>
+        </button>
+        <script src="/assets/js/display/dark-mode.js"></script> -->
         <script src="/assets/js/display/navigation.js"></script>
         <script src="/assets/js/display/lightbox.js"></script>
         <script src="/assets/js/display/cookies.js"></script>

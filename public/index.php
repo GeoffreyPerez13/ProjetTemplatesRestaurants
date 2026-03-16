@@ -40,6 +40,24 @@ switch ($page) {
         require __DIR__ . '/../app/Views/landing.php';
         break;
 
+    case 'seed-reviews':
+        $action = $_GET['action'] ?? 'replace';
+        $settingsController = new SettingsController($pdo);
+        
+        switch ($action) {
+            case 'clear':
+                $settingsController->clearReviews();
+                break;
+            case 'add-5':
+                $settingsController->addReviews(5);
+                break;
+            case 'replace':
+            default:
+                $settingsController->seedReviews();
+                break;
+        }
+        break;
+
     case 'auto-register':
         $adminController = new AdminController($pdo);
         $adminController->autoRegister();  // Inscription libre depuis la page vitrine
@@ -165,6 +183,9 @@ switch ($page) {
                 break;
             case 'update-google-reviews':
                 $controller->updateGoogleReviews();
+                break;
+            case 'seed-reviews':
+                require_once __DIR__ . '/../seed-reviews.php';
                 break;
             case 'toggle-premium':
                 $controller->togglePremium();

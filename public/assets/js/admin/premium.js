@@ -124,20 +124,8 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         e.stopPropagation();
         
-        const button = e.currentTarget;
-        const configDiv = document.getElementById('google-reviews-config');
-        
-        // Toggle l'affichage de la configuration
-        if (configDiv.style.display === 'none') {
-            configDiv.style.display = 'block';
-            configDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            button.innerHTML = '<i class="fas fa-times"></i> Masquer';
-            button.classList.add('active');
-        } else {
-            configDiv.style.display = 'none';
-            button.innerHTML = '<i class="fas fa-cog"></i> Configurer';
-            button.classList.remove('active');
-        }
+        // Rediriger vers la page de configuration Google Reviews
+        window.location.href = '?page=settings&section=google-reviews';
     }
 
     // Fonction pour afficher les notifications

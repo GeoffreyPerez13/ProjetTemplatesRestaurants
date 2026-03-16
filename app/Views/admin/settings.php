@@ -5,7 +5,8 @@ $scripts = [
     "js/sections/settings/premium-cart.js",
     "js/effects/accordion.js",
     "js/sections/settings/closure-dates.js",
-    "js/sections/settings/subscriptions.js"
+    "js/sections/settings/subscriptions.js",
+    "js/admin/premium.js"
 ];
 
 require __DIR__ . '/../partials/header.php';
@@ -592,7 +593,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                                     <?php
                                     $isActive           = (int)($userFeaturesMap[$featureKey] ?? 0) === 1;
                                     $canActivateDirectly = $isSuperAdmin && !$isActive;
-                                    $isSelectable       = !$isSuperAdmin && $hasActiveSub; // Sélectionnable si on a un abonnement basique
+                                    $isSelectable       = !$isSuperAdmin && ($hasActiveSub || !$hasActiveSub); // Sélectionnable si on a un abonnement basique OU si on n'en a pas (pour pouvoir en acheter un)
                                     $cardClass          = $isActive ? 'active' : ($isSelectable ? 'selectable' : '');
                                     ?>
                                     <div class="premium-feature-card <?= $cardClass ?>"
@@ -610,6 +611,18 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                                         <div class="feature-price">
                                             <span class="feature-price-monthly">+<?= (int)$feature['price_monthly'] ?>€<small>/mois</small></span>
                                             <span class="feature-price-annual">+<?= (int)$feature['price_annual'] ?>€<small>/mois en annuel</small></span>
+                                            <?php if (!$isActive): ?>
+                                            <?php
+                                                $now = new DateTime();
+                                                $daysInMonth = (int)$now->format('t');
+                                                $currentDay = (int)$now->format('j');
+                                                $targetMonth = $currentDay > 15 ? (int)$now->format('m') + 1 : (int)$now->format('m');
+                                                $targetDate = new DateTime($now->format('Y') . '-' . $targetMonth . '-15');
+                                                $daysRemaining = (int)$targetDate->diff($now)->days;
+                                                $prorataPrice = round(($daysRemaining / $daysInMonth) * (int)$feature['price_monthly'], 2);
+                                            ?>
+                                            <span class="feature-price-prorata">Prorata : <?= number_format($prorataPrice, 2) ?>€ <small>ce mois</small></span>
+                                            <?php endif; ?>
                                         </div>
 
                                         <div class="feature-status">
@@ -664,7 +677,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                                     <i class="fas fa-shopping-cart"></i>
                                     <span><strong id="cart-count">0</strong> option(s) sélectionnée(s)</span>
                                     <span class="cart-sep">·</span>
-                                    <span>Total : <strong id="cart-total">0€</strong>/mois</span>
+                                    <span>À payer : <strong id="cart-total">0€</strong></span>
                                 </div>
                                 <div class="cart-actions">
                                     <button type="submit" form="premium-cart-form" class="btn btn-primary premium-checkout-btn" id="premium-checkout-btn" disabled>
@@ -678,12 +691,25 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                                     <i class="fas fa-shopping-cart"></i>
                                     <span><strong id="cart-count">0</strong> option(s) sélectionnée(s)</span>
                                     <span class="cart-sep">·</span>
-                                    <span>Total : <strong id="cart-total">0€</strong>/mois</span>
+                                    <span>À payer : <strong id="cart-total">0€</strong></span>
                                 </div>
                             </div>
                             <?php endif; ?>
                         </form>
                     </div>
+                
+                <!-- Conditions de rétractation -->
+                <div class="retractation-notice">
+                    <div class="retractation-notice-content">
+                        <i class="fas fa-info-circle"></i>
+                        <div class="retractation-text">
+                            <h4>Droit de rétractation</h4>
+                            <p>Conformément à la législation européenne, vous disposez d'un délai de 14 jours pour exercer votre droit de rétractation sans frais ni pénalités.</p>
+                            <p>Ce droit s'applique aux services numériques qui n'ont pas été entièrement consommés pendant cette période.</p>
+                            <a href="?page=legal&section=cgu#cgu-retractation" class="retractation-link" target="_blank">Voir les conditions complètes</a>
+                        </div>
+                    </div>
+                </div>
                 </div>
 
                 <?php if ($hasActiveSub): ?>
@@ -761,14 +787,15 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                                 <span>Total mensuel</span>
                                 <span class="total-price" id="combined-total">0€/mois</span>
                             </div>
+                            <div class="cart-prorata">
+                                <span>Paiement initial</span>
+                                <span class="prorata-price" id="combined-prorata">0€ à payer maintenant</span>
+                            </div>
                         </div>
                         
                         <div class="combined-cart-actions">
                             <button type="submit" class="btn btn-primary combined-checkout-btn" id="combined-checkout-btn" disabled>
                                 <i class="fab fa-stripe-s"></i> Payer et activer
-                            </button>
-                            <button type="button" class="btn btn-outline" id="clear-combined-cart">
-                                <i class="fas fa-trash"></i> Vider le panier
                             </button>
                         </div>
                     </form>
@@ -955,6 +982,29 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                     </div>
                 </div>
                 
+                <?php
+                // Préparer les données d'abonnement pour la section subscriptions
+                $basicStartedAt = null;
+                $basicTimeLeft = null;
+                $premiumData = [];
+                
+                if (!empty($subscription_data['basic'])) {
+                    $basic = $subscription_data['basic'];
+                    $basicStartedAt = !empty($basic['started_at']) ? (new DateTime($basic['started_at']))->format('d/m/Y H:i') : null;
+                    $basicTimeLeft = $basic['time_left'] ?? null;
+                }
+                
+                if (!empty($subscription_data['premium'])) {
+                    foreach ($subscription_data['premium'] as $featureName => $premium) {
+                        $activatedAt = !empty($premium['activated_at']) ? (new DateTime($premium['activated_at']))->format('d/m/Y H:i') : null;
+                        $premiumData[$featureName] = [
+                            'activated_at' => $activatedAt,
+                            'prorata_amount' => $premium['prorata_amount'] ?? 0
+                        ];
+                    }
+                }
+                ?>
+                
                 <div class="accordion-section subscription-management-accordion">
                     <div class="accordion-header">
                         <h3><i class="fas fa-sliders-h"></i> Gérer mes abonnements</h3>
@@ -1007,6 +1057,11 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                                                 <i class="fas fa-calendar-alt"></i> Depuis le <?= $basicStartedAt ?>
                                             </span>
                                             <?php endif; ?>
+                                            <?php if ($basicTimeLeft): ?>
+                                            <span class="sub-card-time-left">
+                                                <i class="fas fa-hourglass-half"></i> <?= $basicTimeLeft ?>
+                                            </span>
+                                            <?php endif; ?>
                                         </div>
                                         <form method="POST" action="?page=cancel-subscription"
                                               class="cancel-form"
@@ -1045,6 +1100,16 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                                             <span class="status-badge active">
                                                 <i class="fas fa-check-circle"></i> Actif
                                             </span>
+                                            <?php if (!empty($premiumData[$featureKey]['activated_at'])): ?>
+                                            <span class="sub-card-date">
+                                                <i class="fas fa-calendar-alt"></i> Activé le <?= $premiumData[$featureKey]['activated_at'] ?>
+                                            </span>
+                                            <?php endif; ?>
+                                            <?php if (!empty($premiumData[$featureKey]['prorata_amount']) && $premiumData[$featureKey]['prorata_amount'] > 0): ?>
+                                            <span class="sub-card-prorata">
+                                                <i class="fas fa-calculator"></i> Prorata : <?= $premiumData[$featureKey]['prorata_amount'] ?>€ ce mois
+                                            </span>
+                                            <?php endif; ?>
                                         </div>
                                         <form method="POST" action="?page=cancel-subscription"
                                               class="cancel-form"
@@ -1086,12 +1151,269 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
 
         <?php elseif ($current_section === 'google-reviews' && !empty($premium_statuses['google_reviews'])): ?>
             <!-- Section Avis Google -->
+            <link rel="stylesheet" href="/assets/css/admin/sections/settings/google-reviews.css">
             <div class="settings-section">
                 <h2><i class="fas fa-star"></i> Avis Google</h2>
                 <p class="section-description">Affichez les avis Google de votre restaurant directement sur votre site vitrine.</p>
-                <div class="premium-section-placeholder">
-                    <i class="fas fa-hard-hat"></i>
-                    <p>Cette fonctionnalité est en cours de développement.</p>
+
+                <?php
+                    $grPlaceId = $options['google_place_id'] ?? '';
+                    $grApiKey = $options['google_api_key'] ?? '';
+                    $grEnabled = ($options['google_reviews_enabled'] ?? '0') === '1';
+                    $grData = $google_reviews_data ?? null;
+                    $grConfigured = !empty($grPlaceId) && !empty($grApiKey);
+                ?>
+
+                <!-- Statut de la connexion -->
+                <div class="gr-status-cards">
+                    <div class="gr-status-card <?= $grConfigured ? 'success' : 'warning' ?>">
+                        <i class="fas <?= $grConfigured ? 'fa-plug' : 'fa-exclamation-triangle' ?>"></i>
+                        <div>
+                            <strong><?= $grConfigured ? 'API configurée' : 'API non configurée' ?></strong>
+                            <small><?= $grConfigured ? 'Clé API et Place ID renseignés' : 'Renseignez votre clé API et Place ID ci-dessous' ?></small>
+                        </div>
+                    </div>
+                    <div class="gr-status-card <?= $grEnabled ? 'success' : 'info' ?>">
+                        <i class="fas <?= $grEnabled ? 'fa-eye' : 'fa-eye-slash' ?>"></i>
+                        <div>
+                            <strong><?= $grEnabled ? 'Visible sur le site' : 'Masqué sur le site' ?></strong>
+                            <small><?= $grEnabled ? 'Les avis sont affichés sur votre vitrine' : 'Activez l\'affichage dans la configuration' ?></small>
+                        </div>
+                    </div>
+                    <div class="gr-status-card <?= $grData ? 'success' : 'neutral' ?>">
+                        <i class="fas <?= $grData ? 'fa-star' : 'fa-question-circle' ?>"></i>
+                        <div>
+                            <strong><?= $grData ? number_format($grData['rating'] ?? 0, 1) . '/5 — ' . ($grData['total_reviews'] ?? 0) . ' avis' : 'Aucun avis chargé' ?></strong>
+                            <small><?= $grData ? htmlspecialchars($grData['name'] ?? '') : 'Configurez l\'API pour voir vos avis' ?></small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuration -->
+                <div class="gr-config-section">
+                    <h3><i class="fas fa-cog"></i> Configuration</h3>
+                    <form method="POST" action="?page=settings&action=update-google-reviews" class="gr-config-form">
+                        <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                        
+                        <div class="gr-config-grid">
+                            <div class="form-group">
+                                <label for="google_place_id">
+                                    <i class="fas fa-map-marker-alt"></i> Google Place ID
+                                </label>
+                                <input type="text" id="google_place_id" name="google_place_id"
+                                       value="<?= htmlspecialchars($grPlaceId) ?>"
+                                       placeholder="ex: ChIJb8h2Y6Xu5kcRjLGLt_4nN1E"
+                                       class="form-control">
+                                <small class="help-text">
+                                    <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener">
+                                        Comment trouver mon Place ID ? <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="google_api_key">
+                                    <i class="fas fa-key"></i> Clé API Google
+                                </label>
+                                <input type="password" id="google_api_key" name="google_api_key"
+                                       value="<?= htmlspecialchars($grApiKey) ?>"
+                                       placeholder="AIzaSy..."
+                                       class="form-control">
+                                <small class="help-text">
+                                    Clé API avec l'API <strong>Places API (New)</strong> activée.
+                                    <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">
+                                        Console Google Cloud <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="google_reviews_enabled" value="1" <?= $grEnabled ? 'checked' : '' ?>>
+                                <span class="checkmark"></span>
+                                Activer l'affichage des avis Google sur votre site vitrine
+                            </label>
+                        </div>
+
+                        <div class="gr-config-actions">
+                            <button type="submit" class="btn primary-btn">
+                                <i class="fas fa-save"></i> Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Aperçu des avis -->
+                <?php if ($grData && !empty($grData['reviews'])): ?>
+                <div class="gr-preview-section">
+                    <h3><i class="fas fa-eye"></i> Aperçu des avis</h3>
+                    <p class="gr-preview-info">Voici comment vos avis apparaîtront sur votre site vitrine.</p>
+
+                    <div class="gr-summary">
+                        <div class="gr-rating-large">
+                            <span class="gr-rating-number"><?= number_format($grData['rating'], 1) ?></span>
+                            <div class="gr-stars">
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                    <i class="fas fa-star <?= $i <= round($grData['rating']) ? 'filled' : 'empty' ?>"></i>
+                                <?php endfor; ?>
+                            </div>
+                            <span class="gr-total"><?= $grData['total_reviews'] ?> avis Google</span>
+                        </div>
+                    </div>
+
+                    <div class="gr-reviews-grid">
+                        <?php foreach ($grData['reviews'] as $review): ?>
+                        <div class="gr-review-card">
+                            <div class="gr-review-header">
+                                <div class="gr-reviewer">
+                                    <?php if (!empty($review['profile_photo_url'])): ?>
+                                        <img src="<?= htmlspecialchars($review['profile_photo_url']) ?>" 
+                                             alt="<?= htmlspecialchars($review['author_name']) ?>"
+                                             class="gr-avatar">
+                                    <?php else: ?>
+                                        <div class="gr-avatar-placeholder">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div>
+                                        <div class="gr-reviewer-name"><?= htmlspecialchars($review['author_name']) ?></div>
+                                        <div class="gr-review-date"><?= htmlspecialchars($review['relative_time_description']) ?></div>
+                                    </div>
+                                </div>
+                                <div class="gr-review-stars">
+                                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                                        <i class="fas fa-star <?= $i <= $review['rating'] ? 'filled' : 'empty' ?>"></i>
+                                    <?php endfor; ?>
+                                </div>
+                            </div>
+                            <?php if (!empty($review['text'])): ?>
+                            <div class="gr-review-text">
+                                <p><?= htmlspecialchars($review['text']) ?></p>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php elseif ($grConfigured): ?>
+                <div class="gr-preview-section">
+                    <h3><i class="fas fa-eye"></i> Aperçu des avis</h3>
+                    <div class="gr-empty-state">
+                        <i class="fas fa-sync-alt"></i>
+                        <p>Aucun avis chargé. Vérifiez votre Place ID et votre clé API, puis rechargez la page.</p>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Guide de configuration -->
+                <?php if (!$grConfigured): ?>
+                <div class="gr-guide-section">
+                    <h3><i class="fas fa-book"></i> Guide de configuration</h3>
+                    <div class="gr-steps">
+                        <div class="gr-step">
+                            <div class="gr-step-number">1</div>
+                            <div class="gr-step-content">
+                                <h4>Activer l'API Places (New)</h4>
+                                <p>Dans votre <a href="https://console.cloud.google.com/apis/library/places-backend.googleapis.com" target="_blank" rel="noopener">Google Cloud Console</a>, activez l'API <strong>Places API (New)</strong>.</p>
+                            </div>
+                        </div>
+                        <div class="gr-step">
+                            <div class="gr-step-number">2</div>
+                            <div class="gr-step-content">
+                                <h4>Créer une clé API</h4>
+                                <p>Allez dans <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Identifiants</a> et créez une clé API. Restreignez-la à l'API Places (New).</p>
+                            </div>
+                        </div>
+                        <div class="gr-step">
+                            <div class="gr-step-number">3</div>
+                            <div class="gr-step-content">
+                                <h4>Trouver votre Place ID</h4>
+                                <p>Utilisez le <a href="https://developers.google.com/maps/documentation/places/web-service/place-id" target="_blank" rel="noopener">Place ID Finder</a> pour trouver l'identifiant de votre restaurant.</p>
+                            </div>
+                        </div>
+                        <div class="gr-step">
+                            <div class="gr-step-number">4</div>
+                            <div class="gr-step-content">
+                                <h4>Renseignez les champs ci-dessus</h4>
+                                <p>Collez votre Place ID et votre clé API dans le formulaire de configuration, puis activez l'affichage.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Gestion des avis de test (uniquement pour développement) -->
+                <div class="gr-test-management-section">
+                    <div class="gr-warning-banner">
+                        <div class="warning-content">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                <strong>⚠️ ATTENTION - MODE DÉVELOPPEMENT</strong>
+                                <p>Cette section permet de créer des avis fictifs pour les tests. <strong>Elle doit être supprimée avant la mise en production</strong> car les utilisateurs ne pourront pas créer d'avis fictifs.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3><i class="fas fa-tools"></i> Gestion des avis de test</h3>
+                    <p class="gr-management-desc">Actions pour gérer les avis de test dans le cache (utilisé uniquement pour développement/démonstration).</p>
+                    
+                    <div class="gr-actions-table">
+                        <div class="table-header">
+                            <div class="col-action">Action</div>
+                            <div class="col-description">Description</div>
+                            <div class="col-link">Lien</div>
+                        </div>
+                        
+                        <div class="table-row">
+                            <div class="col-action">
+                                <span class="action-badge replace">🔄 Remplacer</span>
+                            </div>
+                            <div class="col-description">
+                                Remplace tous les avis existants par 5 avis de test standards
+                            </div>
+                            <div class="col-link">
+                                <a href="?page=seed-reviews&action=replace" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-play"></i> Exécuter
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="table-row">
+                            <div class="col-action">
+                                <span class="action-badge add">➕ Ajouter</span>
+                            </div>
+                            <div class="col-description">
+                                Ajoute 5 nouveaux avis de test aux avis existants (Lucas, Emma, Nicolas, Camille, Antoine)
+                            </div>
+                            <div class="col-link">
+                                <a href="?page=seed-reviews&action=add-5" class="btn btn-sm btn-outline-success">
+                                    <i class="fas fa-plus"></i> Exécuter
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="table-row">
+                            <div class="col-action">
+                                <span class="action-badge clear">🗑️ Vider</span>
+                            </div>
+                            <div class="col-description">
+                                Supprime tous les avis du cache (retour à l'état vide)
+                            </div>
+                            <div class="col-link">
+                                <a href="?page=seed-reviews&action=clear" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i> Exécuter
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="gr-note-box">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <strong>Note :</strong> Les avis restent en cache 1 heure. Après expiration, ils seront remplacés par les vrais avis Google si l'API est configurée.
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1265,32 +1587,60 @@ document.addEventListener('DOMContentLoaded', function() {
     const successMessage = sessionStorage.getItem('subscriptionSuccessMessage');
     if (successMessage) {
         // Créer et afficher le message de succès comme sur le reste du site
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-success alert-dismissible fade show';
-        alertDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
-        alertDiv.innerHTML = `
-            <i class="fas fa-check-circle"></i> ${successMessage}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
+        const messageDiv = document.createElement('p');
+        messageDiv.className = 'message-success';
+        messageDiv.textContent = successMessage;
         
-        document.body.appendChild(alertDiv);
+        // Insérer au début du contenu principal
+        const settingsContent = document.querySelector('.settings-content');
+        if (settingsContent) {
+            settingsContent.insertBefore(messageDiv, settingsContent.firstChild);
+            
+            // Scroller vers le message avec un petit délai
+            setTimeout(() => {
+                messageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 50);
+        }
         
         // Supprimer le message du sessionStorage
         sessionStorage.removeItem('subscriptionSuccessMessage');
         
-        // Auto-supprimer l'alerte après 5 secondes
+        // Auto-supprimer le message après 5 secondes
         setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.parentNode.removeChild(alertDiv);
+            if (messageDiv.parentNode) {
+                messageDiv.parentNode.removeChild(messageDiv);
             }
         }, 5000);
+    }
+    
+    // Afficher le message d'erreur stocké dans sessionStorage
+    const errorMessage = sessionStorage.getItem('subscriptionErrorMessage');
+    if (errorMessage) {
+        // Créer et afficher le message d'erreur comme sur le reste du site
+        const messageDiv = document.createElement('p');
+        messageDiv.className = 'message-error';
+        messageDiv.textContent = errorMessage;
         
-        // Fermeture manuelle
-        alertDiv.querySelector('.btn-close').addEventListener('click', function() {
-            if (alertDiv.parentNode) {
-                alertDiv.parentNode.removeChild(alertDiv);
+        // Insérer au début du contenu principal
+        const settingsContent = document.querySelector('.settings-content');
+        if (settingsContent) {
+            settingsContent.insertBefore(messageDiv, settingsContent.firstChild);
+            
+            // Scroller vers le message avec un petit délai
+            setTimeout(() => {
+                messageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 50);
+        }
+        
+        // Supprimer le message du sessionStorage
+        sessionStorage.removeItem('subscriptionErrorMessage');
+        
+        // Auto-supprimer le message après 5 secondes
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.parentNode.removeChild(messageDiv);
             }
-        });
+        }, 5000);
     }
 });
 </script>

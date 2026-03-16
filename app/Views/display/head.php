@@ -214,6 +214,7 @@
     <link rel="stylesheet" href="/assets/css/display/footer.css">
     <link rel="stylesheet" href="/assets/css/display/lightbox.css">
     <link rel="stylesheet" href="/assets/css/display/cookies.css">
+    <link rel="stylesheet" href="/assets/css/display/reviews.css">
     <link rel="stylesheet" href="/assets/css/display/preview.css">
     <link rel="stylesheet" href="/assets/css/display/maintenance.css">
     <?php if (($templateName ?? 'classic') !== 'classic'): ?>

@@ -84,13 +84,40 @@ class LegalController extends BaseController
         <h3>6. Propriété intellectuelle</h3>
         <p>L\'ensemble des éléments du Service (code source, design, logos, textes, images) sont la propriété exclusive de MenuMiam et sont protégés par les lois relatives à la propriété intellectuelle. Toute reproduction, représentation ou exploitation non autorisée est strictement interdite. Les contenus publiés par l\'Utilisateur restent sa propriété.</p>
         
-        <h3>7. Résiliation</h3>
-        <p>L\'Utilisateur peut supprimer son compte à tout moment depuis les paramètres de son interface d\'administration. MenuMiam se réserve le droit de suspendre ou résilier un compte en cas de non-respect des présentes CGU, sans préavis ni indemnité.</p>
+        <h3>7. Droit de rétractation</h3>
+        <p id="cgu-retractation">Conformément à la législation européenne (Directive 2011/83/UE relative aux droits des consommateurs), l\'Utilisateur dispose d\'un délai de 14 jours à compter de la souscription pour exercer son droit de rétractation sans avoir à justifier de motifs ni à payer de pénalités.</p>
         
-        <h3>8. Droit applicable</h3>
+        <h4>Conditions d\'exercice</h4>
+        <p>Le droit de rétractation s\'applique aux contrats à distance conclus hors établissement. Pour l\'exercer, l\'Utilisateur doit :</p>
+        <ul>
+            <li>Notifier sa décision de rétracter par écrit (email à <a href="mailto:support@menumiam.dev">support@menumiam.dev</a>)</li>
+            <li>Fournir les informations nécessaires à l\'identification (nom, email, adresse)</li>
+            <li>Indiquer la date de souscription de l\'abonnement</li>
+        </ul>
+        
+        <h4>Exceptions</h4>
+        <p>Le droit de rétractation ne s\'applique pas :</p>
+        <ul>
+            <li>Aux services entièrement consommés avant l\'expiration du délai de 14 jours avec votre consentement exprès</li>
+            <li>Aux contenus numériques non fournis sur support matériel (ex: streaming)</li>
+        </ul>
+        
+        <h4>Modalités de remboursement</h4>
+        <p>En cas de rétractation exercée dans le délai de 14 jours :</p>
+        <ul>
+            <li>L\'Utilisateur sera remboursé de l\'intégralité des sommes versées</li>
+            <li>Le remboursement sera effectué dans un délai de 14 jours maximum</li>
+            <li>Les services seront immédiatement désactivés</li>
+            <li>Aucune pénalité ne sera appliquée</li>
+        </ul>
+        
+        <h3>8. Résiliation</h3>
+        <p>Après l\'expiration du délai de rétractation de 14 jours, l\'Utilisateur peut résilier son abonnement à tout moment depuis les paramètres de son interface d\'administration. La résiliation prendra effet à la fin du cycle de facturation en cours (15 du mois suivant).</p>
+        
+        <h3>9. Droit applicable</h3>
         <p>Les présentes CGU sont régies par le droit français. Tout litige relatif à leur interprétation ou exécution relève de la compétence exclusive des tribunaux français.</p>
         
-        <h3>9. Contact</h3>
+        <h3>10. Contact</h3>
         <p>Pour toute question concernant les CGU : <a href="mailto:contact@menumiam.dev">contact@menumiam.dev</a></p>
         ';
     }

@@ -44,50 +44,63 @@ class GoogleReviews
     private function fetchFromApi($placeId)
     {
         if (!$this->apiKey) {
+            error_log('[GoogleReviews] Pas de clé API configurée');
             return null;
         }
 
         $url = "https://places.googleapis.com/v1/places/{$placeId}";
-        $params = [
-            'fields' => 'name,rating,reviews,photos',
-            'key' => $this->apiKey
-        ];
-
-        $url .= '?' . http_build_query($params);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json'
+            'Content-Type: application/json',
+            'X-Goog-Api-Key: ' . $this->apiKey,
+            'X-Goog-FieldMask: displayName,rating,userRatingCount,reviews'
         ]);
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
         curl_close($ch);
 
-        if ($httpCode === 200 && $response) {
-            $data = json_decode($response, true);
-            
-            // Formater les avis pour l'affichage
-            if (isset($data['reviews'])) {
-                $data['reviews'] = array_slice($data['reviews'], 0, 5);
-                $data['reviews'] = array_map(function($review) {
-                    return [
-                        'author_name' => $review['authorAttribution']['displayName'] ?? 'Anonyme',
-                        'rating' => $review['rating'] ?? 0,
-                        'text' => $review['text']['text'] ?? '',
-                        'relative_time_description' => $this->formatRelativeTime($review['publishTime'] ?? ''),
-                        'profile_photo_url' => $review['authorAttribution']['uri'] ?? null
-                    ];
-                }, $data['reviews']);
-            }
-
-            return $data;
+        if ($curlError) {
+            error_log('[GoogleReviews] Erreur cURL: ' . $curlError);
+            return null;
         }
 
-        return null;
+        if ($httpCode !== 200) {
+            error_log('[GoogleReviews] API HTTP ' . $httpCode . ': ' . $response);
+            return null;
+        }
+
+        $data = json_decode($response, true);
+        if (!$data) {
+            return null;
+        }
+
+        // Formater la réponse de la nouvelle API
+        $result = [
+            'name' => $data['displayName']['text'] ?? '',
+            'rating' => $data['rating'] ?? 0,
+            'total_reviews' => $data['userRatingCount'] ?? 0,
+            'reviews' => []
+        ];
+
+        if (isset($data['reviews'])) {
+            $result['reviews'] = array_slice(array_map(function($review) {
+                return [
+                    'author_name' => $review['authorAttribution']['displayName'] ?? 'Anonyme',
+                    'rating' => $review['rating'] ?? 0,
+                    'text' => $review['text']['text'] ?? '',
+                    'relative_time_description' => $this->formatRelativeTime($review['publishTime'] ?? ''),
+                    'profile_photo_url' => $review['authorAttribution']['photoUri'] ?? null
+                ];
+            }, $data['reviews']), 0, 5);
+        }
+
+        return $result;
     }
 
     /**

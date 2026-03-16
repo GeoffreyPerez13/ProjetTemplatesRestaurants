@@ -24,21 +24,27 @@ if (!$reviews || !$restaurantInfo) {
         
         <!-- En-tête avec note globale -->
         <div class="reviews-header">
-            <div class="reviews-summary">
-                <div class="rating-large">
-                    <span class="rating-number"><?= number_format($restaurantInfo['rating'], 1) ?></span>
-                    <div class="stars">
-                        <?php for ($i = 1; $i <= 5; $i++): ?>
-                            <i class="fas fa-star <?= $i <= $restaurantInfo['rating'] ? 'filled' : 'empty' ?>"></i>
-                        <?php endfor; ?>
-                    </div>
-                    <span class="total-reviews"><?= $restaurantInfo['total_reviews'] ?> avis</span>
+            <div class="reviews-hero-card">
+                <div class="reviews-hero-icon">
+                    <i class="fab fa-google"></i>
                 </div>
-                <div class="restaurant-name">
-                    <h3><?= htmlspecialchars($restaurantInfo['name']) ?></h3>
+                <div class="reviews-hero-rating">
+                    <span class="rating-number"><?= number_format($restaurantInfo['rating'], 1) ?></span>
+                    <div class="reviews-hero-stars-block">
+                        <div class="stars">
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <i class="fas fa-star <?= $i <= round($restaurantInfo['rating']) ? 'filled' : 'empty' ?>"></i>
+                            <?php endfor; ?>
+                        </div>
+                        <span class="total-reviews"><?= $restaurantInfo['total_reviews'] ?> avis Google</span>
+                    </div>
+                </div>
+                <div class="reviews-hero-sep"></div>
+                <div class="reviews-hero-info">
+                    <span class="reviews-hero-name"><?= htmlspecialchars($restaurantInfo['name']) ?></span>
                     <a href="https://search.google.com/local/reviews?placeid=<?= urlencode($googlePlaceId) ?>" 
                        target="_blank" rel="noopener" class="see-all-reviews">
-                        Voir tous les avis <i class="fas fa-external-link-alt"></i>
+                        Voir tous les avis <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
             </div>

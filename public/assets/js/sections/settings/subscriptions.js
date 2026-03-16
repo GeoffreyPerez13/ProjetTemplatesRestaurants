@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (sub.type === 'basique') {
                 formData.append('basique_cancel', '1');
             } else {
-                formData.append(`premium_cancel_`, sub.name);
+                formData.append(`premium_cancel_${sub.name}`, sub.name);
             }
         });
 
@@ -144,22 +144,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.hash = 'subscription-total';
                 window.location.reload();
             } else {
-                Swal.fire({
-                    title: 'Erreur',
-                    text: data.message || 'Une erreur est survenue lors de la résiliation.',
-                    icon: 'error',
-                    confirmButtonColor: '#e53e3e'
-                });
+                // Stocker le message d'erreur dans sessionStorage pour l'afficher après le rechargement
+                sessionStorage.setItem('subscriptionErrorMessage', data.message || 'Une erreur est survenue lors de la résiliation.');
+                window.location.hash = 'subscription-total';
+                window.location.reload();
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            Swal.fire({
-                title: 'Erreur',
-                text: 'Une erreur technique est survenue. Veuillez réessayer.',
-                icon: 'error',
-                confirmButtonColor: '#e53e3e'
-            });
+            // Stocker le message d'erreur technique dans sessionStorage pour l'afficher après le rechargement
+            sessionStorage.setItem('subscriptionErrorMessage', 'Une erreur technique est survenue. Veuillez réessayer.');
+            window.location.hash = 'subscription-total';
+            window.location.reload();
         });
     }
 

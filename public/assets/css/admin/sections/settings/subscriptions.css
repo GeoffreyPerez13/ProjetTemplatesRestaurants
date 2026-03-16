@@ -247,6 +247,34 @@
     color: var(--color-text-muted);
 }
 
+.sub-card-time-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.82rem;
+    color: var(--color-warning);
+    font-weight: 500;
+}
+
+.sub-card-time-left i {
+    font-size: 0.78rem;
+    color: var(--color-warning);
+}
+
+.sub-card-prorata {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.82rem;
+    color: var(--color-info);
+    font-weight: 500;
+}
+
+.sub-card-prorata i {
+    font-size: 0.78rem;
+    color: var(--color-info);
+}
+
 /* Badges de statut */
 .status-badge {
     display: inline-flex;

@@ -17,6 +17,10 @@ class SettingsController extends BaseController
      */
     public function show()
     {
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
         $this->requireLogin();
 
         // Récupérer les informations de l'utilisateur
@@ -111,6 +115,41 @@ class SettingsController extends BaseController
             exit;
         }
 
+        // Récupérer les données Google Reviews pour la section google-reviews
+        $googleReviewsData = null;
+        if ($section === 'google-reviews' && !empty($premiumFeatureStatuses['google_reviews'])) {
+            try {
+                $optionModel = new OptionModel($this->pdo);
+                $googlePlaceId = $optionModel->get($_SESSION['admin_id'], 'google_place_id');
+                $googleApiKey = $optionModel->get($_SESSION['admin_id'], 'google_api_key');
+                $googleReviewsEnabled = $optionModel->get($_SESSION['admin_id'], 'google_reviews_enabled') === '1';
+
+                if ($googlePlaceId && $googleApiKey) {
+                    require_once __DIR__ . '/../Models/GoogleReviews.php';
+                    $googleReviews = new GoogleReviews($this->pdo, $googleApiKey);
+                    $googleReviewsData = $googleReviews->getReviews($googlePlaceId, 5);
+                }
+            } catch (Exception $e) {
+                error_log('Erreur récupération avis Google: ' . $e->getMessage());
+            }
+        }
+
+        // Récupérer les dates d'abonnement pour la section subscriptions
+        $subscriptionData = [];
+        if ($section === 'subscriptions') {
+            try {
+                require_once __DIR__ . '/../Models/BillingCycle.php';
+                $billingCycle = new BillingCycle($this->pdo);
+                
+                // Utiliser BillingCycle pour récupérer toutes les informations
+                $subscriptionData = $billingCycle->getBillingInfo($_SESSION['admin_id']);
+                
+            } catch (Exception $e) {
+                error_log('Erreur récupération dates abonnements: ' . $e->getMessage());
+                $subscriptionData = [];
+            }
+        }
+
         $this->render('admin/settings', [
             'user' => $user,
             'options' => $options,
@@ -125,6 +164,8 @@ class SettingsController extends BaseController
             'has_advanced_stats' => $premiumFeatureStatuses['advanced_analytics'] ?? false,
             'restaurant_name_display' => $restaurantName,
             'slug' => $slug,
+            'subscription_data' => $subscriptionData,
+            'google_reviews_data' => $googleReviewsData,
         ]);
     }
 
@@ -810,11 +851,11 @@ class SettingsController extends BaseController
             }
 
             $this->addSuccessMessage('Paramètres Google Reviews mis à jour avec succès.');
-            header('Location: ?page=settings&section=premium');
+            header('Location: ?page=settings&section=google-reviews');
             exit;
         } catch (Exception $e) {
             $this->addErrorMessage('Erreur lors de la mise à jour : ' . $e->getMessage());
-            header('Location: ?page=settings&section=premium');
+            header('Location: ?page=settings&section=google-reviews');
             exit;
         }
     }
@@ -994,5 +1035,233 @@ class SettingsController extends BaseController
         
         header('Location: ?page=settings&section=options');
         exit;
+    }
+
+    /**
+     * Insère des avis de test pour Google Reviews
+     */
+    public function seedReviews()
+    {
+        $this->requireLogin();
+
+        $adminId = $_SESSION['admin_id'];
+
+        // Récupérer le Place ID de l'admin
+        $stmt = $this->pdo->prepare("SELECT option_value FROM admin_options WHERE admin_id = ? AND option_name = 'google_place_id'");
+        $stmt->execute([$adminId]);
+        $placeId = $stmt->fetchColumn();
+
+        if (!$placeId) {
+            echo "❌ Pas de Place ID configuré pour l'admin $adminId\n";
+            echo "<br>→ Configurez d'abord votre Place ID dans ?page=settings&section=google-reviews\n";
+            exit;
+        }
+
+        // Données de test
+        $testData = [
+            'name' => 'Restaurant Test MenuMiam',
+            'rating' => 4.5,
+            'total_reviews' => 12,
+            'reviews' => [
+                [
+                    'author_name' => 'Marie Dupont',
+                    'rating' => 5,
+                    'text' => 'Excellent restaurant ! Les plats sont délicieux et le service est impeccable. Je reviendrai sans hésiter.',
+                    'relative_time_description' => 'il y a 2 jours',
+                    'profile_photo_url' => null
+                ],
+                [
+                    'author_name' => 'Jean Martin',
+                    'rating' => 4,
+                    'text' => 'Très bonne expérience. La cuisine est de qualité et les portions sont généreuses. Un peu cher mais justifié.',
+                    'relative_time_description' => 'il y a 1 semaine',
+                    'profile_photo_url' => null
+                ],
+                [
+                    'author_name' => 'Sophie Bernard',
+                    'rating' => 5,
+                    'text' => 'Une découverte formidable ! Ambiance chaleureuse, plats créatifs et service attentionné. À recommander vivement.',
+                    'relative_time_description' => 'il y a 2 semaines',
+                    'profile_photo_url' => null
+                ],
+                [
+                    'author_name' => 'Pierre Durand',
+                    'rating' => 4,
+                    'text' => 'Bon restaurant avec des produits frais. Le menu du midi est très intéressant. Rapport qualité/prix correct.',
+                    'relative_time_description' => 'il y a 3 semaines',
+                    'profile_photo_url' => null
+                ],
+                [
+                    'author_name' => 'Claire Petit',
+                    'rating' => 4,
+                    'text' => 'J\'ai adoré l\'originalité des plats. Le chef sait revisiter les classiques avec talent. Desserts à tomber !',
+                    'relative_time_description' => 'il y a 1 mois',
+                    'profile_photo_url' => null
+                ]
+            ]
+        ];
+
+        // Insérer dans le cache
+        $stmt = $this->pdo->prepare("
+            INSERT INTO google_reviews_cache (place_id, data, cached_at) 
+            VALUES (?, ?, NOW())
+            ON DUPLICATE KEY UPDATE data = VALUES(data), cached_at = VALUES(cached_at)
+        ");
+
+        $result = $stmt->execute([$placeId, json_encode($testData)]);
+
+        if ($result) {
+            echo "✅ Données de test insérées avec succès !\n";
+            echo "<br>📍 Place ID utilisé : <code>$placeId</code>";
+            echo "<br>📊 " . count($testData['reviews']) . " avis de test ajoutés";
+            echo "<br>⭐ Note moyenne : " . $testData['rating'] . "/5";
+            echo "<br><br>";
+            echo "<strong>Actions suivantes :</strong><br>";
+            echo "→ <a href='?page=settings&section=google-reviews'>Voir les avis dans l'admin</a><br>";
+            echo "→ <a href='?page=display&slug=demo-menumiam'>Voir l'affichage sur le site vitrine</a><br>";
+            echo "<br><small>Note : Les avis resteront en cache 1 heure. Après ça, ils seront remplacés par les vrais avis Google si votre API fonctionne.</small>";
+        } else {
+            echo "❌ Erreur lors de l'insertion : " . print_r($stmt->errorInfo(), true);
+        }
+    }
+
+    /**
+     * Vide tous les avis en cache
+     */
+    public function clearReviews()
+    {
+        $this->requireLogin();
+
+        $adminId = $_SESSION['admin_id'];
+
+        // Récupérer le Place ID de l'admin
+        $stmt = $this->pdo->prepare("SELECT option_value FROM admin_options WHERE admin_id = ? AND option_name = 'google_place_id'");
+        $stmt->execute([$adminId]);
+        $placeId = $stmt->fetchColumn();
+
+        if (!$placeId) {
+            echo "❌ Pas de Place ID configuré pour l'admin $adminId\n";
+            exit;
+        }
+
+        // Supprimer du cache
+        $stmt = $this->pdo->prepare("DELETE FROM google_reviews_cache WHERE place_id = ?");
+        $result = $stmt->execute([$placeId]);
+
+        if ($result) {
+            echo "✅ Tous les avis ont été supprimés du cache\n";
+            echo "<br>📍 Place ID : <code>$placeId</code>";
+            echo "<br><br>";
+            echo "<strong>Actions suivantes :</strong><br>";
+            echo "→ <a href='?page=seed-reviews&action=replace'>Remplacer par des avis de test</a><br>";
+            echo "→ <a href='?page=seed-reviews&action=add-5'>Ajouter 5 avis de test</a><br>";
+            echo "→ <a href='?page=settings&section=google-reviews'>Retour à la configuration</a><br>";
+        } else {
+            echo "❌ Erreur lors de la suppression : " . print_r($stmt->errorInfo(), true);
+        }
+    }
+
+    /**
+     * Ajoute des avis de test (sans remplacer les existants)
+     */
+    public function addReviews($count = 5)
+    {
+        $this->requireLogin();
+
+        $adminId = $_SESSION['admin_id'];
+
+        // Récupérer le Place ID de l'admin
+        $stmt = $this->pdo->prepare("SELECT option_value FROM admin_options WHERE admin_id = ? AND option_name = 'google_place_id'");
+        $stmt->execute([$adminId]);
+        $placeId = $stmt->fetchColumn();
+
+        if (!$placeId) {
+            echo "❌ Pas de Place ID configuré pour l'admin $adminId\n";
+            exit;
+        }
+
+        // Récupérer les avis existants
+        $stmt = $this->pdo->prepare("SELECT data FROM google_reviews_cache WHERE place_id = ?");
+        $stmt->execute([$placeId]);
+        $existingData = $stmt->fetchColumn();
+
+        $existingReviews = [];
+        if ($existingData) {
+            $decoded = json_decode($existingData, true);
+            $existingReviews = $decoded['reviews'] ?? [];
+        }
+
+        // Nouveaux avis à ajouter
+        $newReviews = [
+            [
+                'author_name' => 'Lucas Moreau',
+                'rating' => 5,
+                'text' => 'Exceptionnel ! Un vrai chef cuisinier avec des produits d\'exception. Le rapport qualité/prix est imbattable.',
+                'relative_time_description' => 'il y a 3 jours',
+                'profile_photo_url' => null
+            ],
+            [
+                'author_name' => 'Emma Lefevre',
+                'rating' => 4,
+                'text' => 'Très bonne table. Service professionnel et cuisine raffinée. Je recommande pour une occasion spéciale.',
+                'relative_time_description' => 'il y a 4 jours',
+                'profile_photo_url' => null
+            ],
+            [
+                'author_name' => 'Nicolas Petit',
+                'rating' => 5,
+                'text' => 'Une adresse à connaître ! Ambiance chaleureuse, plats créatifs et service impeccable. Bravo à toute l\'équipe.',
+                'relative_time_description' => 'il y a 5 jours',
+                'profile_photo_url' => null
+            ],
+            [
+                'author_name' => 'Camille Bernard',
+                'rating' => 4,
+                'text' => 'Excellent restaurant. Les saveurs sont bien équilibrées et la présentation des plats est soignée.',
+                'relative_time_description' => 'il y a 1 semaine',
+                'profile_photo_url' => null
+            ],
+            [
+                'author_name' => 'Antoine Dubois',
+                'rating' => 5,
+                'text' => 'Magifique ! Une cuisine inventive qui respecte les produits. Le menu dégustation est une vraie réussite.',
+                'relative_time_description' => 'il y a 2 semaines',
+                'profile_photo_url' => null
+            ]
+        ];
+
+        // Ajouter seulement les premiers avis demandés
+        $toAdd = array_slice($newReviews, 0, $count);
+        $allReviews = array_merge($existingReviews, $toAdd);
+
+        // Mettre à jour le cache
+        $updatedData = [
+            'name' => 'Restaurant Test MenuMiam',
+            'rating' => 4.6, // Légèrement amélioré avec les nouveaux avis
+            'total_reviews' => count($allReviews),
+            'reviews' => $allReviews
+        ];
+
+        $stmt = $this->pdo->prepare("
+            INSERT INTO google_reviews_cache (place_id, data, cached_at) 
+            VALUES (?, ?, NOW())
+            ON DUPLICATE KEY UPDATE data = VALUES(data), cached_at = VALUES(cached_at)
+        ");
+
+        $result = $stmt->execute([$placeId, json_encode($updatedData)]);
+
+        if ($result) {
+            echo "✅ $count avis de test ajoutés avec succès !\n";
+            echo "<br>📍 Place ID : <code>$placeId</code>";
+            echo "<br>📊 Total d'avis : " . count($allReviews);
+            echo "<br>⭐ Nouvelle note moyenne : " . $updatedData['rating'] . "/5";
+            echo "<br><br>";
+            echo "<strong>Actions suivantes :</strong><br>";
+            echo "→ <a href='?page=settings&section=google-reviews'>Voir les avis dans l'admin</a><br>";
+            echo "→ <a href='?page=display&slug=demo-menumiam'>Voir sur le site vitrine</a><br>";
+            echo "→ <a href='?page=seed-reviews&action=clear'>Vider tous les avis</a><br>";
+        } else {
+            echo "❌ Erreur lors de l'ajout : " . print_r($stmt->errorInfo(), true);
+        }
     }
 }

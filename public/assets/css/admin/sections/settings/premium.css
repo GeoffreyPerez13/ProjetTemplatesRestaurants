@@ -1119,6 +1119,21 @@ body.dark-mode .status-badge.inactive {
     color: var(--color-text-muted);
 }
 
+.feature-price-prorata {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.feature-price-prorata small {
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    margin-left: 2px;
+}
+
 /* ───────────────────────────────────────────────
    Carte sélectionnable / sélectionnée
 ─────────────────────────────────────────────── */
@@ -1741,4 +1756,154 @@ body.dark-mode .api-test-result {
     display: block;
     max-height: 5000px;
     opacity: 1;
+}
+
+/* Notice de rétractation */
+.retractation-notice {
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin: 20px 0;
+  padding: 0;
+}
+
+.retractation-notice-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 20px;
+}
+
+.retractation-notice-content i {
+  color: var(--color-info);
+  font-size: 1.2rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.retractation-text h4 {
+  margin: 0 0 10px 0;
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.retractation-text p {
+  margin: 0 0 8px 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.retractation-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.retractation-link:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+.retractation-link::after {
+  content: "→";
+  transition: transform 0.2s ease;
+}
+
+.retractation-link:hover::after {
+  transform: translateX(3px);
+}
+
+/* Récapitulatif du panier premium */
+.premium-total-summary {
+  width: 100%;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border);
+}
+
+.premium-total-summary .summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+.premium-total-summary .summary-item small {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.premium-total-summary .summary-separator {
+  height: 1px;
+  background: var(--color-border);
+  margin: 8px 0;
+}
+
+.premium-total-summary .summary-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px 0;
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+
+.premium-total-summary .summary-prorata {
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 6px 0;
+}
+
+.premium-total-summary .summary-monthly {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.premium-total-summary .summary-total {
+  border-top: 1px solid var(--color-border);
+  margin-top: 6px;
+  padding-top: 8px;
+  color: var(--color-primary);
+  font-size: 0.9rem;
+}
+
+/* Prorata dans le panier combiné */
+.cart-prorata {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+}
+
+.cart-prorata span:first-child {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.prorata-price {
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.item-prorata-price {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.premium-item .item-price small,
+.basique-item .item-price small {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
 }

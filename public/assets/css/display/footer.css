@@ -48,12 +48,12 @@ footer h2::after {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: var(--text-base);
+  line-height: 1.6;
 }
 
 .contact-item i {
-  font-size: 1.15rem;
+  font-size: var(--text-lg);
   color: var(--color-primary-light);
   width: 20px;
   text-align: center;
@@ -68,7 +68,7 @@ footer h2::after {
 }
 
 .social-links h4 {
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   margin-bottom: var(--spacing-md);
   color: rgba(255, 255, 255, 0.5);
@@ -92,7 +92,7 @@ footer h2::after {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-md);
   color: rgba(255, 255, 255, 0.7);
-  font-size: 1.1rem;
+  font-size: var(--text-lg);
   transition: all var(--transition-normal);
   text-decoration: none;
 }
@@ -135,7 +135,7 @@ footer h2::after {
 }
 
 .footer-credits p {
-  font-size: 0.8rem;
+  font-size: var(--text-xs);
   color: rgba(255, 255, 255, 0.45);
   margin: 0;
 }
@@ -156,7 +156,7 @@ footer h2::after {
 }
 
 .footer-legal-links a {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: rgba(255, 255, 255, 0.35);
   transition: color var(--transition-fast);
 }
@@ -167,7 +167,7 @@ footer h2::after {
 
 @media (max-width: 480px) {
   .contact-item {
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
   }
 
   .footer-credits-content {
