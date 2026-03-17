@@ -359,7 +359,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 <!-- Accordéon Options du compte -->
                 <div class="accordion-section">
                     <div class="accordion-header">
-                        <h3><i class="fas fa-cog"></i> Options du compte</h3>
+                        <h2><i class="fas fa-cog"></i> Options du compte</h2>
                         <button type="button" class="accordion-toggle" data-target="account-options-content">
                             <i class="fas fa-chevron-down"></i>
                         </button>
@@ -424,7 +424,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 <!-- Accordéon Fermetures Exceptionnelles -->
                 <div class="accordion-section">
                     <div class="accordion-header">
-                        <h3><i class="fas fa-calendar-times"></i> Fermetures Exceptionnelles</h3>
+                        <h2><i class="fas fa-calendar-times"></i> Fermetures Exceptionnelles</h2>
                         <button type="button" class="accordion-toggle" data-target="closure-dates-content">
                             <i class="fas fa-chevron-down"></i>
                         </button>
@@ -579,7 +579,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
 
                 <div class="accordion-section premium-options-accordion">
                     <div class="accordion-header">
-                        <h3><i class="fas fa-bolt"></i> Options premium à la carte</h3>
+                        <h2><i class="fas fa-bolt"></i> Options premium à la carte</h2>
                         <button type="button" class="accordion-toggle" data-target="premium-options-content">
                             <i class="fas fa-chevron-down"></i>
                         </button>
@@ -726,7 +726,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 ?>
                 <div class="accordion-section premium-total-accordion">
                     <div class="accordion-header">
-                        <h3><i class="fas fa-calculator"></i> Total de votre abonnement</h3>
+                        <h2><i class="fas fa-calculator"></i> Total de votre abonnement</h2>
                         <button type="button" class="accordion-toggle" data-target="subscription-total-content">
                             <i class="fas fa-chevron-down"></i>
                         </button>
@@ -761,7 +761,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 <?php if (!$hasActiveSub && !$isSuperAdmin): ?>
                 <div class="combined-cart-section" id="combined-cart-section" style="display: none;">
                     <div class="combined-cart-header">
-                        <h3><i class="fas fa-shopping-cart"></i> Panier d'abonnement</h3>
+                        <h2><i class="fas fa-shopping-cart"></i> Panier d'abonnement</h2>
                         <p>Sélectionnez votre abonnement basique et les options premium en un seul paiement</p>
                     </div>
                     
@@ -953,7 +953,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 ?>
                 <div class="accordion-section premium-total-accordion" id="subscription-total">
                     <div class="accordion-header">
-                        <h3><i class="fas fa-calculator"></i> Total de votre abonnement</h3>
+                        <h2><i class="fas fa-calculator"></i> Total de votre abonnement</h2>
                         <button type="button" class="accordion-toggle" data-target="subscription-total-content">
                             <i class="fas fa-chevron-down"></i>
                         </button>
@@ -1007,7 +1007,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 
                 <div class="accordion-section subscription-management-accordion">
                     <div class="accordion-header">
-                        <h3><i class="fas fa-sliders-h"></i> Gérer mes abonnements</h3>
+                        <h2><i class="fas fa-sliders-h"></i> Gérer mes abonnements</h2>
                         <button type="button" class="accordion-toggle" data-target="subscription-management-content">
                             <i class="fas fa-chevron-down"></i>
                         </button>

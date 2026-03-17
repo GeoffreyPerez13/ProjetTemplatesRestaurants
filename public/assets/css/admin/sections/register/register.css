@@ -207,3 +207,91 @@
     color: var(--color-warning);
     margin-right: 0.5rem;
 }
+
+/* ==================== RESPONSIVE REGISTER ==================== */
+@media (max-width: 600px) {
+  .register-container {
+    padding-left: var(--spacing-sm) !important;
+    padding-right: var(--spacing-sm) !important;
+    max-width: 100% !important;
+  }
+  
+  .register-container h1,
+  .register-container h2 {
+    padding-left: var(--spacing-md) !important;
+    padding-right: var(--spacing-md) !important;
+    text-align: center !important;
+  }
+  
+  .register-container .register-subtitle {
+    padding-left: var(--spacing-md) !important;
+    padding-right: var(--spacing-md) !important;
+    text-align: center !important;
+  }
+  
+  .register-container .register-logo {
+    padding-left: var(--spacing-md) !important;
+    padding-right: var(--spacing-md) !important;
+    text-align: center !important;
+  }
+  
+  .register-container .form-footer {
+    padding-left: var(--spacing-md) !important;
+    padding-right: var(--spacing-md) !important;
+    text-align: center !important;
+  }
+  
+  .register-container input[type="text"],
+  .register-container input[type="email"],
+  .register-container input[type="password"],
+  .register-container .password-input-with-toggle {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .register-container .btn-primary {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .register-container .password-input-group {
+    width: 100%;
+  }
+  
+  .register-container .password-toggle-btn {
+    min-height: 42px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-container {
+    padding-left: var(--spacing-xs) !important;
+    padding-right: var(--spacing-xs) !important;
+    max-width: 100% !important;
+  }
+  
+  .register-container h1,
+  .register-container h2 {
+    padding-left: var(--spacing-sm) !important;
+    padding-right: var(--spacing-sm) !important;
+    text-align: center !important;
+  }
+  
+  .register-container .register-subtitle {
+    padding-left: var(--spacing-sm) !important;
+    padding-right: var(--spacing-sm) !important;
+    text-align: center !important;
+  }
+  
+  .register-container .register-logo {
+    padding-left: var(--spacing-sm) !important;
+    padding-right: var(--spacing-sm) !important;
+    text-align: center !important;
+  }
+  
+  .register-container .form-footer {
+    padding-left: var(--spacing-sm) !important;
+    padding-right: var(--spacing-sm) !important;
+    text-align: center !important;
+  }
+}

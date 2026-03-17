@@ -3,7 +3,6 @@ $title = $title ?? "Mentions légales";
 require __DIR__ . '/../partials/header.php';
 ?>
 
-<a class="btn-back" href="?page=dashboard">Retour</a>
 
 <div class="legal-container">
     <div class="legal-sidebar">

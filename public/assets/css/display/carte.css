@@ -98,11 +98,31 @@
   flex-direction: column;
 }
 
+.plat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+  width: 100%;
+}
+
+/* Pour les plats pairs (image à droite, texte à droite) : prix tout à gauche */
+.plat-card:nth-child(even) .plat-price {
+  order: -1;
+}
+
 .plat-info h4 {
   font-size: var(--text-lg);
   font-weight: 600;
-  margin-bottom: var(--spacing-xs);
   color: var(--color-text);
+  margin: 0;
+}
+
+.plat-price {
+  font-weight: 700;
+  font-size: var(--text-lg);
+  color: var(--color-primary);
+  margin: 0;
 }
 
 .plat-info p {
@@ -111,12 +131,6 @@
   margin-bottom: var(--spacing-sm);
   line-height: 1.6;
   flex: 1;
-}
-
-.plat-price {
-  font-weight: 700;
-  font-size: var(--text-lg);
-  color: var(--color-primary);
 }
 
 /* Mode images */
@@ -242,6 +256,12 @@
     align-items: center;
     text-align: center;
     width: 100%;
+  }
+
+  .plat-header {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
   }
 
   .images-grid {

@@ -243,6 +243,18 @@ html.dark-mode .dark-mode-toggle-floating .fa-sun {
     max-width: 850px;
   }
   
+  /* Enlever les paddings uniquement pour la page edit-services */
+  body[data-page="edit-services"] form {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
+  /* Réduire les paddings pour la page settings section premium */
+  body[data-page="settings"][data-section="premium"] form {
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+  
   .message-success,
   .message-error {
     padding: var(--spacing-sm) var(--spacing-md);

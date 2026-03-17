@@ -45,6 +45,12 @@
     .logo-display,
     .banner-display {
         flex-direction: column;
+        align-items: center;
+    }
+    
+    .logo-image-container,
+    .banner-image-container {
+        margin: 0 auto;
     }
 }
 
@@ -338,6 +344,11 @@
     .preview-side-by-side {
         flex-direction: column;
         gap: 20px;
+        align-items: center;
+    }
+    
+    .preview-image-column {
+        margin: 0 auto;
     }
 }
 
@@ -804,23 +815,17 @@
     }
     .current-logo-image,
     .current-banner-image {
-        max-width: 250px;
-        max-height: 250px;
+        max-width: 280px;
+        max-height: 280px;
     }
     .current-banner-image {
-        max-height: 150px;
+        max-height: 180px;
     }
-    .preview-image-column {
-        max-width: 250px;
+    .logo-info,
+    .banner-info {
+        padding: 20px 0;
+        text-align: center;
     }
-    .preview-image-main {
-        height: 250px;
-    }
-    .form-actions {
-        flex-direction: column;
-    }
-    #uploadBtn,
-    #uploadBannerBtn,
     #resetBtn,
     #resetBannerBtn {
         width: 100%;

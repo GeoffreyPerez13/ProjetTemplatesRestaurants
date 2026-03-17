@@ -1,7 +1,7 @@
 .edit-services-container {
-    max-width: 900px;
-    margin: 30px auto;
-    padding: 0 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
 .services-grid,
@@ -150,4 +150,160 @@
 
 .btn-allergenes-toggle i {
     margin-right: 4px;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .edit-services-container {
+        padding: 0 15px;
+        margin: 20px auto;
+    }
+    
+    .services-grid,
+    .payments-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 20px;
+    }
+    
+    .socials-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 20px;
+    }
+    
+    .service-item,
+    .payment-item,
+    .social-item {
+        padding: 20px;
+    }
+    
+    .service-item label,
+    .payment-item label {
+        font-size: 16px;
+        gap: 12px;
+    }
+    
+    .service-item i,
+    .payment-item i {
+        font-size: 22px;
+        width: 28px;
+    }
+    
+    .service-item input[type="checkbox"],
+    .payment-item input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .livraison-options {
+        padding-left: 25px;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .livraison-options label {
+        font-size: 15px;
+        gap: 10px;
+    }
+    
+    .livraison-options input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .social-item label {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+    
+    .social-item label i {
+        font-size: 22px;
+    }
+    
+    .social-item input {
+        padding: 12px;
+        font-size: 15px;
+    }
+    
+    .allergenes-controls {
+        padding: 0 20px;
+    }
+    
+    .btn-allergenes-toggle {
+        font-size: 0.9rem;
+        padding: 5px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .edit-services-container {
+        padding: 0 10px;
+    }
+    
+    .services-grid,
+    .payments-grid,
+    .socials-grid {
+        padding: 10px;
+        gap: 12px;
+    }
+    
+    .service-item,
+    .payment-item,
+    .social-item {
+        padding: 10px;
+    }
+    
+    .service-item label,
+    .payment-item label {
+        font-size: 13px;
+        gap: 8px;
+    }
+    
+    .service-item i,
+    .payment-item i {
+        font-size: 16px;
+        width: 18px;
+    }
+    
+    .service-item input[type="checkbox"],
+    .payment-item input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .livraison-options {
+        padding-left: 15px;
+        margin-top: 8px;
+    }
+    
+    .livraison-options label {
+        font-size: 12px;
+        gap: 6px;
+    }
+    
+    .livraison-options input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .social-item label {
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+    
+    .social-item label i {
+        font-size: 18px;
+    }
+    
+    .social-item input {
+        padding: 6px;
+        font-size: 12px;
+    }
+    
+    .global-save button {
+        padding: 12px 25px;
+        font-size: 14px;
+        width: 100%;
+    }
 }

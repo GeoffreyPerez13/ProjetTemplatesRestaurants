@@ -51,9 +51,9 @@ if (!$reviews || !$restaurantInfo) {
         </div>
 
         <!-- Avis -->
-        <div class="reviews-grid">
-            <?php foreach ($reviews as $review): ?>
-                <div class="review-card">
+        <div class="reviews-grid" id="reviews-grid">
+            <?php foreach ($reviews as $index => $review): ?>
+                <div class="review-card <?= $index >= 3 ? 'review-hidden' : '' ?>" data-index="<?= $index ?>">
                     <div class="review-header">
                         <div class="reviewer-info">
                             <?php if ($review['profile_photo_url']): ?>
@@ -84,6 +84,16 @@ if (!$reviews || !$restaurantInfo) {
                 </div>
             <?php endforeach; ?>
         </div>
+
+        <!-- Boutons de déroulement (mobile uniquement) -->
+        <?php if (count($reviews) > 3): ?>
+            <div class="reviews-toggle-mobile">
+                <button class="btn-toggle-reviews" id="toggle-reviews">
+                    <i class="fas fa-chevron-down"></i>
+                    <span>Voir les autres avis</span>
+                </button>
+            </div>
+        <?php endif; ?>
 
         <!-- Lien vers Google -->
         <div class="reviews-footer">

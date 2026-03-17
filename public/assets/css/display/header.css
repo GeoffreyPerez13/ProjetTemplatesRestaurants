@@ -4,15 +4,17 @@ header {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border);
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 999;
+  left: 0;
+  right: 0;
+  z-index: 1002;
   transition: box-shadow var(--transition-normal);
 }
 
-/* Ajuster le header quand la bannière de fermeture est présente */
+/* Header décalé si bannière de fermeture présente */
 body:has(.closure-banner:not(.hidden)) header {
-  top: 60px; /* Hauteur approximative de la bannière de fermeture */
+  top: 60px; /* Hauteur de la bannière de fermeture */
 }
 
 .header-content {
@@ -305,5 +307,15 @@ html.dark-mode .dark-mode-toggle-fixed .fa-sun {
 
   .dark-mode-toggle-fixed i {
     font-size: 1.1rem;
+  }
+
+  /* Header et nav-menu décalés si bannière de fermeture présente (mobile) */
+  body:has(.closure-banner:not(.hidden)) header {
+    top: 60px;
+  }
+
+  body:has(.closure-banner:not(.hidden)) .nav-menu {
+    top: calc(var(--header-height) + 60px);
+    height: calc(100vh - var(--header-height) - 60px);
   }
 }

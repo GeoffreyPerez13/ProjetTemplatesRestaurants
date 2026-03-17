@@ -41,7 +41,7 @@
     <?php endif; ?>
 </head>
 
-<body>
+<body data-page="<?= htmlspecialchars($_GET['page'] ?? '') ?>" data-section="<?= htmlspecialchars($_GET['section'] ?? '') ?>">
     <!-- Bandeau mode démo (visible uniquement en session démo) -->
     <?php if (!empty($_SESSION['demo_mode']) && $_SESSION['demo_mode'] === true): ?>
         <div class="demo-banner">

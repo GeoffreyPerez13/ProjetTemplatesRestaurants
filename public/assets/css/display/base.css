@@ -21,6 +21,12 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  padding-top: var(--header-height);
+}
+
+/* Body padding ajusté si bannière de fermeture présente */
+body:has(.closure-banner:not(.hidden)) {
+  padding-top: calc(var(--header-height) + 60px); /* Header + bannière */
 }
 
 ::selection {
@@ -80,5 +86,10 @@ h3 {
 @media (max-width: 768px) {
   .container {
     padding: var(--spacing-2xl) var(--spacing-md);
+  }
+
+  /* Body padding ajusté si bannière de fermeture présente (mobile) */
+  body:has(.closure-banner:not(.hidden)) {
+    padding-top: calc(var(--header-height) + 60px);
   }
 }

@@ -44,6 +44,8 @@
             <a href="#pricing">Tarifs</a>
             <a href="#demo">Démo</a>
             <a href="#faq">FAQ</a>
+            <a href="?page=login" class="nav-btn-outline nav-mobile-only">Se connecter</a>
+            <a href="?page=auto-register" class="nav-btn-primary nav-mobile-only">Créer mon site</a>
         </div>
         <div class="nav-actions">
             <a href="?page=login" class="nav-btn-outline">Se connecter</a>

@@ -86,7 +86,8 @@
   border-bottom: 2px solid var(--color-border);
 }
 
-.accordion-header h3 {
+
+.accordion-header h2 {
   margin: 0;
   font-size: 1.2em;
 }

@@ -62,6 +62,7 @@ $displayDir = __DIR__ . '/display/';
             <i class="fas fa-sun"></i>
         </button>
         <script src="/assets/js/display/dark-mode.js"></script> -->
+        <script src="/assets/js/display/reviews-mobile.js"></script>
         <script src="/assets/js/display/navigation.js"></script>
         <script src="/assets/js/display/lightbox.js"></script>
         <script src="/assets/js/display/cookies.js"></script>

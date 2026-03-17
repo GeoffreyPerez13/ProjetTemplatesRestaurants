@@ -24,9 +24,11 @@
                                             <img src="<?= htmlspecialchars($plat['image_url']) ?>" alt="<?= htmlspecialchars($plat['name']) ?> — <?= htmlspecialchars($category['name']) ?>" loading="lazy" class="lightbox-image">
                                         <?php endif; ?>
                                         <div class="plat-info">
-                                            <h4><?= htmlspecialchars($plat['name']) ?></h4>
+                                            <div class="plat-header">
+                                                <h4><?= htmlspecialchars($plat['name']) ?></h4>
+                                                <span class="plat-price"><?= htmlspecialchars($plat['price']) ?> €</span>
+                                            </div>
                                             <p><?= htmlspecialchars($plat['description']) ?></p>
-                                            <span class="plat-price"><?= htmlspecialchars($plat['price']) ?> €</span>
                                         </div>
                                     </div>
                                 <?php endforeach; ?>

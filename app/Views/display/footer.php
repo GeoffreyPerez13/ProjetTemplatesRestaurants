@@ -46,14 +46,35 @@
             <div class="footer-map">
                 <?php if ($contact && !empty($contact['adresse'])): ?>
                     <iframe
+                        src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDuJqKAlW6qajR3FrK5oVz-Mba5Jz6WZmY&q=<?= urlencode($contact['adresse']) ?>&zoom=16&maptype=roadmap"
                         width="100%"
-                        height="300"
-                        style="border:0; border-radius: 8px;"
-                        loading="lazy"
+                        height="320"
+                        style="border:0; border-radius: var(--radius-lg);"
                         allowfullscreen
-                        referrerpolicy="no-referrer-when-downgrade"
-                        src="https://www.google.com/maps?q=<?= urlencode($contact['adresse']) ?>&output=embed">
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
                     </iframe>
+                    <div class="map-button">
+                        <a href="https://www.google.com/maps/search/?api=1&query=<?= urlencode($contact['adresse']) ?>" 
+                           target="_blank" 
+                           rel="noopener" 
+                           class="map-link-full"
+                           title="Voir sur Google Maps">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <span>Voir sur Google Maps</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                    <div class="map-fallback">
+                        <a href="https://www.google.com/maps/search/?api=1&query=<?= urlencode($contact['adresse']) ?>" 
+                           target="_blank" 
+                           rel="noopener" 
+                           class="map-link"
+                           title="Voir sur Google Maps">
+                            <i class="fas fa-map-marked-alt"></i>
+                            Voir sur Google Maps
+                        </a>
+                    </div>
                 <?php else: ?>
                     <p class="no-map">Carte non disponible</p>
                 <?php endif; ?>

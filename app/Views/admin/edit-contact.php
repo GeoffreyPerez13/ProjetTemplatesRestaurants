@@ -55,11 +55,12 @@ require __DIR__ . '/../partials/header.php';
 
     <div class="form-group">
         <label for="adresse">
-            <i class="fas fa-map-marker-alt"></i> Adresse
+            <i class="fas fa-map-marker-alt"></i> Adresse complète
         </label>
         <input type="text" name="adresse" id="adresse" 
                value="<?= htmlspecialchars($contact['adresse']) ?>" 
                placeholder="Ex: 123 Rue du Restaurant, 75000 Paris" required>
+        <small class="form-hint">Indiquez l'adresse complète : numéro, rue, code postal et ville. <br>Cette adresse sera utilisée pour la carte Google et aidera vos clients à vous trouver.</small>
     </div>
 
     <div class="form-group">

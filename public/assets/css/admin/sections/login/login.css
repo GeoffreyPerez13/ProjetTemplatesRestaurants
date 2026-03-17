@@ -192,3 +192,47 @@
   align-items: center;
   justify-content: center;
 }
+
+/* ==================== RESPONSIVE LOGIN ==================== */
+@media (max-width: 600px) {
+  .login-container {
+    padding-left: var(--spacing-sm) !important;
+    padding-right: var(--spacing-sm) !important;
+    max-width: 100% !important;
+  }
+  
+  .login-container h1,
+  .login-container h2 {
+    padding-left: var(--spacing-md) !important;
+    padding-right: var(--spacing-md) !important;
+    text-align: center !important;
+  }
+  
+  .login-container input[type="text"],
+  .login-container input[type="email"],
+  .login-container input[type="password"],
+  .login-container .password-input-with-toggle {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  .login-container .btn {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-container {
+    padding-left: var(--spacing-xs) !important;
+    padding-right: var(--spacing-xs) !important;
+    max-width: 100% !important;
+  }
+  
+  .login-container h1,
+  .login-container h2 {
+    padding-left: var(--spacing-sm) !important;
+    padding-right: var(--spacing-sm) !important;
+    text-align: center !important;
+  }
+}
