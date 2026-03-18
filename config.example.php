@@ -40,6 +40,15 @@ define('SITE_URL', 'http://localhost/ProjetTemplatesRestaurants');
 // Événement à écouter : checkout.session.completed
 define('STRIPE_WEBHOOK_SECRET', '');  // whsec_... (laisser vide en dev local)
 
+// ==================== GOOGLE MAPS ====================
+// Clé API Google Maps (https://console.cloud.google.com/)
+define('GOOGLE_MAPS_API_KEY', 'VOTRE_CLE_API_GOOGLE_MAPS_ICI');
+
+// ==================== SESSION ====================
+// Durée de session en secondes (14400 = 4 heures)
+// 0 = session navigateur (expire à la fermeture)
+define('SESSION_LIFETIME', 14400);
+
 // ==================== OPTIONS DEV ====================
 // Afficher les liens directs (invitations, vérification email) dans l'interface
 // ATTENTION : désactiver en production !

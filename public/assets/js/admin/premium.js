@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const cartTotal    = document.getElementById('cart-total');
         const checkoutBtn  = document.getElementById('cart-checkout-btn');
 
-        if (!cartBar) return; // pas affiché si pas d'abonnement basique
+        if (!cartBar || !cartCount || !cartTotal || !checkoutBtn) return; // éléments requis manquants
 
         function updateCart() {
             const checked = document.querySelectorAll('.feature-checkbox:checked');

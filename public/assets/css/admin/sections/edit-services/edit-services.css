@@ -31,10 +31,11 @@
 .payment-item label {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
     font-weight: 500;
     color: var(--color-text);
+    min-height: 44px;
 }
 
 .service-item input[type="checkbox"],
@@ -42,13 +43,17 @@
     width: 18px;
     height: 18px;
     cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
 }
 
 .service-item i,
 .payment-item i {
     font-size: 20px;
     color: var(--color-primary);
-    width: 25px;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
 }
 
 .livraison-options {
@@ -62,14 +67,62 @@
 .livraison-options label {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     font-size: 14px;
     color: var(--color-text-light);
+    min-height: 36px;
 }
 
 .livraison-options input[type="checkbox"] {
     width: 16px;
     height: 16px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.animaux-options {
+    margin-top: 10px;
+    padding-left: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.animaux-options label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--color-text-light);
+    min-height: 36px;
+}
+
+.animaux-options input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 36px;
+}
+
+.radio-option input[type="radio"] {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.radio-option label {
+    font-size: 14px;
+    color: var(--color-text-light);
+    cursor: pointer;
+    margin: 0;
+    line-height: 1.4;
 }
 
 .socials-grid {
@@ -182,12 +235,14 @@
     .payment-item label {
         font-size: 16px;
         gap: 12px;
+        min-height: 48px;
     }
     
     .service-item i,
     .payment-item i {
         font-size: 22px;
-        width: 28px;
+        width: 22px;
+        text-align: center;
     }
     
     .service-item input[type="checkbox"],
@@ -204,12 +259,39 @@
     
     .livraison-options label {
         font-size: 15px;
-        gap: 10px;
+        gap: 12px;
+        min-height: 40px;
     }
     
     .livraison-options input[type="checkbox"] {
         width: 18px;
         height: 18px;
+    }
+    
+    .animaux-options {
+        padding-left: 25px;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .animaux-options label {
+        font-size: 15px;
+        gap: 12px;
+        min-height: 40px;
+    }
+    
+    .animaux-options input[type="radio"] {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .radio-option {
+        gap: 12px;
+        min-height: 40px;
+    }
+    
+    .radio-option label {
+        font-size: 15px;
     }
     
     .social-item label {
@@ -258,6 +340,7 @@
     .payment-item label {
         font-size: 13px;
         gap: 8px;
+        min-height: 40px;
     }
     
     .service-item i,
@@ -279,12 +362,38 @@
     
     .livraison-options label {
         font-size: 12px;
-        gap: 6px;
+        gap: 8px;
+        min-height: 32px;
     }
     
     .livraison-options input[type="checkbox"] {
         width: 14px;
         height: 14px;
+    }
+    
+    .animaux-options {
+        padding-left: 15px;
+        margin-top: 8px;
+    }
+    
+    .animaux-options label {
+        font-size: 12px;
+        gap: 8px;
+        min-height: 32px;
+    }
+    
+    .animaux-options input[type="radio"] {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .radio-option {
+        gap: 8px;
+        min-height: 32px;
+    }
+    
+    .radio-option label {
+        font-size: 12px;
     }
     
     .social-item label {

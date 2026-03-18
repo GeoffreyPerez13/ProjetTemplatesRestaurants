@@ -68,11 +68,11 @@ require __DIR__ . '/../partials/header.php';
                         <div class="livraison-options">
                             <label>
                                 <input type="checkbox" name="service_livraison_ubereats" value="1" <?= $services['service_livraison_ubereats'] == '1' ? 'checked' : '' ?>>
-                                <i class="fab fa-ubereats"></i> Uber Eats / Deliveroo
+                                Uber Eats / Deliveroo
                             </label>
                             <label>
                                 <input type="checkbox" name="service_livraison_etablissement" value="1" <?= $services['service_livraison_etablissement'] == '1' ? 'checked' : '' ?>>
-                                <i class="fas fa-motorcycle"></i> Livraison par l'établissement
+                                Livraison par l'établissement
                             </label>
                         </div>
                     </div>
@@ -89,10 +89,21 @@ require __DIR__ . '/../partials/header.php';
                         </label>
                     </div>
                     <div class="service-item">
-                        <label>
-                            <input type="checkbox" name="service_pmr" value="1" <?= $services['service_pmr'] == '1' ? 'checked' : '' ?>>
-                            <i class="fas fa-wheelchair"></i> Accès PMR
-                        </label>
+                        <label for="service_pmr"><i class="fas fa-wheelchair"></i> Accès PMR</label>
+                        <input type="checkbox" name="service_pmr" id="service_pmr" value="1" <?= $services['service_pmr'] == '1' ? 'checked' : '' ?>>
+                    </div>
+                    <div class="service-item">
+                        <label><i class="fas fa-paw"></i> Animaux</label>
+                        <div class="animaux-options">
+                            <div class="radio-option">
+                                <input type="radio" name="service_animaux" id="animaux_autorises" value="autorises" <?= ($services['service_animaux'] ?? '') == 'autorises' ? 'checked' : '' ?>>
+                                <label for="animaux_autorises">Autorisés</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="service_animaux" id="animaux_non_autorises" value="non_autorises" <?= ($services['service_animaux'] ?? '') == 'non_autorises' ? 'checked' : '' ?>>
+                                <label for="animaux_non_autorises">Non autorisés</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -140,6 +151,12 @@ require __DIR__ . '/../partials/header.php';
                         <label>
                             <input type="checkbox" name="payment_cheques" value="1" <?= $payments['payment_cheques'] == '1' ? 'checked' : '' ?>>
                             <i class="fas fa-money-check"></i> Chèques
+                        </label>
+                    </div>
+                    <div class="payment-item">
+                        <label>
+                            <input type="checkbox" name="payment_tickets_restaurant" value="1" <?= $payments['payment_tickets_restaurant'] == '1' ? 'checked' : '' ?>>
+                            <i class="fas fa-ticket-alt"></i> Tickets restaurant
                         </label>
                     </div>
                 </div>

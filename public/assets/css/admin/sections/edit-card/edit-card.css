@@ -737,10 +737,6 @@
     gap: 20px;
   }
 
-  .category-block {
-    flex: 1 1 300px;
-  }
-
   .accordion-header h2 {
     font-size: 1.2rem;
   }
@@ -754,11 +750,6 @@
 }
 
 @media (max-width: 768px) {
-  .categories-grid {
-    flex-direction: column;
-    max-width: 100%;
-  }
-
   .category-block {
     flex: 1 1 100%;
     width: 100%;

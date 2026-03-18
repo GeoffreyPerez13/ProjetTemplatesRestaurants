@@ -158,7 +158,6 @@
 
 .settings-section h2 {
   margin-top: 0;
-  margin-bottom: var(--spacing-lg);
   color: var(--color-text);
   padding-bottom: var(--spacing-sm);
 }
@@ -733,76 +732,7 @@
   }
 }
 
-/* ==================== STYLES ACCORDÉONS SPÉCIFIQUE PREMIUM (comme edit-card) ==================== */
-body[data-page="settings"][data-section="premium"] .accordion-header {
-  padding: 15px 20px;
-  min-height: 55px;
-  align-items: flex-start;
-  width: 100%;
-  box-sizing: border-box;
-  border-bottom: none !important; /* Supprimer le trait blanc */
-}
-
 /* ==================== SUPPRIMER LES BORDER-BOTTOM POUR TOUS LES ACCORDÉONS SETTINGS ==================== */
 body[data-page="settings"] .accordion-header {
   border-bottom: none !important;
-}
-
-/* TITRE h2 : 85% de largeur */
-body[data-page="settings"][data-section="premium"] .accordion-header h2 {
-  font-size: 1.2em;
-  width: 85%;
-  max-width: 85%;
-  padding-right: 10px;
-  margin: 0;
-  white-space: normal;
-  line-height: 1.3;
-  align-self: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* BOUTON TOGGLE : 15% de largeur */
-body[data-page="settings"][data-section="premium"] .accordion-toggle {
-  min-width: 35px;
-  height: 35px;
-  width: 15%;
-  flex: 0 0 15%;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  align-self: center;
-}
-
-/* ==================== MEDIA QUERIES POUR ACCORDÉONS PREMIUM (comme edit-card) ==================== */
-@media (max-width: 600px) {
-  body[data-page="settings"][data-section="premium"] .accordion-header {
-    padding: 12px 15px;
-    min-height: 50px;
-  }
-
-  /* Conserve 85%/15% pour les écrans très petits */
-  body[data-page="settings"][data-section="premium"] .accordion-header h2 {
-    font-size: 1.1em;
-    width: 85%;
-    max-width: 85%;
-    white-space: normal;
-  }
-
-  body[data-page="settings"][data-section="premium"] .accordion-toggle {
-    min-width: 30px;
-    height: 30px;
-    width: 15%;
-    flex: 0 0 15%;
-  }
-}
-
-@media (max-width: 480px) {
-  body[data-page="settings"][data-section="premium"] .accordion-header h2 {
-    font-size: 1em;
-    width: 85%;
-    max-width: 85%;
-  }
 }

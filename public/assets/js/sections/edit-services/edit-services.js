@@ -17,6 +17,9 @@
 
         // Configuration des boutons "Tout (dé)cocher"
         setupCheckboxesToggles();
+        
+        // Configuration des radio buttons désélectionnables
+        setupRadioDeselect();
     }
 
     /**
@@ -62,6 +65,36 @@
         const checkboxes = container.querySelectorAll('input[type="checkbox"]');
         const allChecked = Array.from(checkboxes).every(cb => cb.checked);
         checkboxes.forEach(cb => cb.checked = !allChecked);
+    }
+
+    /**
+     * Configure les radio buttons désélectionnables
+     */
+    function setupRadioDeselect() {
+        // Trouver le service-item qui contient les animaux-options
+        const animauxOptions = document.querySelector('.animaux-options');
+        if (animauxOptions) {
+            const animauxServiceItem = animauxOptions.closest('.service-item');
+            if (animauxServiceItem) {
+                animauxServiceItem.addEventListener('click', handleServiceItemClick);
+            }
+        }
+    }
+
+    /**
+     * Gestionnaire pour désélectionner en cliquant sur le service-item
+     */
+    function handleServiceItemClick(e) {
+        // Vérifier si le clic vient d'un input radio
+        if (e.target.type === 'radio') {
+            return; // Laisser le comportement normal pour les inputs
+        }
+        
+        // Si le clic vient du service-item (sauf inputs), décocher tous les radios
+        const radios = this.querySelectorAll('.animaux-options input[type="radio"]');
+        radios.forEach(radio => {
+            radio.checked = false;
+        });
     }
 
     // Initialisation

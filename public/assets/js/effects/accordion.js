@@ -48,6 +48,12 @@
       if (firstAccordion && firstAccordion.classList.contains("collapsed")) {
         openAccordion(firstAccordion.id);
       }
+      
+      // Vérifier l'état initial de l'accordéon premium
+      const premiumAccordion = document.getElementById("premium-options-content");
+      if (premiumAccordion && premiumAccordion.classList.contains("collapsed")) {
+        hideRetractationNotice();
+      }
     }, 50);
   }
 
@@ -232,8 +238,16 @@
 
     if (isExpanded) {
       closeAccordion(target.id);
+      // Gérer le retractation-notice pour l'accordéon premium
+      if (target.id === 'premium-options-content') {
+        hideRetractationNotice();
+      }
     } else {
       openAccordion(target.id);
+      // Gérer le retractation-notice pour l'accordéon premium
+      if (target.id === 'premium-options-content') {
+        showRetractationNotice();
+      }
     }
   }
 
@@ -261,6 +275,11 @@
 
     accordion.classList.remove("collapsed");
     accordion.classList.add("expanded");
+    
+    // Gérer le retractation-notice pour l'accordéon premium
+    if (accordionId === 'premium-options-content') {
+      showRetractationNotice();
+    }
   }
 
   /**
@@ -272,6 +291,11 @@
 
     accordion.classList.remove("expanded");
     accordion.classList.add("collapsed");
+    
+    // Gérer le retractation-notice pour l'accordéon premium
+    if (accordionId === 'premium-options-content') {
+      hideRetractationNotice();
+    }
   }
 
   /**
@@ -389,6 +413,26 @@
   }
 
   /**
+   * Affiche le retractation-notice
+   */
+  function showRetractationNotice() {
+    const notice = document.querySelector('.retractation-notice');
+    if (notice) {
+      notice.style.display = 'block';
+    }
+  }
+
+  /**
+   * Masque le retractation-notice
+   */
+  function hideRetractationNotice() {
+    const notice = document.querySelector('.retractation-notice');
+    if (notice) {
+      notice.style.display = 'none';
+    }
+  }
+
+  /**
    * API publique
    */
   window.AccordionManager = {
@@ -402,6 +446,8 @@
     expandAll: expandAllAccordions,
     collapseAll: collapseAllAccordions,
     closeAllExceptFirst: closeAllExceptFirst,
+    showRetractationNotice: showRetractationNotice,
+    hideRetractationNotice: hideRetractationNotice,
   };
 
   // Initialisation

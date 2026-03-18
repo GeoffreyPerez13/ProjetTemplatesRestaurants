@@ -80,6 +80,7 @@ class ServicesController extends BaseController
             'service_wifi'                      => isset($_POST['service_wifi']) ? '1' : '0',
             'service_climatisation'             => isset($_POST['service_climatisation']) ? '1' : '0',
             'service_pmr'                       => isset($_POST['service_pmr']) ? '1' : '0',
+            'service_animaux'                   => $_POST['service_animaux'] ?? '',
         ];
 
         $payments = [
@@ -88,6 +89,7 @@ class ServicesController extends BaseController
             'payment_cb' => isset($_POST['payment_cb']) ? '1' : '0',
             'payment_especes' => isset($_POST['payment_especes']) ? '1' : '0',
             'payment_cheques' => isset($_POST['payment_cheques']) ? '1' : '0',
+            'payment_tickets_restaurant' => isset($_POST['payment_tickets_restaurant']) ? '1' : '0',
         ];
 
         $socials = [
@@ -136,6 +138,7 @@ class ServicesController extends BaseController
             'service_wifi'                      => '0',
             'service_climatisation'             => '0',
             'service_pmr'                       => '0',
+            'service_animaux'                   => '',
         ];
         return array_merge($defaults, array_intersect_key($options, $defaults));
     }
@@ -154,6 +157,7 @@ class ServicesController extends BaseController
             'payment_cb' => '0',
             'payment_especes' => '0',
             'payment_cheques' => '0',
+            'payment_tickets_restaurant' => '0',
         ];
         return array_merge($defaults, array_intersect_key($options, $defaults));
     }

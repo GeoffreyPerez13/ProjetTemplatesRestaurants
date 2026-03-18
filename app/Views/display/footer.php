@@ -46,7 +46,7 @@
             <div class="footer-map">
                 <?php if ($contact && !empty($contact['adresse'])): ?>
                     <iframe
-                        src="https://www.google.com/maps/embed/v1/place?key=<?= $_ENV['GOOGLE_MAPS_API_KEY'] ?? '' ?>&q=<?= urlencode($contact['adresse']) ?>&zoom=16&maptype=roadmap"
+                        src="https://maps.google.com/maps?q=<?= urlencode($contact['adresse']) ?>&t=&z=16&ie=UTF8&iwloc=&output=embed"
                         width="100%"
                         height="320"
                         style="border:0; border-radius: var(--radius-lg);"

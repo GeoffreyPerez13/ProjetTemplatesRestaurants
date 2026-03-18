@@ -119,6 +119,7 @@ class DisplayController extends BaseController
             'service_wifi'                      => $options['service_wifi'] ?? '0',
             'service_climatisation'             => $options['service_climatisation'] ?? '0',
             'service_pmr'                       => $options['service_pmr'] ?? '0',
+            'service_animaux'                   => $options['service_animaux'] ?? '',
         ];
 
         // Paiements
@@ -128,6 +129,7 @@ class DisplayController extends BaseController
             'payment_cb'         => $options['payment_cb'] ?? '0',
             'payment_especes'    => $options['payment_especes'] ?? '0',
             'payment_cheques'    => $options['payment_cheques'] ?? '0',
+            'payment_tickets_restaurant' => $options['payment_tickets_restaurant'] ?? '0',
         ];
 
         // Réseaux sociaux

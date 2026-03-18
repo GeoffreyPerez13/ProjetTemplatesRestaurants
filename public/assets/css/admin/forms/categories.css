@@ -155,7 +155,8 @@
 }
 
 /* ==================== RESPONSIVE CATEGORIES ==================== */
-@media (min-width: 601px) {
+/* Tablette et desktop moyen (770px - 1000px) : Maximum 2 colonnes */
+@media (min-width: 770px) and (max-width: 1000px) {
   .edit-card-container {
     display: flex;
     flex-direction: column;
@@ -169,13 +170,13 @@
   }
 
   .category-block {
-    flex: 1 1 calc(50% - 10px);
+    flex: 0 0 calc(50% - 10px);
+    max-width: calc(50% - 10px);
     align-self: flex-start;
-    min-width: 0; /* CRITIQUE : permet la réduction */
   }
 }
 
-@media (min-width: 1025px) {
+@media (min-width: 1001px) {
   .edit-card-container {
     flex-direction: row;
     flex-wrap: wrap;
@@ -193,7 +194,7 @@
   }
 
   .category-block {
-    flex: 0 0 calc(33.333% - 20px);
+    flex: 0 0 calc(25% - 20px);
     align-self: flex-start;
     min-height: auto;
     min-width: 0; /* CRITIQUE : permet la réduction */
@@ -203,7 +204,7 @@
 /* Pour les très grands écrans */
 @media (min-width: 1400px) {
   .category-block {
-    flex: 0 0 calc(25% - 25px);
+    flex: 0 0 calc(20% - 25px);
   }
 }
 

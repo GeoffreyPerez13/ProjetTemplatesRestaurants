@@ -226,7 +226,7 @@ class BaseController
 
         // Content-Security-Policy (uniquement pour les pages rendues avec HTML)
         if (!headers_sent()) {
-            header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://code.jquery.com https://cdn.jsdelivr.net https://js.stripe.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: blob:; frame-src https://js.stripe.com; connect-src 'self'");
+            header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://code.jquery.com https://cdn.jsdelivr.net https://js.stripe.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: blob:; frame-src https://js.stripe.com https://maps.google.com https://www.google.com; connect-src 'self'");
         }
 
         // Transforme les clés du tableau en variables (EXTR_SKIP évite d'écraser des variables existantes)

@@ -13,17 +13,17 @@ function setCookie(name, value, days) {
 }
 
 function acceptCookies() {
-    setCookie('cookie_consent', 'accepted', 365);
-    setCookie('cookie_analytics', 'true', 365);
-    setCookie('cookie_marketing', 'false', 365);
+    setCookie('cookie_consent', 'accepted', 180);
+    setCookie('cookie_analytics', 'true', 180);
+    setCookie('cookie_marketing', 'false', 180);
     document.getElementById('cookie-banner').style.display = 'none';
     loadAnalytics();
 }
 
 function rejectCookies() {
-    setCookie('cookie_consent', 'rejected', 365);
-    setCookie('cookie_analytics', 'false', 365);
-    setCookie('cookie_marketing', 'false', 365);
+    setCookie('cookie_consent', 'rejected', 180);
+    setCookie('cookie_analytics', 'false', 180);
+    setCookie('cookie_marketing', 'false', 180);
     document.getElementById('cookie-banner').style.display = 'none';
 }
 
@@ -41,9 +41,9 @@ function saveCookieSettings() {
     const analytics = document.getElementById('cookie-analytics').checked ? 'true' : 'false';
     const marketing = document.getElementById('cookie-marketing').checked ? 'true' : 'false';
     
-    setCookie('cookie_consent', 'custom', 365);
-    setCookie('cookie_analytics', analytics, 365);
-    setCookie('cookie_marketing', marketing, 365);
+    setCookie('cookie_consent', 'custom', 180);
+    setCookie('cookie_analytics', analytics, 180);
+    setCookie('cookie_marketing', marketing, 180);
     
     if (analytics === 'true') {
         loadAnalytics();

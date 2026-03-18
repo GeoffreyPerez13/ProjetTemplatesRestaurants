@@ -8,7 +8,8 @@ $hasServices = (
     $services['service_livraison_etablissement'] == '1' ||
     $services['service_wifi'] == '1' ||
     $services['service_climatisation'] == '1' ||
-    $services['service_pmr'] == '1'
+    $services['service_pmr'] == '1' ||
+    !empty($services['service_animaux'])
 );
 // Vérifier si au moins un paiement est actif
 $hasPayments = (
@@ -16,7 +17,8 @@ $hasPayments = (
     $payments['payment_mastercard'] == '1' ||
     $payments['payment_cb'] == '1' ||
     $payments['payment_especes'] == '1' ||
-    $payments['payment_cheques'] == '1'
+    $payments['payment_cheques'] == '1' ||
+    $payments['payment_tickets_restaurant'] == '1'
 );
 if ($hasServices || $hasPayments):
 ?>
@@ -58,6 +60,16 @@ if ($hasServices || $hasPayments):
                             <?php if ($services['service_pmr'] == '1'): ?>
                                 <li><i class="fas fa-wheelchair"></i> Accès personnes à mobilité réduite</li>
                             <?php endif; ?>
+                            <?php if (!empty($services['service_animaux'])): ?>
+                                <li><i class="fas fa-paw"></i> 
+                                    Animaux : 
+                                    <?php if ($services['service_animaux'] === 'autorises'): ?>
+                                        Autorisés
+                                    <?php elseif ($services['service_animaux'] === 'non_autorises'): ?>
+                                        Non autorisés
+                                    <?php endif; ?>
+                                </li>
+                            <?php endif; ?>
                         </ul>
                     </div>
                 <?php endif; ?>
@@ -80,6 +92,9 @@ if ($hasServices || $hasPayments):
                             <?php endif; ?>
                             <?php if ($payments['payment_cheques'] == '1'): ?>
                                 <li><i class="fas fa-money-check"></i> Chèques</li>
+                            <?php endif; ?>
+                            <?php if ($payments['payment_tickets_restaurant'] == '1'): ?>
+                                <li><i class="fas fa-ticket-alt"></i> Tickets restaurant</li>
                             <?php endif; ?>
                         </ul>
                     </div>

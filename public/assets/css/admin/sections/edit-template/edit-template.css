@@ -33,10 +33,6 @@
 }
 
 /* ==================== SECTIONS ==================== */
-.template-section {
-    margin-bottom: var(--spacing-xl);
-}
-
 .template-section-title {
     font-size: 1.15rem;
     color: var(--color-text);
