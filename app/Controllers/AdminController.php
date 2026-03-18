@@ -558,4 +558,83 @@ class AdminController extends BaseController
             'csrf_token' => $this->getCsrfToken()
         ]);
     }
+
+    /**
+     * Réinitialisation du mot de passe (contexte admin sécurisé)
+     * Réservée aux utilisateurs déjà connectés
+     * Étape 1 : saisie de l'email → envoi du lien de réinitialisation
+     * Étape 2 : saisie du nouveau mot de passe via le token reçu par mail
+     */
+    public function resetPasswordAdmin()
+    {
+        // Vérification de sécurité : l'utilisateur doit être connecté
+        $this->requireLogin();
+
+        // Initialisation
+        $token = $_GET['token'] ?? $_POST['token'] ?? null;
+        $adminModel = new Admin($this->pdo);
+
+        // Traitement du formulaire
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+                $_SESSION['error_message'] = "Requête invalide (CSRF).";
+                // Redirection vers la même page (avec ou sans token)
+                $redirect = $token ? '?page=reset-password-admin&token=' . urlencode($token) : '?page=reset-password-admin';
+                header('Location: ' . $redirect);
+                exit;
+            }
+
+            if (empty($token)) {
+                // Étape 1 : demande d'email
+                $email = trim($_POST['email'] ?? '');
+                if (empty($email)) {
+                    $_SESSION['error_message'] = "Veuillez renseigner une adresse email.";
+                } else {
+                    if ($adminModel->requestPasswordReset($email)) {
+                        $_SESSION['success_message'] = "Si cette adresse existe dans notre système, vous recevrez un email.";
+                    } else {
+                        $_SESSION['error_message'] = "Erreur lors de l'envoi de l'email de réinitialisation.";
+                    }
+                }
+                header('Location: ?page=reset-password-admin');
+                exit;
+            } else {
+                // Étape 2 : réinitialisation du mot de passe
+                $newPassword = $_POST['new_password'] ?? '';
+                $confirmPassword = $_POST['confirm_password'] ?? '';
+
+                // Validation côté serveur via Validator centralisé
+                $errors = Validator::validatePassword($newPassword, $confirmPassword);
+
+                if (!empty($errors)) {
+                    $_SESSION['error_message'] = implode('<br>', $errors);
+                    header('Location: ?page=reset-password-admin&token=' . urlencode($token));
+                    exit;
+                }
+
+                // Tentative de réinitialisation
+                if ($adminModel->resetPassword($token, $newPassword)) {
+                    $_SESSION['success_message'] = "Mot de passe mis à jour avec succès.";
+                    header('Location: ?page=settings&section=password');
+                    exit;
+                } else {
+                    $_SESSION['error_message'] = "Lien de réinitialisation invalide ou expiré.";
+                    header('Location: ?page=reset-password-admin&token=' . urlencode($token));
+                    exit;
+                }
+            }
+        }
+
+        // Affichage du formulaire (première visite ou après erreur)
+        $success_message = $_SESSION['success_message'] ?? null;
+        $error_message = $_SESSION['error_message'] ?? null;
+        unset($_SESSION['success_message'], $_SESSION['error_message']);
+
+        $this->render('admin/reset-password-admin', [
+            'success_message' => $success_message,
+            'error_message' => $error_message,
+            'token' => $token,
+            'csrf_token' => $this->getCsrfToken()
+        ]);
+    }
 }

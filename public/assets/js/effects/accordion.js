@@ -118,6 +118,16 @@
 
       toggle.setAttribute("data-accordion-initialized", "true");
 
+      // Synchroniser l'état initial du chevron (logique inversée)
+      // Vérifier l'état réel de l'accordéon (visible ou caché)
+      const isVisible = target.style.display !== "none" && !target.classList.contains("collapsed");
+      
+      if (isVisible) {
+        toggle.classList.remove("expanded");  // Accordéon visible (ouvert) -> chevron bas
+      } else {
+        toggle.classList.add("expanded");   // Accordéon caché (fermé) -> chevron haut
+      }
+
       // Ajouter l'événement de clic sur tout le header du plat
       header.addEventListener("click", function (e) {
         // Ne pas déclencher si on clique sur un lien, un bouton ou un input à l'intérieur du header
@@ -255,14 +265,15 @@
    * Bascule un accordéon de plat
    */
   function toggleDishAccordion(target, toggle) {
-    const isExpanded = target.classList.contains("expanded");
+    // Utiliser la même logique que la synchronisation initiale
+    const isExpanded = target.style.display !== "none" && !target.classList.contains("collapsed");
 
     if (isExpanded) {
       closeDishAccordion(target.id);
-      if (toggle) toggle.classList.remove("expanded");
+      if (toggle) toggle.classList.add("expanded");  // Inversé : ouvert -> chevron haut
     } else {
       openDishAccordion(target.id);
-      if (toggle) toggle.classList.add("expanded");
+      if (toggle) toggle.classList.remove("expanded");  // Inversé : fermé -> chevron bas
     }
   }
 
@@ -386,11 +397,11 @@
       )
       .forEach((dishSection) => {
         openDishAccordion(dishSection.id);
-        // Mettre à jour l'icône du toggle correspondant
+        // Mettre à jour l'icône du toggle correspondant (logique inversée)
         const toggle = document.querySelector(
           `.dish-accordion-toggle[data-target="${dishSection.id}"]`,
         );
-        if (toggle) toggle.classList.add("expanded");
+        if (toggle) toggle.classList.remove("expanded");  // Ouvert -> chevron bas
       });
   }
 
@@ -404,11 +415,11 @@
       )
       .forEach((dishSection) => {
         closeDishAccordion(dishSection.id);
-        // Mettre à jour l'icône du toggle correspondant
+        // Mettre à jour l'icône du toggle correspondant (logique inversée)
         const toggle = document.querySelector(
           `.dish-accordion-toggle[data-target="${dishSection.id}"]`,
         );
-        if (toggle) toggle.classList.remove("expanded");
+        if (toggle) toggle.classList.add("expanded");   // Fermé -> chevron haut
       });
   }
 

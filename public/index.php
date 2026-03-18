@@ -212,6 +212,11 @@ switch ($page) {
         $adminController->resetPassword();  // Réinitialisation du mot de passe
         break;
 
+    case 'reset-password-admin':
+        $adminController = new AdminController($pdo);
+        $adminController->resetPasswordAdmin();  // Réinitialisation du mot de passe (contexte admin)
+        break;
+
     case 'display':
         $slug = $_GET['slug'] ?? '';
         if (empty($slug)) {

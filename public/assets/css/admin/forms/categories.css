@@ -6,7 +6,6 @@
   border-radius: var(--radius-md);
   margin-bottom: 25px;
   width: 100%;
-  max-width: 450px;
   box-sizing: border-box;
 }
 
@@ -155,56 +154,46 @@
 }
 
 /* ==================== RESPONSIVE CATEGORIES ==================== */
-/* Tablette et desktop moyen (770px - 1000px) : Maximum 2 colonnes */
-@media (min-width: 770px) and (max-width: 1000px) {
+/* Tablette et desktop (770px et plus) : Maximum 2 colonnes */
+@media (min-width: 770px) {
   .edit-card-container {
-    display: flex;
-    flex-direction: column;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   .categories-grid {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 20px;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 20px !important;
   }
 
   .category-block {
-    flex: 0 0 calc(50% - 10px);
-    max-width: calc(50% - 10px);
-    align-self: flex-start;
+    flex: 0 0 calc(50% - 10px) !important;
+    max-width: calc(50% - 10px) !important;
+    align-self: flex-start !important;
   }
 }
 
-@media (min-width: 1001px) {
-  .edit-card-container {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: flex-start;
+/* Corriger les boutons form-actions en mode 2-3 colonnes */
+@media (min-width: 770px) {
+  .category-block .form-actions {
+    flex-direction: column !important;
+    gap: 10px !important;
   }
-
-  .new-category-block {
-    flex: 0 0 300px;
-    max-width: 300px;
-  }
-
-  .categories-grid {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .category-block {
-    flex: 0 0 calc(25% - 20px);
-    align-self: flex-start;
-    min-height: auto;
-    min-width: 0; /* CRITIQUE : permet la réduction */
+  
+  .category-block .form-actions .btn {
+    width: 100% !important;
+    flex: 1 !important;
+    justify-content: center !important;
   }
 }
 
-/* Pour les très grands écrans */
-@media (min-width: 1400px) {
+/* Desktop large (1500px et plus) : 3 colonnes */
+@media (min-width: 1500px) {
   .category-block {
-    flex: 0 0 calc(20% - 25px);
+    flex: 0 0 calc(33.333% - 15px) !important;
+    max-width: calc(33.333% - 15px) !important;
   }
 }
 

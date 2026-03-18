@@ -13,6 +13,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!isExpanded) {
                 // Ouverture
                 this.style.borderRadius = '6px 6px 0 0';
+                
+                // Scroll automatique vers le menu
+                setTimeout(() => {
+                    this.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }, 100);
             } else {
                 // Fermeture
                 setTimeout(() => {

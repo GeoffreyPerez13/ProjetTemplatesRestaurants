@@ -543,7 +543,7 @@ require __DIR__ . '/../partials/header.php';
                                                     <button type="button" class="dish-accordion-toggle"
                                                         data-target="dish-<?= $plat['id'] ?>"
                                                         data-category="<?= $cat['id'] ?>">
-                                                        <i class="fas fa-chevron-up"></i>
+                                                        <i class="fas fa-chevron-down"></i>
                                                     </button>
                                                 </div>
                                             </div>

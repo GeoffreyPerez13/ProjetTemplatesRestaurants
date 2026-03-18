@@ -387,6 +387,19 @@
   }
 }
 
+@media (max-width: 450px) {
+  /* Cacher le compteur et les parenthèses */
+  .selected-dates-header-row h4 {
+    font-size: 0.9rem;
+    white-space: normal; /* Permettre le retour à la ligne si nécessaire */
+    line-height: 1.3;
+  }
+  
+  .selected-dates-header-row h4 .count-wrapper {
+    display: none; /* Cacher les parenthèses et le compteur */
+  }
+}
+
 @media (max-width: 415px) {
   .closure-calendar-container {
     padding: 8px;
@@ -419,10 +432,6 @@
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
-  }
-
-  .selected-dates-header-row h4 {
-    font-size: 0.9rem;
   }
 }
 

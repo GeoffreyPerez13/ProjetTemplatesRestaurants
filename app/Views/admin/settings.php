@@ -296,7 +296,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                     </button>
 
                     <div class="password-reset-link">
-                        <p><a href="?page=reset-password">Mot de passe oublié ? Réinitialiser le mot de passe</a></p>
+                        <p><a href="?page=reset-password-admin" target="_blank" rel="noopener noreferrer">Mot de passe oublié ? Réinitialiser le mot de passe</a></p>
                     </div>
                 </form>
             </div>
@@ -458,7 +458,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                             <!-- Liste des dates sélectionnées -->
                             <div class="selected-dates-container">
                                 <div class="selected-dates-header-row">
-                                    <h4>Dates de fermeture programmées (<span id="selected-count">0</span>)</h4>
+                                    <h4>Dates de fermeture programmées<span class="count-wrapper"> (<span id="selected-count">0</span>)</span></h4>
                                     <button type="button" class="btn small btn-clear-dates" id="clear-all-closure-dates">
                                         <i class="fas fa-trash"></i> Tout effacer
                                     </button>
