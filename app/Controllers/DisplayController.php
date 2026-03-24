@@ -9,6 +9,7 @@ require_once __DIR__ . '/../Models/OptionModel.php';
 require_once __DIR__ . '/../Models/PremiumFeature.php';
 require_once __DIR__ . '/../Models/GoogleReviews.php';
 require_once __DIR__ . '/../Models/SiteVisit.php';
+require_once __DIR__ . '/../Models/DailyMenu.php';
 
 /**
  * Contrôleur de la vitrine publique du restaurant
@@ -105,6 +106,10 @@ class DisplayController extends BaseController
         } else {
             $cardImages = $restaurantModel->getCardImages($adminId);
         }
+
+        // Récupérer les menus du jour actifs
+        $dailyMenuModel = new DailyMenu($this->pdo);
+        $dailyMenus = $dailyMenuModel->getActiveByAdmin($adminId);
 
         // Récupérer les options (services, paiements, réseaux)
         $optionModel = new OptionModel($this->pdo);
@@ -245,6 +250,27 @@ class DisplayController extends BaseController
             }
         }
 
+        // Vérifier si les réservations en ligne sont activées
+        $bookingEnabled = false;
+        $bookingSettings = [];
+        try {
+            $premiumFeature = new PremiumFeature($this->pdo);
+            if ($premiumFeature->isEnabled($adminId, 'online_booking')) {
+                $bookingOptionEnabled = $optionModel->get($adminId, 'booking_enabled');
+                if ($bookingOptionEnabled !== '0') {
+                    $bookingEnabled = true;
+                    $bookingSettings = [
+                        'min_party'     => max(1, (int)($optionModel->get($adminId, 'booking_min_party') ?: 1)),
+                        'max_party'     => max(1, (int)($optionModel->get($adminId, 'booking_max_party') ?: 10)),
+                        'advance_days'  => max(1, (int)($optionModel->get($adminId, 'booking_advance_days') ?: 30)),
+                        'message'       => $optionModel->get($adminId, 'booking_message') ?: '',
+                    ];
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Erreur vérification réservations: " . $e->getMessage());
+        }
+
         // Tracker la visite (uniquement si le site est en ligne et pas un preview admin)
         if ($siteOnline && !$isPreview) {
             try {
@@ -270,6 +296,7 @@ class DisplayController extends BaseController
             'carteMode'    => $carteMode,
             'categories'   => $categories,
             'cardImages'   => $cardImages,
+            'dailyMenus'   => $dailyMenus,
             'contact'      => $contact,
             'siteOnline'   => $siteOnline,
             'isPreview'    => $isPreview,
@@ -283,7 +310,12 @@ class DisplayController extends BaseController
             'googleApiKey' => $googleApiKey,
             'googleReviewsEnabled' => $googleReviewsEnabled,
             'todayClosureDate' => $todayClosureDate,
-            'googleReviewsData' => $googleReviewsData
+            'googleReviewsData' => $googleReviewsData,
+            'bookingEnabled'    => $bookingEnabled,
+            'bookingMinParty'   => $bookingSettings['min_party'] ?? 1,
+            'bookingMaxParty'   => $bookingSettings['max_party'] ?? 10,
+            'bookingAdvanceDays' => $bookingSettings['advance_days'] ?? 30,
+            'bookingMessage'    => $bookingSettings['message'] ?? '',
         ]);
     }
 }

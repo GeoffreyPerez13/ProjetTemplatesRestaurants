@@ -452,10 +452,12 @@ class AdminController extends BaseController
 
         // Vérifier si l'option statistiques avancées est disponible
         $hasAdvancedStats = false;
+        $hasOnlineBooking = false;
         try {
             require_once __DIR__ . '/../Models/PremiumFeature.php';
             $pf = new PremiumFeature($this->pdo);
             $hasAdvancedStats = ($role === 'SUPER_ADMIN') || $pf->isEnabled($_SESSION['admin_id'], 'advanced_analytics');
+            $hasOnlineBooking = ($role === 'SUPER_ADMIN') || $pf->isEnabled($_SESSION['admin_id'], 'online_booking');
         } catch (Exception $e) { /* silencieux */ }
 
         // Récupérer les tokens de démo actifs pour SUPER_ADMIN
@@ -479,6 +481,7 @@ class AdminController extends BaseController
             'is_demo' => $this->isDemoMode(),
             'is_read_only' => $this->isReadOnly(),
             'has_advanced_stats' => $hasAdvancedStats,
+            'has_online_booking' => $hasOnlineBooking,
             'demoTokens' => $demoTokens,
             'demoExists' => $demoExists,
             'csrf_token' => $this->getCsrfToken(),

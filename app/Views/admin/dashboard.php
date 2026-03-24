@@ -163,6 +163,21 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                 </a>
                 <?php endif; ?>
 
+                <?php if (!empty($has_online_booking)): ?>
+                <a href="?page=reservations" class="mobile-menu-item premium">
+                    <div class="menu-item-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="menu-item-content">
+                        <span class="menu-item-title">Réservations en ligne</span>
+                        <span class="menu-item-desc">Gérer les réservations</span>
+                    </div>
+                    <div class="menu-item-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </a>
+                <?php endif; ?>
+
                 <a href="?page=view-card" class="mobile-menu-item success">
                     <div class="menu-item-icon">
                         <i class="fas fa-eye"></i>
@@ -235,6 +250,11 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                 <?php if (!empty($has_advanced_stats)): ?>
                     <a href="?page=stats" class="btn premium-btn">
                         <i class="fas fa-chart-line"></i> Statistiques avancées
+                    </a>
+                <?php endif; ?>
+                <?php if (!empty($has_online_booking)): ?>
+                    <a href="?page=reservations" class="btn premium-btn">
+                        <i class="fas fa-calendar-check"></i> Réservations en ligne
                     </a>
                 <?php endif; ?>
                 <a href="?page=view-card" class="btn success">Aperçu de la carte</a>

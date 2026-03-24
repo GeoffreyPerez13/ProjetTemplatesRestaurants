@@ -43,6 +43,9 @@ $displayDir = __DIR__ . '/display/';
         <?php include $displayDir . 'carte.php'; ?>
         <?php include $displayDir . 'services.php'; ?>
         <?php include $displayDir . 'reviews.php'; ?>
+        <?php if (!empty($bookingEnabled)): ?>
+            <?php include $displayDir . 'reservation.php'; ?>
+        <?php endif; ?>
         <?php include $displayDir . 'footer.php'; ?>
         <?php include $displayDir . 'lightbox.php'; ?>
 
@@ -69,6 +72,9 @@ $displayDir = __DIR__ . '/display/';
         <script src="/assets/js/display/scroll-arrows.js"></script>
         <?php if (!empty($todayClosureDate)): ?>
             <script src="/assets/js/display/closure-banner.js"></script>
+        <?php endif; ?>
+        <?php if (!empty($bookingEnabled)): ?>
+            <script src="/assets/js/display/reservation.js"></script>
         <?php endif; ?>
     <?php endif; ?>
 </body>

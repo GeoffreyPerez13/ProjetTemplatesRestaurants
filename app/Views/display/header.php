@@ -32,8 +32,14 @@
         <nav class="nav-menu" id="nav-menu">
             <ul>
                 <li><a href="#accueil">Accueil</a></li>
+                <?php if (!empty($dailyMenus)): ?>
+                    <li><a href="#menus-du-jour">Menus</a></li>
+                <?php endif; ?>
                 <li><a href="#carte">Carte</a></li>
                 <li><a href="#services">Services</a></li>
+                <?php if (!empty($bookingEnabled)): ?>
+                    <li><a href="#reservation">Réservation</a></li>
+                <?php endif; ?>
                 <li><a href="#contact">Contact</a></li>
             </ul>
         </nav>

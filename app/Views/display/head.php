@@ -210,6 +210,7 @@
     <link rel="stylesheet" href="/assets/css/display/header.css">
     <link rel="stylesheet" href="/assets/css/display/banner.css">
     <link rel="stylesheet" href="/assets/css/display/carte.css">
+    <link rel="stylesheet" href="/assets/css/display/daily-menus.css">
     <link rel="stylesheet" href="/assets/css/display/services.css">
     <link rel="stylesheet" href="/assets/css/display/footer.css">
     <link rel="stylesheet" href="/assets/css/display/lightbox.css">
@@ -222,5 +223,8 @@
     <?php endif; ?>
     <?php if (($layoutName ?? 'standard') !== 'standard'): ?>
         <link rel="stylesheet" href="/assets/css/display/layout-<?= htmlspecialchars($layoutName) ?>.css">
+    <?php endif; ?>
+    <?php if (!empty($bookingEnabled)): ?>
+        <link rel="stylesheet" href="/assets/css/display/reservation.css">
     <?php endif; ?>
 </head>

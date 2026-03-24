@@ -7,6 +7,7 @@ require_once __DIR__ . '/../Models/Admin.php';
 require_once __DIR__ . '/../Models/Restaurant.php';
 require_once __DIR__ . '/../Helpers/Validator.php';
 require_once __DIR__ . '/../Models/Allergene.php';
+require_once __DIR__ . '/../Models/DailyMenu.php';
 
 /**
  * Contrôleur de gestion de la carte du restaurant
@@ -86,6 +87,10 @@ class CardController extends BaseController
             $data = $this->getImagesModeData($admin_id, $carteImageModel, $messages, $error_fields, $old_input);
         }
 
+        // Ajouter les menus du jour (commun aux deux modes)
+        $dailyMenuModel = new DailyMenu($this->pdo);
+        $data['dailyMenus'] = $dailyMenuModel->getAllByAdmin($admin_id);
+
         $this->render('admin/edit-card', $data);
     }
 
@@ -112,6 +117,22 @@ class CardController extends BaseController
         try {
             if (isset($_POST['change_mode'])) {
                 $this->handleChangeMode($adminModel, $admin_id, $anchor);
+                return;
+            }
+
+            // Actions menus du jour (indépendant du mode)
+            $dailyMenuModel = new DailyMenu($this->pdo);
+            if (isset($_POST['new_daily_menu'])) {
+                $this->handleAddDailyMenu($dailyMenuModel, $admin_id, $anchor);
+                return;
+            } elseif (isset($_POST['edit_daily_menu'])) {
+                $this->handleEditDailyMenu($dailyMenuModel, $admin_id, $anchor);
+                return;
+            } elseif (isset($_POST['delete_daily_menu'])) {
+                $this->handleDeleteDailyMenu($dailyMenuModel, $admin_id, $anchor);
+                return;
+            } elseif (isset($_POST['toggle_daily_menu'])) {
+                $this->handleToggleDailyMenu($dailyMenuModel, $admin_id, $anchor);
                 return;
             }
 
@@ -1122,5 +1143,152 @@ class CardController extends BaseController
         if (!empty($errors)) {
             $this->addErrorMessage(implode("<br>", $errors), $anchor);
         }
+    }
+
+    // ==================== MENUS DU JOUR ====================
+
+    /**
+     * Crée un nouveau menu du jour
+     */
+    private function handleAddDailyMenu($dailyMenuModel, $admin_id, $anchor)
+    {
+        $title = trim($_POST['menu_title'] ?? '');
+        $description = trim($_POST['menu_description'] ?? '');
+        $price = $_POST['menu_price'] ?? '';
+        $price = $price !== '' ? (float)str_replace(',', '.', $price) : null;
+
+        if (empty($title) || mb_strlen($title) > 150) {
+            $this->addErrorMessage("Le titre du menu est requis (max 150 caractères).", 'daily-menus');
+            $_SESSION['old_input'] = $_POST;
+            $_SESSION['open_accordion'] = 'add-daily-menu-content';
+            $this->redirectToEditCard($anchor);
+            return;
+        }
+
+        // Collecter les lignes du menu
+        $items = [];
+        $labels = $_POST['item_label'] ?? [];
+        $values = $_POST['item_value'] ?? [];
+        foreach ($values as $i => $val) {
+            $val = trim($val);
+            if ($val !== '') {
+                $items[] = [
+                    'label' => trim($labels[$i] ?? ''),
+                    'value' => $val
+                ];
+            }
+        }
+
+        if (empty($items)) {
+            $this->addErrorMessage("Ajoutez au moins une ligne au menu.", 'daily-menus');
+            $_SESSION['old_input'] = $_POST;
+            $_SESSION['open_accordion'] = 'add-daily-menu-content';
+            $this->redirectToEditCard($anchor);
+            return;
+        }
+
+        try {
+            $menuId = $dailyMenuModel->create($admin_id, $title, $items, $price, $description);
+            $this->updateRestaurantTimestamp();
+            $this->addSuccessMessage("Menu du jour créé avec succès.", 'daily-menu-' . $menuId);
+            $_SESSION['close_accordion'] = 'add-daily-menu-content';
+            unset($_SESSION['old_input']);
+        } catch (Exception $e) {
+            $this->addErrorMessage("Erreur : " . $e->getMessage(), 'daily-menus');
+        }
+
+        $this->redirectToEditCard($anchor);
+    }
+
+    /**
+     * Met à jour un menu du jour existant
+     */
+    private function handleEditDailyMenu($dailyMenuModel, $admin_id, $anchor)
+    {
+        $menuId = (int)($_POST['menu_id'] ?? 0);
+        $title = trim($_POST['menu_title'] ?? '');
+        $description = trim($_POST['menu_description'] ?? '');
+        $price = $_POST['menu_price'] ?? '';
+        $price = $price !== '' ? (float)str_replace(',', '.', $price) : null;
+
+        if (!$menuId || empty($title) || mb_strlen($title) > 150) {
+            $this->addErrorMessage("Le titre du menu est requis (max 150 caractères).", 'daily-menu-' . $menuId);
+            $_SESSION['old_input'] = $_POST;
+            $_SESSION['open_accordion'] = 'edit-daily-menu-' . $menuId;
+            $this->redirectToEditCard($anchor);
+            return;
+        }
+
+        // Collecter les lignes du menu
+        $items = [];
+        $labels = $_POST['item_label'] ?? [];
+        $values = $_POST['item_value'] ?? [];
+        foreach ($values as $i => $val) {
+            $val = trim($val);
+            if ($val !== '') {
+                $items[] = [
+                    'label' => trim($labels[$i] ?? ''),
+                    'value' => $val
+                ];
+            }
+        }
+
+        if (empty($items)) {
+            $this->addErrorMessage("Ajoutez au moins une ligne au menu.", 'daily-menu-' . $menuId);
+            $_SESSION['old_input'] = $_POST;
+            $_SESSION['open_accordion'] = 'edit-daily-menu-' . $menuId;
+            $this->redirectToEditCard($anchor);
+            return;
+        }
+
+        try {
+            $dailyMenuModel->update($menuId, $admin_id, $title, $items, $price, $description);
+            $this->updateRestaurantTimestamp();
+            $this->addSuccessMessage("Menu du jour modifié avec succès.", 'daily-menu-' . $menuId);
+            $_SESSION['close_accordion'] = 'edit-daily-menu-' . $menuId;
+            unset($_SESSION['old_input']);
+        } catch (Exception $e) {
+            $this->addErrorMessage("Erreur : " . $e->getMessage(), 'daily-menu-' . $menuId);
+        }
+
+        $this->redirectToEditCard($anchor);
+    }
+
+    /**
+     * Supprime un menu du jour
+     */
+    private function handleDeleteDailyMenu($dailyMenuModel, $admin_id, $anchor)
+    {
+        $menuId = (int)($_POST['delete_daily_menu'] ?? 0);
+
+        try {
+            $dailyMenuModel->delete($menuId, $admin_id);
+            $this->updateRestaurantTimestamp();
+            $this->addSuccessMessage("Menu du jour supprimé.", 'daily-menus');
+        } catch (Exception $e) {
+            $this->addErrorMessage("Erreur : " . $e->getMessage(), 'daily-menus');
+        }
+
+        $this->redirectToEditCard($anchor);
+    }
+
+    /**
+     * Active/désactive un menu du jour
+     */
+    private function handleToggleDailyMenu($dailyMenuModel, $admin_id, $anchor)
+    {
+        $menuId = (int)($_POST['toggle_daily_menu'] ?? 0);
+        $newState = (int)($_POST['new_state'] ?? 0);
+
+        try {
+            $dailyMenuModel->toggleActive($menuId, $admin_id, (bool)$newState);
+            $this->updateRestaurantTimestamp();
+            $label = $newState ? 'activé' : 'désactivé';
+            $this->addSuccessMessage("Menu du jour $label.", 'daily-menu-' . $menuId);
+        } catch (Exception $e) {
+            $this->addErrorMessage("Erreur : " . $e->getMessage(), 'daily-menu-' . $menuId);
+        }
+
+        $this->redirectToEditCard($anchor);
     }
 }

@@ -20,6 +20,7 @@ require_once __DIR__ . '/../app/Controllers/ServicesController.php';
 require_once __DIR__ . '/../app/Controllers/SitemapController.php';
 require_once __DIR__ . '/../app/Controllers/StripeController.php';
 require_once __DIR__ . '/../app/Controllers/StatsController.php';
+require_once __DIR__ . '/../app/Controllers/ReservationController.php';
 require_once __DIR__ . '/../app/Models/DemoToken.php';
 require_once __DIR__ . '/../app/Helpers/FormHelper.php';
 require_once __DIR__ . '/../app/Helpers/Validator.php';
@@ -465,6 +466,38 @@ switch ($page) {
     case 'stats-data':
         $controller = new StatsController($pdo);
         $controller->getData();
+        break;
+
+    // Réservations en ligne (premium)
+    case 'reservations':
+        $controller = new ReservationController($pdo);
+        $controller->show();
+        break;
+
+    case 'reservation-update-status':
+        $controller = new ReservationController($pdo);
+        $controller->updateStatus();
+        break;
+
+    case 'reservation-delete':
+        $controller = new ReservationController($pdo);
+        $controller->deleteReservation();
+        break;
+
+    case 'reservation-save-settings':
+        $controller = new ReservationController($pdo);
+        $controller->saveSettings();
+        break;
+
+    // API publique réservations (vitrine)
+    case 'booking-submit':
+        $controller = new ReservationController($pdo);
+        $controller->publicBook();
+        break;
+
+    case 'booking-slots':
+        $controller = new ReservationController($pdo);
+        $controller->publicGetSlots();
         break;
 
     case 'sitemap':

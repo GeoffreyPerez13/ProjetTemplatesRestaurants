@@ -1556,9 +1556,12 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
             <div class="settings-section">
                 <h2><i class="fas fa-calendar-check"></i> Réservations en ligne</h2>
                 <p class="section-description">Permettez à vos clients de réserver une table directement depuis votre site vitrine.</p>
-                <div class="premium-section-placeholder">
-                    <i class="fas fa-hard-hat"></i>
-                    <p>Cette fonctionnalité est en cours de développement.</p>
+                <div class="premium-section-cta" style="text-align: center; padding: 40px 20px;">
+                    <i class="fas fa-calendar-check" style="font-size: 3rem; color: var(--color-primary); margin-bottom: 16px; display: block;"></i>
+                    <p style="margin-bottom: 20px; color: var(--color-text-light);">Gérez vos réservations, configurez les créneaux horaires et suivez les demandes de vos clients.</p>
+                    <a href="?page=reservations" class="btn primary" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-external-link-alt"></i> Accéder aux réservations
+                    </a>
                 </div>
             </div>
 

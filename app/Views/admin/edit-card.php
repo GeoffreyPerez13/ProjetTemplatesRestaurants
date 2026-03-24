@@ -7,6 +7,7 @@ $title = "Modifier la carte";
 $scripts = [
     "js/effects/accordion.js",
     "js/sections/edit-card/edit-card.js",
+    "js/sections/edit-card/daily-menus.js",
     "js/effects/lightbox.js"
 ];
 
@@ -114,6 +115,202 @@ require __DIR__ . '/../partials/header.php';
 
             <button type="submit" name="change_mode" class="btn primary">Changer de mode</button>
         </form>
+    </div>
+</div>
+
+<!-- ==================== MENUS DU JOUR / FORMULES ==================== -->
+<div class="daily-menus-section" id="daily-menus">
+    <div class="accordion-section daily-menus-accordion">
+        <div class="accordion-header">
+            <h2><i class="fas fa-utensils"></i> Menus & Formules du jour (<?= count($dailyMenus ?? []) ?>)</h2>
+            <button type="button" class="accordion-toggle" data-target="daily-menus-content">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+
+        <div id="daily-menus-content" class="accordion-content<?= empty($dailyMenus) ? ' expanded' : ' collapsed' ?>">
+
+            <!-- Formulaire d'ajout -->
+            <div class="accordion-section add-daily-menu-sub" id="add-daily-menu">
+                <div class="accordion-header sub-header">
+                    <h3><i class="fas fa-plus-circle"></i> Créer un nouveau menu</h3>
+                    <button type="button" class="accordion-toggle" data-target="add-daily-menu-content">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+
+                <div id="add-daily-menu-content" class="accordion-content collapsed">
+                    <form method="post" class="daily-menu-form">
+                        <?= $csrfField ?>
+                        <input type="hidden" name="anchor" value="daily-menus">
+
+                        <div class="form-row">
+                            <div class="form-group flex-2">
+                                <label for="new-menu-title">Titre du menu <span class="required">*</span></label>
+                                <input type="text" id="new-menu-title" name="menu_title" 
+                                       placeholder="Ex: Menu du jour, Formule du midi, Plat du jour..."
+                                       value="<?= htmlspecialchars($old_input['menu_title'] ?? '') ?>"
+                                       maxlength="150" required>
+                            </div>
+                            <div class="form-group flex-1">
+                                <label for="new-menu-price">Prix (€)</label>
+                                <input type="text" id="new-menu-price" name="menu_price" 
+                                       placeholder="Ex: 15,90"
+                                       value="<?= htmlspecialchars($old_input['menu_price'] ?? '') ?>">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new-menu-desc">Description <small>(optionnel)</small></label>
+                            <input type="text" id="new-menu-desc" name="menu_description" 
+                                   placeholder="Ex: Entrée + Plat + Dessert"
+                                   value="<?= htmlspecialchars($old_input['menu_description'] ?? '') ?>">
+                        </div>
+
+                        <div class="menu-items-builder" id="new-menu-items">
+                            <label>Composition du menu <span class="required">*</span></label>
+                            <div class="menu-items-list">
+                                <div class="menu-item-row">
+                                    <input type="text" name="item_label[]" placeholder="Catégorie (ex: Entrée)" class="item-label">
+                                    <input type="text" name="item_value[]" placeholder="Nom du plat *" class="item-value" required>
+                                    <button type="button" class="btn-icon remove-item" title="Supprimer cette ligne"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn small add-menu-item-btn" data-target="new-menu-items">
+                                <i class="fas fa-plus"></i> Ajouter une ligne
+                            </button>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" name="new_daily_menu" class="btn success">
+                                <i class="fas fa-check"></i> Créer le menu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Liste des menus existants -->
+            <?php if (!empty($dailyMenus)): ?>
+                <div class="daily-menus-list">
+                    <?php foreach ($dailyMenus as $menu): ?>
+                        <div class="daily-menu-card <?= $menu['is_active'] ? '' : 'inactive' ?>" id="daily-menu-<?= $menu['id'] ?>">
+                            <div class="daily-menu-header">
+                                <div class="daily-menu-info">
+                                    <h4>
+                                        <?php if (!$menu['is_active']): ?>
+                                            <span class="badge-inactive"><i class="fas fa-eye-slash"></i></span>
+                                        <?php endif; ?>
+                                        <?= htmlspecialchars($menu['title']) ?>
+                                        <?php if ($menu['price']): ?>
+                                            <span class="daily-menu-price"><?= number_format($menu['price'], 2, ',', '') ?> €</span>
+                                        <?php endif; ?>
+                                    </h4>
+                                    <?php if (!empty($menu['description'])): ?>
+                                        <p class="daily-menu-desc"><?= htmlspecialchars($menu['description']) ?></p>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="daily-menu-actions">
+                                    <!-- Toggle actif/inactif -->
+                                    <form method="post" class="inline-form">
+                                        <?= $csrfField ?>
+                                        <input type="hidden" name="anchor" value="daily-menus">
+                                        <input type="hidden" name="new_state" value="<?= $menu['is_active'] ? '0' : '1' ?>">
+                                        <button type="submit" name="toggle_daily_menu" value="<?= $menu['id'] ?>"
+                                                class="btn small <?= $menu['is_active'] ? 'btn-outline' : 'success' ?>"
+                                                title="<?= $menu['is_active'] ? 'Désactiver' : 'Activer' ?>">
+                                            <i class="fas <?= $menu['is_active'] ? 'fa-eye-slash' : 'fa-eye' ?>"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Bouton éditer -->
+                                    <button type="button" class="btn small accordion-toggle" data-target="edit-daily-menu-<?= $menu['id'] ?>">
+                                        <i class="fas fa-pen"></i>
+                                    </button>
+
+                                    <!-- Supprimer -->
+                                    <form method="post" class="inline-form delete-daily-menu-form">
+                                        <?= $csrfField ?>
+                                        <input type="hidden" name="anchor" value="daily-menus">
+                                        <button type="submit" name="delete_daily_menu" value="<?= $menu['id'] ?>"
+                                                class="btn small danger" title="Supprimer"
+                                                data-menu-title="<?= htmlspecialchars($menu['title']) ?>">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Aperçu des lignes du menu -->
+                            <div class="daily-menu-items-preview">
+                                <?php foreach ($menu['items'] as $item): ?>
+                                    <div class="menu-item-preview">
+                                        <?php if (!empty($item['label'])): ?>
+                                            <span class="item-preview-label"><?= htmlspecialchars($item['label']) ?></span>
+                                        <?php endif; ?>
+                                        <span class="item-preview-value"><?= htmlspecialchars($item['value']) ?></span>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+
+                            <!-- Formulaire d'édition (caché) -->
+                            <div id="edit-daily-menu-<?= $menu['id'] ?>" class="accordion-content collapsed edit-daily-menu-form-container">
+                                <form method="post" class="daily-menu-form">
+                                    <?= $csrfField ?>
+                                    <input type="hidden" name="anchor" value="daily-menus">
+                                    <input type="hidden" name="menu_id" value="<?= $menu['id'] ?>">
+
+                                    <div class="form-row">
+                                        <div class="form-group flex-2">
+                                            <label>Titre du menu <span class="required">*</span></label>
+                                            <input type="text" name="menu_title" 
+                                                   value="<?= htmlspecialchars($menu['title']) ?>"
+                                                   maxlength="150" required>
+                                        </div>
+                                        <div class="form-group flex-1">
+                                            <label>Prix (€)</label>
+                                            <input type="text" name="menu_price" 
+                                                   value="<?= $menu['price'] ? number_format($menu['price'], 2, ',', '') : '' ?>">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Description <small>(optionnel)</small></label>
+                                        <input type="text" name="menu_description" 
+                                               value="<?= htmlspecialchars($menu['description'] ?? '') ?>">
+                                    </div>
+
+                                    <div class="menu-items-builder" id="edit-menu-items-<?= $menu['id'] ?>">
+                                        <label>Composition du menu <span class="required">*</span></label>
+                                        <div class="menu-items-list">
+                                            <?php foreach ($menu['items'] as $item): ?>
+                                                <div class="menu-item-row">
+                                                    <input type="text" name="item_label[]" value="<?= htmlspecialchars($item['label'] ?? '') ?>" placeholder="Catégorie" class="item-label">
+                                                    <input type="text" name="item_value[]" value="<?= htmlspecialchars($item['value']) ?>" placeholder="Nom du plat *" class="item-value" required>
+                                                    <button type="button" class="btn-icon remove-item" title="Supprimer"><i class="fas fa-times"></i></button>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <button type="button" class="btn small add-menu-item-btn" data-target="edit-menu-items-<?= $menu['id'] ?>">
+                                            <i class="fas fa-plus"></i> Ajouter une ligne
+                                        </button>
+                                    </div>
+
+                                    <div class="form-actions">
+                                        <button type="submit" name="edit_daily_menu" class="btn success">
+                                            <i class="fas fa-save"></i> Enregistrer
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <p class="empty-state-text"><i class="fas fa-info-circle"></i> Aucun menu du jour créé. Utilisez le formulaire ci-dessus pour en créer un.</p>
+            <?php endif; ?>
+
+        </div>
     </div>
 </div>
 

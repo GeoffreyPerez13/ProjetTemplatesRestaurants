@@ -1,3 +1,36 @@
+<?php if (!empty($dailyMenus)): ?>
+<section id="menus-du-jour" class="daily-menus-display">
+    <div class="container">
+        <h2><i class="fas fa-star"></i> Nos Menus & Formules</h2>
+        <div class="daily-menus-grid">
+            <?php foreach ($dailyMenus as $dm): ?>
+                <div class="daily-menu-display-card">
+                    <div class="daily-menu-display-header">
+                        <h3><?= htmlspecialchars($dm['title']) ?></h3>
+                        <?php if ($dm['price']): ?>
+                            <span class="daily-menu-display-price"><?= number_format($dm['price'], 2, ',', '') ?> €</span>
+                        <?php endif; ?>
+                    </div>
+                    <?php if (!empty($dm['description'])): ?>
+                        <p class="daily-menu-display-desc"><?= htmlspecialchars($dm['description']) ?></p>
+                    <?php endif; ?>
+                    <ul class="daily-menu-display-items">
+                        <?php foreach ($dm['items'] as $item): ?>
+                            <li>
+                                <?php if (!empty($item['label'])): ?>
+                                    <span class="dm-item-label"><?= htmlspecialchars($item['label']) ?></span>
+                                <?php endif; ?>
+                                <span class="dm-item-value"><?= htmlspecialchars($item['value']) ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
 <section id="carte">
     <div class="container">
         <h2>Notre Carte</h2>
