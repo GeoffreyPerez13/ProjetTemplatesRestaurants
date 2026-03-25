@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderCalendar();
                 
                 // Afficher un message de succès en haut de page
-                showSuccessMessage('Toutes les dates de fermeture ont été effacées avec succès.');
+                showToast('Toutes les dates de fermeture ont été effacées avec succès.', 'success');
             }
         });
     }
@@ -256,12 +256,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function saveDates() {
         const datesArray = Array.from(selectedDates);
         
-        // Créer un formulaire pour soumettre les données (comme saveAllOptions)
+        // Créer un formulaire pour soumettre via AJAX
         const form = document.createElement("form");
         form.method = "POST";
         form.action = "?page=settings&action=save-closure-dates";
 
-        // Ajouter les données
         const datesInput = document.createElement("input");
         datesInput.type = "hidden";
         datesInput.name = "dates";
@@ -274,9 +273,13 @@ document.addEventListener('DOMContentLoaded', function() {
         csrfInput.value = document.querySelector('.settings-container').dataset.csrfToken;
         form.appendChild(csrfInput);
 
-        // Ajouter au DOM et soumettre
+        const submitBtn = document.createElement("button");
+        submitBtn.type = "submit";
+        form.appendChild(submitBtn);
+
         document.body.appendChild(form);
-        form.submit();
+        ajaxSubmit(form, form.action);
+        setTimeout(function() { form.remove(); }, 100);
     }
     
     /**
@@ -307,41 +310,4 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${day}/${month}/${year}`;
     }
     
-    /**
-     * Affiche un message de succès dans la zone des messages de la page settings
-     */
-    function showSuccessMessage(message) {
-        // Trouver la zone des messages dans settings-content
-        const settingsContent = document.querySelector('.settings-content');
-        if (!settingsContent) return;
-        
-        // Supprimer les messages existants
-        const existingSuccess = settingsContent.querySelector('.message-success');
-        const existingError = settingsContent.querySelector('.message-error');
-        if (existingSuccess) existingSuccess.remove();
-        if (existingError) existingError.remove();
-        
-        // Créer le message de succès
-        const messageDiv = document.createElement('p');
-        messageDiv.className = 'message-success';
-        messageDiv.textContent = message;
-        
-        // Insérer après le h1 ou au début du settings-content
-        const h1 = settingsContent.querySelector('h1');
-        if (h1) {
-            h1.insertAdjacentElement('afterend', messageDiv);
-        } else {
-            settingsContent.insertBefore(messageDiv, settingsContent.firstChild);
-        }
-        
-        // Scroller vers le message
-        messageDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        // Auto-suppression après 4 secondes
-        setTimeout(() => {
-            if (messageDiv.parentNode) {
-                messageDiv.parentNode.removeChild(messageDiv);
-            }
-        }, 4000);
-    }
 });

@@ -8,11 +8,8 @@ $scripts = [
 require __DIR__ . '/../partials/header.php';
 ?>
 
-<!-- Script pour passer les paramètres au JavaScript -->
 <script>
     window.scrollParams = {
-        anchor: '<?= htmlspecialchars($anchor ?? '') ?>',
-        scrollDelay: <?= (int)($scroll_delay ?? 1500) ?>,
         currentLogoUrl: '<?= !empty($current_logo['public_url']) ? htmlspecialchars($current_logo['public_url']) : '' ?>',
         hasLogo: <?= !empty($current_logo) ? 'true' : 'false' ?>,
         currentBannerUrl: '<?= !empty($current_banner['public_url']) ? htmlspecialchars($current_banner['public_url']) : '' ?>',
@@ -30,14 +27,6 @@ require __DIR__ . '/../partials/header.php';
     <button type="button" id="expand-all-accordions" class="btn"><i class="fas fa-expand-alt"></i> Tout ouvrir</button>
     <button type="button" id="collapse-all-accordions" class="btn"><i class="fas fa-compress-alt"></i> Tout fermer</button>
 </div>
-
-<!-- Affichage des messages -->
-<?php if (!empty($success_message)): ?>
-    <p class="message-success"><?= htmlspecialchars($success_message) ?></p>
-<?php endif; ?>
-<?php if (!empty($error_message)): ?>
-    <p class="message-error"><?= htmlspecialchars($error_message) ?></p>
-<?php endif; ?>
 
 <div class="edit-logo-container">
     <!-- ==================== SECTION LOGO ==================== -->
@@ -281,6 +270,19 @@ window.tourBeforeStart = function() {
         collapseAllBtn.click();
     }
 };
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Texte de la bannière (seul formulaire non géré par edit-logo-banner.js)
+    var bannerTextForm = document.querySelector('.banner-text-form');
+    if (bannerTextForm) {
+        bannerTextForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            ajaxSubmit(this, '?page=edit-logo-banner&action=updateBannerText');
+        });
+    }
+});
 </script>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

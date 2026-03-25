@@ -33,6 +33,9 @@
     <!-- Tour guidé -->
     <script src="/assets/js/admin/tour.js"></script>
 
+    <!-- Utilitaire toast global -->
+    <script src="/assets/js/admin/toast.js"></script>
+
     <!-- Inclusion de scripts additionnels dynamiques si fournis -->
     <?php if (!empty($scripts)): ?>
         <?php foreach ($scripts as $script): ?>

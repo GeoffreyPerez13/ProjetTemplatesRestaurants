@@ -25,14 +25,6 @@ require __DIR__ . '/../partials/header.php';
     <button type="button" id="collapse-all-accordions" class="btn"><i class="fas fa-compress-alt"></i> Tout fermer</button>
 </div>
 
-<!-- Affichage des messages -->
-<?php if (!empty($success_message)): ?>
-    <p class="message-success"><?= htmlspecialchars($success_message) ?></p>
-<?php endif; ?>
-<?php if (!empty($error_message)): ?>
-    <p class="message-error"><?= htmlspecialchars($error_message) ?></p>
-<?php endif; ?>
-
 <div class="edit-services-container">
     <form method="post" action="?page=edit-services&action=save">
         <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
@@ -246,6 +238,18 @@ window.tourBeforeStart = function() {
         collapseAllBtn.click();
     }
 };
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.querySelector('.edit-services-container form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            ajaxSubmit(this, '?page=edit-services&action=save');
+        });
+    }
+});
 </script>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

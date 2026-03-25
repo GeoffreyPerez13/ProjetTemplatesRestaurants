@@ -7,29 +7,11 @@ $scripts = [
 require __DIR__ . '/../partials/header.php';
 ?>
 
-<!-- Script pour passer les paramètres au JavaScript -->
-<script>
-    // Variables disponibles pour le JavaScript
-    window.scrollParams = {
-        anchor: '<?= htmlspecialchars($anchor ?? '') ?>',
-        scrollDelay: <?= (int)($scroll_delay ?? 1500) ?>
-    };
-</script>
-
 <!-- Bouton retour vers le dashboard -->
 <a class="btn-back" href="?page=dashboard">Retour</a>
 
-<!-- Affichage des messages - Même structure que edit-card.php -->
-<?php if (!empty($success_message)): ?>
-    <p class="message-success" id="edit-contact-form"><?= htmlspecialchars($success_message) ?></p>
-<?php endif; ?>
-
-<?php if (!empty($error_message)): ?>
-    <p class="message-error" id="edit-contact-form"><?= htmlspecialchars($error_message) ?></p>
-<?php endif; ?>
-
 <!-- Formulaire pour modifier les informations de contact -->
-<form method="post" class="edit-contact-form">
+<form method="post" class="edit-contact-form" id="edit-contact-form">
     <h2><i class="fas fa-address-book"></i> Modifier les informations de contact</h2>
 
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">
@@ -76,6 +58,18 @@ require __DIR__ . '/../partials/header.php';
         <i class="fas fa-save"></i> Mettre à jour les informations
     </button>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.getElementById('edit-contact-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            ajaxSubmit(form, '?page=edit-contact');
+        });
+    }
+});
+</script>
 
 <!-- Définition des étapes du tour guidé pour cette page -->
 <script>

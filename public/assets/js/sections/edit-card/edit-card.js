@@ -185,8 +185,7 @@
               allowOutsideClick: false,
             }).then((result) => {
               if (result.isConfirmed) {
-                showLoading("Suppression en cours...");
-                setTimeout(() => form.submit(), 100);
+                ajaxSubmit(form, '?page=edit-card');
               }
             });
           } else {
@@ -195,7 +194,7 @@
                 `Voulez-vous vraiment supprimer l'image de la catégorie "${categoryName}" ?`,
               )
             ) {
-              form.submit();
+              ajaxSubmit(form, '?page=edit-card');
             }
           }
         });
@@ -232,8 +231,7 @@
               allowOutsideClick: false,
             }).then((result) => {
               if (result.isConfirmed) {
-                showLoading("Suppression en cours...");
-                setTimeout(() => form.submit(), 100);
+                ajaxSubmit(form, '?page=edit-card');
               }
             });
           } else {
@@ -242,7 +240,7 @@
                 `Voulez-vous vraiment supprimer l'image du plat "${dishName}" ?`,
               )
             ) {
-              form.submit();
+              ajaxSubmit(form, '?page=edit-card');
             }
           }
         });
@@ -285,8 +283,7 @@
               allowOutsideClick: false,
             }).then((result) => {
               if (result.isConfirmed) {
-                showLoading("Suppression en cours...");
-                setTimeout(() => form.submit(), 100);
+                ajaxSubmit(form, '?page=edit-card');
               }
             });
           } else {
@@ -295,7 +292,7 @@
                 `Voulez-vous vraiment supprimer la catégorie "${categoryName}" ?${warningMessage}`,
               )
             ) {
-              form.submit();
+              ajaxSubmit(form, '?page=edit-card');
             }
           }
         });
@@ -328,15 +325,14 @@
               allowOutsideClick: false,
             }).then((result) => {
               if (result.isConfirmed) {
-                showLoading("Suppression en cours...");
-                setTimeout(() => form.submit(), 100);
+                ajaxSubmit(form, '?page=edit-card');
               }
             });
           } else {
             if (
               confirm(`Voulez-vous vraiment supprimer le plat "${cleanDishName}" ?`)
             ) {
-              form.submit();
+              ajaxSubmit(form, '?page=edit-card');
             }
           }
         });
@@ -372,15 +368,14 @@
               allowOutsideClick: false,
             }).then((result) => {
               if (result.isConfirmed) {
-                showLoading("Suppression en cours...");
-                setTimeout(() => form.submit(), 100);
+                ajaxSubmit(form, '?page=edit-card');
               }
             });
           } else {
             if (
               confirm(`Voulez-vous vraiment supprimer le plat "${dishName}" ?`)
             ) {
-              form.submit();
+              ajaxSubmit(form, '?page=edit-card');
             }
           }
         });
@@ -485,7 +480,8 @@
         hiddenForm.appendChild(anchorInput);
 
         document.body.appendChild(hiddenForm);
-        hiddenForm.submit();
+        ajaxSubmit(hiddenForm, hiddenForm.action);
+        setTimeout(function() { hiddenForm.remove(); }, 100);
       }
     });
   }

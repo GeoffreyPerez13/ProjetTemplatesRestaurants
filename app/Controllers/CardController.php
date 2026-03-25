@@ -19,6 +19,18 @@ class CardController extends BaseController
     /** @var Restaurant Modèle pour mettre à jour le timestamp du restaurant */
     private $restaurantModel;
 
+    private function isAjax()
+    {
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    }
+
+    private function jsonResponse($success, $message, $extra = [])
+    {
+        header('Content-Type: application/json');
+        echo json_encode(array_merge(['success' => $success, 'message' => $message], $extra));
+        exit;
+    }
+
     /**
      * @param PDO $pdo Connexion à la base de données
      */
@@ -865,6 +877,14 @@ class CardController extends BaseController
      */
     private function redirectToEditCard($anchor = '')
     {
+        // Pour les requêtes AJAX, renvoyer JSON au lieu de rediriger
+        if ($this->isAjax()) {
+            $success = !empty($_SESSION['success_message']);
+            $message = $_SESSION['success_message'] ?? $_SESSION['error_message'] ?? '';
+            unset($_SESSION['success_message'], $_SESSION['error_message'], $_SESSION['anchor'], $_SESSION['scroll_delay']);
+            $this->jsonResponse($success, $message, ['reload' => true]);
+        }
+
         $redirectUrl = '?page=edit-card';
         if (!empty($anchor)) {
             $redirectUrl .= '&anchor=' . urlencode($anchor);

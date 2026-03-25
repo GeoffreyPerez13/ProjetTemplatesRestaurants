@@ -17,13 +17,6 @@ require __DIR__ . '/../partials/header.php';
         <p class="template-subtitle">Choisissez la palette de couleurs et le design de votre site. Combinez-les librement !</p>
     </div>
 
-    <?php if (!empty($success_message)): ?>
-        <div class="message-success"><?= htmlspecialchars($success_message) ?></div>
-    <?php endif; ?>
-    <?php if (!empty($error_message)): ?>
-        <div class="message-error"><?= htmlspecialchars($error_message) ?></div>
-    <?php endif; ?>
-
     <!-- Boutons de contrôle généraux pour tous les accordéons -->
     <div class="global-accordion-controls">
         <button type="button" id="expand-all-accordions" class="btn"><i class="fas fa-expand-alt"></i> Tout ouvrir</button>
@@ -539,6 +532,26 @@ window.tourBeforeStart = function() {
         collapseAllBtn.click();
     }
 };
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Palette forms
+    document.querySelectorAll('form[action*="save-palette"]').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            ajaxSubmit(this, '?page=edit-template&action=save-palette');
+        });
+    });
+
+    // Layout forms
+    document.querySelectorAll('form[action*="save-layout"]').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            ajaxSubmit(this, '?page=edit-template&action=save-layout');
+        });
+    });
+});
 </script>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

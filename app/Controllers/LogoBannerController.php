@@ -19,6 +19,24 @@ class LogoBannerController extends BaseController
     }
 
     /**
+     * Détecte si la requête est AJAX
+     */
+    private function isAjax()
+    {
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    }
+
+    /**
+     * Envoie une réponse JSON et termine le script
+     */
+    private function jsonResponse($success, $message, $extra = [])
+    {
+        header('Content-Type: application/json');
+        echo json_encode(array_merge(['success' => $success, 'message' => $message], $extra));
+        exit;
+    }
+
+    /**
      * Page d'édition du logo et de la bannière
      */
     public function show()
@@ -158,7 +176,8 @@ class LogoBannerController extends BaseController
         $this->requireLogin();
         $this->requireActiveSubscription();
         $admin_id = $_SESSION['admin_id'];
-        $anchor = 'banner-text'; // ID de l'accordéon
+        $anchor = 'banner-text';
+        $ajax = $this->isAjax();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header("Location: ?page=edit-logo-banner");
@@ -166,6 +185,7 @@ class LogoBannerController extends BaseController
         }
 
         if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            if ($ajax) $this->jsonResponse(false, "Token de sécurité invalide.");
             $this->addErrorMessage("Token de sécurité invalide.", $anchor);
             header("Location: ?page=edit-logo-banner&anchor=$anchor");
             exit;
@@ -176,6 +196,7 @@ class LogoBannerController extends BaseController
         // Vérifier qu'une bannière existe
         $banner = $this->getCurrentBanner($admin_id);
         if (!$banner) {
+            if ($ajax) $this->jsonResponse(false, "Vous devez d'abord uploader une bannière.");
             $this->addErrorMessage("Vous devez d'abord uploader une bannière.", $anchor);
             header("Location: ?page=edit-logo-banner&anchor=$anchor");
             exit;
@@ -184,8 +205,10 @@ class LogoBannerController extends BaseController
         // Mise à jour en base
         $stmt = $this->pdo->prepare("UPDATE banners SET text = ? WHERE admin_id = ?");
         if ($stmt->execute([$texte !== '' ? $texte : null, $admin_id])) {
+            if ($ajax) $this->jsonResponse(true, "Texte de la bannière mis à jour.");
             $this->addSuccessMessage("Texte de la bannière mis à jour.", $anchor);
         } else {
+            if ($ajax) $this->jsonResponse(false, "Erreur lors de l'enregistrement.");
             $this->addErrorMessage("Erreur lors de l'enregistrement.", $anchor);
         }
 
@@ -202,6 +225,7 @@ class LogoBannerController extends BaseController
         $this->requireActiveSubscription();
         $admin_id = $_SESSION['admin_id'];
         $anchor = 'banner-text';
+        $ajax = $this->isAjax();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header("Location: ?page=edit-logo-banner");
@@ -209,6 +233,7 @@ class LogoBannerController extends BaseController
         }
 
         if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            if ($ajax) $this->jsonResponse(false, "Token de sécurité invalide.");
             $this->addErrorMessage("Token de sécurité invalide.", $anchor);
             header("Location: ?page=edit-logo-banner&anchor=$anchor");
             exit;
@@ -216,8 +241,10 @@ class LogoBannerController extends BaseController
 
         $stmt = $this->pdo->prepare("UPDATE banners SET text = NULL WHERE admin_id = ?");
         if ($stmt->execute([$admin_id])) {
+            if ($ajax) $this->jsonResponse(true, "Texte de la bannière supprimé.");
             $this->addSuccessMessage("Texte de la bannière supprimé.", $anchor);
         } else {
+            if ($ajax) $this->jsonResponse(false, "Erreur lors de la suppression.");
             $this->addErrorMessage("Erreur lors de la suppression.", $anchor);
         }
 
@@ -253,13 +280,17 @@ class LogoBannerController extends BaseController
      */
     private function handleUpload($field, $admin_id, $anchor, $table, $label)
     {
+        $ajax = $this->isAjax();
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_FILES[$field])) {
+            if ($ajax) $this->jsonResponse(false, "Aucun fichier reçu.");
             $this->addErrorMessage("Aucun fichier reçu.", $anchor);
             header("Location: ?page=edit-logo-banner&anchor=$anchor");
             exit;
         }
 
         if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            if ($ajax) $this->jsonResponse(false, "Token de sécurité invalide.");
             $this->addErrorMessage("Token de sécurité invalide.", $anchor);
             header("Location: ?page=edit-logo-banner&anchor=$anchor");
             exit;
@@ -270,6 +301,7 @@ class LogoBannerController extends BaseController
 
         if (!is_dir($uploadDir)) {
             if (!mkdir($uploadDir, 0755, true)) {
+                if ($ajax) $this->jsonResponse(false, "Impossible de créer le dossier de destination.");
                 $this->addErrorMessage("Impossible de créer le dossier de destination.", $anchor);
                 header("Location: ?page=edit-logo-banner&anchor=$anchor");
                 exit;
@@ -279,12 +311,14 @@ class LogoBannerController extends BaseController
         // Validation
         if ($file['error'] !== UPLOAD_ERR_OK) {
             $error = $this->uploadErrorToString($file['error']);
+            if ($ajax) $this->jsonResponse(false, $error);
             $this->addErrorMessage($error, $anchor);
             header("Location: ?page=edit-logo-banner&anchor=$anchor");
             exit;
         }
 
         if ($file['size'] > 5 * 1024 * 1024) {
+            if ($ajax) $this->jsonResponse(false, "Le fichier est trop volumineux (max 5Mo).");
             $this->addErrorMessage("Le fichier est trop volumineux (max 5Mo).", $anchor);
             header("Location: ?page=edit-logo-banner&anchor=$anchor");
             exit;
@@ -296,6 +330,7 @@ class LogoBannerController extends BaseController
         finfo_close($finfo);
 
         if (!in_array($mime, $allowedMimes)) {
+            if ($ajax) $this->jsonResponse(false, "Type de fichier non autorisé. Formats acceptés: JPG, PNG, GIF, WebP.");
             $this->addErrorMessage("Type de fichier non autorisé. Formats acceptés: JPG, PNG, GIF, WebP.", $anchor);
             header("Location: ?page=edit-logo-banner&anchor=$anchor");
             exit;
@@ -304,6 +339,7 @@ class LogoBannerController extends BaseController
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         $allowedExt = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
         if (!in_array($ext, $allowedExt)) {
+            if ($ajax) $this->jsonResponse(false, "Extension de fichier non autorisée.");
             $this->addErrorMessage("Extension de fichier non autorisée.", $anchor);
             header("Location: ?page=edit-logo-banner&anchor=$anchor");
             exit;
@@ -314,6 +350,7 @@ class LogoBannerController extends BaseController
         $targetFile = $uploadDir . $fileName;
 
         if (!move_uploaded_file($file['tmp_name'], $targetFile)) {
+            if ($ajax) $this->jsonResponse(false, "Erreur lors du déplacement du fichier.");
             $this->addErrorMessage("Erreur lors du déplacement du fichier.", $anchor);
             header("Location: ?page=edit-logo-banner&anchor=$anchor");
             exit;
@@ -325,6 +362,7 @@ class LogoBannerController extends BaseController
         // Sauvegarde en base
         try {
             $this->saveMediaToDatabase($admin_id, $fileName, $table);
+            if ($ajax) $this->jsonResponse(true, "$label mis à jour avec succès.", ['reload' => true]);
             $this->addSuccessMessage("$label mis à jour avec succès.", $anchor);
             // Gérer l'ouverture/fermeture des accordéons
             if ($field === 'logo') {
@@ -339,6 +377,7 @@ class LogoBannerController extends BaseController
             if (file_exists($targetFile)) {
                 unlink($targetFile);
             }
+            if ($ajax) $this->jsonResponse(false, "Erreur de base de données: " . $e->getMessage());
             $this->addErrorMessage("Erreur de base de données: " . $e->getMessage(), $anchor);
         }
 
@@ -357,12 +396,15 @@ class LogoBannerController extends BaseController
      */
     private function handleDelete($field, $admin_id, $anchor, $table, $label)
     {
+        $ajax = $this->isAjax();
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header("Location: ?page=edit-logo-banner");
             exit;
         }
 
         if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            if ($ajax) $this->jsonResponse(false, "Token de sécurité invalide.");
             $this->addErrorMessage("Token de sécurité invalide.", $anchor);
             header("Location: ?page=edit-logo-banner&anchor=$anchor");
             exit;
@@ -381,6 +423,7 @@ class LogoBannerController extends BaseController
             $stmt = $this->pdo->prepare("DELETE FROM $table WHERE admin_id = ?");
             $stmt->execute([$admin_id]);
 
+            if ($ajax) $this->jsonResponse(true, "$label supprimé avec succès.", ['reload' => true]);
             $this->addSuccessMessage("$label supprimé avec succès.", $anchor);
 
             // Gérer les accordéons
@@ -392,6 +435,7 @@ class LogoBannerController extends BaseController
                 $_SESSION['open_accordion'] = 'upload-banner-content';
             }
         } else {
+            if ($ajax) $this->jsonResponse(false, "Aucun $label à supprimer.");
             $this->addErrorMessage("Aucun $label à supprimer.", $anchor);
         }
 

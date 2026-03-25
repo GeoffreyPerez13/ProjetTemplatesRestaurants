@@ -308,7 +308,7 @@ document.addEventListener("DOMContentLoaded", function () {
           cancelButtonText: "Annuler",
         }).then((result) => {
           if (result.isConfirmed) {
-            uploadForm.submit();
+            ajaxSubmit(uploadForm, uploadForm.action || '?page=edit-card');
           }
         });
       }

@@ -49,6 +49,24 @@ class ServicesController extends BaseController
     }
 
     /**
+     * Détecte si la requête est AJAX
+     */
+    private function isAjax()
+    {
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    }
+
+    /**
+     * Envoie une réponse JSON et termine le script
+     */
+    private function jsonResponse($success, $message, $extra = [])
+    {
+        header('Content-Type: application/json');
+        echo json_encode(array_merge(['success' => $success, 'message' => $message], $extra));
+        exit;
+    }
+
+    /**
      * Enregistre tous les paramètres
      */
     public function save()
@@ -56,13 +74,16 @@ class ServicesController extends BaseController
         $this->requireLogin();
         $this->requireActiveSubscription();
         $admin_id = $_SESSION['admin_id'];
+        $ajax = $this->isAjax();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            if ($ajax) $this->jsonResponse(false, 'Méthode non autorisée.');
             header('Location: ?page=edit-services');
             exit;
         }
 
         if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            if ($ajax) $this->jsonResponse(false, 'Token de sécurité invalide.');
             $_SESSION['error_message'] = "Token de sécurité invalide.";
             header('Location: ?page=edit-services');
             exit;
@@ -106,6 +127,14 @@ class ServicesController extends BaseController
         foreach ($allOptions as $key => $value) {
             if (!$this->optionModel->set($admin_id, $key, $value)) {
                 $success = false;
+            }
+        }
+
+        if ($ajax) {
+            if ($success) {
+                $this->jsonResponse(true, 'Paramètres enregistrés avec succès.');
+            } else {
+                $this->jsonResponse(false, "Erreur lors de l'enregistrement de certains paramètres.");
             }
         }
 

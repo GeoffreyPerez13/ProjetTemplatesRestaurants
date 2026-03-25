@@ -34,13 +34,17 @@ class ContactController extends BaseController
         // 3. Traitement du formulaire POST
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->requireActiveSubscription();
-            // Récupérer l'ancre du formulaire
-            $anchor = $_POST['anchor'] ?? 'edit-contact-form';
+            $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
             // Vérification CSRF
             if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
-                $this->addErrorMessage("Token de sécurité invalide.", $anchor);
-                header('Location: ?page=edit-contact&anchor=' . urlencode($anchor));
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => 'Token de sécurité invalide.']);
+                    exit;
+                }
+                $this->addErrorMessage("Token de sécurité invalide.", 'edit-contact-form');
+                header('Location: ?page=edit-contact');
                 exit;
             }
 
@@ -52,21 +56,40 @@ class ContactController extends BaseController
 
             // Validation basique
             if (empty($telephone) || empty($email) || empty($adresse)) {
-                $this->addErrorMessage("Veuillez remplir tous les champs obligatoires.", $anchor);
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => 'Veuillez remplir tous les champs obligatoires.']);
+                    exit;
+                }
+                $this->addErrorMessage("Veuillez remplir tous les champs obligatoires.", 'edit-contact-form');
             } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $this->addErrorMessage("Veuillez saisir une adresse email valide.", $anchor);
+                if ($isAjax) {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => 'Veuillez saisir une adresse email valide.']);
+                    exit;
+                }
+                $this->addErrorMessage("Veuillez saisir une adresse email valide.", 'edit-contact-form');
             } else {
                 // Mise à jour
                 if ($contactModel->update($admin_id, $telephone, $email, $adresse, $horaires)) {
-                    $this->addSuccessMessage("Contact mis à jour avec succès.", $anchor);
+                    if ($isAjax) {
+                        header('Content-Type: application/json');
+                        echo json_encode(['success' => true, 'message' => 'Contact mis à jour avec succès.']);
+                        exit;
+                    }
+                    $this->addSuccessMessage("Contact mis à jour avec succès.", 'edit-contact-form');
                 } else {
-                    $this->addErrorMessage("Erreur lors de la mise à jour du contact.", $anchor);
+                    if ($isAjax) {
+                        header('Content-Type: application/json');
+                        echo json_encode(['success' => false, 'message' => 'Erreur lors de la mise à jour du contact.']);
+                        exit;
+                    }
+                    $this->addErrorMessage("Erreur lors de la mise à jour du contact.", 'edit-contact-form');
                 }
             }
 
-            // Redirection avec l'ancre pour éviter la soumission multiple
-            $redirectUrl = '?page=edit-contact&anchor=' . urlencode($anchor);
-            header('Location: ' . $redirectUrl);
+            // Redirection (fallback non-AJAX)
+            header('Location: ?page=edit-contact');
             exit;
         }
 

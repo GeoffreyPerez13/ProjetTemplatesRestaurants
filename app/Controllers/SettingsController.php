@@ -12,6 +12,18 @@ require_once __DIR__ . '/../Models/PremiumFeature.php';
  */
 class SettingsController extends BaseController
 {
+    private function isAjax()
+    {
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    }
+
+    private function jsonResponse($success, $message, $extra = [])
+    {
+        header('Content-Type: application/json');
+        echo json_encode(array_merge(['success' => $success, 'message' => $message], $extra));
+        exit;
+    }
+
     /**
      * Affiche la page des paramètres avec la section demandée (?section=profile|password|options|account)
      */
@@ -177,10 +189,12 @@ class SettingsController extends BaseController
     {
         $this->requireLogin();
         $this->blockIfDemo("La modification du profil n'est pas disponible en mode démonstration.");
+        $ajax = $this->isAjax();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Validation CSRF
             if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+                if ($ajax) $this->jsonResponse(false, 'Token de sécurité invalide.');
                 $this->addErrorMessage('Token de sécurité invalide', 'profile-form');
                 header('Location: ?page=settings&section=profile');
                 exit;
@@ -257,19 +271,21 @@ class SettingsController extends BaseController
 
                         $this->pdo->commit();
 
-                        // Utiliser la méthode du BaseController
+                        if ($ajax) $this->jsonResponse(true, 'Profil mis à jour avec succès.');
                         $this->addSuccessMessage('Profil mis à jour avec succès', 'profile-form');
                     } else {
                         $this->pdo->rollBack();
+                        if ($ajax) $this->jsonResponse(false, 'Erreur lors de la mise à jour de la base de données.');
                         $this->addErrorMessage('Erreur lors de la mise à jour de la base de données', 'profile-form');
                     }
                 } catch (Exception $e) {
                     $this->pdo->rollBack();
                     error_log("Erreur mise à jour profil: " . $e->getMessage());
+                    if ($ajax) $this->jsonResponse(false, 'Une erreur est survenue lors de la mise à jour du profil.');
                     $this->addErrorMessage('Une erreur est survenue lors de la mise à jour du profil', 'profile-form');
                 }
             } else {
-                // Utiliser la méthode du BaseController pour chaque erreur
+                if ($ajax) $this->jsonResponse(false, implode(' ', $errors));
                 foreach ($errors as $error) {
                     $this->addErrorMessage($error, 'profile-form');
                 }
@@ -288,10 +304,12 @@ class SettingsController extends BaseController
     {
         $this->requireLogin();
         $this->blockIfDemo("Le changement de mot de passe n'est pas disponible en mode démonstration.");
+        $ajax = $this->isAjax();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Validation CSRF
             if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+                if ($ajax) $this->jsonResponse(false, 'Token de sécurité invalide.');
                 $this->addErrorMessage('Token de sécurité invalide', 'password-form');
                 header('Location: ?page=settings&section=password');
                 exit;
@@ -352,18 +370,21 @@ class SettingsController extends BaseController
 
                     if ($success) {
                         $this->pdo->commit();
+                        if ($ajax) $this->jsonResponse(true, 'Mot de passe modifié avec succès.');
                         $this->addSuccessMessage('Mot de passe modifié avec succès', 'password-form');
                     } else {
                         $this->pdo->rollBack();
+                        if ($ajax) $this->jsonResponse(false, 'Erreur lors de la mise à jour du mot de passe.');
                         $this->addErrorMessage('Erreur lors de la mise à jour du mot de passe', 'password-form');
                     }
                 } catch (Exception $e) {
                     $this->pdo->rollBack();
                     error_log("Erreur changement mot de passe: " . $e->getMessage());
+                    if ($ajax) $this->jsonResponse(false, 'Une erreur est survenue lors du changement de mot de passe.');
                     $this->addErrorMessage('Une erreur est survenue lors du changement de mot de passe', 'password-form');
                 }
             } else {
-                // Utiliser la méthode du BaseController pour chaque erreur
+                if ($ajax) $this->jsonResponse(false, implode(' ', $errors));
                 foreach ($errors as $error) {
                     $this->addErrorMessage($error, 'password-form');
                 }
@@ -752,13 +773,16 @@ class SettingsController extends BaseController
     {
         $this->requireLogin();
         $this->requireActiveSubscription();
+        $ajax = $this->isAjax();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            if ($ajax) $this->jsonResponse(false, 'Méthode non autorisée.');
             header('Location: ?page=edit-template');
             exit;
         }
 
         if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            if ($ajax) $this->jsonResponse(false, 'Token CSRF invalide.');
             $this->addErrorMessage('Token CSRF invalide.');
             header('Location: ?page=edit-template');
             exit;
@@ -768,6 +792,7 @@ class SettingsController extends BaseController
         $allowed = ['classic', 'modern', 'elegant', 'nature', 'rose', 'bistro', 'ocean'];
 
         if (!in_array($palette, $allowed)) {
+            if ($ajax) $this->jsonResponse(false, 'Palette invalide.');
             $this->addErrorMessage('Palette invalide.');
             header('Location: ?page=edit-template');
             exit;
@@ -777,6 +802,7 @@ class SettingsController extends BaseController
         $optionModel->set($_SESSION['admin_id'], 'site_palette', $palette);
 
         $names = ['classic' => 'Classique', 'modern' => 'Moderne', 'elegant' => 'Élégant', 'nature' => 'Nature', 'rose' => 'Rosé', 'bistro' => 'Bistro', 'ocean' => 'Océan'];
+        if ($ajax) $this->jsonResponse(true, 'Palette "' . $names[$palette] . '" appliquée avec succès !', ['reload' => true]);
         $this->addSuccessMessage('Palette "' . $names[$palette] . '" appliquée avec succès !');
         $_SESSION['open_template_accordion'] = 'palette';
         header('Location: ?page=edit-template');
@@ -790,13 +816,16 @@ class SettingsController extends BaseController
     {
         $this->requireLogin();
         $this->requireActiveSubscription();
+        $ajax = $this->isAjax();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            if ($ajax) $this->jsonResponse(false, 'Méthode non autorisée.');
             header('Location: ?page=edit-template');
             exit;
         }
 
         if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            if ($ajax) $this->jsonResponse(false, 'Token CSRF invalide.');
             $this->addErrorMessage('Token CSRF invalide.');
             header('Location: ?page=edit-template');
             exit;
@@ -806,6 +835,7 @@ class SettingsController extends BaseController
         $allowed = ['standard', 'bistro', 'ocean'];
 
         if (!in_array($layout, $allowed)) {
+            if ($ajax) $this->jsonResponse(false, 'Layout invalide.');
             $this->addErrorMessage('Layout invalide.');
             header('Location: ?page=edit-template');
             exit;
@@ -815,6 +845,7 @@ class SettingsController extends BaseController
         $optionModel->set($_SESSION['admin_id'], 'site_layout', $layout);
 
         $names = ['standard' => 'Standard', 'bistro' => 'Bistro', 'ocean' => 'Océan'];
+        if ($ajax) $this->jsonResponse(true, 'Design "' . $names[$layout] . '" appliqué avec succès !', ['reload' => true]);
         $this->addSuccessMessage('Design "' . $names[$layout] . '" appliqué avec succès !');
         $_SESSION['open_template_accordion'] = 'layout';
         header('Location: ?page=edit-template');
@@ -828,9 +859,11 @@ class SettingsController extends BaseController
     {
         $this->requireLogin();
         $adminId = $_SESSION['admin_id'];
+        $ajax = $this->isAjax();
 
         // Vérifier le CSRF
         if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            if ($ajax) $this->jsonResponse(false, 'Token de sécurité invalide.');
             $this->addErrorMessage('Token de sécurité invalide.');
             header('Location: ?page=settings&section=premium');
             exit;
@@ -850,10 +883,12 @@ class SettingsController extends BaseController
                 $optionModel->set($adminId, $key, $value);
             }
 
+            if ($ajax) $this->jsonResponse(true, 'Paramètres Google Reviews mis à jour avec succès.');
             $this->addSuccessMessage('Paramètres Google Reviews mis à jour avec succès.');
             header('Location: ?page=settings&section=google-reviews');
             exit;
         } catch (Exception $e) {
+            if ($ajax) $this->jsonResponse(false, 'Erreur lors de la mise à jour : ' . $e->getMessage());
             $this->addErrorMessage('Erreur lors de la mise à jour : ' . $e->getMessage());
             header('Location: ?page=settings&section=google-reviews');
             exit;
@@ -983,9 +1018,11 @@ class SettingsController extends BaseController
     public function saveClosureDates()
     {
         $this->requireLogin();
+        $ajax = $this->isAjax();
         
         // Validation CSRF
         if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            if ($ajax) $this->jsonResponse(false, 'Token de sécurité invalide.');
             $this->addErrorMessage('Token de sécurité invalide', 'closure-dates-section');
             header('Location: ?page=settings&section=options');
             exit;
@@ -999,6 +1036,7 @@ class SettingsController extends BaseController
         }
         
         if (!is_array($dates)) {
+            if ($ajax) $this->jsonResponse(false, 'Données invalides.');
             $this->addErrorMessage('Données invalides', 'closure-dates-section');
             header('Location: ?page=settings&section=options');
             exit;
@@ -1024,12 +1062,15 @@ class SettingsController extends BaseController
             $result = $stmt->execute([$_SESSION['admin_id'], $datesJson, $datesJson]);
             
             if ($result) {
+                if ($ajax) $this->jsonResponse(true, 'Dates de fermeture enregistrées avec succès.');
                 $this->addSuccessMessage('Dates de fermeture enregistrées avec succès', 'closure-dates-section');
             } else {
+                if ($ajax) $this->jsonResponse(false, "Erreur lors de l'enregistrement.");
                 $this->addErrorMessage('Erreur lors de l\'enregistrement', 'closure-dates-section');
             }
         } catch (Exception $e) {
             error_log("Erreur sauvegarde dates fermeture: " . $e->getMessage());
+            if ($ajax) $this->jsonResponse(false, 'Erreur lors de la sauvegarde des dates.');
             $this->addErrorMessage('Erreur lors de la sauvegarde des dates', 'closure-dates-section');
         }
         

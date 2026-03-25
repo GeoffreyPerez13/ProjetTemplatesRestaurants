@@ -68,15 +68,6 @@ require __DIR__ . '/../partials/header.php';
     </button>
 </div>
 
-<!-- Affichage des messages -->
-<?php if (!empty($success_message)): ?>
-    <p class="message-success"><?= htmlspecialchars($success_message) ?></p>
-<?php endif; ?>
-
-<?php if (!empty($error_message)): ?>
-    <p class="message-error"><?= htmlspecialchars($error_message) ?></p>
-<?php endif; ?>
-
 <!-- Sélecteur de mode (accordéon) -->
 <div class="accordion-section mode-selector-accordion" id="mode-selector">
     <div class="accordion-header">
@@ -1238,6 +1229,19 @@ window.tourBeforeStart = function() {
         collapseAllBtn.click();
     }
 };
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Intercepter tous les formulaires POST de la page edit-card
+    document.querySelectorAll('form[method="post"]').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var url = this.getAttribute('action') || '?page=edit-card';
+            ajaxSubmit(this, url);
+        });
+    });
+});
 </script>
 
 <?php

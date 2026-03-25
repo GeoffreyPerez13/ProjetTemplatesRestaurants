@@ -372,7 +372,7 @@
             });
         }
         
-        setTimeout(() => form.submit(), 300);
+        setTimeout(() => ajaxSubmit(form, form.action || '?page=edit-card'), 300);
     }
     
     /**

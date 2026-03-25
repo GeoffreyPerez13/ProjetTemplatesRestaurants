@@ -87,12 +87,12 @@
             cancelButtonText: "Annuler",
           }).then(function (result) {
             if (result.isConfirmed) {
-              form.submit();
+              ajaxSubmit(form, '?page=edit-card');
             }
           });
         } else {
           if (confirm('Supprimer le menu "' + title + '" ?')) {
-            form.submit();
+            ajaxSubmit(form, '?page=edit-card');
           }
         }
       });

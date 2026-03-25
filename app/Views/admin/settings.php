@@ -156,15 +156,6 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
     </div>
 
     <div class="settings-content">
-        <!-- Affichage des messages -->
-        <?php if (!empty($success_message)): ?>
-            <p class="message-success"><?= htmlspecialchars($success_message) ?></p>
-        <?php endif; ?>
-
-        <?php if (!empty($error_message)): ?>
-            <p class="message-error"><?= htmlspecialchars($error_message) ?></p>
-        <?php endif; ?>
-
         <h1><?= htmlspecialchars($title) ?></h1>
 
         <?php if ($current_section === 'profile'): ?>
@@ -1648,5 +1639,40 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <?php endif; ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Profil
+    var profileForm = document.querySelector('#profile-form form[action*="update-profile"]');
+    if (profileForm) {
+        profileForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            ajaxSubmit(this, '?page=settings&action=update-profile');
+        });
+    }
+
+    // Mot de passe
+    var passwordForm = document.getElementById('password-change-form');
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            ajaxSubmit(this, '?page=settings&action=change-password', {
+                onSuccess: function() {
+                    passwordForm.reset();
+                }
+            });
+        });
+    }
+
+    // Google Reviews config forms
+    var grForms = document.querySelectorAll('form[action*="update-google-reviews"]');
+    grForms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            ajaxSubmit(this, '?page=settings&action=update-google-reviews');
+        });
+    });
+});
+</script>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

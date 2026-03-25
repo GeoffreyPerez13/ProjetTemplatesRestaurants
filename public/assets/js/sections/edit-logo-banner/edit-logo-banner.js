@@ -53,6 +53,15 @@
             if (this.resetBtn) this.resetBtn.addEventListener('click', () => this.resetSelection());
             if (this.uploadBtn) this.uploadBtn.addEventListener('click', (e) => this.validateBeforeUpload(e));
 
+            // Intercepter le submit du formulaire pour utiliser AJAX
+            if (this.form) {
+                this.form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const url = this.form.getAttribute('action');
+                    ajaxSubmit(this.form, url);
+                });
+            }
+
             this.setupDragAndDrop();
             this.setupEnlargeButtons();
             this.setupDeleteConfirmation();
@@ -230,8 +239,8 @@
                 const mediaName = this.prefix === 'logo' ? 'logo' : 'bannière';
                 const confirmUpload = () => {
                     if (this.form) {
-                        this.showLoading("Upload en cours...");
-                        setTimeout(() => this.form.submit(), 100);
+                        const url = this.form.getAttribute('action');
+                        ajaxSubmit(this.form, url);
                     }
                 };
 
@@ -324,29 +333,21 @@
                             cancelButtonText: "Annuler"
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                this.showLoading("Suppression en cours...");
-                                setTimeout(() => {
-                                    const hiddenInput = document.createElement('input');
-                                    hiddenInput.type = 'hidden';
-                                    hiddenInput.name = this.deleteBtnName;
-                                    hiddenInput.value = '1';
-                                    form.appendChild(hiddenInput);
-                                    form.submit();
-                                }, 300);
+                                const url = form.getAttribute('action');
+                                ajaxSubmit(form, url);
                             }
                         });
                     } else {
                         if (confirm(`Êtes-vous sûr de vouloir supprimer ${mediaName === 'logo' ? 'le logo' : 'la bannière'} ${fileName} ? Cette action est irréversible.`)) {
-                            form.submit();
+                            const url = form.getAttribute('action');
+                            ajaxSubmit(form, url);
                         }
                     }
                 });
 
                 form.addEventListener('submit', (e) => {
-                    if (!e.detail || !e.detail.fromSweetAlert) {
-                        e.preventDefault();
-                        deleteButton.click();
-                    }
+                    e.preventDefault();
+                    deleteButton.click();
                 });
             });
         }
@@ -436,12 +437,14 @@
                     cancelButtonText: "Annuler"
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        deleteForm.submit();
+                        const url = deleteForm.getAttribute('action');
+                        ajaxSubmit(deleteForm, url);
                     }
                 });
             } else {
                 if (confirm("Voulez-vous vraiment supprimer le texte de la bannière ?")) {
-                    deleteForm.submit();
+                    const url = deleteForm.getAttribute('action');
+                    ajaxSubmit(deleteForm, url);
                 }
             }
         });

@@ -164,12 +164,11 @@ document.addEventListener("DOMContentLoaded", function () {
       options[btn.dataset.option] = btn.dataset.value;
     });
 
-    // Créer un formulaire pour soumettre les données
+    // Créer un formulaire pour soumettre via AJAX
     const form = document.createElement("form");
     form.method = "POST";
     form.action = "?page=settings&action=save-options-batch";
 
-    // Ajouter les données
     const optionsInput = document.createElement("input");
     optionsInput.type = "hidden";
     optionsInput.name = "options";
@@ -182,9 +181,16 @@ document.addEventListener("DOMContentLoaded", function () {
     csrfInput.value = csrfToken;
     form.appendChild(csrfInput);
 
-    // Ajouter au DOM et soumettre
+    // Bouton submit pour que ajaxSubmit puisse le trouver
+    const submitBtn = button || document.createElement("button");
+    if (!button) {
+      submitBtn.type = "submit";
+      form.appendChild(submitBtn);
+    }
+
     document.body.appendChild(form);
-    form.submit();
+    ajaxSubmit(form, form.action);
+    setTimeout(function() { form.remove(); }, 100);
   }
 
   function resetOptions(button) {
@@ -220,9 +226,15 @@ document.addEventListener("DOMContentLoaded", function () {
     csrfInput.value = csrfToken;
     form.appendChild(csrfInput);
 
-    // Ajouter au DOM et soumettre
+    const submitBtn = button || document.createElement("button");
+    if (!button) {
+      submitBtn.type = "submit";
+      form.appendChild(submitBtn);
+    }
+
     document.body.appendChild(form);
-    form.submit();
+    ajaxSubmit(form, form.action);
+    setTimeout(function() { form.remove(); }, 100);
   }
 
   // ==================== VALIDATION DU MOT DE PASSE ====================
