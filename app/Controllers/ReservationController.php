@@ -198,6 +198,24 @@ class ReservationController extends BaseController
         $todayReservations = $reservationModel->getToday($adminId);
         $settings = $this->getSettings($adminId);
 
+        // Récupérer les dates de fermeture exceptionnelles pour le badge et l'info
+        $closureDates = [];
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT option_value 
+                FROM admin_options 
+                WHERE admin_id = ? AND option_name = 'closure_dates'
+            ");
+            $stmt->execute([$adminId]);
+            $closureDatesValue = $stmt->fetchColumn();
+            if ($closureDatesValue) {
+                $closureDates = json_decode($closureDatesValue, true) ?: [];
+            }
+        } catch (Exception $e) {
+            error_log("Erreur récupération dates fermeture: " . $e->getMessage());
+            $closureDates = [];
+        }
+
         $messages = $this->getFlashMessages();
 
         $this->render('admin/reservations', [
@@ -209,6 +227,7 @@ class ReservationController extends BaseController
             'stats'              => $stats,
             'settings'           => $settings,
             'filters'            => $filters,
+            'closureDates'       => $closureDates,
             'restaurant_name'    => $admin->restaurant_name ?? '',
         ]);
     }
@@ -560,6 +579,62 @@ class ReservationController extends BaseController
             'success' => true,
             'slots'   => $availableSlots,
             'closed'  => false,
+        ]);
+        exit;
+    }
+
+    /**
+     * API AJAX : récupérer les réservations pour une date spécifique
+     */
+    public function getDayReservations()
+    {
+        header('Content-Type: application/json');
+        $this->checkAccess();
+        
+        $adminId = $_SESSION['admin_id'];
+        $date = $_GET['date'] ?? date('Y-m-d');
+        
+        // Valider la date
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            echo json_encode(['success' => false, 'message' => 'Date invalide']);
+            exit;
+        }
+        
+        $reservationModel = new Reservation($this->pdo);
+        $reservations = $reservationModel->getByDate($adminId, $date);
+        
+        // Séparer les réservations en attente des autres
+        $pendingReservations = array_values(array_filter($reservations, function($r) {
+            return $r['status'] === 'pending';
+        }));
+        
+        $otherReservations = array_values(array_filter($reservations, function($r) {
+            return $r['status'] !== 'pending';
+        }));
+        
+        // Statuts et couleurs
+        $statusLabels = [
+            'pending'   => 'En attente',
+            'confirmed' => 'Confirmée',
+            'cancelled' => 'Annulée',
+            'completed' => 'Terminée',
+            'no_show'   => 'Absent',
+        ];
+        
+        $statusColors = [
+            'pending'   => 'warning',
+            'confirmed' => 'success',
+            'cancelled' => 'danger',
+            'completed' => 'muted',
+            'no_show'   => 'danger',
+        ];
+        
+        echo json_encode([
+            'success' => true,
+            'reservations' => $otherReservations,
+            'pendingReservations' => $pendingReservations,
+            'statusLabels' => $statusLabels,
+            'statusColors' => $statusColors
         ]);
         exit;
     }

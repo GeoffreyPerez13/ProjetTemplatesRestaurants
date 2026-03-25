@@ -94,6 +94,20 @@ class Reservation
     }
 
     /**
+     * Récupérer les réservations pour une date spécifique
+     */
+    public function getByDate($adminId, $date)
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT * FROM reservations 
+            WHERE admin_id = ? AND reservation_date = ? 
+            ORDER BY reservation_time ASC
+        ");
+        $stmt->execute([$adminId, $date]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
      * Compter les réservations avec filtres
      */
     public function count($adminId, $filters = [])

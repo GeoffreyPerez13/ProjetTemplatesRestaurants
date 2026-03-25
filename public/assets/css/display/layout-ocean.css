@@ -75,10 +75,6 @@ body.layout-ocean .plat-info h4 {
   font-size: 1.1rem;
 }
 
-/* Alternance visuelle pour les plats (pair/impair) */
-body.layout-ocean .plat-card:nth-child(even) {
-  flex-direction: row-reverse;
-}
 
 /* Images carte — grande grille aérée */
 body.layout-ocean .images-grid {
@@ -143,15 +139,24 @@ body.layout-ocean .payments-list li:hover i {
     min-height: 60vh;
   }
 
-  body.layout-ocean .plat-card,
-  body.layout-ocean .plat-card:nth-child(even) {
+  body.layout-ocean .plat-card {
     flex-direction: column;
+    padding: var(--spacing-sm);
   }
 
   body.layout-ocean .plat-card img {
-    width: 100%;
-    height: 160px;
-    min-height: auto;
+    display: none;
+  }
+
+  body.layout-ocean .plat-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  body.layout-ocean .plat-price {
+    align-self: flex-end;
   }
 
   body.layout-ocean .images-grid {
@@ -167,5 +172,17 @@ body.layout-ocean .payments-list li:hover i {
   body.layout-ocean .payments-list li {
     width: 100%;
     justify-content: center;
+  }
+}
+
+@media (max-width: 500px) {
+  body.layout-ocean .plat-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  body.layout-ocean .plat-price {
+    align-self: flex-start;
+    margin-top: var(--spacing-xs);
   }
 }

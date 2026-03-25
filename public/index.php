@@ -500,6 +500,11 @@ switch ($page) {
         $controller->publicGetSlots();
         break;
 
+    case 'get-day-reservations':
+        $controller = new ReservationController($pdo);
+        $controller->getDayReservations();
+        break;
+
     case 'sitemap':
         $controller = new SitemapController($pdo);
         $controller->generate();

@@ -316,30 +316,31 @@ class Tour {
     const tooltipH = this._lastTooltipH || 220; // hauteur réelle mesurée, ou estimation
     const bottomPad = 24;     // marge sous le tooltip
 
-    // Zone totale nécessaire : élément + gap + tooltip + marge basse
-    const totalNeeded = rect.height + gap + tooltipH + bottomPad;
-
     // Position idéale : l'élément commence juste sous le header avec un peu de marge
     const idealTop = headerH + 20;
 
-    // Vérifier si tout est déjà visible
-    const elVisibleTop = rect.top >= idealTop;
-    const allVisibleBottom = (rect.bottom + gap + tooltipH + bottomPad) <= vh;
+    // Position du bas du tooltip
+    const tooltipBottom = rect.bottom + gap + tooltipH;
 
-    if (elVisibleTop && allVisibleBottom) {
+    // Vérifier si le bas du tooltip est déjà visible
+    if (tooltipBottom <= vh - bottomPad && rect.top >= idealTop) {
       // Tout est visible, pas besoin de scroll
       requestAnimationFrame(() => callback());
       return;
     }
 
-    // Calculer le scroll cible pour placer l'élément en haut du viewport (sous le header)
-    let targetScrollY = window.scrollY + rect.top - idealTop;
-
-    // Si le bloc total (élément + tooltip) dépasse le viewport,
-    // on scroll pour que le bas du tooltip soit visible
-    if (totalNeeded > vh - idealTop) {
-      // Espace insuffisant : placer l'élément le plus haut possible
-      targetScrollY = window.scrollY + rect.top - idealTop;
+    // Calculer le scroll pour que le bas du tooltip soit visible
+    let targetScrollY;
+    
+    if (tooltipBottom > vh - bottomPad) {
+      // Le tooltip déborde en bas : scroller pour que le bas du tooltip soit visible
+      targetScrollY = window.scrollY + (tooltipBottom - (vh - bottomPad));
+    } else if (rect.top < idealTop) {
+      // L'élément est trop haut : scroller pour le positionner sous le header
+      targetScrollY = window.scrollY + (rect.top - idealTop);
+    } else {
+      // Pas besoin de scroll
+      targetScrollY = window.scrollY;
     }
 
     window.scrollTo({

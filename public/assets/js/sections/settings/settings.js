@@ -1,4 +1,22 @@
 document.addEventListener("DOMContentLoaded", function () {
+  // ==================== GESTION DES ANCRES ====================
+  // Ouvrir l'accordéon des fermetures exceptionnelles si on arrive avec l'ancre
+  if (window.location.hash === '#closure-dates-section') {
+    const closureSection = document.getElementById('closure-dates-content');
+    const toggleBtn = document.querySelector('[data-target="closure-dates-content"]');
+    
+    if (closureSection && toggleBtn) {
+      // Ouvrir l'accordéon
+      closureSection.classList.remove('collapsed');
+      toggleBtn.querySelector('i').classList.replace('fa-chevron-down', 'fa-chevron-up');
+      
+      // Scroll vers la section après un petit délai pour que l'animation se fasse
+      setTimeout(() => {
+        closureSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }
+
   // ==================== GESTION DU MENU MOBILE ====================
   const menuToggle = document.querySelector(".settings-mobile-toggle");
   const menuContent = document.getElementById("settings-mobile-content");

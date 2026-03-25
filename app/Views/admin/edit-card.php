@@ -1075,6 +1075,18 @@ const editableTourSteps = [
         }
     },
     {
+        element: '#daily-menus',
+        title: 'Menus & Formules du jour',
+        content: '<p>Créez des menus du jour ou formules avec prix fixe et composition personnalisée.</p><p>Parfait pour proposer des offres spéciales (Menu du midi, Plat du jour, Formule du soir...).</p><p>Les menus apparaissent sur votre site avant la carte classique.</p>',
+        beforeShow: function() {
+            const accordion = document.querySelector('#daily-menus-content');
+            const toggle = document.querySelector('[data-target="daily-menus-content"]');
+            if (accordion && accordion.classList.contains('collapsed')) {
+                toggle.click();
+            }
+        }
+    },
+    {
         element: '#quick-add-categories',
         title: 'Ajout rapide de catégories',
         content: '<p>Gagnez du temps en ajoutant plusieurs catégories d\'un coup avec leurs images.</p><p>Parfait pour créer rapidement la structure de votre carte (Entrées, Plats, Desserts, etc.)</p>'
@@ -1110,6 +1122,18 @@ const editableCreationSteps = [
         beforeShow: function() {
             const accordion = document.querySelector('#mode-selector-content');
             const toggle = document.querySelector('[data-target="mode-selector-content"]');
+            if (accordion && accordion.classList.contains('collapsed')) {
+                toggle.click();
+            }
+        }
+    },
+    {
+        element: '#daily-menus',
+        title: 'Menus & Formules du jour',
+        content: '<p>Créez des menus du jour ou formules avec prix fixe et composition personnalisée.</p><p>Parfait pour proposer des offres spéciales (Menu du midi, Plat du jour, Formule du soir...).</p><p>Les menus apparaissent sur votre site avant la carte classique.</p>',
+        beforeShow: function() {
+            const accordion = document.querySelector('#daily-menus-content');
+            const toggle = document.querySelector('[data-target="daily-menus-content"]');
             if (accordion && accordion.classList.contains('collapsed')) {
                 toggle.click();
             }

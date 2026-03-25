@@ -47,8 +47,8 @@ a {
 }
 
 .container {
-  max-width: var(--max-width);
-  margin: 0 auto;
+  /* max-width: var(--max-width); */
+  /* margin: 0 auto; */
   padding: var(--spacing-3xl) var(--spacing-lg);
 }
 

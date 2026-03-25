@@ -26,10 +26,11 @@ $statusColors = [
 ];
 ?>
 
+<a class="btn-back" href="?page=dashboard">Retour</a>
+
 <div class="reservations-page">
     <div class="reservations-header">
         <h2><i class="fas fa-calendar-check"></i> Réservations en ligne</h2>
-        <a href="?page=dashboard" class="btn small"><i class="fas fa-arrow-left"></i> Retour</a>
     </div>
 
     <?php if (!empty($success_message)): ?>
@@ -43,7 +44,12 @@ $statusColors = [
     <div class="reservations-tabs">
         <button class="tab-btn active" data-tab="tab-dashboard"><i class="fas fa-tachometer-alt"></i> <span>Tableau de bord</span></button>
         <button class="tab-btn" data-tab="tab-list"><i class="fas fa-list"></i> <span>Réservations</span></button>
-        <button class="tab-btn" data-tab="tab-settings"><i class="fas fa-cog"></i> <span>Paramètres</span></button>
+        <button class="tab-btn" data-tab="tab-settings">
+            <i class="fas fa-cog"></i> <span>Paramètres</span>
+            <?php if (!empty($closureDates)): ?>
+                <span class="tab-badge" title="<?= count($closureDates) ?> fermeture(s) exceptionnelle(s) configurée(s)"><?= count($closureDates) ?></span>
+            <?php endif; ?>
+        </button>
     </div>
 
     <!-- ==================== TAB DASHBOARD ==================== -->
@@ -89,15 +95,46 @@ $statusColors = [
 
         <!-- Réservations du jour -->
         <div class="today-section">
-            <h3><i class="fas fa-calendar-day"></i> Réservations du jour — <?= date('d/m/Y') ?></h3>
-            <?php if (empty($todayReservations)): ?>
+            <div class="today-header">
+                <div class="today-date-selector">
+                    <button class="btn small btn-outline" id="prev-day" title="Jour précédent">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="today-date-display">
+                        <input type="date" id="dashboard-date" value="<?= date('Y-m-d') ?>">
+                        <h3><i class="fas fa-calendar-day"></i> <span id="dashboard-date-label">Aujourd'hui</span> — <span id="dashboard-date-text"><?= date('d/m/Y') ?></span></h3>
+                    </div>
+                    <button class="btn small btn-outline" id="next-day" title="Jour suivant">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Réservations en attente -->
+            <div id="pending-reservations-section" style="display: none;">
+                <h4><i class="fas fa-clock"></i> Réservations en attente</h4>
+                <div class="pending-reservations-grid">
+                    <!-- Contenu rempli par JavaScript -->
+                </div>
+            </div>
+            <?php 
+            $nonPendingReservations = array_filter($todayReservations, function($r) {
+                return $r['status'] !== 'pending';
+            });
+            
+            if (empty($nonPendingReservations) && empty($todayReservations)): ?>
                 <div class="empty-state">
                     <i class="fas fa-calendar-times"></i>
                     <p>Aucune réservation pour aujourd'hui.</p>
                 </div>
+            <?php elseif (empty($nonPendingReservations)): ?>
+                <div class="empty-state">
+                    <i class="fas fa-check-circle"></i>
+                    <p>Aucune réservation confirmée pour aujourd'hui.</p>
+                </div>
             <?php else: ?>
                 <div class="today-reservations-grid">
-                    <?php foreach ($todayReservations as $r): ?>
+                    <?php foreach ($nonPendingReservations as $r): ?>
                         <div class="reservation-card status-<?= $r['status'] ?>" data-id="<?= $r['id'] ?>">
                             <div class="reservation-card-header">
                                 <span class="reservation-time"><i class="fas fa-clock"></i> <?= substr($r['reservation_time'], 0, 5) ?></span>
@@ -325,6 +362,13 @@ $statusColors = [
                     <div class="setting-info">
                         <label>Jours de fermeture hebdomadaire</label>
                         <p class="setting-desc">Sélectionnez les jours où le restaurant est fermé.</p>
+                        <?php if (!empty($closureDates)): ?>
+                            <p class="setting-info-extra">
+                                <i class="fas fa-info-circle"></i>
+                                <?= count($closureDates) ?> fermeture(s) exceptionnelle(s) programmée(s)
+                                <a href="?page=settings&section=options#closure-dates-section" target="_blank" class="info-link">Voir les dates</a>
+                            </p>
+                        <?php endif; ?>
                     </div>
                     <div class="setting-control">
                         <?php
@@ -363,5 +407,271 @@ $statusColors = [
 
 <!-- Token CSRF pour les appels AJAX -->
 <input type="hidden" id="csrf-token" value="<?= htmlspecialchars($csrf_token) ?>">
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Navigation entre les jours
+    const dateInput = document.getElementById('dashboard-date');
+    const dateLabel = document.getElementById('dashboard-date-label');
+    const dateText = document.getElementById('dashboard-date-text');
+    const prevBtn = document.getElementById('prev-day');
+    const nextBtn = document.getElementById('next-day');
+    
+    function updateDateDisplay() {
+        const selectedDate = new Date(dateInput.value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        selectedDate.setHours(0, 0, 0, 0);
+        
+        const diffTime = selectedDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        let label = '';
+        if (diffDays === 0) {
+            label = 'Aujourd\'hui';
+        } else if (diffDays === 1) {
+            label = 'Demain';
+        } else if (diffDays === -1) {
+            label = 'Hier';
+        } else if (diffDays > 0) {
+            label = `Dans ${diffDays} jours`;
+        } else {
+            label = `Il y a ${Math.abs(diffDays)} jours`;
+        }
+        
+        dateLabel.textContent = label;
+        dateText.textContent = selectedDate.toLocaleDateString('fr-FR');
+        
+        // Charger les réservations pour cette date
+        loadReservationsForDate(dateInput.value);
+    }
+    
+    function changeDate(days) {
+        const currentDate = new Date(dateInput.value);
+        currentDate.setDate(currentDate.getDate() + days);
+        dateInput.value = currentDate.toISOString().split('T')[0];
+        updateDateDisplay();
+    }
+    
+    function loadReservationsForDate(date) {
+        fetch(`?page=get-day-reservations&date=${date}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const section = document.querySelector('.today-section');
+                    
+                    // Construire le HTML pour les réservations en attente
+                    let pendingHtml = '';
+                    if (data.pendingReservations && data.pendingReservations.length > 0) {
+                        pendingHtml = '<div id="pending-reservations-section" style="display: block;"><h4><i class="fas fa-clock"></i> Réservations en attente</h4><div class="pending-reservations-grid">';
+                        data.pendingReservations.forEach(r => {
+                            pendingHtml += `
+                                <div class="reservation-card status-pending" data-id="${r.id}">
+                                    <div class="reservation-card-header">
+                                        <span class="reservation-time"><i class="fas fa-clock"></i> ${r.reservation_time.substring(0, 5)}</span>
+                                        <span class="reservation-status badge-warning">En attente</span>
+                                    </div>
+                                    <div class="reservation-card-body">
+                                        <div class="reservation-info">
+                                            <span class="reservation-name"><i class="fas fa-user"></i> ${r.customer_name}</span>
+                                            <span class="reservation-party"><i class="fas fa-users"></i> ${r.party_size} pers.</span>
+                                        </div>
+                                        <div class="reservation-contact">
+                                            <span><i class="fas fa-phone"></i> ${r.customer_phone}</span>
+                                            ${r.customer_email ? `<span><i class="fas fa-envelope"></i> ${r.customer_email}</span>` : ''}
+                                        </div>
+                                        ${r.special_requests ? `
+                                            <div class="reservation-notes">
+                                                <i class="fas fa-comment-alt"></i> ${r.special_requests}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                    <div class="reservation-card-actions">
+                                        <button class="btn small success btn-confirm-reservation" data-id="${r.id}">
+                                            <i class="fas fa-check"></i> Confirmer
+                                        </button>
+                                        <button class="btn small danger btn-cancel-reservation" data-id="${r.id}">
+                                            <i class="fas fa-times"></i> Annuler
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        pendingHtml += '</div></div>';
+                    }
+                    
+                    // Construire le HTML pour les autres réservations
+                    let otherHtml = '';
+                    if (data.reservations.length === 0 && data.pendingReservations.length === 0) {
+                        otherHtml = `
+                            <div class="empty-state">
+                                <i class="fas fa-calendar-times"></i>
+                                <p>Aucune réservation pour ce jour.</p>
+                            </div>
+                        `;
+                    } else if (data.reservations.length === 0) {
+                        otherHtml = `
+                            <div class="empty-state">
+                                <i class="fas fa-check-circle"></i>
+                                <p>Aucune réservation confirmée pour ce jour.</p>
+                            </div>
+                        `;
+                    } else {
+                        otherHtml = '<div class="today-reservations-grid">';
+                        data.reservations.forEach(r => {
+                            otherHtml += `
+                                <div class="reservation-card status-${r.status}" data-id="${r.id}">
+                                    <div class="reservation-card-header">
+                                        <span class="reservation-time"><i class="fas fa-clock"></i> ${r.reservation_time.substring(0, 5)}</span>
+                                        <span class="reservation-status badge-${data.statusColors[r.status]}">${data.statusLabels[r.status]}</span>
+                                    </div>
+                                    <div class="reservation-card-body">
+                                        <div class="reservation-info">
+                                            <span class="reservation-name"><i class="fas fa-user"></i> ${r.customer_name}</span>
+                                            <span class="reservation-party"><i class="fas fa-users"></i> ${r.party_size} pers.</span>
+                                        </div>
+                                        <div class="reservation-contact">
+                                            <span><i class="fas fa-phone"></i> ${r.customer_phone}</span>
+                                            ${r.customer_email ? `<span><i class="fas fa-envelope"></i> ${r.customer_email}</span>` : ''}
+                                        </div>
+                                        ${r.special_requests ? `
+                                            <div class="reservation-notes">
+                                                <i class="fas fa-comment-alt"></i> ${r.special_requests}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        otherHtml += '</div>';
+                    }
+                    
+                    // Mettre à jour le contenu
+                    section.innerHTML = `
+                        <div class="today-header">
+                            <div class="today-date-selector">
+                                <button class="btn small btn-outline" id="prev-day" title="Jour précédent">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <div class="today-date-display">
+                                    <input type="date" id="dashboard-date" value="${date}">
+                                    <h3><i class="fas fa-calendar-day"></i> <span id="dashboard-date-label">${dateLabel.textContent}</span> — <span id="dashboard-date-text">${dateText.textContent}</span></h3>
+                                </div>
+                                <button class="btn small btn-outline" id="next-day" title="Jour suivant">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    ` + pendingHtml + otherHtml;
+                    
+                    // Réattacher les événements
+                    attachDayNavigationEvents();
+                    attachReservationEvents();
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+    }
+    
+    function attachDayNavigationEvents() {
+        const newDateInput = document.getElementById('dashboard-date');
+        const newPrevBtn = document.getElementById('prev-day');
+        const newNextBtn = document.getElementById('next-day');
+        
+        if (newDateInput) {
+            newDateInput.addEventListener('change', updateDateDisplay);
+        }
+        if (newPrevBtn) {
+            newPrevBtn.addEventListener('click', () => changeDate(-1));
+        }
+        if (newNextBtn) {
+            newNextBtn.addEventListener('click', () => changeDate(1));
+        }
+    }
+    
+    function attachReservationEvents() {
+        document.querySelectorAll('.btn-confirm-reservation').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                Swal.fire({
+                    title: 'Confirmer cette réservation ?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#10b981',
+                    confirmButtonText: '<i class="fas fa-check"></i> Confirmer',
+                    cancelButtonText: 'Annuler'
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        updateReservationStatus(id, 'confirmed');
+                    }
+                });
+            });
+        });
+        
+        document.querySelectorAll('.btn-cancel-reservation').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                Swal.fire({
+                    title: 'Annuler cette réservation ?',
+                    text: 'Le client sera informé de l\'annulation.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    confirmButtonText: '<i class="fas fa-times"></i> Annuler la réservation',
+                    cancelButtonText: 'Retour'
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        updateReservationStatus(id, 'cancelled');
+                    }
+                });
+            });
+        });
+    }
+    
+    function updateReservationStatus(id, status) {
+        const csrfToken = document.getElementById('csrf-token').value;
+        const data = new FormData();
+        data.append('csrf_token', csrfToken);
+        data.append('id', id);
+        data.append('status', status);
+        
+        fetch('?page=reservation-update-status', {
+            method: 'POST',
+            body: data
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: status === 'confirmed' ? 'Réservation confirmée' : 'Réservation annulée',
+                    icon: 'success',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                loadReservationsForDate(dateInput.value);
+            } else {
+                Swal.fire('Erreur', data.message || 'Une erreur est survenue', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            Swal.fire('Erreur', 'Erreur lors de la mise à jour', 'error');
+        });
+    }
+    
+    // Événements initiaux
+    if (dateInput) {
+        dateInput.addEventListener('change', updateDateDisplay);
+    }
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => changeDate(-1));
+    }
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => changeDate(1));
+    }
+    
+    // Charger les réservations pour la date initiale (aujourd'hui)
+    loadReservationsForDate(dateInput.value);
+});
+</script>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

@@ -422,7 +422,7 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                 </div>
 
                 <!-- Accordéon Fermetures Exceptionnelles -->
-                <div class="accordion-section">
+                <div class="accordion-section" id="closure-dates-section">
                     <div class="accordion-header">
                         <h2><i class="fas fa-calendar-times"></i> Fermetures Exceptionnelles</h2>
                         <button type="button" class="accordion-toggle" data-target="closure-dates-content">
