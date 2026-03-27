@@ -74,3 +74,8 @@ public/assets/logo*.png
 notes.txt
 todo.txt
 private/
+
+# --- Dossier de développement (à supprimer avant production)
+_dev/*
+!_dev/cda/
+!_dev/README.md
