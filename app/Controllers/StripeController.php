@@ -295,9 +295,11 @@ class StripeController extends BaseController
                 foreach (array_keys($pf->getAvailableFeatures()) as $key) {
                     $pf->disable($_SESSION['admin_id'], $key);
                 }
-                $this->addSuccessMessage(
-                    'Votre abonnement Basique et toutes les options premium ont été résiliés.'
-                );
+                $message = 'Votre abonnement Basique et toutes les options premium ont été résiliés.';
+                $_SESSION['pendingToast'] = json_encode([
+                    'message' => $message,
+                    'type' => 'success'
+                ]);
             } catch (Exception $e) {
                 error_log('[Cancel] Basique: ' . $e->getMessage());
                 $this->addErrorMessage('Erreur lors de la résiliation. Contactez le support.');
@@ -317,7 +319,11 @@ class StripeController extends BaseController
                 $pf = new PremiumFeature($this->pdo);
                 $pf->disable($_SESSION['admin_id'], $featureKey);
                 $name = $pf->getAvailableFeatures()[$featureKey]['name'] ?? $featureKey;
-                $this->addSuccessMessage('L\'option « ' . $name . ' » a été désactivée.');
+                $message = 'L\'option « ' . $name . ' » a été désactivée.';
+                $_SESSION['pendingToast'] = json_encode([
+                    'message' => $message,
+                    'type' => 'success'
+                ]);
             } catch (Exception $e) {
                 error_log('[Cancel] Premium feature: ' . $e->getMessage());
                 $this->addErrorMessage('Erreur lors de la résiliation. Contactez le support.');
@@ -490,9 +496,12 @@ class StripeController extends BaseController
             $features = json_decode($session['metadata']['features'] ?? '[]', true);
             $this->activatePremiumFeatures($_SESSION['admin_id'], $features);
             $names = implode(', ', array_map([$this, 'translateFeatureName'], $features));
-            $this->addSuccessMessage(
-                'Paiement confirmé ! Option(s) activée(s) : ' . $names . '.'
-            );
+            $message = 'Paiement confirmé ! Option(s) activée(s) : ' . $names . '.';
+            // Stocker dans sessionStorage pour SweetAlert2
+            $_SESSION['pendingToast'] = json_encode([
+                'message' => $message,
+                'type' => 'success'
+            ]);
             header('Location: ?page=settings&section=subscriptions#subscription-total');
         } elseif ($type === 'basique_premium') {
             // Activer l'abonnement basique ET les options premium
@@ -501,16 +510,22 @@ class StripeController extends BaseController
             $this->activatePremiumFeatures($_SESSION['admin_id'], $features);
             
             $names = implode(', ', array_map([$this, 'translateFeatureName'], $features));
-            $this->addSuccessMessage(
-                'Paiement confirmé ! Votre abonnement Basique est actif' . 
-                ($names ? ' et option(s) premium activée(s) : ' . $names . '.' : ' !')
-            );
+            $message = 'Paiement confirmé ! Votre abonnement Basique est actif' . 
+                ($names ? ' et option(s) premium activée(s) : ' . $names . '.' : ' !');
+            // Stocker dans sessionStorage pour SweetAlert2
+            $_SESSION['pendingToast'] = json_encode([
+                'message' => $message,
+                'type' => 'success'
+            ]);
             header('Location: ?page=settings&section=subscriptions#subscription-total');
         } else {
             $this->activateSubscription($_SESSION['admin_id'], $sessionId);
-            $this->addSuccessMessage(
-                'Paiement confirmé ! Votre abonnement Basique est maintenant actif. Bienvenue sur MenuMiam !'
-            );
+            $message = 'Paiement confirmé ! Votre abonnement Basique est maintenant actif. Bienvenue sur MenuMiam !';
+            // Stocker dans sessionStorage pour SweetAlert2
+            $_SESSION['pendingToast'] = json_encode([
+                'message' => $message,
+                'type' => 'success'
+            ]);
             header('Location: ?page=settings&section=subscriptions#subscription-total');
         }
         exit;

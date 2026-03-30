@@ -129,11 +129,12 @@ a:hover {
 /* ==================== BOUTONS FLOTTANTS (DARK MODE + TOUR) ==================== */
 .floating-buttons {
   position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
+  bottom: 20px;
+  left: 20px;
   display: flex;
+  flex-direction: column;
   gap: 10px;
+  z-index: 9999;
 }
 
 .dark-mode-toggle-floating,

@@ -78,7 +78,14 @@
   justify-content: center;
   color: var(--color-primary);
   font-size: 14px;
-  transition: transform var(--transition-normal);
+}
+
+.category-toggle i {
+  transition: transform 0.3s ease;
+}
+
+.category-toggle i.rotated {
+  transform: rotate(180deg);
 }
 
 /* Accordéon catégorie */

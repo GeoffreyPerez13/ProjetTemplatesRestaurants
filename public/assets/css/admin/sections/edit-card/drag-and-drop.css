@@ -270,6 +270,97 @@
   transition: all 0.3s ease;
 }
 
+/* ==================== SÉLECTION MULTIPLE D'IMAGES ==================== */
+.images-selection-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  margin: 0 15px;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.selection-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.select-all-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.85em;
+  font-weight: 500;
+  color: var(--color-text);
+  user-select: none;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.select-all-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  vertical-align: middle;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+}
+
+.selection-count {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.85em;
+  color: var(--color-primary);
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1;
+  height: 16px;
+}
+
+#bulk-delete-btn {
+  white-space: nowrap;
+}
+
+.image-select-checkbox {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.image-select-checkbox:hover {
+  background: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.image-select-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+  margin: 0;
+}
+
+.image-card.selected {
+  outline: 3px solid var(--color-primary);
+  outline-offset: -3px;
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb, 59, 130, 246), 0.2);
+}
+
 /* Responsive pour les contrôles de réorganisation */
 @media (max-width: 768px) {
   .reorder-controls {
@@ -311,5 +402,22 @@
   
   .drag-clone-active {
     transform: rotate(2deg) scale(0.9);
+  }
+  
+  .images-selection-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .selection-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  #bulk-delete-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

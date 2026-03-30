@@ -121,6 +121,49 @@
   font-size: 0.9rem;
 }
 
+.upload-info .fa-info-circle {
+  color: var(--color-primary);
+  margin-right: 4px;
+}
+
+.upload-size-gauge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.gauge-bar {
+  flex: 1;
+  max-width: 200px;
+  height: 8px;
+  background: var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.gauge-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--color-success);
+  transition: width 0.3s ease, background 0.3s ease;
+  width: 0%;
+}
+
+.gauge-fill.warning {
+  background: var(--color-warning);
+}
+
+.gauge-fill.danger {
+  background: var(--color-danger);
+}
+
+.gauge-text {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
 .upload-actions {
   display: flex;
   gap: 15px;
@@ -209,7 +252,6 @@
 .image-preview-container {
   height: 220px;
   overflow: hidden;
-  background: var(--color-bg-alt);
   display: flex;
   align-items: center;
   justify-content: center;

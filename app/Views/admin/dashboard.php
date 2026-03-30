@@ -286,7 +286,7 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                         <div class="accordion-section demo-tokens-accordion">
                             <div class="accordion-header">
                                 <h4><i class="fas fa-link"></i> Liens actifs (<?= count($demoTokens) ?>)</h4>
-                                <button type="button" class="accordion-toggle" data-target="demo-tokens-content"><i class="fas fa-chevron-up"></i></button>
+                                <button type="button" class="accordion-toggle" data-target="demo-tokens-content"><i class="fas fa-chevron-down"></i></button>
                             </div>
                             <div id="demo-tokens-content" class="accordion-content expanded prevent-auto-close">
                                 <!-- Boutons d'actions en masse -->

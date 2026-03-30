@@ -177,11 +177,10 @@
 .allergenes-accordion-toggle > i {
   transition: transform 0.3s ease;
   color: var(--color-text-muted);
-  transform: rotate(180deg);
 }
 
-.allergenes-accordion-toggle.expanded > i {
-  transform: rotate(0deg);
+.allergenes-accordion-toggle > i.rotated {
+  transform: rotate(180deg);
 }
 
 .allergenes-accordion-content {

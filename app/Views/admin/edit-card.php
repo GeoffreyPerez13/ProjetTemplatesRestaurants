@@ -35,6 +35,7 @@ unset(
 );
 
 require __DIR__ . '/../partials/header.php';
+
 ?>
 
 <!-- Script pour passer les paramètres au JavaScript -->
@@ -47,6 +48,9 @@ require __DIR__ . '/../partials/header.php';
         closeAccordionSecondary: '<?= htmlspecialchars($closeAccordionSecondary) ?>',
         closeDishAccordion: '<?= htmlspecialchars($closeDishAccordion) ?>',
         openAccordion: '<?= htmlspecialchars($openAccordion) ?>'
+    };
+    window.uploadConfig = {
+        postMaxSize: <?= (int)(floatval(ini_get('post_max_size')) * 1024 * 1024) ?>
     };
 
     // FORCER l'ouverture de l'accordéon images si on vient d'une réorganisation
@@ -223,8 +227,9 @@ require __DIR__ . '/../partials/header.php';
                                     <form method="post" class="inline-form delete-daily-menu-form">
                                         <?= $csrfField ?>
                                         <input type="hidden" name="anchor" value="daily-menus">
-                                        <button type="submit" name="delete_daily_menu" value="<?= $menu['id'] ?>"
-                                                class="btn small danger" title="Supprimer"
+                                        <input type="hidden" name="delete_daily_menu" value="<?= $menu['id'] ?>">
+                                        <button type="button"
+                                                class="btn small danger delete-daily-menu-btn" title="Supprimer"
                                                 data-menu-title="<?= htmlspecialchars($menu['title']) ?>">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -531,7 +536,7 @@ require __DIR__ . '/../partials/header.php';
                                 <?= $csrfField ?>
                                 <input type="hidden" name="delete_category" value="<?= $cat['id'] ?>">
                                 <input type="hidden" name="anchor" value="categories-grid">
-                                <button type="submit" class="category-delete-btn" title="Supprimer cette catégorie">
+                                <button type="button" class="category-delete-btn" title="Supprimer cette catégorie">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </form>
@@ -724,7 +729,7 @@ require __DIR__ . '/../partials/header.php';
                                                         <input type="hidden" name="delete_dish" value="<?= $plat['id'] ?>">
                                                         <input type="hidden" name="current_category_id" value="<?= $cat['id'] ?>">
                                                         <input type="hidden" name="anchor" value="category-<?= $cat['id'] ?>">
-                                                        <button type="submit" class="dish-delete-btn" title="Supprimer ce plat">
+                                                        <button type="button" class="dish-delete-btn" title="Supprimer ce plat">
                                                             <i class="fas fa-times"></i>
                                                         </button>
                                                     </form>
@@ -873,6 +878,7 @@ require __DIR__ . '/../partials/header.php';
             <div id="upload-images-content" class="accordion-content expanded">
                 <form method="post" enctype="multipart/form-data" class="upload-form">
                     <?= $csrfField ?>
+                    <input type="hidden" name="upload_images" value="1">
                     <input type="hidden" name="anchor" value="upload-images">
 
                     <div class="upload-area" id="uploadArea">
@@ -896,7 +902,14 @@ require __DIR__ . '/../partials/header.php';
 
                     <div class="upload-info">
                         <p><small>Formats acceptés : JPG, PNG, GIF, WebP, PDF</small></p>
-                        <p><small>Taille maximale par fichier : 5MB</small></p>
+                        <p><small>Taille maximale par fichier : 5 Mo — Limite d'envoi : <?= ini_get('post_max_size') ?> au total</small></p>
+                        <p><small><i class="fas fa-info-circle"></i> Pour de meilleurs résultats, envoyez vos images par lots de 3 maximum.</small></p>
+                        <div class="upload-size-gauge" id="uploadSizeGauge" style="display: none;">
+                            <div class="gauge-bar">
+                                <div class="gauge-fill" id="gaugeFill"></div>
+                            </div>
+                            <span class="gauge-text" id="gaugeText"></span>
+                        </div>
                     </div>
 
                     <div class="upload-actions">
@@ -925,12 +938,33 @@ require __DIR__ . '/../partials/header.php';
                 <?php if (empty($carteImages)): ?>
                     <p class="no-images">Aucune image téléchargée. Ajoutez vos premières images ci-dessus.</p>
                 <?php else: ?>
+                    <!-- Barre de sélection -->
+                    <div class="images-selection-bar" id="images-selection-bar">
+                        <div class="selection-controls">
+                            <label class="select-all-label">
+                                <input type="checkbox" id="select-all-images">
+                                <span>Tout sélectionner</span>
+                            </label>
+                            <span class="selection-count" id="selection-count" style="display: none;">
+                                <span id="selected-count">0</span> image(s) sélectionnée(s)
+                            </span>
+                        </div>
+                        <button type="button" class="btn danger small" id="bulk-delete-btn" style="display: none;">
+                            <i class="fas fa-trash"></i> Supprimer la sélection
+                        </button>
+                    </div>
+
                     <!-- Grille d'images avec système de réorganisation -->
                     <div class="images-grid" id="sortable-images">
                         <?php foreach ($carteImages as $index => $image): ?>
                             <div class="image-card"
                                 data-image-id="<?= $image['id'] ?>"
                                 draggable="false"> <!-- Initialement false -->
+
+                                <!-- Checkbox de sélection -->
+                                <label class="image-select-checkbox">
+                                    <input type="checkbox" class="image-checkbox" value="<?= $image['id'] ?>">
+                                </label>
 
                                 <!-- Badge de position en haut à gauche -->
                                 <div class="position-badge">

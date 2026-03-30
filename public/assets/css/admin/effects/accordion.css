@@ -184,6 +184,14 @@
   transition: all 0.2s ease;
 }
 
+.dish-accordion-toggle i {
+  transition: transform 0.3s ease;
+}
+
+.dish-accordion-toggle i.rotated {
+  transform: rotate(180deg);
+}
+
 .dish-accordion-toggle:hover {
   background-color: var(--color-bg-warm);
   color: var(--color-text);

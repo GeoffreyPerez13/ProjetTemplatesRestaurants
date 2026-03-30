@@ -231,6 +231,8 @@ class CardController extends BaseController
     {
         if (isset($_POST['upload_images']) && isset($_FILES['card_images'])) {
             $this->handleUploadImages($carteImageModel, $admin_id, $anchor);
+        } elseif (isset($_POST['bulk_delete_images'])) {
+            $this->handleBulkDeleteImages($carteImageModel, $admin_id, $anchor);
         } elseif (isset($_POST['delete_image'])) {
             $this->handleDeleteImageSimple($carteImageModel, $admin_id, $anchor);
         } elseif (isset($_POST['update_image_order'])) {
@@ -293,6 +295,58 @@ class CardController extends BaseController
         $_SESSION['close_accordion'] = 'mode-selector-content';
         $_SESSION['open_accordion'] = 'images-list-content';
 
+        $this->redirectToEditCard($anchor);
+    }
+
+    /**
+     * Suppression en masse d'images
+     *
+     * @param CardImage $carteImageModel Modèle images
+     * @param int       $admin_id        ID de l'admin
+     * @param string    $anchor          Ancre HTML pour le scroll
+     */
+    private function handleBulkDeleteImages($carteImageModel, $admin_id, $anchor)
+    {
+        $imageIds = $_POST['image_ids'] ?? '';
+        $ids = array_filter(array_map('intval', explode(',', $imageIds)));
+
+        if (empty($ids)) {
+            $this->addErrorMessage("Aucune image sélectionnée.", 'images-list');
+            $this->redirectToEditCard($anchor);
+            return;
+        }
+
+        $deletedCount = 0;
+        foreach ($ids as $imageId) {
+            $stmt = $this->pdo->prepare("SELECT * FROM card_images WHERE id = ? AND admin_id = ?");
+            $stmt->execute([$imageId, $admin_id]);
+            $image = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$image) continue;
+
+            try {
+                $stmt = $this->pdo->prepare("DELETE FROM card_images WHERE id = ? AND admin_id = ?");
+                $stmt->execute([$imageId, $admin_id]);
+                if ($stmt->rowCount() > 0) {
+                    if (!empty($image['filename'])) {
+                        $this->deletePhysicalFile($image['filename']);
+                    }
+                    $deletedCount++;
+                }
+            } catch (Exception $e) {
+                // Continuer avec les autres images
+            }
+        }
+
+        if ($deletedCount > 0) {
+            $this->updateRestaurantTimestamp();
+            $this->addSuccessMessage("$deletedCount image(s) supprimée(s) avec succès.", 'images-list');
+        } else {
+            $this->addErrorMessage("Aucune image n'a pu être supprimée.", 'images-list');
+        }
+
+        $_SESSION['close_accordion'] = 'mode-selector-content';
+        $_SESSION['open_accordion'] = 'images-list-content';
         $this->redirectToEditCard($anchor);
     }
 
@@ -729,22 +783,25 @@ class CardController extends BaseController
         $errorCount = 0;
 
         foreach ($_FILES['card_images']['name'] as $index => $name) {
-            if ($_FILES['card_images']['error'][$index] === UPLOAD_ERR_OK) {
-                try {
-                    $file = [
-                        'name' => $_FILES['card_images']['name'][$index],
-                        'type' => $_FILES['card_images']['type'][$index],
-                        'tmp_name' => $_FILES['card_images']['tmp_name'][$index],
-                        'error' => $_FILES['card_images']['error'][$index],
-                        'size' => $_FILES['card_images']['size'][$index]
-                    ];
+            if ($_FILES['card_images']['error'][$index] !== UPLOAD_ERR_OK) {
+                $errorCount++;
+                continue;
+            }
 
-                    $filename = $carteImageModel->uploadImage($file);
-                    $carteImageModel->add($admin_id, $filename, $name);
-                    $uploadCount++;
-                } catch (Exception $e) {
-                    $errorCount++;
-                }
+            try {
+                $file = [
+                    'name' => $_FILES['card_images']['name'][$index],
+                    'type' => $_FILES['card_images']['type'][$index],
+                    'tmp_name' => $_FILES['card_images']['tmp_name'][$index],
+                    'error' => $_FILES['card_images']['error'][$index],
+                    'size' => $_FILES['card_images']['size'][$index]
+                ];
+
+                $filename = $carteImageModel->uploadImage($file);
+                $carteImageModel->add($admin_id, $filename, $name);
+                $uploadCount++;
+            } catch (Exception $e) {
+                $errorCount++;
             }
         }
 

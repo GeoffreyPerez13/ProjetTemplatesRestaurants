@@ -12,6 +12,7 @@
     initAddItemButtons();
     initRemoveItemButtons();
     initDeleteConfirmation();
+    initEditToggleButtons();
   }
 
   /**
@@ -67,13 +68,17 @@
 
   /**
    * Confirmation SweetAlert2 avant suppression d'un menu
+   * Utilise un click handler sur le bouton (type="button") pour éviter les conflits de submit
    */
   function initDeleteConfirmation() {
-    document.querySelectorAll(".delete-daily-menu-form").forEach(function (form) {
-      form.addEventListener("submit", function (e) {
+    document.querySelectorAll(".delete-daily-menu-btn").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
         e.preventDefault();
-        var btn = form.querySelector("[name='delete_daily_menu']");
-        var title = btn ? btn.dataset.menuTitle : "ce menu";
+        e.stopPropagation();
+
+        var form = btn.closest("form");
+        if (!form) return;
+        var title = btn.dataset.menuTitle || "ce menu";
 
         if (typeof Swal !== "undefined") {
           Swal.fire({
@@ -94,6 +99,57 @@
           if (confirm('Supprimer le menu "' + title + '" ?')) {
             ajaxSubmit(form, '?page=edit-card');
           }
+        }
+      });
+    });
+  }
+
+  /**
+   * Boutons d'édition (accordion-toggle) dans daily-menu-actions et sub-header
+   * Ces boutons ne sont pas dans .accordion-header donc accordion.js ne les gère pas
+   */
+  function initEditToggleButtons() {
+    // Gérer les toggles dans daily-menu-actions
+    document.querySelectorAll(".daily-menu-actions .accordion-toggle").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var targetId = btn.getAttribute("data-target");
+        var target = document.getElementById(targetId);
+        if (!target) return;
+
+        var isExpanded = target.classList.contains("expanded");
+        if (isExpanded) {
+          target.classList.remove("expanded");
+          target.classList.add("collapsed");
+        } else {
+          target.classList.remove("collapsed");
+          target.classList.add("expanded");
+        }
+      });
+    });
+
+    // Gérer le sub-header (add-daily-menu)
+    document.querySelectorAll(".sub-header .accordion-toggle").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var targetId = btn.getAttribute("data-target");
+        var target = document.getElementById(targetId);
+        if (!target) return;
+
+        var isExpanded = target.classList.contains("expanded");
+        var icon = btn.querySelector('i');
+        if (isExpanded) {
+          target.classList.remove("expanded");
+          target.classList.add("collapsed");
+          if (icon) icon.classList.add('rotated');    // Fermé -> chevron haut
+        } else {
+          target.classList.remove("collapsed");
+          target.classList.add("expanded");
+          if (icon) icon.classList.remove('rotated'); // Ouvert -> chevron bas
         }
       });
     });

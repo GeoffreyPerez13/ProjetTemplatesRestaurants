@@ -56,6 +56,12 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // Limite POST max (récupérée depuis PHP via window.uploadConfig ou fallback 8MB)
+  var postMaxSize = (window.uploadConfig && window.uploadConfig.postMaxSize) || 8 * 1024 * 1024;
+  var gaugeEl = document.getElementById("uploadSizeGauge");
+  var gaugeFill = document.getElementById("gaugeFill");
+  var gaugeText = document.getElementById("gaugeText");
+
   // Gérer les fichiers sélectionnés
   function handleFiles(files) {
     selectedFiles = Array.from(files);
@@ -63,6 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
     updatePreview();
     updateCounter();
     updateUploadButton();
+    updateSizeGauge();
 
     // Afficher le bouton d'annulation
     if (selectedFiles.length > 0) {
@@ -200,6 +207,7 @@ document.addEventListener("DOMContentLoaded", function () {
     updatePreview();
     updateCounter();
     updateUploadButton();
+    updateSizeGauge();
 
     if (selectedFiles.length === 0) {
       clearSelection.style.display = "none";
@@ -214,9 +222,38 @@ document.addEventListener("DOMContentLoaded", function () {
       updatePreview();
       updateCounter();
       updateUploadButton();
+      updateSizeGauge();
       fileInput.value = "";
       clearSelection.style.display = "none";
     });
+  }
+
+  // Jauge de taille totale
+  function updateSizeGauge() {
+    if (!gaugeEl || !gaugeFill || !gaugeText) return;
+
+    if (selectedFiles.length === 0) {
+      gaugeEl.style.display = "none";
+      return;
+    }
+
+    var totalSize = 0;
+    selectedFiles.forEach(function(f) { totalSize += f.size; });
+
+    var percent = Math.min((totalSize / postMaxSize) * 100, 100);
+    gaugeEl.style.display = "flex";
+    gaugeFill.style.width = percent.toFixed(1) + "%";
+
+    gaugeFill.classList.remove("warning", "danger");
+    if (percent > 90) {
+      gaugeFill.classList.add("danger");
+    } else if (percent > 60) {
+      gaugeFill.classList.add("warning");
+    }
+
+    var totalMB = (totalSize / (1024 * 1024)).toFixed(1);
+    var maxMB = (postMaxSize / (1024 * 1024)).toFixed(0);
+    gaugeText.textContent = totalMB + " Mo / " + maxMB + " Mo";
   }
 
   // Fonctions utilitaires
@@ -241,13 +278,27 @@ document.addEventListener("DOMContentLoaded", function () {
     return "PDF";
   }
 
+  // Soumettre le formulaire d'upload via AJAX
+  function submitUploadForm() {
+    ajaxSubmit(uploadForm, '?page=edit-card', {
+      beforeSend: function(formData) {
+        // Remplacer les fichiers du input par les selectedFiles (gère le drag & drop)
+        formData.delete('card_images[]');
+        selectedFiles.forEach(function(file) {
+          formData.append('card_images[]', file);
+        });
+      }
+    });
+  }
+
   // Validation avant soumission
   const uploadForm = document.querySelector(".upload-form");
   if (uploadForm) {
     uploadForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
       // Vérifier qu'il y a des fichiers
       if (selectedFiles.length === 0) {
-        e.preventDefault();
         Swal.fire(
           "Aucun fichier",
           "Veuillez sélectionner au moins un fichier à télécharger.",
@@ -257,12 +308,9 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       // Vérifier la taille des fichiers
-      let totalSize = 0;
       let hasInvalidFile = false;
 
       selectedFiles.forEach((file) => {
-        totalSize += file.size;
-
         // Vérifier le type
         const allowedTypes = [
           "image/jpeg",
@@ -292,13 +340,11 @@ document.addEventListener("DOMContentLoaded", function () {
       });
 
       if (hasInvalidFile) {
-        e.preventDefault();
         return;
       }
 
-      // Confirmation
+      // Confirmation si beaucoup de fichiers
       if (selectedFiles.length > 3) {
-        e.preventDefault();
         Swal.fire({
           title: "Confirmer le téléchargement",
           text: `Vous êtes sur le point de télécharger ${selectedFiles.length} fichiers. Êtes-vous sûr ?`,
@@ -308,10 +354,133 @@ document.addEventListener("DOMContentLoaded", function () {
           cancelButtonText: "Annuler",
         }).then((result) => {
           if (result.isConfirmed) {
-            ajaxSubmit(uploadForm, uploadForm.action || '?page=edit-card');
+            submitUploadForm();
           }
         });
+      } else {
+        submitUploadForm();
       }
     });
+  }
+
+  // ==================== SÉLECTION MULTIPLE D'IMAGES ====================
+  const selectAllCheckbox = document.getElementById("select-all-images");
+  const bulkDeleteBtn = document.getElementById("bulk-delete-btn");
+  const selectionCount = document.getElementById("selection-count");
+  const selectedCountSpan = document.getElementById("selected-count");
+  const imageCheckboxes = document.querySelectorAll(".image-checkbox");
+
+  if (selectAllCheckbox && imageCheckboxes.length > 0) {
+    // Mettre à jour le compteur et la visibilité du bouton
+    function updateSelectionUI() {
+      const checked = document.querySelectorAll(".image-checkbox:checked");
+      const count = checked.length;
+
+      if (selectedCountSpan) selectedCountSpan.textContent = count;
+      if (selectionCount) selectionCount.style.display = count > 0 ? "inline" : "none";
+      if (bulkDeleteBtn) bulkDeleteBtn.style.display = count > 0 ? "inline-flex" : "none";
+
+      // Mettre à jour l'état du "Tout sélectionner"
+      selectAllCheckbox.checked = count === imageCheckboxes.length && count > 0;
+      selectAllCheckbox.indeterminate = count > 0 && count < imageCheckboxes.length;
+
+      // Classe .selected sur les cards
+      imageCheckboxes.forEach(function (cb) {
+        var card = cb.closest(".image-card");
+        if (card) {
+          if (cb.checked) {
+            card.classList.add("selected");
+          } else {
+            card.classList.remove("selected");
+          }
+        }
+      });
+    }
+
+    // Tout sélectionner / désélectionner
+    selectAllCheckbox.addEventListener("change", function () {
+      imageCheckboxes.forEach(function (cb) {
+        cb.checked = selectAllCheckbox.checked;
+      });
+      updateSelectionUI();
+    });
+
+    // Chaque checkbox individuelle
+    imageCheckboxes.forEach(function (cb) {
+      cb.addEventListener("change", updateSelectionUI);
+    });
+
+    // Suppression en masse
+    if (bulkDeleteBtn) {
+      bulkDeleteBtn.addEventListener("click", function () {
+        var checked = document.querySelectorAll(".image-checkbox:checked");
+        var ids = [];
+        checked.forEach(function (cb) { ids.push(cb.value); });
+
+        if (ids.length === 0) return;
+
+        var msg = ids.length === 1
+          ? "Voulez-vous vraiment supprimer cette image ?"
+          : "Voulez-vous vraiment supprimer ces " + ids.length + " images ?";
+
+        if (typeof Swal !== "undefined") {
+          Swal.fire({
+            title: "Confirmer la suppression",
+            text: msg,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Oui, supprimer",
+            cancelButtonText: "Annuler",
+          }).then(function (result) {
+            if (result.isConfirmed) {
+              bulkDeleteSubmit(ids);
+            }
+          });
+        } else {
+          if (confirm(msg)) {
+            bulkDeleteSubmit(ids);
+          }
+        }
+      });
+    }
+
+    function bulkDeleteSubmit(ids) {
+      var form = document.createElement("form");
+      form.style.display = "none";
+
+      // CSRF token
+      var csrfInput = document.querySelector('input[name="csrf_token"]');
+      if (csrfInput) {
+        var csrf = document.createElement("input");
+        csrf.type = "hidden";
+        csrf.name = "csrf_token";
+        csrf.value = csrfInput.value;
+        form.appendChild(csrf);
+      }
+
+      var action = document.createElement("input");
+      action.type = "hidden";
+      action.name = "bulk_delete_images";
+      action.value = "1";
+      form.appendChild(action);
+
+      var idsInput = document.createElement("input");
+      idsInput.type = "hidden";
+      idsInput.name = "image_ids";
+      idsInput.value = ids.join(",");
+      form.appendChild(idsInput);
+
+      var anchor = document.createElement("input");
+      anchor.type = "hidden";
+      anchor.name = "anchor";
+      anchor.value = "images-list";
+      form.appendChild(anchor);
+
+      document.body.appendChild(form);
+      ajaxSubmit(form, "?page=edit-card");
+      document.body.removeChild(form);
+    }
   }
 });

@@ -77,6 +77,16 @@
 
       toggle.setAttribute("data-accordion-initialized", "true");
 
+      // Synchroniser l'état initial du chevron
+      const icon = toggle.querySelector('i');
+      if (icon && target) {
+        if (target.classList.contains('collapsed')) {
+          icon.classList.add('rotated');     // Fermé -> chevron haut
+        } else {
+          icon.classList.remove('rotated');  // Ouvert -> chevron bas
+        }
+      }
+
       // Ajouter l'événement de clic sur tout le header
       header.addEventListener("click", function (e) {
         // Ne pas déclencher si on clique sur un lien, un bouton ou un input à l'intérieur du header
@@ -118,14 +128,15 @@
 
       toggle.setAttribute("data-accordion-initialized", "true");
 
-      // Synchroniser l'état initial du chevron (logique inversée)
-      // Vérifier l'état réel de l'accordéon (visible ou caché)
+      // Synchroniser l'état initial du chevron
       const isVisible = target.style.display !== "none" && !target.classList.contains("collapsed");
-      
-      if (isVisible) {
-        toggle.classList.remove("expanded");  // Accordéon visible (ouvert) -> chevron bas
-      } else {
-        toggle.classList.add("expanded");   // Accordéon caché (fermé) -> chevron haut
+      const icon = toggle.querySelector('i');
+      if (icon) {
+        if (isVisible) {
+          icon.classList.remove('rotated');  // Ouvert -> chevron bas
+        } else {
+          icon.classList.add('rotated');     // Fermé -> chevron haut
+        }
       }
 
       // Ajouter l'événement de clic sur tout le header du plat
@@ -270,10 +281,16 @@
 
     if (isExpanded) {
       closeDishAccordion(target.id);
-      if (toggle) toggle.classList.add("expanded");  // Inversé : ouvert -> chevron haut
+      if (toggle) {
+        const icon = toggle.querySelector('i');
+        if (icon) icon.classList.add('rotated');    // Fermé -> chevron haut
+      }
     } else {
       openDishAccordion(target.id);
-      if (toggle) toggle.classList.remove("expanded");  // Inversé : fermé -> chevron bas
+      if (toggle) {
+        const icon = toggle.querySelector('i');
+        if (icon) icon.classList.remove('rotated'); // Ouvert -> chevron bas
+      }
     }
   }
 
@@ -286,6 +303,13 @@
 
     accordion.classList.remove("collapsed");
     accordion.classList.add("expanded");
+
+    // Mettre à jour le chevron (ouvert = chevron bas, pas de rotation)
+    const toggle = document.querySelector('.accordion-toggle[data-target="' + accordionId + '"]');
+    if (toggle) {
+      const icon = toggle.querySelector('i');
+      if (icon) icon.classList.remove('rotated');
+    }
     
     // Gérer le retractation-notice pour l'accordéon premium
     if (accordionId === 'premium-options-content') {
@@ -302,6 +326,13 @@
 
     accordion.classList.remove("expanded");
     accordion.classList.add("collapsed");
+
+    // Mettre à jour le chevron (fermé = chevron haut, rotation 180°)
+    const toggle = document.querySelector('.accordion-toggle[data-target="' + accordionId + '"]');
+    if (toggle) {
+      const icon = toggle.querySelector('i');
+      if (icon) icon.classList.add('rotated');
+    }
     
     // Gérer le retractation-notice pour l'accordéon premium
     if (accordionId === 'premium-options-content') {
@@ -401,7 +432,10 @@
         const toggle = document.querySelector(
           `.dish-accordion-toggle[data-target="${dishSection.id}"]`,
         );
-        if (toggle) toggle.classList.remove("expanded");  // Ouvert -> chevron bas
+        if (toggle) {
+          const icon = toggle.querySelector('i');
+          if (icon) icon.classList.remove('rotated');  // Ouvert -> chevron bas
+        }
       });
   }
 
@@ -419,7 +453,10 @@
         const toggle = document.querySelector(
           `.dish-accordion-toggle[data-target="${dishSection.id}"]`,
         );
-        if (toggle) toggle.classList.add("expanded");   // Fermé -> chevron haut
+        if (toggle) {
+          const icon = toggle.querySelector('i');
+          if (icon) icon.classList.add('rotated');     // Fermé -> chevron haut
+        }
       });
   }
 

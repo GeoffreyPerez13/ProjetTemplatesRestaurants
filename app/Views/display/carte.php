@@ -132,10 +132,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (body.classList.contains('collapsed')) {
                 body.classList.remove('collapsed');
-                icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+                icon.classList.remove('rotated');
             } else {
                 body.classList.add('collapsed');
-                icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+                icon.classList.add('rotated');
             }
         });
     });
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var icon = target.querySelector('.category-toggle i');
             if (body && body.classList.contains('collapsed')) {
                 body.classList.remove('collapsed');
-                icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+                icon.classList.remove('rotated');
             }
 
             // Scroll smooth

@@ -14,6 +14,16 @@ require __DIR__ . '/../partials/header.php';
 // Formatage des dates
 $created_at = !empty($user['created_at']) ? (new \DateTime($user['created_at']))->format('d/m/Y') : 'N/A';
 $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['last_card_update']))->format('d/m/Y') : 'Jamais modifiée';
+
+// Transférer pendingToast depuis session PHP vers sessionStorage si présent
+if (!empty($_SESSION['pendingToast'])) {
+    ?>
+    <script>
+    sessionStorage.setItem('pendingToast', <?= json_encode($_SESSION['pendingToast']) ?>);
+    </script>
+    <?php
+    unset($_SESSION['pendingToast']); // Nettoyer après transfert
+}
 ?>
 
 <a class="btn-back" href="?page=dashboard">Retour</a>
@@ -638,6 +648,14 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
                                                     <button type="button" class="btn btn-sm configure-google-reviews">
                                                         <i class="fas fa-cog"></i> Configurer
                                                     </button>
+                                                <?php elseif ($featureKey === 'advanced_analytics'): ?>
+                                                    <a href="?page=stats" class="btn btn-sm">
+                                                        <i class="fas fa-chart-line"></i> Configurer
+                                                    </a>
+                                                <?php elseif ($featureKey === 'online_booking'): ?>
+                                                    <a href="?page=reservations" class="btn btn-sm">
+                                                        <i class="fas fa-calendar-check"></i> Configurer
+                                                    </a>
                                                 <?php endif; ?>
                                             <?php elseif ($canActivateDirectly): ?>
                                                 <button type="button" class="btn premium-btn toggle-premium"
@@ -1571,74 +1589,6 @@ $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['la
     </div>
 </div>
 
-<?php 
-// Afficher les messages de succès stockés dans sessionStorage (pour la résiliation AJAX)
-if ($current_section === 'subscriptions'): 
-?>
-<script>
-// Afficher le message de succès stocké dans sessionStorage
-document.addEventListener('DOMContentLoaded', function() {
-    const successMessage = sessionStorage.getItem('subscriptionSuccessMessage');
-    if (successMessage) {
-        // Créer et afficher le message de succès comme sur le reste du site
-        const messageDiv = document.createElement('p');
-        messageDiv.className = 'message-success';
-        messageDiv.textContent = successMessage;
-        
-        // Insérer au début du contenu principal
-        const settingsContent = document.querySelector('.settings-content');
-        if (settingsContent) {
-            settingsContent.insertBefore(messageDiv, settingsContent.firstChild);
-            
-            // Scroller vers le message avec un petit délai
-            setTimeout(() => {
-                messageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 50);
-        }
-        
-        // Supprimer le message du sessionStorage
-        sessionStorage.removeItem('subscriptionSuccessMessage');
-        
-        // Auto-supprimer le message après 5 secondes
-        setTimeout(() => {
-            if (messageDiv.parentNode) {
-                messageDiv.parentNode.removeChild(messageDiv);
-            }
-        }, 5000);
-    }
-    
-    // Afficher le message d'erreur stocké dans sessionStorage
-    const errorMessage = sessionStorage.getItem('subscriptionErrorMessage');
-    if (errorMessage) {
-        // Créer et afficher le message d'erreur comme sur le reste du site
-        const messageDiv = document.createElement('p');
-        messageDiv.className = 'message-error';
-        messageDiv.textContent = errorMessage;
-        
-        // Insérer au début du contenu principal
-        const settingsContent = document.querySelector('.settings-content');
-        if (settingsContent) {
-            settingsContent.insertBefore(messageDiv, settingsContent.firstChild);
-            
-            // Scroller vers le message avec un petit délai
-            setTimeout(() => {
-                messageDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 50);
-        }
-        
-        // Supprimer le message du sessionStorage
-        sessionStorage.removeItem('subscriptionErrorMessage');
-        
-        // Auto-supprimer le message après 5 secondes
-        setTimeout(() => {
-            if (messageDiv.parentNode) {
-                messageDiv.parentNode.removeChild(messageDiv);
-            }
-        }, 5000);
-    }
-});
-</script>
-<?php endif; ?>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

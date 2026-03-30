@@ -12,6 +12,14 @@
         const toggleButtons = document.querySelectorAll('.allergenes-accordion-toggle');
         
         toggleButtons.forEach(button => {
+            // Synchroniser l'état initial du chevron
+            const targetId = button.getAttribute('data-target');
+            const content = document.getElementById(targetId);
+            const icon = button.querySelector('i:last-child');
+            if (icon && content && content.classList.contains('collapsed')) {
+                icon.classList.add('rotated');
+            }
+
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 toggleAccordion(this);
@@ -30,14 +38,17 @@
         
         const isCollapsed = content.classList.contains('collapsed');
         
+        const icon = button.querySelector('i:last-child');
         if (isCollapsed) {
             // Ouvrir
             content.classList.remove('collapsed');
             button.classList.add('expanded');
+            if (icon) icon.classList.remove('rotated');
         } else {
             // Fermer
             content.classList.add('collapsed');
             button.classList.remove('expanded');
+            if (icon) icon.classList.add('rotated');
         }
     }
 

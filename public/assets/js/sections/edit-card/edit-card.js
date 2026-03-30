@@ -185,7 +185,11 @@
               allowOutsideClick: false,
             }).then((result) => {
               if (result.isConfirmed) {
-                ajaxSubmit(form, '?page=edit-card');
+                ajaxSubmit(form, '?page=edit-card', {
+                  beforeSend: function(formData) {
+                    formData.append('remove_category_image', button.value || '1');
+                  }
+                });
               }
             });
           } else {
@@ -194,7 +198,11 @@
                 `Voulez-vous vraiment supprimer l'image de la catégorie "${categoryName}" ?`,
               )
             ) {
-              ajaxSubmit(form, '?page=edit-card');
+              ajaxSubmit(form, '?page=edit-card', {
+                beforeSend: function(formData) {
+                  formData.append('remove_category_image', button.value || '1');
+                }
+              });
             }
           }
         });
@@ -231,7 +239,11 @@
               allowOutsideClick: false,
             }).then((result) => {
               if (result.isConfirmed) {
-                ajaxSubmit(form, '?page=edit-card');
+                ajaxSubmit(form, '?page=edit-card', {
+                  beforeSend: function(formData) {
+                    formData.append('remove_dish_image', button.value || '1');
+                  }
+                });
               }
             });
           } else {
@@ -240,22 +252,27 @@
                 `Voulez-vous vraiment supprimer l'image du plat "${dishName}" ?`,
               )
             ) {
-              ajaxSubmit(form, '?page=edit-card');
+              ajaxSubmit(form, '?page=edit-card', {
+                beforeSend: function(formData) {
+                  formData.append('remove_dish_image', button.value || '1');
+                }
+              });
             }
           }
         });
       });
 
     // ==================== 3. FORMULAIRES DE SUPPRESSION DE CATÉGORIES ====================
-    // 3a. Bouton X (category-delete-form) + 3b. Bouton dans accordéon (inline-form)
+    // Click handler sur le bouton (type="button") pour éviter les conflits de submit
     document
-      .querySelectorAll('form.category-delete-form, form.inline-form input[name="delete_category"]')
-      .forEach((element) => {
-        const form = element.tagName === 'FORM' ? element : element.closest("form");
-        if (!form) return;
-
-        form.addEventListener("submit", function (e) {
+      .querySelectorAll('.category-delete-btn')
+      .forEach((button) => {
+        button.addEventListener("click", function (e) {
           e.preventDefault();
+          e.stopPropagation();
+
+          const form = button.closest("form");
+          if (!form) return;
 
           const categoryBlock = form.closest(".category-block");
           const categoryName =
@@ -299,12 +316,16 @@
       });
 
     // ==================== 4. FORMULAIRES DE SUPPRESSION DE PLATS ====================
-    // 4a. Bouton X dans le header (dish-delete-form)
+    // Click handler sur le bouton (type="button") pour éviter les conflits de submit
     document
-      .querySelectorAll('form.dish-delete-form')
-      .forEach((form) => {
-        form.addEventListener("submit", function (e) {
+      .querySelectorAll('.dish-delete-btn')
+      .forEach((button) => {
+        button.addEventListener("click", function (e) {
           e.preventDefault();
+          e.stopPropagation();
+
+          const form = button.closest("form");
+          if (!form) return;
 
           const dishHeader = form.closest(".dish-accordion-header");
           const dishName = dishHeader?.querySelector("h4")?.textContent?.trim() || "ce plat";
@@ -331,49 +352,6 @@
           } else {
             if (
               confirm(`Voulez-vous vraiment supprimer le plat "${cleanDishName}" ?`)
-            ) {
-              ajaxSubmit(form, '?page=edit-card');
-            }
-          }
-        });
-      });
-
-    // 4b. Bouton dans le formulaire (inline-form) - si encore présent
-    document
-      .querySelectorAll('form.inline-form input[name="delete_dish"]')
-      .forEach((input) => {
-        const form = input.closest("form");
-        if (!form) return;
-
-        form.addEventListener("submit", function (e) {
-          e.preventDefault();
-
-          const dishEditContainer = form.closest(".dish-edit-container");
-          const dishName =
-            dishEditContainer
-              ?.querySelector('input[name="dish_name"]')
-              ?.value?.trim() || "ce plat";
-
-          if (typeof Swal !== "undefined") {
-            Swal.fire({
-              title: "Confirmer la suppression",
-              text: `Voulez-vous vraiment supprimer le plat "${dishName}" ?`,
-              icon: "warning",
-              showCancelButton: true,
-              confirmButtonColor: "#d33",
-              cancelButtonColor: "#3085d6",
-              confirmButtonText: "Oui, supprimer",
-              cancelButtonText: "Annuler",
-              backdrop: true,
-              allowOutsideClick: false,
-            }).then((result) => {
-              if (result.isConfirmed) {
-                ajaxSubmit(form, '?page=edit-card');
-              }
-            });
-          } else {
-            if (
-              confirm(`Voulez-vous vraiment supprimer le plat "${dishName}" ?`)
             ) {
               ajaxSubmit(form, '?page=edit-card');
             }
@@ -475,6 +453,16 @@
         anchorInput.name = "anchor";
         anchorInput.value = "images-list";
 
+        // Ajouter le CSRF token
+        const csrfToken = document.querySelector('input[name="csrf_token"]');
+        if (csrfToken) {
+          const csrfInput = document.createElement("input");
+          csrfInput.type = "hidden";
+          csrfInput.name = "csrf_token";
+          csrfInput.value = csrfToken.value;
+          hiddenForm.appendChild(csrfInput);
+        }
+
         hiddenForm.appendChild(imageIdInput);
         hiddenForm.appendChild(deleteInput);
         hiddenForm.appendChild(anchorInput);
@@ -566,20 +554,76 @@
 
   /**
    * Configure les gestionnaires de formulaires
+   * Convertit les formulaires d'enregistrement en AJAX pour afficher les toasts
    */
   function setupFormHandlers() {
-    // Stocker l'ancre avant soumission
-    document.querySelectorAll("form").forEach((form) => {
+    // Classes de formulaires qui ont DÉJÀ un handler AJAX (suppressions, etc.)
+    var ajaxExclude = [
+      'category-delete-form',
+      'dish-delete-form',
+      'delete-daily-menu-form',
+      'upload-form'
+    ];
+
+    // Tracker quel bouton submit a été cliqué (pour l'inclure dans FormData)
+    document.querySelectorAll('form button[type="submit"]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        // Marquer ce bouton comme le dernier cliqué sur son formulaire
+        var form = btn.closest('form');
+        if (form) form._lastClickedSubmit = btn;
+      });
+    });
+
+    // Formulaires à convertir en AJAX
+    var formsToConvert = document.querySelectorAll(
+      '.mode-selector-form, .edit-category-form, .new-dish-form, ' +
+      '.inline-form.edit-form, .daily-menu-form, .quick-add-form'
+    );
+
+    formsToConvert.forEach(function(form) {
+      // Vérifier que ce formulaire n'a pas déjà un handler AJAX
+      var dominated = false;
+      ajaxExclude.forEach(function(cls) { if (form.classList.contains(cls)) dominated = true; });
+      if (dominated || form.id === 'reorder-form') return;
+
       form.addEventListener("submit", function (e) {
-        const anchorInput = this.querySelector('input[name="anchor"]');
-        if (anchorInput && anchorInput.value) {
-          sessionStorage.setItem("pending_scroll", anchorInput.value);
-        }
+        e.preventDefault();
+
+        // Récupérer le bouton submit cliqué
+        var clickedBtn = form._lastClickedSubmit || form.querySelector('button[type="submit"]');
+
+        ajaxSubmit(form, '?page=edit-card', {
+          beforeSend: function(formData) {
+            // Inclure le nom/valeur du bouton submit (crucial pour le routage côté PHP)
+            if (clickedBtn && clickedBtn.name) {
+              formData.append(clickedBtn.name, clickedBtn.value || '1');
+            }
+          }
+        });
+
+        // Nettoyer
+        delete form._lastClickedSubmit;
+      });
+    });
+
+    // Formulaires toggle (activer/désactiver menu du jour) - classe inline-form avec toggle_daily_menu
+    document.querySelectorAll('button[name="toggle_daily_menu"]').forEach(function(btn) {
+      var form = btn.closest('form');
+      if (!form) return;
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        ajaxSubmit(form, '?page=edit-card', {
+          beforeSend: function(formData) {
+            formData.append('toggle_daily_menu', btn.value || '1');
+          }
+        });
       });
     });
 
     // Gérer le scroll depuis le sessionStorage
-    const pendingScroll = sessionStorage.getItem("pending_scroll");
+    var pendingScroll = sessionStorage.getItem("pending_scroll");
     if (pendingScroll) {
       handleAnchorScroll(pendingScroll, CONFIG.scrollDelay);
       sessionStorage.removeItem("pending_scroll");

@@ -213,11 +213,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const premiumContent = document.getElementById('premium-options-content');
             
             if (premiumAccordion && premiumContent) {
-                // Mettre à jour l'icône
+                // Mettre à jour l'icône (ouvert = pas de rotation)
                 const icon = premiumAccordion.querySelector('i');
                 if (icon) {
-                    icon.classList.remove('fa-chevron-down');
-                    icon.classList.add('fa-chevron-up');
+                    icon.classList.remove('rotated');
                 }
                 
                 // Ouvrir le contenu

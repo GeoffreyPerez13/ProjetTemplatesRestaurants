@@ -139,21 +139,30 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             console.log('Response data:', data);
             if (data.success) {
-                // Stocker le message de succès dans sessionStorage pour l'afficher après le rechargement
-                sessionStorage.setItem('subscriptionSuccessMessage', data.message || 'Vos abonnements ont été résiliés avec succès.');
+                // Stocker le message de succès dans sessionStorage pour toast.js
+                sessionStorage.setItem('pendingToast', JSON.stringify({
+                    message: data.message || 'Vos abonnements ont été résiliés avec succès.',
+                    type: 'success'
+                }));
                 window.location.hash = 'subscription-total';
                 window.location.reload();
             } else {
-                // Stocker le message d'erreur dans sessionStorage pour l'afficher après le rechargement
-                sessionStorage.setItem('subscriptionErrorMessage', data.message || 'Une erreur est survenue lors de la résiliation.');
+                // Stocker le message d'erreur dans sessionStorage pour toast.js
+                sessionStorage.setItem('pendingToast', JSON.stringify({
+                    message: data.message || 'Une erreur est survenue lors de la résiliation.',
+                    type: 'error'
+                }));
                 window.location.hash = 'subscription-total';
                 window.location.reload();
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            // Stocker le message d'erreur technique dans sessionStorage pour l'afficher après le rechargement
-            sessionStorage.setItem('subscriptionErrorMessage', 'Une erreur technique est survenue. Veuillez réessayer.');
+            // Stocker le message d'erreur technique dans sessionStorage pour toast.js
+            sessionStorage.setItem('pendingToast', JSON.stringify({
+                message: 'Une erreur technique est survenue. Veuillez réessayer.',
+                type: 'error'
+            }));
             window.location.hash = 'subscription-total';
             window.location.reload();
         });

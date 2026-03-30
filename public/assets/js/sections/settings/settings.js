@@ -8,7 +8,8 @@ document.addEventListener("DOMContentLoaded", function () {
     if (closureSection && toggleBtn) {
       // Ouvrir l'accordéon
       closureSection.classList.remove('collapsed');
-      toggleBtn.querySelector('i').classList.replace('fa-chevron-down', 'fa-chevron-up');
+      const icon = toggleBtn.querySelector('i');
+      if (icon) icon.classList.remove('rotated');
       
       // Scroll vers la section après un petit délai pour que l'animation se fasse
       setTimeout(() => {
@@ -255,6 +256,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Réinitialiser l'état initial du bouton
     submitBtn.disabled = true;
     submitBtn.classList.add("btn-disabled");
+    submitBtn.classList.remove("btn-enabled");
+    submitBtn.innerHTML = "Modifier le mot de passe";
 
     // Fonction pour basculer l'affichage du mot de passe
     toggleButtons.forEach((button) => {
@@ -565,10 +568,8 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      // Afficher l'animation de chargement
+      // Désactiver le bouton pendant la soumission
       submitBtn.disabled = true;
-      submitBtn.innerHTML =
-        '<i class="fa-solid fa-spinner fa-spin"></i> Modification en cours...';
     });
 
     // Initialiser l'état des exigences
@@ -596,8 +597,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (toggle) {
           const icon = toggle.querySelector("i");
           if (icon) {
-            icon.classList.remove("fa-chevron-down");
-            icon.classList.add("fa-chevron-up");
+            icon.classList.remove('rotated');
           }
         }
       });
@@ -615,8 +615,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (toggle) {
           const icon = toggle.querySelector("i");
           if (icon) {
-            icon.classList.remove("fa-chevron-up");
-            icon.classList.add("fa-chevron-down");
+            icon.classList.add('rotated');
           }
         }
       });

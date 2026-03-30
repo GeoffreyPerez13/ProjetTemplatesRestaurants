@@ -34,7 +34,7 @@ require __DIR__ . '/../partials/header.php';
         <div class="accordion-section current-logo-accordion" id="current-logo">
             <div class="accordion-header">
                 <h2><i class="fas fa-image"></i> Logo actuel</h2>
-                <button type="button" class="accordion-toggle" data-target="current-logo-content"><i class="fas fa-chevron-up"></i></button>
+                <button type="button" class="accordion-toggle" data-target="current-logo-content"><i class="fas fa-chevron-down"></i></button>
             </div>
             <div id="current-logo-content" class="accordion-content expanded prevent-auto-close">
                 <div class="logo-display">
@@ -60,7 +60,7 @@ require __DIR__ . '/../partials/header.php';
     <div class="accordion-section upload-logo-accordion" id="upload-logo">
         <div class="accordion-header">
             <h2><i class="fas fa-upload"></i> <?= !empty($current_logo) ? 'Changer le logo' : 'Ajouter un logo' ?></h2>
-            <button type="button" class="accordion-toggle" data-target="upload-logo-content"><i class="fas fa-chevron-<?= empty($current_logo) ? 'down' : 'up' ?>"></i></button>
+            <button type="button" class="accordion-toggle" data-target="upload-logo-content"><i class="fas fa-chevron-down"></i></button>
         </div>
         <div id="upload-logo-content" class="accordion-content <?= empty($current_logo) ? 'expanded' : 'collapsed' ?>">
             <form method="post" enctype="multipart/form-data" action="?page=edit-logo-banner&action=uploadLogo" class="upload-logo-form" id="upload-logo-form">
@@ -94,7 +94,7 @@ require __DIR__ . '/../partials/header.php';
         <div class="accordion-section current-banner-accordion" id="current-banner">
             <div class="accordion-header">
                 <h2><i class="fas fa-image"></i> Bannière actuelle</h2>
-                <button type="button" class="accordion-toggle" data-target="current-banner-content"><i class="fas fa-chevron-up"></i></button>
+                <button type="button" class="accordion-toggle" data-target="current-banner-content"><i class="fas fa-chevron-down"></i></button>
             </div>
             <div id="current-banner-content" class="accordion-content expanded prevent-auto-close">
                 <div class="banner-display">
@@ -119,7 +119,7 @@ require __DIR__ . '/../partials/header.php';
     <div class="accordion-section upload-banner-accordion" id="upload-banner">
         <div class="accordion-header">
             <h2><i class="fas fa-upload"></i> <?= !empty($current_banner) ? 'Changer la bannière' : 'Ajouter une bannière' ?></h2>
-            <button type="button" class="accordion-toggle" data-target="upload-banner-content"><i class="fas fa-chevron-<?= empty($current_banner) ? 'down' : 'up' ?>"></i></button>
+            <button type="button" class="accordion-toggle" data-target="upload-banner-content"><i class="fas fa-chevron-down"></i></button>
         </div>
         <div id="upload-banner-content" class="accordion-content <?= empty($current_banner) ? 'expanded' : 'collapsed' ?>">
             <form method="post" enctype="multipart/form-data" action="?page=edit-logo-banner&action=uploadBanner" class="upload-banner-form" id="upload-banner-form">

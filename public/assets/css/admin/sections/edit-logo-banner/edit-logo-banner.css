@@ -655,7 +655,7 @@
 /* ==================== TEXTE DE BANNIÈRE ==================== */
 .info-message {
     padding: 15px 20px;
-    margin: 15px 0;
+    margin: 15px 10px;
     background-color: var(--color-bg-alt);
     border-left: 4px solid var(--color-primary);
     border-radius: var(--radius-md);
