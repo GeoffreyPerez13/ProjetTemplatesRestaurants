@@ -214,9 +214,12 @@ html.dark-mode .dark-mode-toggle-floating .fa-sun {
   .category-block,
   .reset-password-container,
   .register-container {
-    padding-left: var(--spacing-xl);
-    padding-right: var(--spacing-xl);
     max-width: 850px;
+  }
+  
+  /* Enlever le max-width pour edit-services */
+  body[data-page="edit-services"] form {
+    max-width: none;
   }
 }
 
@@ -239,8 +242,6 @@ html.dark-mode .dark-mode-toggle-floating .fa-sun {
   .category-block,
   .reset-password-container,
   .register-container {
-    padding-left: var(--spacing-xl);
-    padding-right: var(--spacing-xl);
     max-width: 850px;
   }
   
@@ -248,6 +249,7 @@ html.dark-mode .dark-mode-toggle-floating .fa-sun {
   body[data-page="edit-services"] form {
     padding-left: 0;
     padding-right: 0;
+    max-width: none;
   }
   
   /* Réduire les paddings pour la page settings section premium */

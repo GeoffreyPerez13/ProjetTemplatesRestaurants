@@ -10,54 +10,58 @@ require __DIR__ . '/../partials/header.php';
 <!-- Bouton retour vers le dashboard -->
 <a class="btn-back" href="?page=dashboard">Retour</a>
 
-<!-- Formulaire pour modifier les informations de contact -->
-<form method="post" class="edit-contact-form" id="edit-contact-form">
-    <h2><i class="fas fa-address-book"></i> Modifier les informations de contact</h2>
+<div class="edit-contact-container">
+    <!-- Formulaire pour modifier les informations de contact -->
+    <form method="post" class="edit-contact-form" id="edit-contact-form">
+        <div class="template-header">
+            <h2><i class="fas fa-address-book"></i> Gérer les informations de contact</h2>
+            <p class="template-subtitle">Configurez vos coordonnées, adresse et horaires. Soyez facilement joignable par vos clients !</p>
+        </div>
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">
+        <input type="hidden" name="anchor" value="edit-contact-form">
 
-    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">
-    <input type="hidden" name="anchor" value="edit-contact-form">
+        <div class="form-group">
+            <label for="telephone">
+                <i class="fas fa-phone"></i> Téléphone
+            </label>
+            <input type="text" name="telephone" id="telephone" 
+                   value="<?= htmlspecialchars($contact['telephone']) ?>" 
+                   placeholder="Ex: 01 23 45 67 89" required>
+        </div>
 
-    <div class="form-group">
-        <label for="telephone">
-            <i class="fas fa-phone"></i> Téléphone
-        </label>
-        <input type="text" name="telephone" id="telephone" 
-               value="<?= htmlspecialchars($contact['telephone']) ?>" 
-               placeholder="Ex: 01 23 45 67 89" required>
-    </div>
+        <div class="form-group">
+            <label for="email">
+                <i class="fas fa-envelope"></i> Email
+            </label>
+            <input type="email" name="email" id="email" 
+                   value="<?= htmlspecialchars($contact['email']) ?>" 
+                   placeholder="Ex: contact@restaurant.com" required>
+        </div>
 
-    <div class="form-group">
-        <label for="email">
-            <i class="fas fa-envelope"></i> Email
-        </label>
-        <input type="email" name="email" id="email" 
-               value="<?= htmlspecialchars($contact['email']) ?>" 
-               placeholder="Ex: contact@restaurant.com" required>
-    </div>
+        <div class="form-group">
+            <label for="adresse">
+                <i class="fas fa-map-marker-alt"></i> Adresse complète
+            </label>
+            <input type="text" name="adresse" id="adresse" 
+                   value="<?= htmlspecialchars($contact['adresse']) ?>" 
+                   placeholder="Ex: 123 Rue du Restaurant, 75000 Paris" required>
+            <small class="form-hint">Indiquez l'adresse complète : numéro, rue, code postal et ville. <br>Cette adresse sera utilisée pour la carte Google et aidera vos clients à vous trouver.</small>
+        </div>
 
-    <div class="form-group">
-        <label for="adresse">
-            <i class="fas fa-map-marker-alt"></i> Adresse complète
-        </label>
-        <input type="text" name="adresse" id="adresse" 
-               value="<?= htmlspecialchars($contact['adresse']) ?>" 
-               placeholder="Ex: 123 Rue du Restaurant, 75000 Paris" required>
-        <small class="form-hint">Indiquez l'adresse complète : numéro, rue, code postal et ville. <br>Cette adresse sera utilisée pour la carte Google et aidera vos clients à vous trouver.</small>
-    </div>
+        <div class="form-group">
+            <label for="horaires">
+                <i class="fas fa-clock"></i> Horaires
+            </label>
+            <textarea name="horaires" id="horaires" 
+                      placeholder="Ex: Lundi - Vendredi: 12h-14h30 / 19h-23h&#10;Samedi: 12h-15h / 19h-00h&#10;Dimanche: 12h-16h"><?= htmlspecialchars($contact['horaires']) ?></textarea>
+            <small class="form-hint">Vous pouvez utiliser plusieurs lignes pour organiser les horaires.</small>
+        </div>
 
-    <div class="form-group">
-        <label for="horaires">
-            <i class="fas fa-clock"></i> Horaires
-        </label>
-        <textarea name="horaires" id="horaires" 
-                  placeholder="Ex: Lundi - Vendredi: 12h-14h30 / 19h-23h&#10;Samedi: 12h-15h / 19h-00h&#10;Dimanche: 12h-16h"><?= htmlspecialchars($contact['horaires']) ?></textarea>
-        <small class="form-hint">Vous pouvez utiliser plusieurs lignes pour organiser les horaires.</small>
-    </div>
-
-    <button type="submit" class="btn primary">
-        <i class="fas fa-save"></i> Mettre à jour les informations
-    </button>
-</form>
+        <button type="submit" class="btn primary">
+            <i class="fas fa-save"></i> Mettre à jour les informations
+        </button>
+    </form>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

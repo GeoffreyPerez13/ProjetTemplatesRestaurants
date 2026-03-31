@@ -11,7 +11,6 @@
 
 .template-header {
     text-align: center;
-    margin-bottom: var(--spacing-xl);
 }
 
 .template-header h2 {
@@ -28,8 +27,9 @@
 .template-subtitle {
     color: var(--color-text-muted);
     font-size: 0.95rem;
-    max-width: 600px;
+    max-width: 800px;
     margin: 0 auto;
+    line-height: 1.4;
 }
 
 /* ==================== SECTIONS ==================== */
@@ -533,14 +533,29 @@
     border-top: 1px solid var(--color-border);
     display: flex;
     gap: var(--spacing-sm);
-    align-items: center;
 }
 
 .template-actions .btn {
-    flex: 1;
     justify-content: center;
     font-size: 0.85rem;
+    font-weight: 600;
     padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    background: var(--color-primary);
+    color: white;
+    border: 1px solid var(--color-primary);
+    transition: all var(--transition-normal);
+}
+
+.template-actions .btn:hover {
+    background: var(--color-primary-dark);
+    border-color: var(--color-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.template-actions .btn:not(.btn-outline) {
+    flex: 1;
 }
 
 .template-actions .btn-outline {
@@ -570,6 +585,29 @@ html.dark-mode .active-badge {
     background: #052e16;
     color: #86efac;
     border-color: #14532d;
+}
+
+/* ==================== RESPONSIVE ACTIONS ==================== */
+@media (max-width: 400px) {
+    .template-actions {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+    
+    .template-actions .btn:not(.btn-outline) {
+        order: 1;
+        width: 100%;
+    }
+    
+    .template-actions .btn-outline {
+        order: 2;
+        width: 100%;
+    }
+    
+    .template-actions .template-badge {
+        order: 1;
+        width: 100%;
+    }
 }
 
 /* ==================== RESPONSIVE ==================== */

@@ -62,15 +62,21 @@ require __DIR__ . '/../partials/header.php';
 
 <a class="btn-back" href="?page=dashboard">Retour</a>
 
-<!-- Boutons de contrôle généraux pour tous les accordéons -->
-<div class="global-accordion-controls">
-    <button type="button" id="expand-all-accordions" class="btn">
-        <i class="fas fa-expand-alt"></i> Tout ouvrir
-    </button>
-    <button type="button" id="collapse-all-accordions" class="btn">
-        <i class="fas fa-compress-alt"></i> Tout fermer
-    </button>
-</div>
+<div class="edit-card-container">
+    <div class="template-header">
+        <h2><i class="fas fa-utensils"></i> Gérer la carte du restaurant</h2>
+        <p class="template-subtitle">Organisez vos catégories, vos plats et vos images. Personnalisez l'affichage selon vos besoins !</p>
+    </div>
+
+    <!-- Boutons de contrôle généraux pour tous les accordéons -->
+    <div class="global-accordion-controls">
+        <button type="button" id="expand-all-accordions" class="btn">
+            <i class="fas fa-expand-alt"></i> Tout ouvrir
+        </button>
+        <button type="button" id="collapse-all-accordions" class="btn">
+            <i class="fas fa-compress-alt"></i> Tout fermer
+        </button>
+    </div>
 
 <!-- Sélecteur de mode (accordéon) -->
 <div class="accordion-section mode-selector-accordion" id="mode-selector">
@@ -1072,6 +1078,7 @@ require __DIR__ . '/../partials/header.php';
     </div>
 </div>
 <?php endif; ?>
+</div>
 
 <!-- Définition des étapes du tour guidé pour cette page -->
 <script>

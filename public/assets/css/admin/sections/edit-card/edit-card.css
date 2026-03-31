@@ -1,4 +1,37 @@
 /* ==================== STRUCTURE ET LAYOUT ==================== */
+.edit-card-container {
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  max-width: 100%;
+  margin: 0 auto var(--spacing-lg) auto;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+}
+
+.template-header {
+  text-align: center;
+}
+
+.template-header h2 {
+  font-size: 1.5rem;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+}
+
+.template-header h2 i {
+  color: var(--color-primary);
+  margin-right: var(--spacing-sm);
+}
+
+.template-subtitle {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.4;
+}
+
 .edit-card-page {
   max-width: 1200px;
   margin: 0 auto;
@@ -201,7 +234,7 @@
 
 /* ==================== MODE ÉDITABLE ==================== */
 .edit-carte-container {
-  margin-top: 30px;
+  margin-top: 0;
   width: 100%;
 }
 
@@ -743,17 +776,29 @@
 }
 
 @media (min-width: 601px) {
+  .edit-card-container {
+    padding: var(--spacing-xl);
+    max-width: 1400px;
+  }
+
   .category-buttons .btn {
     flex: 1;
     min-width: 120px;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .category-block {
-    flex: 1 1 100%;
-    width: 100%;
-    max-width: 100%;
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .edit-card-container {
+    padding: var(--spacing-md);
+    margin: 20px auto;
   }
 
   .form-row {
@@ -924,6 +969,10 @@
 }
 
 @media (max-width: 480px) {
+  .edit-card-container {
+    padding: var(--spacing-sm);
+  }
+
   .accordion-header h2 {
     font-size: 1em;
     width: 85%;

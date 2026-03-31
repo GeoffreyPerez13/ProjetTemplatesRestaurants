@@ -131,7 +131,6 @@
 .accordion-content.expanded {
   max-height: 5000px;
   opacity: 1;
-  padding: 15px 0;
 }
 
 /* Animation pour l'icône */

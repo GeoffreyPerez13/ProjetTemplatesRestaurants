@@ -14,7 +14,7 @@
     });
 
     /**
-     * Initialise le formulaire d'ajout rapide de catégories
+     * Initialise le formulaire d'ajout de catégories
      */
     function initQuickAddCategories() {
         const addButton = document.getElementById('add-category-row');

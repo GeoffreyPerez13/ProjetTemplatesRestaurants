@@ -1,21 +1,60 @@
 /* ==================== EDIT CONTACT PAGE SPECIFIC STYLES ==================== */
 
+/* Header du template */
+.template-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Margin-bottom spécifique pour le template-header dans edit-contact-form */
+.edit-contact-form .template-header {
+  margin-bottom: 20px;
+}
+
+.template-header h2 {
+  font-size: 1.5rem;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+}
+
+.template-header h2 i {
+  color: var(--color-primary);
+  margin-right: var(--spacing-sm);
+}
+
+.template-subtitle {
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.4;
+}
+
+/* Conteneur pour la page de contact */
+.edit-contact-container {
+  background: var(--color-bg);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  max-width: 700px;
+  margin: 0 auto var(--spacing-lg) auto;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+}
+
 /* Formulaire de contact */
 .edit-contact-form {
   max-width: 600px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background: var(--color-bg);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-border);
+  margin: 0 auto;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
 }
 
 .edit-contact-form h2 {
   margin-bottom: 2rem;
   color: var(--color-text);
-  border-bottom: 2px solid var(--color-primary);
-  padding-bottom: 0.75rem;
   font-size: 1.5rem;
 }
 
@@ -100,13 +139,8 @@
 
 /* Responsive pour la page contact */
 @media (max-width: 650px) {
-  .edit-contact-form {
-    margin: 1rem;
-    padding: 1.5rem;
-  }
-  
-  .edit-contact-form h2 {
-    font-size: 1.3rem;
+  .edit-contact-container {
+    padding: var(--spacing-md);
   }
   
   .edit-contact-form .btn.primary {
@@ -116,13 +150,8 @@
 }
 
 @media (max-width: 480px) {
-  .edit-contact-form {
-    margin: 0.5rem;
-    padding: 1rem;
-  }
-  
-  .edit-contact-form h2 {
-    font-size: 1.2rem;
+  .edit-contact-container {
+    padding: var(--spacing-sm);
   }
   
   .edit-contact-form .form-group input,

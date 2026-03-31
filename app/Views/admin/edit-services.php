@@ -19,13 +19,18 @@ require __DIR__ . '/../partials/header.php';
 
 <a class="btn-back" href="?page=dashboard">Retour</a>
 
-<!-- Boutons de contrôle généraux pour tous les accordéons -->
-<div class="global-accordion-controls">
-    <button type="button" id="expand-all-accordions" class="btn"><i class="fas fa-expand-alt"></i> Tout ouvrir</button>
-    <button type="button" id="collapse-all-accordions" class="btn"><i class="fas fa-compress-alt"></i> Tout fermer</button>
-</div>
-
 <div class="edit-services-container">
+    <div class="template-header">
+        <h2><i class="fas fa-concierge-bell"></i> Configurer les services</h2>
+        <p class="template-subtitle">Définissez vos options de service, paiements et réseaux sociaux. Personnalisez votre offre !</p>
+    </div>
+
+    <!-- Boutons de contrôle généraux pour tous les accordéons -->
+    <div class="global-accordion-controls">
+        <button type="button" id="expand-all-accordions" class="btn"><i class="fas fa-expand-alt"></i> Tout ouvrir</button>
+        <button type="button" id="collapse-all-accordions" class="btn"><i class="fas fa-compress-alt"></i> Tout fermer</button>
+    </div>
+
     <form method="post" action="?page=edit-services&action=save">
         <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
 

@@ -1,18 +1,34 @@
 /* ==================== ÉDITION LOGO ET BANNIÈRE ==================== */
-.edit-logo-container,
-.edit-banner-container {
-    max-width: 900px;
-    margin: 30px auto;
-    padding: 0 20px;
+.template-header {
+    text-align: center;
 }
 
-/* ==================== SECTION MÉDIA ACTUEL ==================== */
-.current-logo-section,
-.current-banner-section {
+.template-header h2 {
+    font-size: 1.5rem;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-sm);
+}
+
+.template-header h2 i {
+    color: var(--color-primary);
+    margin-right: var(--spacing-sm);
+}
+
+.template-subtitle {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.4;
+}
+
+.edit-logo-container,
+.edit-banner-container {
     background: var(--color-bg);
     border-radius: var(--radius-lg);
-    padding: 30px;
-    margin-bottom: 30px;
+    padding: var(--spacing-lg);
+    max-width: 100%;
+    margin: 0 auto var(--spacing-lg) auto;
     box-shadow: var(--shadow-md);
     border: 1px solid var(--color-border);
 }
@@ -79,14 +95,7 @@
     padding: 20px;
     cursor: pointer;
     transition: transform var(--transition-normal);
-}
-
-.current-banner-image {
-    width: 400px;
-    height: auto;
-    max-height: 200px;
-    object-fit: cover;
-    padding: 0;
+    border-radius: var(--radius-lg);
 }
 
 .current-logo-image:hover,
@@ -573,7 +582,7 @@
     margin-top: 30px;
 }
 
-#uploadBtn,
+#uploadLogoBtn,
 #uploadBannerBtn {
     background: var(--color-success);
     padding: 14px 35px;
@@ -592,14 +601,14 @@
     box-shadow: var(--shadow-sm);
 }
 
-#uploadBtn:hover:not(:disabled),
+#uploadLogoBtn:hover:not(:disabled),
 #uploadBannerBtn:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
     background: #116932;
 }
 
-#uploadBtn:disabled,
+#uploadLogoBtn:disabled,
 #uploadBannerBtn:disabled {
     background: var(--color-text-muted);
     cursor: not-allowed;
@@ -608,7 +617,7 @@
     box-shadow: 0 3px 10px rgba(149, 165, 166, 0.2) !important;
 }
 
-#uploadBtn.active:not(:disabled),
+#uploadLogoBtn.active:not(:disabled),
 #uploadBannerBtn.active:not(:disabled) {
     animation: pulse 2s infinite;
 }
@@ -619,12 +628,12 @@
     100% { box-shadow: 0 0 0 0 rgba(21, 128, 61, 0); }
 }
 
-#uploadBtn i,
+#uploadLogoBtn i,
 #uploadBannerBtn i {
     font-size: 16px;
 }
 
-#resetBtn,
+#resetLogoBtn,
 #resetBannerBtn {
     background: var(--color-text-muted);
     padding: 14px 25px;
@@ -641,13 +650,13 @@
     font-size: 15px;
 }
 
-#resetBtn:hover,
+#resetLogoBtn:hover,
 #resetBannerBtn:hover {
     background: var(--color-text-light);
     transform: translateY(-2px);
 }
 
-#resetBtn i,
+#resetLogoBtn i,
 #resetBannerBtn i {
     font-size: 14px;
 }
@@ -801,10 +810,18 @@
 }
 
 /* ==================== RESPONSIVE ==================== */
+@media (min-width: 601px) {
+    .edit-logo-container,
+    .edit-banner-container {
+        padding: var(--spacing-xl);
+        max-width: 1100px;
+    }
+}
+
 @media (max-width: 768px) {
     .edit-logo-container,
     .edit-banner-container {
-        padding: 0 15px;
+        padding: var(--spacing-md);
         margin: 20px auto;
     }
     .current-logo-section,
@@ -818,15 +835,12 @@
         max-width: 280px;
         max-height: 280px;
     }
-    .current-banner-image {
-        max-height: 180px;
-    }
     .logo-info,
     .banner-info {
         padding: 20px 0;
         text-align: center;
     }
-    #resetBtn,
+    #resetLogoBtn,
     #resetBannerBtn {
         width: 100%;
     }
@@ -861,9 +875,6 @@
         max-width: 200px;
         max-height: 200px;
         padding: 15px;
-    }
-    .current-banner-image {
-        padding: 0;
     }
     .logo-info p,
     .banner-info p {
@@ -903,9 +914,9 @@
     .form-info i {
         margin-top: 0;
     }
-    #uploadBtn,
+    #uploadLogoBtn,
     #uploadBannerBtn,
-    #resetBtn,
+    #resetLogoBtn,
     #resetBannerBtn {
         padding: 12px 20px;
         font-size: 14px;
@@ -930,7 +941,7 @@
 @media (max-width: 360px) {
     .edit-logo-container,
     .edit-banner-container {
-        padding: 0 10px;
+        padding: var(--spacing-sm);
     }
     .current-logo-section,
     .current-banner-section,

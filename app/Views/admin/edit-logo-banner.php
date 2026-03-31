@@ -22,13 +22,18 @@ require __DIR__ . '/../partials/header.php';
 
 <a class="btn-back" href="?page=dashboard">Retour</a>
 
-<!-- Boutons de contrôle généraux pour tous les accordéons -->
-<div class="global-accordion-controls">
-    <button type="button" id="expand-all-accordions" class="btn"><i class="fas fa-expand-alt"></i> Tout ouvrir</button>
-    <button type="button" id="collapse-all-accordions" class="btn"><i class="fas fa-compress-alt"></i> Tout fermer</button>
-</div>
-
 <div class="edit-logo-container">
+    <div class="template-header">
+        <h2><i class="fas fa-image"></i> Personnaliser l'image de marque</h2>
+        <p class="template-subtitle">Configurez votre logo et votre bannière. Affichez votre identité visuelle en un clic !</p>
+    </div>
+
+    <!-- Boutons de contrôle généraux pour tous les accordéons -->
+    <div class="global-accordion-controls">
+        <button type="button" id="expand-all-accordions" class="btn"><i class="fas fa-expand-alt"></i> Tout ouvrir</button>
+        <button type="button" id="collapse-all-accordions" class="btn"><i class="fas fa-compress-alt"></i> Tout fermer</button>
+    </div>
+
     <!-- ==================== SECTION LOGO ==================== -->
     <?php if (!empty($current_logo)): ?>
         <div class="accordion-section current-logo-accordion" id="current-logo">

@@ -69,11 +69,7 @@ require __DIR__ . '/../partials/header.php';
                     <?php if ($currentPalette === 'classic'): ?>
                         <span class="template-badge active-badge"><i class="fas fa-check-circle"></i> Actif</span>
                     <?php else: ?>
-                        <form method="POST" action="?page=edit-template&action=save-palette">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                            <input type="hidden" name="palette" value="classic">
-                            <button type="submit" class="btn">Appliquer</button>
-                        </form>
+                        <button type="button" class="btn apply-palette-btn" data-palette="classic" data-csrf="<?= htmlspecialchars($csrf_token) ?>">Appliquer</button>
                     <?php endif; ?>
                     <?php if (!empty($slug)): ?>
                         <a href="?page=display&slug=<?= urlencode($slug) ?>&preview_palette=classic" target="_blank" class="btn btn-outline"><i class="fas fa-eye"></i></a>
@@ -111,11 +107,7 @@ require __DIR__ . '/../partials/header.php';
                     <?php if ($currentPalette === 'modern'): ?>
                         <span class="template-badge active-badge"><i class="fas fa-check-circle"></i> Actif</span>
                     <?php else: ?>
-                        <form method="POST" action="?page=edit-template&action=save-palette">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                            <input type="hidden" name="palette" value="modern">
-                            <button type="submit" class="btn">Appliquer</button>
-                        </form>
+                        <button type="button" class="btn apply-palette-btn" data-palette="modern" data-csrf="<?= htmlspecialchars($csrf_token) ?>">Appliquer</button>
                     <?php endif; ?>
                     <?php if (!empty($slug)): ?>
                         <a href="?page=display&slug=<?= urlencode($slug) ?>&preview_palette=modern" target="_blank" class="btn btn-outline"><i class="fas fa-eye"></i></a>
@@ -156,11 +148,7 @@ require __DIR__ . '/../partials/header.php';
                     <?php if ($currentPalette === 'elegant'): ?>
                         <span class="template-badge active-badge"><i class="fas fa-check-circle"></i> Actif</span>
                     <?php else: ?>
-                        <form method="POST" action="?page=edit-template&action=save-palette">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                            <input type="hidden" name="palette" value="elegant">
-                            <button type="submit" class="btn">Appliquer</button>
-                        </form>
+                        <button type="button" class="btn apply-palette-btn" data-palette="elegant" data-csrf="<?= htmlspecialchars($csrf_token) ?>">Appliquer</button>
                     <?php endif; ?>
                     <?php if (!empty($slug)): ?>
                         <a href="?page=display&slug=<?= urlencode($slug) ?>&preview_palette=elegant" target="_blank" class="btn btn-outline"><i class="fas fa-eye"></i></a>
@@ -198,11 +186,7 @@ require __DIR__ . '/../partials/header.php';
                     <?php if ($currentPalette === 'nature'): ?>
                         <span class="template-badge active-badge"><i class="fas fa-check-circle"></i> Actif</span>
                     <?php else: ?>
-                        <form method="POST" action="?page=edit-template&action=save-palette">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                            <input type="hidden" name="palette" value="nature">
-                            <button type="submit" class="btn">Appliquer</button>
-                        </form>
+                        <button type="button" class="btn apply-palette-btn" data-palette="nature" data-csrf="<?= htmlspecialchars($csrf_token) ?>">Appliquer</button>
                     <?php endif; ?>
                     <?php if (!empty($slug)): ?>
                         <a href="?page=display&slug=<?= urlencode($slug) ?>&preview_palette=nature" target="_blank" class="btn btn-outline"><i class="fas fa-eye"></i></a>
@@ -240,11 +224,7 @@ require __DIR__ . '/../partials/header.php';
                     <?php if ($currentPalette === 'rose'): ?>
                         <span class="template-badge active-badge"><i class="fas fa-check-circle"></i> Actif</span>
                     <?php else: ?>
-                        <form method="POST" action="?page=edit-template&action=save-palette">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                            <input type="hidden" name="palette" value="rose">
-                            <button type="submit" class="btn">Appliquer</button>
-                        </form>
+                        <button type="button" class="btn apply-palette-btn" data-palette="rose" data-csrf="<?= htmlspecialchars($csrf_token) ?>">Appliquer</button>
                     <?php endif; ?>
                     <?php if (!empty($slug)): ?>
                         <a href="?page=display&slug=<?= urlencode($slug) ?>&preview_palette=rose" target="_blank" class="btn btn-outline"><i class="fas fa-eye"></i></a>
@@ -282,11 +262,7 @@ require __DIR__ . '/../partials/header.php';
                     <?php if ($currentPalette === 'bistro'): ?>
                         <span class="template-badge active-badge"><i class="fas fa-check-circle"></i> Actif</span>
                     <?php else: ?>
-                        <form method="POST" action="?page=edit-template&action=save-palette">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                            <input type="hidden" name="palette" value="bistro">
-                            <button type="submit" class="btn">Appliquer</button>
-                        </form>
+                        <button type="button" class="btn apply-palette-btn" data-palette="bistro" data-csrf="<?= htmlspecialchars($csrf_token) ?>">Appliquer</button>
                     <?php endif; ?>
                     <?php if (!empty($slug)): ?>
                         <a href="?page=display&slug=<?= urlencode($slug) ?>&preview_palette=bistro" target="_blank" class="btn btn-outline"><i class="fas fa-eye"></i></a>
@@ -324,11 +300,7 @@ require __DIR__ . '/../partials/header.php';
                     <?php if ($currentPalette === 'ocean'): ?>
                         <span class="template-badge active-badge"><i class="fas fa-check-circle"></i> Actif</span>
                     <?php else: ?>
-                        <form method="POST" action="?page=edit-template&action=save-palette">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                            <input type="hidden" name="palette" value="ocean">
-                            <button type="submit" class="btn">Appliquer</button>
-                        </form>
+                        <button type="button" class="btn apply-palette-btn" data-palette="ocean" data-csrf="<?= htmlspecialchars($csrf_token) ?>">Appliquer</button>
                     <?php endif; ?>
                     <?php if (!empty($slug)): ?>
                         <a href="?page=display&slug=<?= urlencode($slug) ?>&preview_palette=ocean" target="_blank" class="btn btn-outline"><i class="fas fa-eye"></i></a>
@@ -376,11 +348,7 @@ require __DIR__ . '/../partials/header.php';
                     <?php if ($currentLayout === 'standard'): ?>
                         <span class="template-badge active-badge"><i class="fas fa-check-circle"></i> Actif</span>
                     <?php else: ?>
-                        <form method="POST" action="?page=edit-template&action=save-layout">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                            <input type="hidden" name="layout" value="standard">
-                            <button type="submit" class="btn">Appliquer</button>
-                        </form>
+                        <button type="button" class="btn apply-layout-btn" data-layout="standard" data-csrf="<?= htmlspecialchars($csrf_token) ?>">Appliquer</button>
                     <?php endif; ?>
                     <?php if (!empty($slug)): ?>
                         <a href="?page=display&slug=<?= urlencode($slug) ?>&preview_layout=standard" target="_blank" class="btn btn-outline"><i class="fas fa-eye"></i></a>
@@ -416,11 +384,7 @@ require __DIR__ . '/../partials/header.php';
                     <?php if ($currentLayout === 'bistro'): ?>
                         <span class="template-badge active-badge"><i class="fas fa-check-circle"></i> Actif</span>
                     <?php else: ?>
-                        <form method="POST" action="?page=edit-template&action=save-layout">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                            <input type="hidden" name="layout" value="bistro">
-                            <button type="submit" class="btn">Appliquer</button>
-                        </form>
+                        <button type="button" class="btn apply-layout-btn" data-layout="bistro" data-csrf="<?= htmlspecialchars($csrf_token) ?>">Appliquer</button>
                     <?php endif; ?>
                     <?php if (!empty($slug)): ?>
                         <a href="?page=display&slug=<?= urlencode($slug) ?>&preview_layout=bistro" target="_blank" class="btn btn-outline"><i class="fas fa-eye"></i></a>
@@ -455,11 +419,7 @@ require __DIR__ . '/../partials/header.php';
                     <?php if ($currentLayout === 'ocean'): ?>
                         <span class="template-badge active-badge"><i class="fas fa-check-circle"></i> Actif</span>
                     <?php else: ?>
-                        <form method="POST" action="?page=edit-template&action=save-layout">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
-                            <input type="hidden" name="layout" value="ocean">
-                            <button type="submit" class="btn">Appliquer</button>
-                        </form>
+                        <button type="button" class="btn apply-layout-btn" data-layout="ocean" data-csrf="<?= htmlspecialchars($csrf_token) ?>">Appliquer</button>
                     <?php endif; ?>
                     <?php if (!empty($slug)): ?>
                         <a href="?page=display&slug=<?= urlencode($slug) ?>&preview_layout=ocean" target="_blank" class="btn btn-outline"><i class="fas fa-eye"></i></a>
@@ -536,19 +496,71 @@ window.tourBeforeStart = function() {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Palette forms
-    document.querySelectorAll('form[action*="save-palette"]').forEach(function(form) {
-        form.addEventListener('submit', function(e) {
+    // Palette buttons
+    document.querySelectorAll('.apply-palette-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
             e.preventDefault();
-            ajaxSubmit(this, '?page=edit-template&action=save-palette');
+            const palette = this.getAttribute('data-palette');
+            const csrf = this.getAttribute('data-csrf');
+            
+            // Create form dynamically
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '?page=edit-template&action=save-palette';
+            form.style.display = 'none';
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrf_token';
+            csrfInput.value = csrf;
+            
+            const paletteInput = document.createElement('input');
+            paletteInput.type = 'hidden';
+            paletteInput.name = 'palette';
+            paletteInput.value = palette;
+            
+            form.appendChild(csrfInput);
+            form.appendChild(paletteInput);
+            document.body.appendChild(form);
+            
+            ajaxSubmit(form, '?page=edit-template&action=save-palette');
+            
+            // Clean up
+            document.body.removeChild(form);
         });
     });
 
-    // Layout forms
-    document.querySelectorAll('form[action*="save-layout"]').forEach(function(form) {
-        form.addEventListener('submit', function(e) {
+    // Layout buttons
+    document.querySelectorAll('.apply-layout-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
             e.preventDefault();
-            ajaxSubmit(this, '?page=edit-template&action=save-layout');
+            const layout = this.getAttribute('data-layout');
+            const csrf = this.getAttribute('data-csrf');
+            
+            // Create form dynamically
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '?page=edit-template&action=save-layout';
+            form.style.display = 'none';
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrf_token';
+            csrfInput.value = csrf;
+            
+            const layoutInput = document.createElement('input');
+            layoutInput.type = 'hidden';
+            layoutInput.name = 'layout';
+            layoutInput.value = layout;
+            
+            form.appendChild(csrfInput);
+            form.appendChild(layoutInput);
+            document.body.appendChild(form);
+            
+            ajaxSubmit(form, '?page=edit-template&action=save-layout');
+            
+            // Clean up
+            document.body.removeChild(form);
         });
     });
 });

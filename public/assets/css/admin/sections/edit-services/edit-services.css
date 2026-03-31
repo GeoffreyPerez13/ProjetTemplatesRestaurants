@@ -1,7 +1,35 @@
-.edit-services-container {
-    max-width: 1200px;
+/* ==================== STRUCTURE ET LAYOUT ==================== */
+.template-header {
+    text-align: center;
+}
+
+.template-header h2 {
+    font-size: 1.5rem;
+    color: var(--color-text);
+    margin-bottom: var(--spacing-sm);
+}
+
+.template-header h2 i {
+    color: var(--color-primary);
+    margin-right: var(--spacing-sm);
+}
+
+.template-subtitle {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    max-width: 800px;
     margin: 0 auto;
-    padding: 20px;
+    line-height: 1.4;
+}
+
+.edit-services-container {
+    background: var(--color-bg);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    max-width: 100%;
+    margin: 0 auto var(--spacing-lg) auto;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border);
 }
 
 .services-grid,
@@ -208,7 +236,7 @@
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
     .edit-services-container {
-        padding: 0 15px;
+        padding: var(--spacing-md);
         margin: 20px auto;
     }
     
@@ -216,19 +244,19 @@
     .payments-grid {
         grid-template-columns: 1fr;
         gap: 20px;
-        padding: 20px;
+        padding: var(--spacing-md);
     }
     
     .socials-grid {
         grid-template-columns: 1fr;
         gap: 20px;
-        padding: 20px;
+        padding: var(--spacing-md);
     }
     
     .service-item,
     .payment-item,
     .social-item {
-        padding: 20px;
+        padding: var(--spacing-md);
     }
     
     .service-item label,
@@ -318,15 +346,22 @@
     }
 }
 
+@media (min-width: 601px) {
+    .edit-services-container {
+        padding: var(--spacing-xl);
+        max-width: 1100px;
+    }
+}
+
 @media (max-width: 480px) {
     .edit-services-container {
-        padding: 0 10px;
+        padding: var(--spacing-sm);
     }
     
     .services-grid,
     .payments-grid,
     .socials-grid {
-        padding: 10px;
+        padding: var(--spacing-sm);
         gap: 12px;
     }
     
