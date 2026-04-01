@@ -5,15 +5,7 @@ require __DIR__ . '/../partials/header.php';
 ?>
 
 <div class="register-container auto-register">
-    <div class="register-header">
-        <a href="?page=landing" class="back-link">
-            <i class="fas fa-arrow-left"></i> Retour
-        </a>
-        <div class="register-logo">
-            <i class="fas fa-utensils"></i>
-            <span>MenuMiam</span>
-        </div>
-    </div>
+    <a class="btn-back" href="?page=landing">Retour</a>
 
     <h2>Créez votre compte restaurant</h2>
     <p class="register-subtitle">
@@ -146,40 +138,6 @@ require __DIR__ . '/../partials/header.php';
 <style>
 .auto-register {
     max-width: 560px;
-}
-
-.register-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-}
-
-.back-link {
-    color: var(--color-text-light);
-    text-decoration: none;
-    font-size: 0.9rem;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: color 0.2s;
-}
-
-.back-link:hover {
-    color: var(--color-primary);
-}
-
-.register-logo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: var(--color-text);
-}
-
-.register-logo i {
-    color: var(--color-primary);
 }
 
 .register-subtitle {

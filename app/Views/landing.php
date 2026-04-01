@@ -582,16 +582,16 @@
                 <ul>
                     <li><a href="mailto:contact@menumiam.fr">Contact</a></li>
                     <li><a href="mailto:support@menumiam.fr">Support</a></li>
-                    <li><a href="?page=demo">Démo en ligne</a></li>
+                    <li><a href="?page=display&slug=demo-menumiam" target="_blank">Démo en ligne</a></li>
                 </ul>
             </div>
             <div class="footer-links-group">
                 <h4>Légal</h4>
                 <ul>
-                    <li><a href="?page=mentions-legales">Mentions légales</a></li>
-                    <li><a href="?page=cgu">CGU</a></li>
-                    <li><a href="?page=rgpd">RGPD</a></li>
-                    <li><a href="?page=cookies">Cookies</a></li>
+                    <li><a href="?page=legal&section=legal" target="_blank">Mentions légales</a></li>
+                    <li><a href="?page=legal&section=cgu" target="_blank">CGU</a></li>
+                    <li><a href="?page=legal&section=privacy" target="_blank">RGPD</a></li>
+                    <li><a href="?page=legal&section=cookies" target="_blank">Cookies</a></li>
                 </ul>
             </div>
         </div>

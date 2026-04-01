@@ -59,6 +59,14 @@ function showToast(message, type) {
 function ajaxSubmit(form, url, options) {
   options = options || {};
 
+  // Protection contre les soumissions multiples
+  if (form.dataset.ajaxSubmitting === 'true') {
+    console.warn('ajaxSubmit: formulaire déjà en cours de soumission, ignoré');
+    return;
+  }
+  form.dataset.ajaxSubmitting = 'true';
+  console.log('ajaxSubmit: début de soumission pour', form.id || form.className);
+
   var formData = new FormData(form);
 
   if (typeof options.beforeSend === "function") {
@@ -106,6 +114,10 @@ function ajaxSubmit(form, url, options) {
       showToast("Erreur de communication avec le serveur.", "error");
     })
     .finally(function () {
+      // Réinitialiser le flag de soumission
+      form.dataset.ajaxSubmitting = 'false';
+      console.log('ajaxSubmit: fin de soumission pour', form.id || form.className);
+      
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;

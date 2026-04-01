@@ -21,6 +21,7 @@ require_once __DIR__ . '/../app/Controllers/SitemapController.php';
 require_once __DIR__ . '/../app/Controllers/StripeController.php';
 require_once __DIR__ . '/../app/Controllers/StatsController.php';
 require_once __DIR__ . '/../app/Controllers/ReservationController.php';
+require_once __DIR__ . '/../app/Controllers/FloorPlanController.php';
 require_once __DIR__ . '/../app/Models/DemoToken.php';
 require_once __DIR__ . '/../app/Helpers/FormHelper.php';
 require_once __DIR__ . '/../app/Helpers/Validator.php';
@@ -422,9 +423,22 @@ switch ($page) {
             $demoTokenModel->cleanExpired();
         }
         session_destroy();
-        session_start();
-        $_SESSION['success_message'] = "Votre session de démonstration est terminée. Merci de votre intérêt !";
-        header('Location: ?page=login');
+        ?>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <script>
+                sessionStorage.setItem('pendingToast', JSON.stringify({
+                    message: 'Votre session de démonstration est terminée. Merci de votre intérêt !',
+                    type: 'success'
+                }));
+                window.location.href = '?page=login';
+            </script>
+        </head>
+        <body></body>
+        </html>
+        <?php
         exit;
 
     case 'seed-demo':
@@ -503,6 +517,67 @@ switch ($page) {
     case 'get-day-reservations':
         $controller = new ReservationController($pdo);
         $controller->getDayReservations();
+        break;
+
+    // Plan de salle
+    case 'floor-plan':
+        $controller = new FloorPlanController($pdo);
+        $controller->show();
+        break;
+
+    case 'floor-plan-create-floor':
+        $controller = new FloorPlanController($pdo);
+        $controller->createFloor();
+        break;
+
+    case 'floor-plan-update-floor':
+        $controller = new FloorPlanController($pdo);
+        $controller->updateFloor();
+        break;
+
+    case 'floor-plan-delete-floor':
+        $controller = new FloorPlanController($pdo);
+        $controller->deleteFloor();
+        break;
+
+    case 'floor-plan-clear-floor':
+        $controller = new FloorPlanController($pdo);
+        $controller->clearFloor();
+        break;
+
+    case 'floor-plan-create-table':
+        $controller = new FloorPlanController($pdo);
+        $controller->createTable();
+        break;
+
+    case 'floor-plan-update-table':
+        $controller = new FloorPlanController($pdo);
+        $controller->updateTable();
+        break;
+
+    case 'floor-plan-delete-table':
+        $controller = new FloorPlanController($pdo);
+        $controller->deleteTable();
+        break;
+
+    case 'floor-plan-create-element':
+        $controller = new FloorPlanController($pdo);
+        $controller->createElement();
+        break;
+
+    case 'floor-plan-update-element':
+        $controller = new FloorPlanController($pdo);
+        $controller->updateElement();
+        break;
+
+    case 'floor-plan-delete-element':
+        $controller = new FloorPlanController($pdo);
+        $controller->deleteElement();
+        break;
+
+    case 'floor-plan-get-data':
+        $controller = new FloorPlanController($pdo);
+        $controller->getFloorData();
         break;
 
     case 'sitemap':

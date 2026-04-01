@@ -31,6 +31,9 @@ $statusColors = [
 <div class="reservations-page">
     <div class="reservations-header">
         <h2><i class="fas fa-calendar-check"></i> Réservations en ligne</h2>
+        <a href="?page=floor-plan" class="btn-primary">
+            <i class="fas fa-map-marked-alt"></i> Plan de salle
+        </a>
     </div>
 
     <?php if (!empty($success_message)): ?>

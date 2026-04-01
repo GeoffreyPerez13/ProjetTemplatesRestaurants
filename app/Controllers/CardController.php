@@ -1051,6 +1051,9 @@ class CardController extends BaseController
      */
     private function handleBatchAddCategories($categoryModel, $admin_id, $anchor)
     {
+        error_log("=== handleBatchAddCategories appelé ===");
+        error_log("POST data: " . print_r($_POST['categories'] ?? [], true));
+        
         $categories = $_POST['categories'] ?? [];
         
         if (empty($categories)) {
@@ -1095,7 +1098,9 @@ class CardController extends BaseController
             }
 
             try {
+                error_log("Création catégorie: name=$name, order=$order, image=$imagePath");
                 $categoryModel->create($admin_id, $name, $imagePath, $order);
+                error_log("Catégorie créée avec succès, ID: " . $this->pdo->lastInsertId());
                 $added++;
             } catch (Exception $e) {
                 $errors[] = "Ligne " . ($index + 1) . ": " . $e->getMessage();

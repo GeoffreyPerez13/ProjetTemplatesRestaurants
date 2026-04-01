@@ -26,6 +26,12 @@
   margin-right: 8px;
 }
 
+.reservations-header .btn-primary {
+  white-space: nowrap;
+  padding: 12px 20px;
+  font-size: 0.95rem;
+}
+
 /* ==================== ONGLETS ==================== */
 
 .reservations-tabs {

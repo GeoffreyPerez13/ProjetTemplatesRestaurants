@@ -36,6 +36,11 @@
     <!-- Utilitaire toast global -->
     <script src="/assets/js/admin/toast.js"></script>
 
+    <!-- Script inline (données pour JS) si fourni -->
+    <?php if (!empty($inline_script)): ?>
+        <?= $inline_script ?>
+    <?php endif; ?>
+
     <!-- Inclusion de scripts additionnels dynamiques si fournis -->
     <?php if (!empty($scripts)): ?>
         <?php foreach ($scripts as $script): ?>

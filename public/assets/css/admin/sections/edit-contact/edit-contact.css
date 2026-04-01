@@ -6,11 +6,6 @@
   margin-bottom: var(--spacing-xl);
 }
 
-/* Margin-bottom spécifique pour le template-header dans edit-contact-form */
-.edit-contact-form .template-header {
-  margin-bottom: 20px;
-}
-
 .template-header h2 {
   font-size: 1.5rem;
   color: var(--color-text);

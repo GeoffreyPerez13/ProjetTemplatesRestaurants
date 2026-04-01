@@ -10,15 +10,6 @@ require __DIR__ . '/../partials/header.php';
 <div class="reset-password-container">
     <h2>Réinitialisation du mot de passe</h2>
 
-    <!-- Messages flash -->
-    <?php if (!empty($success_message)): ?>
-        <div class="message-success"><?= htmlspecialchars($success_message) ?></div>
-    <?php endif; ?>
-
-    <?php if (!empty($error_message)): ?>
-        <div class="message-error"><?= htmlspecialchars($error_message) ?></div>
-    <?php endif; ?>
-
     <?php if (empty($token)): ?>
         <!-- Étape 1 : Demande d’email -->
         <form method="post" action="?page=reset-password">

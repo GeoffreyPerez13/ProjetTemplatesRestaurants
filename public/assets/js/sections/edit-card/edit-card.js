@@ -6,10 +6,19 @@
     scrollDelay: 1500, // 1,5 secondes par défaut (comme dans PHP)
   };
 
+  // Protection contre les initialisations multiples
+  let initialized = false;
+
   /**
    * Initialisation principale
    */
   function init() {
+    // Vérifier si déjà initialisé
+    if (initialized) {
+      console.log('edit-card.js déjà initialisé, ignoré');
+      return;
+    }
+
     // Vérifier si nous sommes dans la bonne page
     if (
       !document.querySelector(".edit-carte-container") &&
@@ -17,6 +26,10 @@
     ) {
       return;
     }
+
+    // Marquer comme initialisé
+    initialized = true;
+    console.log('edit-card.js initialisé');
 
     // ==================== RÉCUPÉRATION DES PARAMÈTRES ====================
     const scrollParams = window.scrollParams || {};
@@ -586,8 +599,21 @@
       ajaxExclude.forEach(function(cls) { if (form.classList.contains(cls)) dominated = true; });
       if (dominated || form.id === 'reorder-form') return;
 
+      // Vérifier si le listener a déjà été ajouté
+      if (form.dataset.ajaxHandlerAdded === 'true') return;
+      form.dataset.ajaxHandlerAdded = 'true';
+
       form.addEventListener("submit", function (e) {
         e.preventDefault();
+
+        // Protection contre les soumissions multiples
+        if (form.dataset.submitting === 'true') {
+          console.log('Formulaire déjà en cours de soumission, ignoré');
+          return;
+        }
+        form.dataset.submitting = 'true';
+
+        console.log('Soumission du formulaire:', form.id || form.className);
 
         // Récupérer le bouton submit cliqué
         var clickedBtn = form._lastClickedSubmit || form.querySelector('button[type="submit"]');
@@ -598,6 +624,16 @@
             if (clickedBtn && clickedBtn.name) {
               formData.append(clickedBtn.name, clickedBtn.value || '1');
             }
+          },
+          onSuccess: function() {
+            // Réinitialiser après succès
+            setTimeout(function() {
+              form.dataset.submitting = 'false';
+            }, 1000);
+          },
+          onError: function() {
+            // Réinitialiser après erreur
+            form.dataset.submitting = 'false';
           }
         });
 
@@ -610,6 +646,10 @@
     document.querySelectorAll('button[name="toggle_daily_menu"]').forEach(function(btn) {
       var form = btn.closest('form');
       if (!form) return;
+
+      // Vérifier si le listener a déjà été ajouté
+      if (form.dataset.toggleHandlerAdded === 'true') return;
+      form.dataset.toggleHandlerAdded = 'true';
 
       form.addEventListener("submit", function (e) {
         e.preventDefault();

@@ -399,12 +399,23 @@ class AdminController extends BaseController
         // Destruction de la session
         session_destroy();
 
-        // Démarrer une nouvelle session pour le message flash
-        session_start();
-        $_SESSION['success_message'] = "Vous avez été déconnecté avec succès.";
-
-        // Redirection vers la page de connexion
-        header('Location: ?page=login');
+        // Redirection vers la page de connexion avec un script pour afficher le toast
+        ?>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <script>
+                sessionStorage.setItem('pendingToast', JSON.stringify({
+                    message: 'Vous avez été déconnecté avec succès.',
+                    type: 'success'
+                }));
+                window.location.href = '?page=login';
+            </script>
+        </head>
+        <body></body>
+        </html>
+        <?php
         exit;
     }
 
@@ -501,26 +512,59 @@ class AdminController extends BaseController
         // Traitement du formulaire
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
-                $_SESSION['error_message'] = "Requête invalide (CSRF).";
-                // Redirection vers la même page (avec ou sans token)
-                $redirect = $token ? '?page=reset-password&token=' . urlencode($token) : '?page=reset-password';
-                header('Location: ' . $redirect);
+                ?>
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <script>
+                        sessionStorage.setItem('pendingToast', JSON.stringify({
+                            message: 'Requête invalide (CSRF).',
+                            type: 'error'
+                        }));
+                        window.location.href = '<?= $token ? "?page=reset-password&token=" . urlencode($token) : "?page=reset-password" ?>';
+                    </script>
+                </head>
+                <body></body>
+                </html>
+                <?php
                 exit;
             }
 
             if (empty($token)) {
                 // Étape 1 : demande d'email
                 $email = trim($_POST['email'] ?? '');
+                $message = '';
+                $type = '';
+                
                 if (empty($email)) {
-                    $_SESSION['error_message'] = "Veuillez renseigner une adresse email.";
+                    $message = 'Veuillez renseigner une adresse email.';
+                    $type = 'error';
                 } else {
                     if ($adminModel->requestPasswordReset($email)) {
-                        $_SESSION['success_message'] = "Si cette adresse existe dans notre système, vous recevrez un email.";
+                        $message = 'Si cette adresse existe dans notre système, vous recevrez un email.';
+                        $type = 'success';
                     } else {
-                        $_SESSION['error_message'] = "Erreur lors de l'envoi de l'email de réinitialisation.";
+                        $message = 'Erreur lors de l\'envoi de l\'email de réinitialisation.';
+                        $type = 'error';
                     }
                 }
-                header('Location: ?page=reset-password');
+                ?>
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <script>
+                        sessionStorage.setItem('pendingToast', JSON.stringify({
+                            message: '<?= addslashes($message) ?>',
+                            type: '<?= $type ?>'
+                        }));
+                        window.location.href = '?page=reset-password';
+                    </script>
+                </head>
+                <body></body>
+                </html>
+                <?php
                 exit;
             } else {
                 // Étape 2 : réinitialisation du mot de passe
@@ -531,19 +575,62 @@ class AdminController extends BaseController
                 $errors = Validator::validatePassword($newPassword, $confirmPassword);
 
                 if (!empty($errors)) {
-                    $_SESSION['error_message'] = implode('<br>', $errors);
-                    header('Location: ?page=reset-password&token=' . urlencode($token));
+                    $errorMessage = addslashes(implode(' ', $errors));
+                    ?>
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <script>
+                            sessionStorage.setItem('pendingToast', JSON.stringify({
+                                message: '<?= $errorMessage ?>',
+                                type: 'error'
+                            }));
+                            window.location.href = '?page=reset-password&token=<?= urlencode($token) ?>';
+                        </script>
+                    </head>
+                    <body></body>
+                    </html>
+                    <?php
                     exit;
                 }
 
                 // Tentative de réinitialisation
                 if ($adminModel->resetPassword($token, $newPassword)) {
-                    $_SESSION['success_message'] = "Mot de passe mis à jour avec succès. Vous pouvez maintenant vous connecter.";
-                    header('Location: ?page=login');
+                    ?>
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <script>
+                            sessionStorage.setItem('pendingToast', JSON.stringify({
+                                message: 'Mot de passe mis à jour avec succès. Vous pouvez maintenant vous connecter.',
+                                type: 'success'
+                            }));
+                            window.location.href = '?page=login';
+                        </script>
+                    </head>
+                    <body></body>
+                    </html>
+                    <?php
                     exit;
                 } else {
-                    $_SESSION['error_message'] = "Lien de réinitialisation invalide ou expiré.";
-                    header('Location: ?page=reset-password&token=' . urlencode($token));
+                    ?>
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <script>
+                            sessionStorage.setItem('pendingToast', JSON.stringify({
+                                message: 'Lien de réinitialisation invalide ou expiré.',
+                                type: 'error'
+                            }));
+                            window.location.href = '?page=reset-password&token=<?= urlencode($token) ?>';
+                        </script>
+                    </head>
+                    <body></body>
+                    </html>
+                    <?php
                     exit;
                 }
             }

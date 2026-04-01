@@ -61,8 +61,11 @@
 /* Section edit-template */
 @import url("admin/sections/edit-template/edit-template.css");
 
-/* Section reservations */
+/* Section réservations */
 @import url("admin/sections/reservations/reservations.css");
+
+/* Section plan de salle */
+@import url("admin/sections/floor-plan/floor-plan.css");
 
 /* Section view-card */
 @import url("admin/sections/view-card/view-card.css");

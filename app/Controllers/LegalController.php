@@ -201,36 +201,40 @@ class LegalController extends BaseController
         <h3>2. Cookies utilisés</h3>
         <p>Voici la liste exhaustive des cookies utilisés par MenuMiam :</p>
         <table class="cookies-table">
-            <tr>
-                <th>Nom</th>
-                <th>Type</th>
-                <th>Durée</th>
-                <th>Finalité</th>
-            </tr>
-            <tr>
-                <td>PHPSESSID</td>
-                <td>Essentiel</td>
-                <td>Session</td>
-                <td>Maintien de la session utilisateur (connexion, panier, navigation)</td>
-            </tr>
-            <tr>
-                <td>cookie_consent</td>
-                <td>Essentiel</td>
-                <td>1 an</td>
-                <td>Mémoriser votre choix de consentement aux cookies (accepted, rejected, custom)</td>
-            </tr>
-            <tr>
-                <td>cookie_analytics</td>
-                <td>Analytique</td>
-                <td>1 an</td>
-                <td>Indique si vous avez accepté les cookies d\'analyse (true/false)</td>
-            </tr>
-            <tr>
-                <td>cookie_marketing</td>
-                <td>Marketing</td>
-                <td>1 an</td>
-                <td>Indique si vous avez accepté les cookies marketing (true/false)</td>
-            </tr>
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Type</th>
+                    <th>Durée</th>
+                    <th>Finalité</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td data-label="Nom">PHPSESSID</td>
+                    <td data-label="Type">Essentiel</td>
+                    <td data-label="Durée">Session</td>
+                    <td data-label="Finalité">Maintien de la session utilisateur (connexion, panier, navigation)</td>
+                </tr>
+                <tr>
+                    <td data-label="Nom">cookie_consent</td>
+                    <td data-label="Type">Essentiel</td>
+                    <td data-label="Durée">1 an</td>
+                    <td data-label="Finalité">Mémoriser votre choix de consentement aux cookies (accepted, rejected, custom)</td>
+                </tr>
+                <tr>
+                    <td data-label="Nom">cookie_analytics</td>
+                    <td data-label="Type">Analytique</td>
+                    <td data-label="Durée">1 an</td>
+                    <td data-label="Finalité">Indique si vous avez accepté les cookies d\'analyse (true/false)</td>
+                </tr>
+                <tr>
+                    <td data-label="Nom">cookie_marketing</td>
+                    <td data-label="Type">Marketing</td>
+                    <td data-label="Durée">1 an</td>
+                    <td data-label="Finalité">Indique si vous avez accepté les cookies marketing (true/false)</td>
+                </tr>
+            </tbody>
         </table>
         
         <h3>3. Catégories de cookies</h3>
