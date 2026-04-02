@@ -126,7 +126,7 @@ a:hover {
   }
 }
 
-/* ==================== BOUTONS FLOTTANTS (DARK MODE + TOUR) ==================== */
+/* ==================== BOUTONS FLOTTANTS (NOTIFICATIONS + DARK MODE + TOUR) ==================== */
 .floating-buttons {
   position: fixed;
   bottom: 20px;
@@ -135,6 +135,81 @@ a:hover {
   flex-direction: column;
   gap: 10px;
   z-index: 9999;
+}
+
+.notification-toggle-floating,
+.dark-mode-toggle-floating,
+.tour-toggle-floating {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+  position: relative;
+  text-decoration: none;
+}
+
+.notification-toggle-floating:hover,
+.dark-mode-toggle-floating:hover,
+.tour-toggle-floating:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.notification-toggle-floating {
+  background: var(--color-warning);
+  color: white;
+  border-color: var(--color-warning);
+  animation: notificationPulse 2s ease-in-out infinite;
+}
+
+.notification-toggle-floating:hover {
+  background: #d97706;
+  border-color: #d97706;
+  color: white;
+  animation: none;
+}
+
+@keyframes notificationPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(251, 146, 60, 0.7);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+    box-shadow: 0 0 0 8px rgba(251, 146, 60, 0);
+  }
+}
+
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #dc2626;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid var(--color-bg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .dark-mode-toggle-floating,
@@ -185,6 +260,212 @@ html.dark-mode .dark-mode-toggle-floating .fa-moon {
 html.dark-mode .dark-mode-toggle-floating .fa-sun {
   display: inline-block;
   color: var(--color-warning);
+}
+
+/* ==================== DROPDOWN NOTIFICATIONS ==================== */
+.notification-dropdown {
+  position: fixed;
+  bottom: 150px;
+  left: 20px;
+  width: 380px;
+  max-height: 500px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification-dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-warm);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.notification-dropdown-header h4 {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification-dropdown-header h4 i {
+  color: var(--color-warning);
+}
+
+.notification-view-all {
+  font-size: 0.85rem;
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color var(--transition-fast);
+}
+
+.notification-view-all:hover {
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+}
+
+.notification-dropdown-body {
+  overflow-y: auto;
+  max-height: 420px;
+  padding: 8px;
+}
+
+.notification-loading {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.notification-item {
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  margin-bottom: 8px;
+  background: var(--color-bg);
+  transition: all var(--transition-fast);
+}
+
+.notification-item:hover {
+  background: var(--color-bg-warm);
+  border-color: var(--color-primary-light);
+}
+
+.notification-item.past-reservation {
+  opacity: 0.6;
+  background: var(--color-bg-alt);
+  border-color: var(--color-text-muted);
+  position: relative;
+}
+
+.notification-item.past-reservation::before {
+  content: "⏱ Heure dépassée";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 0.75rem;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.notification-item.past-reservation:hover {
+  opacity: 0.7;
+  background: var(--color-bg-alt);
+}
+
+.notification-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.notification-item-time {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.notification-item-party {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.notification-item-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.notification-item-phone {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.notification-item-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.notification-item-actions .btn {
+  flex: 1;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.notification-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.notification-empty i {
+  font-size: 2rem;
+  color: var(--color-success);
+  margin-bottom: 12px;
+  display: block;
+}
+
+@media (max-width: 480px) {
+  .notification-dropdown {
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-width: calc(100vw - 20px);
+  }
+}
+
+/* SweetAlert au premier plan */
+.swal2-container {
+  z-index: 99999 !important;
 }
 
 /* ==================== CONTAINERS ==================== */

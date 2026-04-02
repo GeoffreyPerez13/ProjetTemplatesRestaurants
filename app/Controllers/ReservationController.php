@@ -47,6 +47,107 @@ class ReservationController extends BaseController
     }
 
     /**
+     * Envoie un email au restaurant pour l'informer d'une nouvelle réservation
+     */
+    private function sendNewReservationNotificationToRestaurant($reservation, $admin)
+    {
+        $restaurantEmail = $admin->email;
+        $restaurantName = htmlspecialchars($admin->restaurant_name ?? 'Restaurant');
+        
+        $customerName = htmlspecialchars($reservation['customer_name']);
+        $date = date('d/m/Y', strtotime($reservation['reservation_date']));
+        $time = substr($reservation['reservation_time'], 0, 5);
+        $party = (int)$reservation['party_size'];
+        $phone = htmlspecialchars($reservation['customer_phone']);
+        $email = !empty($reservation['customer_email']) ? htmlspecialchars($reservation['customer_email']) : 'Non renseigné';
+        $specialReqs = !empty($reservation['special_requests']) ? htmlspecialchars($reservation['special_requests']) : 'Aucune';
+
+        $subject = "🔔 Nouvelle réservation - $restaurantName";
+        
+        $message = "
+        <html>
+        <head>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: linear-gradient(135deg, #b45309 0%, #ea580c 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                .header h1 { margin: 0; font-size: 24px; }
+                .content { background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; }
+                .alert { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 20px 0; border-radius: 4px; }
+                .details-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                .details-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+                .details-table td:first-child { font-weight: 600; color: #6b7280; width: 40%; }
+                .footer { background: #f9fafb; padding: 20px; text-align: center; font-size: 0.9rem; color: #6b7280; border-radius: 0 0 8px 8px; }
+                .btn { display: inline-block; padding: 12px 24px; background: #b45309; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1>🔔 Nouvelle réservation</h1>
+                </div>
+                <div class='content'>
+                    <div class='alert'>
+                        <strong>⏰ Action requise :</strong> Une nouvelle demande de réservation vient d'être effectuée sur votre site.
+                    </div>
+                    
+                    <h2 style='color: #b45309; margin-top: 0;'>Détails de la réservation</h2>
+                    
+                    <table class='details-table'>
+                        <tr>
+                            <td>👤 Client</td>
+                            <td><strong>$customerName</strong></td>
+                        </tr>
+                        <tr>
+                            <td>📅 Date</td>
+                            <td><strong>$date</strong></td>
+                        </tr>
+                        <tr>
+                            <td>🕐 Heure</td>
+                            <td><strong>$time</strong></td>
+                        </tr>
+                        <tr>
+                            <td>👥 Nombre de personnes</td>
+                            <td><strong>$party personne" . ($party > 1 ? 's' : '') . "</strong></td>
+                        </tr>
+                        <tr>
+                            <td>📞 Téléphone</td>
+                            <td>$phone</td>
+                        </tr>
+                        <tr>
+                            <td>📧 Email</td>
+                            <td>$email</td>
+                        </tr>
+                        <tr>
+                            <td>💬 Demandes spéciales</td>
+                            <td>$specialReqs</td>
+                        </tr>
+                    </table>
+                    
+                    <p style='text-align: center;'>
+                        <a href='" . (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . "?page=reservations' class='btn'>
+                            Voir dans le panel admin
+                        </a>
+                    </p>
+                    
+                    <p style='color: #6b7280; font-size: 0.9rem; margin-top: 30px;'>
+                        <strong>💡 Conseil :</strong> Pensez à confirmer ou refuser cette réservation rapidement pour offrir la meilleure expérience à vos clients.
+                    </p>
+                </div>
+                <div class='footer'>
+                    <p>Cet email a été envoyé automatiquement par MenuMiam</p>
+                    <p style='margin: 5px 0;'>Vous recevez cet email car vous gérez $restaurantName</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+
+        $mailer = new Mailer();
+        return $mailer->send($restaurantEmail, $subject, $message);
+    }
+
+    /**
      * Envoie un email au client concernant sa réservation
      */
     private function sendReservationEmail($reservation, $restaurantName, $type, $extra = [])
@@ -290,9 +391,12 @@ class ReservationController extends BaseController
                 'completed' => 'terminée',
                 'no_show'   => 'marquée comme absent',
             ];
+            
+            // Renvoyer le token CSRF actuel (il reste valide pour les prochaines requêtes)
             echo json_encode([
                 'success' => true,
-                'message' => 'Réservation ' . ($statusLabels[$status] ?? 'mise à jour') . '.'
+                'message' => 'Réservation ' . ($statusLabels[$status] ?? 'mise à jour') . '.',
+                'new_csrf_token' => $_SESSION['csrf_token'] ?? ''
             ]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Erreur lors de la mise à jour.']);
@@ -511,12 +615,16 @@ class ReservationController extends BaseController
         ]);
 
         if ($reservationId) {
+            $reservation = $reservationModel->findById($reservationId);
+            
             // Envoyer le mail de confirmation de réception au client
-            if (!empty($customerEmail)) {
-                $reservation = $reservationModel->findById($reservationId);
-                if ($reservation) {
-                    $this->sendReservationEmail($reservation, $admin->restaurant_name ?? '', 'received');
-                }
+            if ($reservation && !empty($customerEmail)) {
+                $this->sendReservationEmail($reservation, $admin->restaurant_name ?? '', 'received');
+            }
+            
+            // Envoyer un email au restaurant pour l'informer de la nouvelle réservation
+            if ($reservation && !empty($admin->email)) {
+                $this->sendNewReservationNotificationToRestaurant($reservation, $admin);
             }
 
             echo json_encode([
@@ -579,6 +687,35 @@ class ReservationController extends BaseController
             'success' => true,
             'slots'   => $availableSlots,
             'closed'  => false,
+        ]);
+        exit;
+    }
+
+    /**
+     * API AJAX : récupérer les réservations en attente pour le dropdown de notifications
+     */
+    public function getPendingReservations()
+    {
+        header('Content-Type: application/json');
+        $this->checkAccess();
+        
+        $adminId = $_SESSION['admin_id'];
+        $reservationModel = new Reservation($this->pdo);
+        
+        // Récupérer toutes les réservations en attente, triées par date et heure
+        $stmt = $this->pdo->prepare("
+            SELECT * FROM reservations 
+            WHERE admin_id = ? AND status = 'pending'
+            ORDER BY reservation_date ASC, reservation_time ASC
+            LIMIT 50
+        ");
+        $stmt->execute([$adminId]);
+        $reservations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        echo json_encode([
+            'success' => true,
+            'reservations' => $reservations,
+            'count' => count($reservations)
         ]);
         exit;
     }

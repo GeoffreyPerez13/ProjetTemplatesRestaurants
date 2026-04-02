@@ -1,0 +1,299 @@
+/**
+ * Gestion du dropdown de notifications pour les réservations en attente
+ */
+(function() {
+    'use strict';
+
+    const notificationToggle = document.getElementById('notification-toggle');
+    const notificationDropdown = document.getElementById('notification-dropdown');
+    const notificationList = document.getElementById('notification-list');
+    const notificationCount = document.getElementById('notification-count');
+
+    if (!notificationToggle || !notificationDropdown) {
+        return; // Pas de notifications sur cette page
+    }
+
+    // Toggle dropdown au clic sur le bouton
+    notificationToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isVisible = notificationDropdown.style.display === 'block';
+        
+        if (isVisible) {
+            notificationDropdown.style.display = 'none';
+        } else {
+            notificationDropdown.style.display = 'block';
+            loadPendingReservations();
+        }
+    });
+
+    // Fermer le dropdown si on clique ailleurs
+    document.addEventListener('click', function(e) {
+        // Ne pas fermer si on clique sur le bouton (géré par le toggle) ou dans le dropdown
+        if (!notificationDropdown.contains(e.target) && 
+            !notificationToggle.contains(e.target)) {
+            notificationDropdown.style.display = 'none';
+        }
+    });
+
+    // Charger les réservations en attente
+    function loadPendingReservations() {
+        notificationList.innerHTML = '<div class="notification-loading"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>';
+
+        fetch('?page=get-pending-reservations')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.reservations) {
+                    displayReservations(data.reservations);
+                } else {
+                    notificationList.innerHTML = '<div class="notification-empty"><i class="fas fa-check-circle"></i><p>Aucune réservation en attente</p></div>';
+                }
+            })
+            .catch(error => {
+                console.error('Erreur chargement notifications:', error);
+                notificationList.innerHTML = '<div class="notification-empty"><p>Erreur de chargement</p></div>';
+            });
+    }
+
+    // Afficher les réservations
+    function displayReservations(reservations) {
+        if (reservations.length === 0) {
+            notificationList.innerHTML = '<div class="notification-empty"><i class="fas fa-check-circle"></i><p>Aucune réservation en attente</p></div>';
+            updateBadgeCount(0);
+            return;
+        }
+
+        const now = new Date();
+        let html = '';
+        
+        reservations.forEach(function(r) {
+            const date = new Date(r.reservation_date);
+            const dateStr = date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+            const time = r.reservation_time.substring(0, 5);
+            
+            // Vérifier si la réservation est passée
+            const reservationDateTime = new Date(r.reservation_date + ' ' + r.reservation_time);
+            const isPast = reservationDateTime < now;
+            const pastClass = isPast ? ' past-reservation' : '';
+            
+            html += `
+                <div class="notification-item${pastClass}" data-id="${r.id}">
+                    <div class="notification-item-header">
+                        <span class="notification-item-time">
+                            <i class="fas fa-clock"></i> ${dateStr} à ${time}
+                        </span>
+                        <span class="notification-item-party">
+                            <i class="fas fa-users"></i> ${r.party_size} pers.
+                        </span>
+                    </div>
+                    <div class="notification-item-name">
+                        <i class="fas fa-user"></i> ${escapeHtml(r.customer_name)}
+                    </div>
+                    <div class="notification-item-phone">
+                        <i class="fas fa-phone"></i> ${escapeHtml(r.customer_phone)}
+                    </div>
+                    <div class="notification-item-actions">
+                        <button class="btn success btn-confirm-notif" data-id="${r.id}">
+                            <i class="fas fa-check"></i> Confirmer
+                        </button>
+                        <button class="btn danger btn-cancel-notif" data-id="${r.id}">
+                            <i class="fas fa-times"></i> Refuser
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        notificationList.innerHTML = html;
+
+        // Attacher les événements aux boutons
+        attachActionButtons();
+    }
+
+    // Attacher les événements aux boutons d'action
+    function attachActionButtons() {
+        // Boutons confirmer
+        document.querySelectorAll('.btn-confirm-notif').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const id = btn.dataset.id;
+                confirmReservation(id);
+            });
+        });
+
+        // Boutons refuser
+        document.querySelectorAll('.btn-cancel-notif').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const id = btn.dataset.id;
+                cancelReservation(id);
+            });
+        });
+    }
+
+    // Confirmer une réservation
+    function confirmReservation(id) {
+        if (typeof Swal === 'undefined') {
+            if (!confirm('Confirmer cette réservation ?')) return;
+            updateReservationStatus(id, 'confirmed');
+            return;
+        }
+
+        Swal.fire({
+            title: 'Confirmer la réservation ?',
+            text: 'Le client sera considéré comme attendu.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="fas fa-check"></i> Confirmer',
+            cancelButtonText: 'Annuler'
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                updateReservationStatus(id, 'confirmed');
+            }
+        });
+    }
+
+    // Refuser une réservation
+    function cancelReservation(id) {
+        if (typeof Swal === 'undefined') {
+            const reason = prompt('Raison du refus (optionnel) :');
+            if (reason === null) return;
+            updateReservationStatus(id, 'cancelled', { cancelled_reason: reason });
+            return;
+        }
+
+        Swal.fire({
+            title: 'Refuser cette réservation ?',
+            input: 'textarea',
+            inputLabel: 'Raison du refus (optionnel)',
+            inputPlaceholder: 'Ex: Complet, fermeture exceptionnelle...',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '<i class="fas fa-times"></i> Refuser',
+            cancelButtonText: 'Annuler'
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                updateReservationStatus(id, 'cancelled', { cancelled_reason: result.value || '' });
+            }
+        });
+    }
+
+    // Mettre à jour le statut d'une réservation via AJAX
+    function updateReservationStatus(id, status, extra) {
+        extra = extra || {};
+        
+        // Récupérer le token CSRF à chaque requête (important pour éviter les erreurs après la première action)
+        const csrfTokenElement = document.getElementById('csrf-token');
+        const csrfToken = csrfTokenElement ? csrfTokenElement.value : '';
+        
+        if (!csrfToken) {
+            showToast('Erreur: Token CSRF manquant. Rechargez la page.', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('csrf_token', csrfToken);
+        formData.append('id', id);
+        formData.append('status', status);
+
+        if (extra.cancelled_reason) {
+            formData.append('cancelled_reason', extra.cancelled_reason);
+        }
+
+        fetch('?page=reservation-update-status', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message, 'success');
+                
+                // Mettre à jour le token CSRF si le serveur en renvoie un nouveau
+                if (data.new_csrf_token && csrfTokenElement) {
+                    csrfTokenElement.value = data.new_csrf_token;
+                }
+                
+                // Retirer l'élément de la liste
+                const item = document.querySelector(`.notification-item[data-id="${id}"]`);
+                if (item) {
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateX(-20px)';
+                    setTimeout(function() {
+                        item.remove();
+                        
+                        // Vérifier s'il reste des réservations
+                        const remainingItems = document.querySelectorAll('.notification-item');
+                        if (remainingItems.length === 0) {
+                            notificationList.innerHTML = '<div class="notification-empty"><i class="fas fa-check-circle"></i><p>Aucune réservation en attente</p></div>';
+                            updateBadgeCount(0);
+                        } else {
+                            updateBadgeCount(remainingItems.length);
+                        }
+                    }, 300);
+                }
+            } else {
+                showToast(data.message || 'Erreur', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            showToast('Erreur de communication avec le serveur.', 'error');
+        });
+    }
+
+    // Mettre à jour le compteur de notifications
+    function updateBadgeCount(count) {
+        if (notificationCount) {
+            notificationCount.textContent = count;
+            
+            // Cacher le bouton si count = 0
+            if (count === 0) {
+                if (notificationToggle) {
+                    notificationToggle.style.display = 'none';
+                }
+                if (notificationDropdown) {
+                    notificationDropdown.style.display = 'none';
+                }
+            }
+        }
+    }
+
+    // Toast notification
+    function showToast(message, type) {
+        type = type || 'info';
+        
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: type === 'error' ? 'error' : 'success',
+                title: message,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+            return;
+        }
+
+        // Fallback simple
+        const toast = document.createElement('div');
+        toast.className = 'toast-message toast-' + type;
+        toast.textContent = message;
+        toast.style.cssText = 'position:fixed;top:20px;right:20px;padding:14px 20px;border-radius:8px;color:#fff;font-size:0.9rem;z-index:99999;transition:opacity 0.3s;max-width:400px;box-shadow:0 4px 12px rgba(0,0,0,0.15);';
+        toast.style.background = type === 'error' ? '#ef4444' : '#10b981';
+        document.body.appendChild(toast);
+        
+        setTimeout(function() {
+            toast.style.opacity = '0';
+            setTimeout(function() { toast.remove(); }, 300);
+        }, 3000);
+    }
+
+    // Échapper le HTML pour éviter les XSS
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+})();

@@ -36,6 +36,9 @@
     <!-- Utilitaire toast global -->
     <script src="/assets/js/admin/toast.js"></script>
 
+    <!-- Gestion des notifications -->
+    <script src="/assets/js/admin/notifications.js" defer></script>
+
     <!-- Script inline (données pour JS) si fourni -->
     <?php if (!empty($inline_script)): ?>
         <?= $inline_script ?>
@@ -66,8 +69,28 @@
         </div>
     <?php endif; ?>
 
-    <!-- Boutons flottants (dark mode + tour guidé) -->
+    <!-- Boutons flottants (notifications + dark mode + tour guidé) -->
     <div class="floating-buttons">
+        <?php if (isset($pending_reservations_count) && $pending_reservations_count > 0): ?>
+        <button type="button" class="notification-toggle-floating" id="notification-toggle" title="Réservations en attente">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notification-count"><?= $pending_reservations_count ?></span>
+        </button>
+        
+        <!-- Dropdown des notifications -->
+        <div class="notification-dropdown" id="notification-dropdown" style="display: none;">
+            <div class="notification-dropdown-header">
+                <h4><i class="fas fa-bell"></i> Réservations en attente</h4>
+                <a href="?page=reservations" class="notification-view-all">Tout voir</a>
+            </div>
+            <div class="notification-dropdown-body" id="notification-list">
+                <div class="notification-loading">
+                    <i class="fas fa-spinner fa-spin"></i> Chargement...
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+        
         <button id="dark-mode-toggle" class="dark-mode-toggle-floating" title="Mode sombre / clair">
             <i class="fas fa-moon"></i>
             <i class="fas fa-sun"></i>
@@ -84,6 +107,9 @@
         </button>
         <?php endif; ?>
     </div>
+
+    <!-- Token CSRF pour les appels AJAX -->
+    <input type="hidden" id="csrf-token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">
 
     <!-- Conteneur principal de toutes les pages admin -->
     <div class="container">

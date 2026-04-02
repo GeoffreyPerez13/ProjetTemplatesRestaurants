@@ -467,9 +467,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     let pendingHtml = '';
                     if (data.pendingReservations && data.pendingReservations.length > 0) {
                         pendingHtml = '<div id="pending-reservations-section" style="display: block;"><h4><i class="fas fa-clock"></i> Réservations en attente</h4><div class="pending-reservations-grid">';
+                        const now = new Date();
                         data.pendingReservations.forEach(r => {
+                            // Vérifier si la réservation est passée
+                            const reservationDateTime = new Date(r.reservation_date + ' ' + r.reservation_time);
+                            const isPast = reservationDateTime < now;
+                            const pastClass = isPast ? ' past-reservation' : '';
+                            
                             pendingHtml += `
-                                <div class="reservation-card status-pending" data-id="${r.id}">
+                                <div class="reservation-card pending-reservation-card status-pending${pastClass}" data-id="${r.id}">
                                     <div class="reservation-card-header">
                                         <span class="reservation-time"><i class="fas fa-clock"></i> ${r.reservation_time.substring(0, 5)}</span>
                                         <span class="reservation-status badge-warning">En attente</span>

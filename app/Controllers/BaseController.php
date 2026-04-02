@@ -64,6 +64,37 @@ class BaseController
     }
 
     /**
+     * Récupère le nombre de réservations en attente pour les notifications
+     * 
+     * @return int Nombre de réservations en attente
+     */
+    protected function getPendingReservationsCount()
+    {
+        if (!$this->isLogged() || empty($_SESSION['admin_id'])) {
+            return 0;
+        }
+
+        try {
+            // Vérifier si la table reservations existe
+            $stmt = $this->pdo->query("SHOW TABLES LIKE 'reservations'");
+            if ($stmt->rowCount() === 0) {
+                return 0;
+            }
+
+            // Compter les réservations en attente
+            $stmt = $this->pdo->prepare("
+                SELECT COUNT(*) FROM reservations 
+                WHERE admin_id = ? AND status = 'pending'
+            ");
+            $stmt->execute([$_SESSION['admin_id']]);
+            return (int)$stmt->fetchColumn();
+        } catch (Exception $e) {
+            error_log("Erreur getPendingReservationsCount: " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
      * Force la connexion : si l'utilisateur n'est pas connecté, il est redirigé vers la page de login
      * 
      * Explication détaillée:
@@ -227,6 +258,11 @@ class BaseController
         // Content-Security-Policy (uniquement pour les pages rendues avec HTML)
         if (!headers_sent()) {
             header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://code.jquery.com https://cdn.jsdelivr.net https://js.stripe.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://fonts.googleapis.com; font-src 'self' https://cdnjs.cloudflare.com https://fonts.gstatic.com; img-src 'self' data: blob:; frame-src https://js.stripe.com https://maps.google.com https://www.google.com; connect-src 'self'");
+        }
+
+        // Ajouter le compteur de notifications pour toutes les pages admin
+        if (strpos($view, 'admin/') === 0 && !isset($data['pending_reservations_count'])) {
+            $data['pending_reservations_count'] = $this->getPendingReservationsCount();
         }
 
         // Transforme les clés du tableau en variables (EXTR_SKIP évite d'écraser des variables existantes)

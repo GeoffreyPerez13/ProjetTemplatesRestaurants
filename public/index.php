@@ -514,6 +514,11 @@ switch ($page) {
         $controller->publicGetSlots();
         break;
 
+    case 'get-pending-reservations':
+        $controller = new ReservationController($pdo);
+        $controller->getPendingReservations();
+        break;
+
     case 'get-day-reservations':
         $controller = new ReservationController($pdo);
         $controller->getDayReservations();

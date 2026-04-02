@@ -410,8 +410,37 @@
 
 .pending-reservations-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
+}
+
+.pending-reservation-card.past-reservation {
+  opacity: 0.6;
+  background: var(--color-bg-alt);
+  border-color: var(--color-text-muted);
+  position: relative;
+}
+
+.pending-reservation-card.past-reservation::before {
+  content: "⏱ Heure dépassée";
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 0.75rem;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  z-index: 1;
+}
+
+.pending-reservation-card.past-reservation:hover {
+  opacity: 0.7;
+  background: var(--color-bg-alt);
 }
 
 .today-header {
@@ -934,6 +963,21 @@
     grid-template-columns: 1fr;
   }
 
+  .today-date-selector {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .today-date-display h3 {
+    font-size: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .date-nav-btn {
+    min-width: 40px;
+    padding: 8px;
+  }
+
   /* Filtres : 1 colonne */
   .filters-form {
     grid-template-columns: 1fr;
@@ -1024,19 +1068,89 @@
 
 /* ---- Petit mobile ---- */
 @media (max-width: 480px) {
+  .reservations-page {
+    padding: 12px;
+  }
+
+  .reservations-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .reservations-header h2 {
+    font-size: 1.25rem;
+  }
+
   .reservations-kpis {
     grid-template-columns: 1fr;
   }
 
+  .reservations-tabs {
+    gap: 2px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .tab-btn {
-    padding: 10px;
-    font-size: 0.9rem;
+    padding: 12px 8px;
+    font-size: 0;
     flex: 1;
+    min-width: 50px;
     justify-content: center;
+    position: relative;
+  }
+
+  .tab-btn i {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+
+  .tab-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    margin: 0;
+    min-width: 16px;
+    height: 16px;
+    font-size: 0.65rem;
+    padding: 0 4px;
+  }
+
+  .today-date-selector {
+    gap: 8px;
+  }
+
+  .today-date-display h3 {
+    font-size: 0.9rem;
+    gap: 6px;
+  }
+
+  .date-nav-btn {
+    min-width: 36px;
+    padding: 6px;
+    font-size: 0.9rem;
+  }
+
+  .pending-reservations-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .reservation-card {
+    padding: 14px;
+  }
+
+  .reservation-card h4 {
+    font-size: 0.95rem;
   }
 
   .reservation-card-actions {
     flex-direction: column;
+    gap: 8px;
+  }
+
+  .reservation-card-actions .btn {
+    width: 100%;
   }
 
   .days-checkboxes {
