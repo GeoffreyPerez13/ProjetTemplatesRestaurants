@@ -540,6 +540,11 @@ switch ($page) {
         $controller->deleteFloor();
         break;
 
+    case 'floor-plan-delete-all-floors':
+        $controller = new FloorPlanController($pdo);
+        $controller->deleteAllFloors();
+        break;
+
     case 'floor-plan-clear-floor':
         $controller = new FloorPlanController($pdo);
         $controller->clearFloor();

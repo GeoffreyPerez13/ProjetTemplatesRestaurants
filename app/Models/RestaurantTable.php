@@ -72,7 +72,7 @@ class RestaurantTable
         $fields = [];
         $values = [];
         
-        $allowed = ['table_number', 'shape', 'capacity_min', 'capacity_max', 'position_x', 'position_y', 'width', 'height', 'zone', 'is_active'];
+        $allowed = ['table_number', 'shape', 'capacity_min', 'capacity_max', 'position_x', 'position_y', 'width', 'height', 'rotation', 'zone', 'is_active'];
         
         foreach ($allowed as $field) {
             if (isset($data[$field])) {

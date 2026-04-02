@@ -39,7 +39,10 @@ require __DIR__ . '/../partials/header.php';
             </button>
         </div>
         <div class="floor-actions">
-            <button class="btn-icon" id="edit-floor-btn" title="Modifier l'étage">
+            <button class="btn-icon btn-info" id="recenter-canvas-btn" title="Recentrer la vue">
+                <i class="fas fa-compress-arrows-alt"></i>
+            </button>
+            <button class="btn-icon btn-primary" id="edit-floor-btn" title="Modifier l'étage">
                 <i class="fas fa-edit"></i>
             </button>
             <button class="btn-icon btn-warning" id="clear-floor-btn" title="Vider l'étage">
@@ -47,6 +50,9 @@ require __DIR__ . '/../partials/header.php';
             </button>
             <button class="btn-icon btn-danger" id="delete-floor-btn" title="Supprimer l'étage">
                 <i class="fas fa-trash"></i>
+            </button>
+            <button class="btn-icon btn-danger-dark" id="delete-all-floors-btn" title="Supprimer tous les étages">
+                <i class="fas fa-trash-alt"></i>
             </button>
         </div>
     </div>

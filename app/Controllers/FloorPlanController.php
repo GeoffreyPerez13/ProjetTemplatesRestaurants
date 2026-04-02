@@ -171,6 +171,45 @@ class FloorPlanController extends BaseController
     }
 
     /**
+     * Supprimer tous les étages d'un admin
+     */
+    public function deleteAllFloors()
+    {
+        $this->requireLogin();
+        $this->requireActiveSubscription();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Méthode non autorisée']);
+            exit;
+        }
+
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Token CSRF invalide']);
+            exit;
+        }
+
+        $admin_id = $_SESSION['admin_id'];
+        $floorModel = new Floor($this->pdo);
+
+        // Récupérer tous les étages de l'admin
+        $floors = $floorModel->getAllByAdmin($admin_id);
+
+        // Supprimer chaque étage (cascade supprime tables et éléments)
+        foreach ($floors as $floor) {
+            $floorModel->delete($floor['id']);
+        }
+
+        echo json_encode([
+            'success' => true, 
+            'message' => 'Tous les étages supprimés',
+            'csrf_token' => $this->getCsrfToken()
+        ]);
+        exit;
+    }
+
+    /**
      * Vider tous les éléments d'un étage (tables + éléments)
      */
     public function clearFloor()

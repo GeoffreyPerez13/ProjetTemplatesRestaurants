@@ -9,7 +9,9 @@
     let currentTool = 'select';
     let selectedElement = null;
     let isDragging = false;
+    let isRotating = false;
     let dragOffset = { x: 0, y: 0 };
+    let rotationStart = { angle: 0, mouseAngle: 0 };
     let currentFloorId = window.floorPlanData?.currentFloorId || null;
     let tables = window.floorPlanData?.tables || [];
     let elements = window.floorPlanData?.elements || [];
@@ -18,6 +20,14 @@
     // Compteurs pour numérotation auto
     let tableCounter = tables.length + 1;
     const SNAP_THRESHOLD = 15; // pixels de distance pour le snapping
+    const ANGLE_SNAP_THRESHOLD = 10; // degrés de tolérance pour snapping d'angle
+    const GRID_SIZE = 20; // taille de la grille en pixels
+    let saveRotationTimeout = null;
+    let savePositionTimeout = null;
+    
+    // Queue pour sérialiser les requêtes AJAX et éviter conflits CSRF
+    let requestQueue = [];
+    let isProcessingRequest = false;
 
     /**
      * Initialisation
@@ -30,9 +40,41 @@
         setupFloorTabs();
         setupModals();
         setupPropertiesPanel();
+        setupKeyboardShortcuts();
         renderCanvas();
+        
+        // Afficher le toast si paramètre présent dans l'URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const toast = urlParams.get('toast');
+        if (toast === 'floor-created') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Étage créé',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+            // Nettoyer l'URL
+            window.history.replaceState({}, '', '?page=floor-plan');
+        }
 
         console.log('Floor plan editor initialized');
+    }
+
+    /**
+     * Configuration des raccourcis clavier
+     */
+    function setupKeyboardShortcuts() {
+        document.addEventListener('keydown', (e) => {
+            // Touche Delete ou Suppr pour supprimer l'élément sélectionné
+            if ((e.key === 'Delete' || e.key === 'Suppr') && selectedElement) {
+                e.preventDefault();
+                const id = selectedElement.dataset.id;
+                const type = selectedElement.dataset.type;
+                deleteItem(id, type);
+            }
+        });
     }
 
     /**
@@ -62,6 +104,27 @@
                 }
             }
         });
+    }
+
+    /**
+     * Basculer sur l'outil Sélectionner
+     */
+    function switchToSelectTool() {
+        currentTool = 'select';
+        
+        // Mettre à jour l'UI
+        const toolButtons = document.querySelectorAll('.tool-btn');
+        toolButtons.forEach(btn => {
+            if (btn.dataset.tool === 'select') {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        // Changer le curseur du canvas
+        const canvas = document.getElementById('floor-canvas');
+        canvas.style.cursor = 'default';
     }
 
     /**
@@ -106,8 +169,12 @@
             if (currentTool === 'select') return;
             
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            let x = e.clientX - rect.left;
+            let y = e.clientY - rect.top;
+            
+            // Snap à la grille pour le placement initial
+            x = Math.round(x / GRID_SIZE) * GRID_SIZE;
+            y = Math.round(y / GRID_SIZE) * GRID_SIZE;
             
             addElement(currentTool, x, y);
         });
@@ -139,8 +206,9 @@
         data.append('shape', shape);
         data.append('capacity_min', '2');
         data.append('capacity_max', '4');
-        data.append('position_x', Math.round(x - width / 2));
-        data.append('position_y', Math.round(y - height / 2));
+        // Position déjà snapée à la grille, pas besoin de centrer
+        data.append('position_x', x);
+        data.append('position_y', y);
         data.append('width', width);
         data.append('height', height);
 
@@ -190,8 +258,9 @@
         data.append('csrf_token', csrfToken);
         data.append('floor_id', currentFloorId);
         data.append('element_type', type);
-        data.append('position_x', Math.round(x - width / 2));
-        data.append('position_y', Math.round(y - height / 2));
+        // Position déjà snapée à la grille, pas besoin de centrer
+        data.append('position_x', x);
+        data.append('position_y', y);
         data.append('width', width);
         data.append('height', height);
 
@@ -262,12 +331,17 @@
         div.style.top = table.position_y + 'px';
         div.style.width = table.width + 'px';
         div.style.height = table.height + 'px';
+        
+        if (table.rotation) {
+            div.style.transform = `rotate(${table.rotation}deg)`;
+        }
 
         div.innerHTML = `
             <div class="table-number">${table.table_number}</div>
             <div class="table-capacity">${table.capacity_min}-${table.capacity_max}p</div>
         `;
 
+        addRotationHandles(div);
         makeDraggable(div);
         makeSelectable(div, table);
 
@@ -298,6 +372,7 @@
             div.innerHTML = '<svg class="element-icon-svg" viewBox="0 0 60 20" preserveAspectRatio="none"><line x1="15" y1="3" x2="15" y2="17" stroke="rgba(255,255,255,0.5)" stroke-width="1"/><line x1="30" y1="3" x2="30" y2="17" stroke="rgba(255,255,255,0.5)" stroke-width="1"/><line x1="45" y1="3" x2="45" y2="17" stroke="rgba(255,255,255,0.5)" stroke-width="1"/><line x1="3" y1="10" x2="57" y2="10" stroke="rgba(255,255,255,0.4)" stroke-width="0.8"/></svg>';
         }
 
+        addRotationHandles(div);
         makeDraggable(div);
         makeSelectable(div, element);
 
@@ -305,10 +380,199 @@
     }
 
     /**
+     * Ajouter les poignées de rotation aux 4 coins
+     */
+    function addRotationHandles(element) {
+        const positions = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+        
+        positions.forEach(pos => {
+            const handle = document.createElement('div');
+            handle.className = `rotation-handle ${pos}`;
+            handle.dataset.position = pos;
+            
+            handle.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                startRotation(element, e);
+            });
+            
+            element.appendChild(handle);
+        });
+    }
+
+    /**
+     * Démarrer la rotation interactive
+     */
+    function startRotation(element, e) {
+        isRotating = true;
+        const rect = element.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        // Récupérer la rotation actuelle
+        const currentRotation = getCurrentRotation(element);
+        rotationStart.angle = currentRotation;
+        rotationStart.mouseAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+        
+        element.classList.add('rotating');
+
+        const onMouseMove = (moveEvent) => {
+            if (!isRotating) return;
+            
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const currentMouseAngle = Math.atan2(moveEvent.clientY - centerY, moveEvent.clientX - centerX) * (180 / Math.PI);
+            
+            let newRotation = rotationStart.angle + (currentMouseAngle - rotationStart.mouseAngle);
+            // Normaliser entre 0 et 360
+            newRotation = ((newRotation % 360) + 360) % 360;
+            
+            // Snapping automatique à 45° (0°, 45°, 90°, 135°, 180°, 225°, 270°, 315°)
+            const snapAngles = [0, 45, 90, 135, 180, 225, 270, 315];
+            let snapped = false;
+            for (const angle of snapAngles) {
+                if (Math.abs(newRotation - angle) < ANGLE_SNAP_THRESHOLD) {
+                    newRotation = angle;
+                    snapped = true;
+                    break;
+                }
+            }
+            // Vérifier aussi 360° = 0°
+            if (!snapped && Math.abs(newRotation - 360) < ANGLE_SNAP_THRESHOLD) {
+                newRotation = 0;
+            }
+            
+            element.style.transform = `rotate(${newRotation}deg)`;
+            element.dataset.pendingRotation = newRotation;
+        };
+
+        const onMouseUp = () => {
+            if (isRotating) {
+                isRotating = false;
+                element.classList.remove('rotating');
+                
+                // Sauvegarder la rotation
+                const newRotation = element.dataset.pendingRotation;
+                if (newRotation !== undefined) {
+                    saveRotation(element, Math.round(parseFloat(newRotation)));
+                    delete element.dataset.pendingRotation;
+                }
+            }
+            
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        e.preventDefault();
+    }
+
+    /**
+     * Récupérer la rotation actuelle d'un élément
+     */
+    function getCurrentRotation(element) {
+        const id = element.dataset.id;
+        const type = element.dataset.type;
+        
+        if (type === 'table') {
+            const table = tables.find(t => t.id == id);
+            return parseInt(table?.rotation || 0);
+        } else {
+            const el = elements.find(e => e.id == id);
+            return parseInt(el?.rotation || 0);
+        }
+    }
+
+    /**
+     * Sauvegarder la rotation d'un élément (avec debounce pour éviter erreurs CSRF)
+     */
+    function saveRotation(element, rotation) {
+        // Annuler le timeout précédent si existant
+        if (saveRotationTimeout) {
+            clearTimeout(saveRotationTimeout);
+        }
+
+        // Attendre 300ms avant de sauvegarder
+        saveRotationTimeout = setTimeout(() => {
+            const id = element.dataset.id;
+            const type = element.dataset.type;
+
+            const data = new FormData();
+            data.append('csrf_token', csrfToken);
+            data.append('rotation', rotation);
+
+            const endpoint = type === 'table' 
+                ? `?page=floor-plan-update-table` 
+                : `?page=floor-plan-update-element`;
+            
+            data.append(type === 'table' ? 'table_id' : 'element_id', id);
+
+            queueRequest(() => {
+                return fetch(endpoint, {
+                    method: 'POST',
+                    body: data
+                })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success) {
+                        if (result.csrf_token) csrfToken = result.csrf_token;
+                        reloadFloorData();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erreur',
+                            text: result.message || 'Erreur de sauvegarde'
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error('Error saving rotation:', err);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: 'Erreur de sauvegarde de la rotation'
+                    });
+                });
+            });
+        }, 300);
+    }
+
+    /**
+     * Ajouter une requête à la queue pour éviter les conflits CSRF
+     */
+    function queueRequest(requestFn) {
+        requestQueue.push(requestFn);
+        processQueue();
+    }
+
+    /**
+     * Traiter la queue de requêtes une par une
+     */
+    function processQueue() {
+        if (isProcessingRequest || requestQueue.length === 0) {
+            return;
+        }
+
+        isProcessingRequest = true;
+        const requestFn = requestQueue.shift();
+
+        requestFn()
+            .finally(() => {
+                isProcessingRequest = false;
+                // Traiter la prochaine requête après un petit délai
+                setTimeout(processQueue, 100);
+            });
+    }
+
+    /**
      * Rendre un élément draggable
      */
     function makeDraggable(element) {
         element.addEventListener('mousedown', (e) => {
+            // Ignorer si on clique sur une poignée de rotation
+            if (e.target.classList.contains('rotation-handle')) return;
+            
             isDragging = true;
             const rect = element.getBoundingClientRect();
             const canvasEl = document.getElementById('floor-canvas');
@@ -330,12 +594,9 @@
                 x = Math.max(0, Math.min(x, canvas.width - element.offsetWidth));
                 y = Math.max(0, Math.min(y, canvas.height - element.offsetHeight));
 
-                // Snapping magnétique pour murs/portes/fenêtres
-                if (isStructural) {
-                    const snapped = snapToNearbyElements(element, x, y);
-                    x = snapped.x;
-                    y = snapped.y;
-                }
+                // Snap strict à la grille - pas de position libre
+                x = Math.round(x / GRID_SIZE) * GRID_SIZE;
+                y = Math.round(y / GRID_SIZE) * GRID_SIZE;
                 
                 element.style.left = x + 'px';
                 element.style.top = y + 'px';
@@ -363,7 +624,7 @@
     }
 
     /**
-     * Snapping magnétique : colle les murs/portes/fenêtres proches
+     * Snapping magnétique : colle les murs/portes/fenêtres proches (tous les sens)
      */
     function snapToNearbyElements(draggedEl, x, y) {
         const canvasEl = document.getElementById('floor-canvas');
@@ -383,45 +644,81 @@
             const ow = other.offsetWidth;
             const oh = other.offsetHeight;
 
-            // Snap bord droit de l'élément déplacé au bord gauche de l'autre
+            // Snapping horizontal (X)
+            // Bord droit → bord gauche
             if (Math.abs((x + w) - ox) < SNAP_THRESHOLD) {
                 snappedX = ox - w;
                 didSnap = true;
             }
-            // Snap bord gauche au bord droit de l'autre
+            // Bord gauche → bord droit
             if (Math.abs(x - (ox + ow)) < SNAP_THRESHOLD) {
                 snappedX = ox + ow;
                 didSnap = true;
             }
-            // Snap bord gauche à bord gauche (alignement)
+            // Alignement bord gauche
             if (Math.abs(x - ox) < SNAP_THRESHOLD) {
                 snappedX = ox;
                 didSnap = true;
             }
-            // Snap bord droit à bord droit
+            // Alignement bord droit
             if (Math.abs((x + w) - (ox + ow)) < SNAP_THRESHOLD) {
                 snappedX = ox + ow - w;
                 didSnap = true;
             }
+            // Centre horizontal aligné
+            if (Math.abs((x + w/2) - (ox + ow/2)) < SNAP_THRESHOLD) {
+                snappedX = ox + ow/2 - w/2;
+                didSnap = true;
+            }
 
-            // Snap bord bas au bord haut de l'autre
+            // Snapping vertical (Y)
+            // Bord bas → bord haut
             if (Math.abs((y + h) - oy) < SNAP_THRESHOLD) {
                 snappedY = oy - h;
                 didSnap = true;
             }
-            // Snap bord haut au bord bas de l'autre
+            // Bord haut → bord bas
             if (Math.abs(y - (oy + oh)) < SNAP_THRESHOLD) {
                 snappedY = oy + oh;
                 didSnap = true;
             }
-            // Snap bord haut à bord haut (alignement horizontal)
+            // Alignement bord haut
             if (Math.abs(y - oy) < SNAP_THRESHOLD) {
                 snappedY = oy;
                 didSnap = true;
             }
-            // Snap bord bas à bord bas
+            // Alignement bord bas
             if (Math.abs((y + h) - (oy + oh)) < SNAP_THRESHOLD) {
                 snappedY = oy + oh - h;
+                didSnap = true;
+            }
+            // Centre vertical aligné
+            if (Math.abs((y + h/2) - (oy + oh/2)) < SNAP_THRESHOLD) {
+                snappedY = oy + oh/2 - h/2;
+                didSnap = true;
+            }
+
+            // Snapping perpendiculaire : mur horizontal qui touche mur vertical
+            // Si l'élément déplacé est horizontal et l'autre vertical (ou inversement)
+            // Vérifier si le milieu de l'un touche le bord de l'autre
+            
+            // Milieu gauche/droit de draggedEl → bord haut/bas de other
+            if (Math.abs(x - (ox + ow/2)) < SNAP_THRESHOLD) {
+                snappedX = ox + ow/2;
+                didSnap = true;
+            }
+            if (Math.abs((x + w) - (ox + ow/2)) < SNAP_THRESHOLD) {
+                snappedX = ox + ow/2 - w;
+                didSnap = true;
+            }
+            
+            // Milieu haut/bas de draggedEl → bord gauche/droit de other
+            if (Math.abs(y - (oy + oh/2)) < SNAP_THRESHOLD) {
+                snappedY = oy + oh/2;
+                didSnap = true;
+            }
+            if (Math.abs((y + h) - (oy + oh/2)) < SNAP_THRESHOLD) {
+                snappedY = oy + oh/2 - h;
                 didSnap = true;
             }
         });
@@ -457,12 +754,14 @@
         element.addEventListener('click', (e) => {
             if (isDragging) return;
             
+            // Basculer automatiquement sur l'outil Sélectionner
+            switchToSelectTool();
+            
             // Désélectionner l'ancien
             if (selectedElement) {
                 selectedElement.classList.remove('selected');
             }
             
-            // Sélectionner le nouveau
             selectedElement = element;
             element.classList.add('selected');
             
@@ -474,42 +773,48 @@
     }
 
     /**
-     * Sauvegarder la position d'un élément
+     * Sauvegarder la position d'un élément (avec debounce)
      */
     function savePosition(element) {
-        const id = element.dataset.id;
-        const type = element.dataset.type;
-        const x = parseInt(element.style.left);
-        const y = parseInt(element.style.top);
+        // Annuler le timeout précédent si existant
+        if (savePositionTimeout) {
+            clearTimeout(savePositionTimeout);
+        }
 
-        const data = new FormData();
-        data.append('csrf_token', csrfToken);
-        data.append('position_x', x);
-        data.append('position_y', y);
+        // Attendre 300ms avant de sauvegarder
+        savePositionTimeout = setTimeout(() => {
+            const id = element.dataset.id;
+            const type = element.dataset.type;
+            const x = parseInt(element.style.left);
+            const y = parseInt(element.style.top);
 
-        const endpoint = type === 'table' 
-            ? `?page=floor-plan-update-table` 
-            : `?page=floor-plan-update-element`;
-        
-        data.append(type === 'table' ? 'table_id' : 'element_id', id);
+            const data = new FormData();
+            data.append('csrf_token', csrfToken);
+            data.append('position_x', x);
+            data.append('position_y', y);
 
-        fetch(endpoint, {
-            method: 'POST',
-            body: data
-        })
-        .then(res => res.json())
-        .then(result => {
-            if (result.success) {
-                if (result.csrf_token) csrfToken = result.csrf_token;
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Erreur',
-                    text: result.message || 'Erreur de sauvegarde'
-                });
-            }
-        })
-        .catch(err => console.error('Error saving position:', err));
+            const endpoint = type === 'table' 
+                ? `?page=floor-plan-update-table` 
+                : `?page=floor-plan-update-element`;
+            
+            data.append(type === 'table' ? 'table_id' : 'element_id', id);
+
+            queueRequest(() => {
+                return fetch(endpoint, {
+                    method: 'POST',
+                    body: data
+                })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success && result.csrf_token) {
+                        csrfToken = result.csrf_token;
+                    } else if (!result.success) {
+                        console.error('Error saving position:', result.message);
+                    }
+                })
+                .catch(err => console.error('Error saving position:', err));
+            });
+        }, 300);
     }
 
     /**
@@ -546,6 +851,20 @@
                     <label>Zone (optionnel)</label>
                     <input type="text" id="prop-zone" value="${data.zone || ''}" placeholder="Ex: Terrasse">
                 </div>
+                <div class="form-group">
+                    <label>Rotation</label>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-secondary" style="flex: 1;" onclick="window.floorPlanEditor.rotateElement(${data.id}, 'table', -45)" title="Pivoter à gauche (45°)">
+                            <i class="fas fa-undo"></i> -45°
+                        </button>
+                        <button class="btn-secondary" style="flex: 1;" onclick="window.floorPlanEditor.rotateElement(${data.id}, 'table', 0)" title="Réinitialiser">
+                            <i class="fas fa-sync"></i> 0°
+                        </button>
+                        <button class="btn-secondary" style="flex: 1;" onclick="window.floorPlanEditor.rotateElement(${data.id}, 'table', 45)" title="Pivoter à droite (45°)">
+                            <i class="fas fa-redo"></i> +45°
+                        </button>
+                    </div>
+                </div>
                 <div class="properties-actions">
                     <button class="btn-primary" onclick="window.floorPlanEditor.saveTableProperties(${data.id})">
                         <i class="fas fa-save"></i> Enregistrer
@@ -564,7 +883,21 @@
                 <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0 0 16px 0;">
                     Déplacez l'élément en le glissant sur le canvas.
                 </p>
-                <button class="btn-danger" style="width: 100%;" onclick="window.floorPlanEditor.deleteItem(${data.id}, 'element')">
+                <div class="form-group">
+                    <label>Rotation</label>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-secondary" style="flex: 1;" onclick="window.floorPlanEditor.rotateElement(${data.id}, 'element', -45)" title="Pivoter à gauche (45°)">
+                            <i class="fas fa-undo"></i> -45°
+                        </button>
+                        <button class="btn-secondary" style="flex: 1;" onclick="window.floorPlanEditor.rotateElement(${data.id}, 'element', 0)" title="Réinitialiser">
+                            <i class="fas fa-sync"></i> 0°
+                        </button>
+                        <button class="btn-secondary" style="flex: 1;" onclick="window.floorPlanEditor.rotateElement(${data.id}, 'element', 45)" title="Pivoter à droite (45°)">
+                            <i class="fas fa-redo"></i> +45°
+                        </button>
+                    </div>
+                </div>
+                <button class="btn-danger" style="width: 100%; margin-top: 12px;" onclick="window.floorPlanEditor.deleteItem(${data.id}, 'element')">
                     <i class="fas fa-trash"></i> Supprimer
                 </button>
             `;
@@ -782,6 +1115,11 @@
     function setupModals() {
         // Modal ajout étage
         document.getElementById('add-floor-btn')?.addEventListener('click', () => {
+            // Mettre à jour le token CSRF dans le formulaire
+            const csrfInput = document.querySelector('#add-floor-form input[name="csrf_token"]');
+            if (csrfInput) {
+                csrfInput.value = csrfToken;
+            }
             document.getElementById('add-floor-modal').style.display = 'flex';
         });
 
@@ -800,16 +1138,8 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    if (data.csrf_token) csrfToken = data.csrf_token;
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Étage créé',
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 3000
-                    });
-                    location.reload();
+                    // Recharger immédiatement avec paramètre pour afficher le toast
+                    window.location.href = '?page=floor-plan&toast=floor-created';
                 } else {
                     Swal.fire({
                         icon: 'error',
@@ -820,12 +1150,27 @@
             });
         });
 
+        // Bouton recentrer la vue
+        document.getElementById('recenter-canvas-btn')?.addEventListener('click', () => {
+            const container = document.querySelector('.floor-canvas-container');
+            if (container) {
+                // Recentrer horizontalement et verticalement
+                container.scrollLeft = (container.scrollWidth - container.clientWidth) / 2;
+                container.scrollTop = (container.scrollHeight - container.clientHeight) / 2;
+            }
+        });
+
         // Modal édition/suppression étage
         document.getElementById('edit-floor-btn')?.addEventListener('click', () => {
             const activeTab = document.querySelector('.floor-tab.active');
             if (activeTab) {
                 document.getElementById('edit-floor-id').value = currentFloorId;
                 document.getElementById('edit-floor-name').value = activeTab.textContent.trim();
+                // Mettre à jour le token CSRF dans le formulaire d'édition
+                const csrfInput = document.querySelector('#edit-floor-form input[name="csrf_token"]');
+                if (csrfInput) {
+                    csrfInput.value = csrfToken;
+                }
                 document.getElementById('edit-floor-modal').style.display = 'flex';
             }
         });
@@ -906,6 +1251,58 @@
                             text: data.message || 'Erreur'
                         });
                     }
+                });
+            });
+        });
+
+        // Supprimer tous les étages
+        document.getElementById('delete-all-floors-btn')?.addEventListener('click', () => {
+            Swal.fire({
+                title: 'Supprimer TOUS les étages ?',
+                text: 'Tous les étages et leur contenu seront supprimés définitivement. Cette action est irréversible.',
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonText: 'Oui, tout supprimer',
+                cancelButtonText: 'Annuler',
+                confirmButtonColor: '#dc2626'
+            }).then((result) => {
+                if (!result.isConfirmed) return;
+                
+                const formData = new FormData();
+                formData.append('csrf_token', csrfToken);
+                
+                fetch('?page=floor-plan-delete-all-floors', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.csrf_token) csrfToken = data.csrf_token;
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Tous les étages supprimés',
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                        setTimeout(() => location.reload(), 2000);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Erreur',
+                            text: data.message || 'Erreur de suppression'
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error('Error deleting all floors:', err);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Erreur',
+                        text: 'Erreur de suppression'
+                    });
                 });
             });
         });
@@ -1020,11 +1417,78 @@
         });
     }
 
+    /**
+     * Faire pivoter un élément ou une table
+     */
+    function rotateElement(id, type, angle) {
+        // Trouver l'élément actuel
+        const current = type === 'table' 
+            ? tables.find(t => t.id == id)
+            : elements.find(e => e.id == id);
+        
+        if (!current) return;
+
+        // Calculer la nouvelle rotation
+        let newRotation = angle;
+        if (angle !== 0) {
+            // Si c'est +90 ou -90, ajouter à la rotation actuelle
+            const currentRotation = parseInt(current.rotation || 0);
+            newRotation = currentRotation + angle;
+            // Normaliser entre 0 et 360
+            newRotation = ((newRotation % 360) + 360) % 360;
+        }
+
+        const data = new FormData();
+        data.append('csrf_token', csrfToken);
+        data.append('rotation', newRotation);
+
+        const endpoint = type === 'table' 
+            ? `?page=floor-plan-update-table` 
+            : `?page=floor-plan-update-element`;
+        
+        data.append(type === 'table' ? 'table_id' : 'element_id', id);
+
+        fetch(endpoint, {
+            method: 'POST',
+            body: data
+        })
+        .then(res => res.json())
+        .then(result => {
+            if (result.success) {
+                if (result.csrf_token) csrfToken = result.csrf_token;
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Rotation appliquée',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+                reloadFloorData();
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: result.message || 'Erreur de rotation'
+                });
+            }
+        })
+        .catch(err => {
+            console.error('Error rotating:', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: 'Erreur de rotation'
+            });
+        });
+    }
+
     // Exposer les fonctions publiques
     window.floorPlanEditor = {
         saveTableProperties,
         saveElementProperties,
-        deleteItem
+        deleteItem,
+        rotateElement
     };
 
     // Initialiser au chargement
