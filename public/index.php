@@ -498,6 +498,21 @@ switch ($page) {
         $controller->deleteReservation();
         break;
 
+    case 'reservation-delete-all':
+        $controller = new ReservationController($pdo);
+        $controller->deleteAllReservations();
+        break;
+
+    case 'reservation-delete-completed':
+        $controller = new ReservationController($pdo);
+        $controller->deleteCompletedReservations();
+        break;
+
+    case 'reservation-complete-all':
+        $controller = new ReservationController($pdo);
+        $controller->completeAllReservations();
+        break;
+
     case 'reservation-save-settings':
         $controller = new ReservationController($pdo);
         $controller->saveSettings();

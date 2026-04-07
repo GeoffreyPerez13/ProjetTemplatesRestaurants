@@ -72,7 +72,6 @@
 .tab-badge {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
@@ -221,6 +220,67 @@
 .today-section h3 i {
   color: var(--color-primary);
   margin-right: 8px;
+}
+
+
+.btn-icon {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: 16px;
+}
+
+.btn-icon:hover {
+  background: var(--color-bg-warm);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* Bouton Primary (orange) */
+.btn-icon.btn-primary {
+  background: #fed7aa;
+  border-color: var(--color-primary);
+  color: #92400e;
+}
+
+.btn-icon.btn-primary:hover {
+  background: #fdba74;
+  border-color: #ea580c;
+  color: #7c2d12;
+}
+
+/* Bouton Warning (jaune) */
+.btn-icon.btn-warning {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+}
+
+.btn-icon.btn-warning:hover {
+  background: #fde68a;
+  border-color: #d97706;
+  color: #78350f;
+}
+
+/* Bouton Danger (rouge) */
+.btn-icon.btn-danger {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #991b1b;
+}
+
+.btn-icon.btn-danger:hover {
+  background: #fecaca;
+  border-color: #dc2626;
+  color: #7f1d1d;
 }
 
 .empty-state {
@@ -399,13 +459,38 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+.pending-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 #pending-reservations-section h4 {
-  margin: 0 0 16px 0;
+  margin: 0;
   color: var(--color-warning);
   font-size: 1.1rem;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.btn-validate-all {
+  white-space: nowrap;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+  transition: all var(--transition-fast);
+}
+
+.btn-validate-all:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+.btn-validate-all i {
+  margin-right: 4px;
 }
 
 .pending-reservations-grid {
@@ -558,8 +643,15 @@
 
 .filter-actions {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
+}
+
+.filter-divider {
+  width: 1px;
+  height: 32px;
+  background: var(--color-border);
+  margin: 0 6px;
 }
 
 .filter-actions .btn.small {
@@ -822,6 +914,23 @@
   text-transform: uppercase;
 }
 
+.setting-warning {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(251, 191, 36, 0.1);
+  border-left: 3px solid #fbbf24;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #d97706;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.setting-warning i {
+  color: #fbbf24;
+}
+
 /* Toggle switch */
 .toggle-switch {
   position: relative;
@@ -989,9 +1098,22 @@
     gap: 8px;
   }
 
+  .filter-actions {
+    flex-wrap: wrap;
+  }
+
   .filter-actions .btn.small {
     flex: 1;
     justify-content: center;
+  }
+
+  .filter-divider {
+    display: none;
+  }
+
+  .filter-actions .btn-icon {
+    width: 40px;
+    height: 40px;
   }
 
   /* Settings */
@@ -1120,6 +1242,16 @@
     gap: 8px;
   }
 
+  .pending-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .btn-validate-all {
+    width: 100%;
+    justify-content: center;
+  }
+  
   .today-date-display h3 {
     font-size: 0.9rem;
     gap: 6px;

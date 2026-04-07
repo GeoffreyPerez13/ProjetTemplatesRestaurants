@@ -11,29 +11,49 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // ==================== ONGLETS ====================
 
+  // Fonction pour activer un onglet
+  function activateTab(tabId) {
+    // Désactiver tous les onglets
+    document
+      .querySelectorAll(".tab-btn")
+      .forEach(function (b) { b.classList.remove("active"); });
+    document
+      .querySelectorAll(".tab-content")
+      .forEach(function (c) { c.classList.remove("active"); });
+
+    // Activer l'onglet spécifié
+    var btn = document.querySelector('.tab-btn[data-tab="' + tabId + '"]');
+    var target = document.getElementById(tabId);
+    if (btn) btn.classList.add("active");
+    if (target) target.classList.add("active");
+  }
+
+  // Gestion des clics sur les onglets
   document.querySelectorAll(".tab-btn").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      // Désactiver tous les onglets
-      document
-        .querySelectorAll(".tab-btn")
-        .forEach(function (b) { b.classList.remove("active"); });
-      document
-        .querySelectorAll(".tab-content")
-        .forEach(function (c) { c.classList.remove("active"); });
-
-      // Activer l'onglet cliqué
-      btn.classList.add("active");
-      var target = document.getElementById(btn.dataset.tab);
-      if (target) target.classList.add("active");
+      activateTab(btn.dataset.tab);
     });
   });
+
+  // Détecter les paramètres de filtres dans l'URL au chargement
+  var urlParams = new URLSearchParams(window.location.search);
+  var hasFilters = urlParams.has('status') || urlParams.has('date') || urlParams.has('search');
+  var hasTabParam = urlParams.get('tab') === 'list';
+  
+  // Si des filtres sont présents ou si le paramètre tab=list est présent, activer l'onglet "Réservations"
+  if (hasFilters || hasTabParam) {
+    activateTab('tab-list');
+  }
 
   // ==================== ACTIONS SUR LES RÉSERVATIONS ====================
 
   function updateReservationStatus(id, status, extra) {
     extra = extra || {};
     var data = new FormData();
-    data.append("csrf_token", csrfToken);
+    // Récupérer le token CSRF dynamiquement à chaque appel
+    var currentCsrfToken = document.getElementById("csrf-token")?.value || 
+                           document.querySelector('input[name="csrf_token"]')?.value || "";
+    data.append("csrf_token", currentCsrfToken);
     data.append("id", id);
     data.append("status", status);
 
@@ -51,6 +71,13 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (d.success) {
+          // Mettre à jour le token CSRF
+          if (d.new_csrf_token) {
+            var csrfInput = document.getElementById("csrf-token");
+            if (csrfInput) {
+              csrfInput.value = d.new_csrf_token;
+            }
+          }
           showToast(d.message, "success");
           setTimeout(function () { location.reload(); }, 800);
         } else {
@@ -64,7 +91,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function deleteReservation(id) {
     var data = new FormData();
-    data.append("csrf_token", csrfToken);
+    // Récupérer le token CSRF dynamiquement à chaque appel
+    var currentCsrfToken = document.getElementById("csrf-token")?.value || 
+                           document.querySelector('input[name="csrf_token"]')?.value || "";
+    data.append("csrf_token", currentCsrfToken);
     data.append("id", id);
 
     fetch("?page=reservation-delete", {
@@ -74,6 +104,13 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (d.success) {
+          // Mettre à jour le token CSRF
+          if (d.new_csrf_token) {
+            var csrfInput = document.getElementById("csrf-token");
+            if (csrfInput) {
+              csrfInput.value = d.new_csrf_token;
+            }
+          }
           showToast(d.message, "success");
           setTimeout(function () { location.reload(); }, 800);
         } else {
@@ -207,6 +244,18 @@ document.addEventListener("DOMContentLoaded", function () {
         formData.set("booking_enabled", "0");
       }
 
+      // Gérer le checkbox booking_auto_confirm
+      var autoConfirmCheckbox = settingsForm.querySelector('input[name="booking_auto_confirm"]');
+      if (autoConfirmCheckbox && !autoConfirmCheckbox.checked) {
+        formData.set("booking_auto_confirm", "0");
+      }
+
+      // Gérer le checkbox booking_auto_complete
+      var autoCompleteCheckbox = settingsForm.querySelector('input[name="booking_auto_complete"]');
+      if (autoCompleteCheckbox && !autoCompleteCheckbox.checked) {
+        formData.set("booking_auto_complete", "0");
+      }
+
       // Gérer les jours de fermeture (checkboxes multiples)
       var closedDays = [];
       settingsForm.querySelectorAll('input[name="closed_days[]"]:checked').forEach(function (cb) {
@@ -223,6 +272,14 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(function (d) {
           if (d.success) {
             showToast(d.message, "success");
+            
+            // Mettre à jour le token CSRF si le serveur en renvoie un nouveau
+            if (d.new_csrf_token) {
+              var csrfInput = settingsForm.querySelector('input[name="csrf_token"]');
+              if (csrfInput) {
+                csrfInput.value = d.new_csrf_token;
+              }
+            }
           } else {
             showToast(d.message || "Erreur", "error");
           }
@@ -231,6 +288,161 @@ document.addEventListener("DOMContentLoaded", function () {
           showToast("Erreur de communication avec le serveur.", "error");
         });
     });
+  }
+
+  // ==================== ACTIONS EN MASSE ====================
+
+  // Marquer toutes comme terminées
+  var completeAllBtn = document.getElementById("complete-all-btn");
+  if (completeAllBtn) {
+    completeAllBtn.addEventListener("click", function () {
+      Swal.fire({
+        title: "Marquer toutes comme terminées ?",
+        text: "Toutes vos réservations seront marquées comme terminées.",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonColor: "#6366f1",
+        cancelButtonColor: "#6b7280",
+        confirmButtonText: '<i class="fas fa-flag-checkered"></i> Marquer',
+        cancelButtonText: "Annuler"
+      }).then(function (result) {
+        if (result.isConfirmed) {
+          completeAllReservations();
+        }
+      });
+    });
+  }
+
+  // Supprimer toutes les réservations
+  var deleteAllBtn = document.getElementById("delete-all-btn");
+  if (deleteAllBtn) {
+    deleteAllBtn.addEventListener("click", function () {
+      Swal.fire({
+        title: "Supprimer toutes les réservations ?",
+        text: "Cette action est irréversible. Toutes vos réservations seront supprimées définitivement.",
+        icon: "error",
+        showCancelButton: true,
+        confirmButtonColor: "#ef4444",
+        cancelButtonColor: "#6b7280",
+        confirmButtonText: '<i class="fas fa-trash"></i> Tout supprimer',
+        cancelButtonText: "Annuler"
+      }).then(function (result) {
+        if (result.isConfirmed) {
+          deleteAllReservations();
+        }
+      });
+    });
+  }
+
+  // Supprimer toutes les réservations terminées
+  var deleteCompletedBtn = document.getElementById("delete-completed-btn");
+  if (deleteCompletedBtn) {
+    deleteCompletedBtn.addEventListener("click", function () {
+      Swal.fire({
+        title: "Supprimer les réservations terminées ?",
+        text: "Toutes les réservations marquées comme terminées seront supprimées.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#f59e0b",
+        cancelButtonColor: "#6b7280",
+        confirmButtonText: '<i class="fas fa-trash-alt"></i> Supprimer',
+        cancelButtonText: "Annuler"
+      }).then(function (result) {
+        if (result.isConfirmed) {
+          deleteCompletedReservations();
+        }
+      });
+    });
+  }
+
+  function deleteAllReservations() {
+    var csrfToken = document.getElementById("csrf-token").value;
+    var formData = new FormData();
+    formData.append("csrf_token", csrfToken);
+
+    fetch("?page=reservation-delete-all", {
+      method: "POST",
+      body: formData,
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.success) {
+          showToast(d.message, "success");
+          // Mettre à jour le token CSRF
+          if (d.new_csrf_token) {
+            document.getElementById("csrf-token").value = d.new_csrf_token;
+          }
+          // Rediriger vers l'onglet Réservations après un court délai
+          setTimeout(function () {
+            window.location.href = "?page=reservations&tab=list";
+          }, 1500);
+        } else {
+          showToast(d.message || "Erreur", "error");
+        }
+      })
+      .catch(function () {
+        showToast("Erreur de communication avec le serveur.", "error");
+      });
+  }
+
+  function deleteCompletedReservations() {
+    var csrfToken = document.getElementById("csrf-token").value;
+    var formData = new FormData();
+    formData.append("csrf_token", csrfToken);
+
+    fetch("?page=reservation-delete-completed", {
+      method: "POST",
+      body: formData,
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.success) {
+          showToast(d.message, "success");
+          // Mettre à jour le token CSRF
+          if (d.new_csrf_token) {
+            document.getElementById("csrf-token").value = d.new_csrf_token;
+          }
+          // Rediriger vers l'onglet Réservations après un court délai
+          setTimeout(function () {
+            window.location.href = "?page=reservations&tab=list";
+          }, 1500);
+        } else {
+          showToast(d.message || "Erreur", "error");
+        }
+      })
+      .catch(function () {
+        showToast("Erreur de communication avec le serveur.", "error");
+      });
+  }
+
+  function completeAllReservations() {
+    var csrfToken = document.getElementById("csrf-token").value;
+    var formData = new FormData();
+    formData.append("csrf_token", csrfToken);
+
+    fetch("?page=reservation-complete-all", {
+      method: "POST",
+      body: formData,
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.success) {
+          showToast(d.message, "success");
+          // Mettre à jour le token CSRF
+          if (d.new_csrf_token) {
+            document.getElementById("csrf-token").value = d.new_csrf_token;
+          }
+          // Rediriger vers l'onglet Réservations après un court délai
+          setTimeout(function () {
+            window.location.href = "?page=reservations&tab=list";
+          }, 1500);
+        } else {
+          showToast(d.message || "Erreur", "error");
+        }
+      })
+      .catch(function () {
+        showToast("Erreur de communication avec le serveur.", "error");
+      });
   }
 
   // ==================== TOAST ====================

@@ -261,6 +261,9 @@ class ReservationController extends BaseController
             'booking_time_slots'    => $options['booking_time_slots'] ?? '12:00,12:30,13:00,13:30,19:00,19:30,20:00,20:30,21:00',
             'booking_closed_days'   => $options['booking_closed_days'] ?? '',
             'booking_message'       => $options['booking_message'] ?? '',
+            'booking_auto_confirm'  => ($options['booking_auto_confirm'] ?? '0') === '1',
+            'booking_auto_complete' => ($options['booking_auto_complete'] ?? '0') === '1',
+            'booking_meal_duration' => max(30, (int)($options['booking_meal_duration'] ?? 90)),
         ];
     }
 
@@ -430,7 +433,89 @@ class ReservationController extends BaseController
 
         echo json_encode([
             'success' => $result,
-            'message' => $result ? 'Réservation supprimée.' : 'Erreur lors de la suppression.'
+            'message' => $result ? 'Réservation supprimée.' : 'Erreur lors de la suppression.',
+            'new_csrf_token' => $_SESSION['csrf_token'] ?? ''
+        ]);
+        exit;
+    }
+
+    /**
+     * Supprimer toutes les réservations (AJAX)
+     */
+    public function deleteAllReservations()
+    {
+        $this->checkAccess();
+        $adminId = $_SESSION['admin_id'];
+
+        header('Content-Type: application/json');
+
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            echo json_encode(['success' => false, 'message' => 'Token CSRF invalide']);
+            exit;
+        }
+
+        $reservationModel = new Reservation($this->pdo);
+        $count = $reservationModel->deleteAll($adminId);
+
+        echo json_encode([
+            'success' => true,
+            'message' => "$count réservation(s) supprimée(s).",
+            'count' => $count,
+            'new_csrf_token' => $_SESSION['csrf_token'] ?? ''
+        ]);
+        exit;
+    }
+
+    /**
+     * Supprimer toutes les réservations terminées (AJAX)
+     */
+    public function deleteCompletedReservations()
+    {
+        $this->checkAccess();
+        $adminId = $_SESSION['admin_id'];
+
+        header('Content-Type: application/json');
+
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            echo json_encode(['success' => false, 'message' => 'Token CSRF invalide']);
+            exit;
+        }
+
+        $reservationModel = new Reservation($this->pdo);
+        $count = $reservationModel->deleteByStatus($adminId, 'completed');
+
+        echo json_encode([
+            'success' => true,
+            'message' => "$count réservation(s) terminée(s) supprimée(s).",
+            'count' => $count,
+            'new_csrf_token' => $_SESSION['csrf_token'] ?? ''
+        ]);
+        exit;
+    }
+
+    /**
+     * Marquer toutes les réservations comme terminées (AJAX)
+     */
+    public function completeAllReservations()
+    {
+        $this->checkAccess();
+        $adminId = $_SESSION['admin_id'];
+
+        header('Content-Type: application/json');
+
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            echo json_encode(['success' => false, 'message' => 'Token CSRF invalide']);
+            exit;
+        }
+
+        $reservationModel = new Reservation($this->pdo);
+        $count = $reservationModel->completeAll($adminId);
+
+        echo json_encode([
+            'success' => true,
+            'message' => "$count réservation(s) marquée(s) comme terminée(s).",
+            'count' => $count,
+            'new_csrf_token' => $_SESSION['csrf_token'] ?? ''
         ]);
         exit;
     }
@@ -461,23 +546,33 @@ class ReservationController extends BaseController
             'booking_time_slots',
             'booking_closed_days',
             'booking_message',
+            'booking_auto_confirm',
+            'booking_auto_complete',
+            'booking_meal_duration',
         ];
 
+        $checkboxKeys = ['booking_enabled', 'booking_auto_confirm', 'booking_auto_complete'];
+        
         foreach ($settingsKeys as $key) {
-            if (isset($_POST[$key])) {
+            // Pour les checkboxes, on gère le cas où elles ne sont pas présentes dans $_POST
+            if (in_array($key, $checkboxKeys)) {
+                $value = isset($_POST[$key]) && $_POST[$key] === '1' ? '1' : '0';
+                $optionModel->set($adminId, $key, $value);
+            } elseif (isset($_POST[$key])) {
                 $value = trim($_POST[$key]);
                 // Validation basique
-                if (in_array($key, ['booking_min_party', 'booking_max_party', 'booking_advance_days', 'booking_max_per_slot'])) {
+                if (in_array($key, ['booking_min_party', 'booking_max_party', 'booking_advance_days', 'booking_max_per_slot', 'booking_meal_duration'])) {
                     $value = max(1, (int)$value);
-                }
-                if ($key === 'booking_enabled') {
-                    $value = $value === '1' ? '1' : '0';
                 }
                 $optionModel->set($adminId, $key, (string)$value);
             }
         }
 
-        echo json_encode(['success' => true, 'message' => 'Paramètres de réservation enregistrés.']);
+        echo json_encode([
+            'success' => true, 
+            'message' => 'Paramètres de réservation enregistrés.',
+            'new_csrf_token' => $_SESSION['csrf_token'] ?? ''
+        ]);
         exit;
     }
 
@@ -604,6 +699,11 @@ class ReservationController extends BaseController
 
         // Créer la réservation
         $reservationModel = new Reservation($this->pdo);
+        
+        // Vérifier si la validation automatique est activée
+        $autoConfirm = ($settings['booking_auto_confirm'] ?? false);
+        $initialStatus = $autoConfirm ? 'confirmed' : 'pending';
+        
         $reservationId = $reservationModel->create($adminId, [
             'customer_name'    => $customerName,
             'customer_email'   => $customerEmail ?: null,
@@ -612,14 +712,16 @@ class ReservationController extends BaseController
             'reservation_time' => $time . ':00',
             'party_size'       => $partySize,
             'special_requests' => $specialReqs ?: null,
+            'status'           => $initialStatus,
         ]);
 
         if ($reservationId) {
             $reservation = $reservationModel->findById($reservationId);
             
-            // Envoyer le mail de confirmation de réception au client
+            // Envoyer le mail approprié au client selon le statut
             if ($reservation && !empty($customerEmail)) {
-                $this->sendReservationEmail($reservation, $admin->restaurant_name ?? '', 'received');
+                $emailType = $autoConfirm ? 'confirmed' : 'received';
+                $this->sendReservationEmail($reservation, $admin->restaurant_name ?? '', $emailType);
             }
             
             // Envoyer un email au restaurant pour l'informer de la nouvelle réservation
@@ -627,10 +729,15 @@ class ReservationController extends BaseController
                 $this->sendNewReservationNotificationToRestaurant($reservation, $admin);
             }
 
+            $message = $autoConfirm 
+                ? 'Votre réservation a été confirmée ! Nous vous attendons avec plaisir.'
+                : 'Votre réservation a bien été enregistrée ! Vous recevrez une confirmation prochainement.';
+
             echo json_encode([
                 'success' => true,
-                'message' => 'Votre réservation a bien été enregistrée ! Vous recevrez une confirmation prochainement.',
-                'reservation_id' => $reservationId
+                'message' => $message,
+                'reservation_id' => $reservationId,
+                'auto_confirmed' => $autoConfirm
             ]);
         } else {
             echo json_encode(['success' => false, 'message' => 'Erreur lors de la création de la réservation.']);

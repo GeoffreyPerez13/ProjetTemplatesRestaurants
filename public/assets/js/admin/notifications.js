@@ -8,6 +8,9 @@
     const notificationDropdown = document.getElementById('notification-dropdown');
     const notificationList = document.getElementById('notification-list');
     const notificationCount = document.getElementById('notification-count');
+    
+    // Flag pour empêcher la fermeture pendant le traitement d'une action
+    let isProcessingAction = false;
 
     if (!notificationToggle || !notificationDropdown) {
         return; // Pas de notifications sur cette page
@@ -29,7 +32,9 @@
     // Fermer le dropdown si on clique ailleurs
     document.addEventListener('click', function(e) {
         // Ne pas fermer si on clique sur le bouton (géré par le toggle) ou dans le dropdown
-        if (!notificationDropdown.contains(e.target) && 
+        // Ne pas fermer non plus si une action est en cours de traitement
+        if (!isProcessingAction && 
+            !notificationDropdown.contains(e.target) && 
             !notificationToggle.contains(e.target)) {
             notificationDropdown.style.display = 'none';
         }
@@ -130,8 +135,13 @@
 
     // Confirmer une réservation
     function confirmReservation(id) {
+        isProcessingAction = true; // Empêcher la fermeture du dropdown
+        
         if (typeof Swal === 'undefined') {
-            if (!confirm('Confirmer cette réservation ?')) return;
+            if (!confirm('Confirmer cette réservation ?')) {
+                isProcessingAction = false;
+                return;
+            }
             updateReservationStatus(id, 'confirmed');
             return;
         }
@@ -148,15 +158,22 @@
         }).then(function(result) {
             if (result.isConfirmed) {
                 updateReservationStatus(id, 'confirmed');
+            } else {
+                isProcessingAction = false; // Réactiver la fermeture si annulé
             }
         });
     }
 
     // Refuser une réservation
     function cancelReservation(id) {
+        isProcessingAction = true; // Empêcher la fermeture du dropdown
+        
         if (typeof Swal === 'undefined') {
             const reason = prompt('Raison du refus (optionnel) :');
-            if (reason === null) return;
+            if (reason === null) {
+                isProcessingAction = false;
+                return;
+            }
             updateReservationStatus(id, 'cancelled', { cancelled_reason: reason });
             return;
         }
@@ -174,6 +191,8 @@
         }).then(function(result) {
             if (result.isConfirmed) {
                 updateReservationStatus(id, 'cancelled', { cancelled_reason: result.value || '' });
+            } else {
+                isProcessingAction = false; // Réactiver la fermeture si annulé
             }
         });
     }
@@ -227,18 +246,30 @@
                         if (remainingItems.length === 0) {
                             notificationList.innerHTML = '<div class="notification-empty"><i class="fas fa-check-circle"></i><p>Aucune réservation en attente</p></div>';
                             updateBadgeCount(0);
+                            
+                            // Fermer le dropdown automatiquement après un court délai si plus aucune réservation
+                            setTimeout(function() {
+                                if (notificationDropdown) {
+                                    notificationDropdown.style.display = 'none';
+                                }
+                                isProcessingAction = false; // Réactiver après fermeture
+                            }, 1500);
                         } else {
                             updateBadgeCount(remainingItems.length);
+                            // Garder le dropdown ouvert pour traiter les autres réservations
+                            isProcessingAction = false; // Réactiver pour permettre les prochaines actions
                         }
                     }, 300);
                 }
             } else {
                 showToast(data.message || 'Erreur', 'error');
+                isProcessingAction = false; // Réactiver en cas d'erreur
             }
         })
         .catch(error => {
             console.error('Erreur:', error);
             showToast('Erreur de communication avec le serveur.', 'error');
+            isProcessingAction = false; // Réactiver en cas d'erreur réseau
         });
     }
 

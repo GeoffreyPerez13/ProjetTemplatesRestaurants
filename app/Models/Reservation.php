@@ -18,7 +18,7 @@ class Reservation
     {
         $stmt = $this->pdo->prepare("
             INSERT INTO reservations (admin_id, customer_name, customer_email, customer_phone, reservation_date, reservation_time, party_size, special_requests, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt->execute([
             $adminId,
@@ -28,7 +28,8 @@ class Reservation
             $data['reservation_date'],
             $data['reservation_time'],
             $data['party_size'],
-            $data['special_requests'] ?? null
+            $data['special_requests'] ?? null,
+            $data['status'] ?? 'pending'
         ]);
         return $this->pdo->lastInsertId();
     }
@@ -288,6 +289,40 @@ class Reservation
     {
         $stmt = $this->pdo->prepare("DELETE FROM reservations WHERE id = ? AND admin_id = ?");
         return $stmt->execute([$id, $adminId]);
+    }
+
+    /**
+     * Supprimer toutes les réservations d'un admin
+     */
+    public function deleteAll($adminId)
+    {
+        $stmt = $this->pdo->prepare("DELETE FROM reservations WHERE admin_id = ?");
+        $stmt->execute([$adminId]);
+        return $stmt->rowCount();
+    }
+
+    /**
+     * Supprimer toutes les réservations d'un admin par statut
+     */
+    public function deleteByStatus($adminId, $status)
+    {
+        $stmt = $this->pdo->prepare("DELETE FROM reservations WHERE admin_id = ? AND status = ?");
+        $stmt->execute([$adminId, $status]);
+        return $stmt->rowCount();
+    }
+
+    /**
+     * Marquer toutes les réservations comme terminées
+     */
+    public function completeAll($adminId)
+    {
+        $stmt = $this->pdo->prepare("
+            UPDATE reservations 
+            SET status = 'completed' 
+            WHERE admin_id = ? AND status != 'completed'
+        ");
+        $stmt->execute([$adminId]);
+        return $stmt->rowCount();
     }
 
     /**

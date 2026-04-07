@@ -115,7 +115,12 @@ $statusColors = [
             
             <!-- Réservations en attente -->
             <div id="pending-reservations-section" style="display: none;">
-                <h4><i class="fas fa-clock"></i> Réservations en attente</h4>
+                <div class="pending-header">
+                    <h4><i class="fas fa-clock"></i> Réservations en attente</h4>
+                    <button id="btn-validate-all" class="btn small success btn-validate-all" style="display: none;">
+                        <i class="fas fa-check-double"></i> Tout valider à ce jour
+                    </button>
+                </div>
                 <div class="pending-reservations-grid">
                     <!-- Contenu rempli par JavaScript -->
                 </div>
@@ -211,7 +216,17 @@ $statusColors = [
                 </div>
                 <div class="filter-actions">
                     <button type="submit" class="btn small"><i class="fas fa-search"></i> Filtrer</button>
-                    <a href="?page=reservations" class="btn small btn-outline"><i class="fas fa-undo"></i> Réinitialiser</a>
+                    <a href="?page=reservations&tab=list" class="btn small btn-outline"><i class="fas fa-undo"></i> Réinitialiser</a>
+                    <div class="filter-divider"></div>
+                    <button type="button" id="complete-all-btn" class="btn-icon btn-primary" title="Marquer toutes comme terminées">
+                        <i class="fas fa-flag-checkered"></i>
+                    </button>
+                    <button type="button" id="delete-completed-btn" class="btn-icon btn-warning" title="Supprimer réservations terminées">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    <button type="button" id="delete-all-btn" class="btn-icon btn-danger" title="Supprimer toutes les réservations">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </div>
             </form>
         </div>
@@ -306,6 +321,39 @@ $statusColors = [
                             <input type="checkbox" name="booking_enabled" value="1" <?= ($settings['booking_enabled'] ?? true) ? 'checked' : '' ?>>
                             <span class="toggle-slider"></span>
                         </label>
+                    </div>
+                </div>
+
+                <!-- Validation automatique -->
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <label>Validation automatique</label>
+                        <p class="setting-desc">Confirmer automatiquement les nouvelles réservations sans validation manuelle.</p>
+                        <p class="setting-warning"><i class="fas fa-exclamation-triangle"></i> Attention : toutes les réservations seront automatiquement confirmées.</p>
+                    </div>
+                    <div class="setting-control">
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="booking_auto_confirm" value="1" <?= ($settings['booking_auto_confirm'] ?? false) ? 'checked' : '' ?>>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Marquage automatique comme terminée -->
+                <div class="setting-row">
+                    <div class="setting-info">
+                        <label>Marquage automatique comme terminée</label>
+                        <p class="setting-desc">Marquer automatiquement les réservations confirmées comme terminées après la durée du repas.</p>
+                    </div>
+                    <div class="setting-control setting-inline">
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="booking_auto_complete" value="1" <?= ($settings['booking_auto_complete'] ?? false) ? 'checked' : '' ?>>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <div class="input-group-mini" style="margin-left: 16px;">
+                            <label for="booking_meal_duration">Durée (min)</label>
+                            <input type="number" name="booking_meal_duration" id="booking_meal_duration" min="30" max="300" step="15" value="<?= $settings['booking_meal_duration'] ?? 90 ?>">
+                        </div>
                     </div>
                 </div>
 
@@ -466,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Construire le HTML pour les réservations en attente
                     let pendingHtml = '';
                     if (data.pendingReservations && data.pendingReservations.length > 0) {
-                        pendingHtml = '<div id="pending-reservations-section" style="display: block;"><h4><i class="fas fa-clock"></i> Réservations en attente</h4><div class="pending-reservations-grid">';
+                        pendingHtml = '<div id="pending-reservations-section" style="display: block;"><div class="pending-header"><h4><i class="fas fa-clock"></i> Réservations en attente</h4><button id="btn-validate-all" class="btn small success btn-validate-all"><i class="fas fa-check-double"></i> Tout valider à ce jour</button></div><div class="pending-reservations-grid">';
                         const now = new Date();
                         data.pendingReservations.forEach(r => {
                             // Vérifier si la réservation est passée
@@ -598,6 +646,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function attachReservationEvents() {
+        // Bouton "Valider toutes"
+        const btnValidateAll = document.getElementById('btn-validate-all');
+        if (btnValidateAll) {
+            btnValidateAll.addEventListener('click', validateAllReservations);
+        }
+        
         document.querySelectorAll('.btn-confirm-reservation').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.dataset.id;
@@ -636,6 +690,91 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    function validateAllReservations() {
+        // Récupérer toutes les réservations en attente
+        const pendingCards = document.querySelectorAll('.pending-reservation-card');
+        
+        if (pendingCards.length === 0) {
+            Swal.fire('Info', 'Aucune réservation en attente à valider', 'info');
+            return;
+        }
+        
+        Swal.fire({
+            title: 'Valider toutes les réservations ?',
+            text: `Vous allez confirmer ${pendingCards.length} réservation(s) en attente.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            confirmButtonText: '<i class="fas fa-check-double"></i> Tout valider',
+            cancelButtonText: 'Annuler'
+        }).then(result => {
+            if (result.isConfirmed) {
+                const csrfToken = document.getElementById('csrf-token').value;
+                const reservationIds = Array.from(pendingCards).map(card => card.dataset.id);
+                
+                // Afficher un loader
+                Swal.fire({
+                    title: 'Validation en cours...',
+                    html: `<div class="swal-progress">0 / ${reservationIds.length}</div>`,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Valider toutes les réservations une par une
+                let completed = 0;
+                let errors = 0;
+                
+                const promises = reservationIds.map(id => {
+                    const data = new FormData();
+                    data.append('csrf_token', csrfToken);
+                    data.append('id', id);
+                    data.append('status', 'confirmed');
+                    
+                    return fetch('?page=reservation-update-status', {
+                        method: 'POST',
+                        body: data
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        completed++;
+                        document.querySelector('.swal-progress').textContent = `${completed} / ${reservationIds.length}`;
+                        if (!data.success) errors++;
+                        return data;
+                    })
+                    .catch(error => {
+                        completed++;
+                        errors++;
+                        document.querySelector('.swal-progress').textContent = `${completed} / ${reservationIds.length}`;
+                        return { success: false };
+                    });
+                });
+                
+                Promise.all(promises).then(() => {
+                    if (errors === 0) {
+                        Swal.fire({
+                            title: 'Succès !',
+                            text: `${reservationIds.length} réservation(s) confirmée(s)`,
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Terminé avec erreurs',
+                            text: `${reservationIds.length - errors} réservation(s) confirmée(s), ${errors} erreur(s)`,
+                            icon: 'warning'
+                        });
+                    }
+                    loadReservationsForDate(dateInput.value);
+                });
+            }
+        });
+    }
+    
     function updateReservationStatus(id, status) {
         const csrfToken = document.getElementById('csrf-token').value;
         const data = new FormData();
@@ -650,6 +789,10 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // Mettre à jour le token CSRF
+                if (data.new_csrf_token) {
+                    document.getElementById('csrf-token').value = data.new_csrf_token;
+                }
                 Swal.fire({
                     title: status === 'confirmed' ? 'Réservation confirmée' : 'Réservation annulée',
                     icon: 'success',
