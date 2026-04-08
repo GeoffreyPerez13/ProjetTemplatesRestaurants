@@ -295,7 +295,19 @@ class Admin
         $defaultOptions = [
             'site_online' => '1',           // Site actif par défaut
             'mail_reminder' => '0',         // Rappel mail désactivé par défaut
-            'email_notifications' => '0'    // Notifications désactivées par défaut
+            'email_notifications' => '0',   // Notifications désactivées par défaut
+            
+            // Options de réservation
+            'booking_enabled' => '1',                   // Réservations activées par défaut
+            'booking_auto_confirm' => '1',              // Validation automatique activée
+            'booking_auto_complete' => '0',             // Marquage automatique désactivé
+            'booking_meal_duration' => '90',            // Durée de repas : 90 minutes
+            'booking_min_party_size' => '1',            // Nombre de personnes min : 1
+            'booking_max_party_size' => '10',           // Nombre de personnes max : 10
+            'booking_max_per_slot' => '5',              // Réservations par créneau : 5
+            'booking_advance_days' => '30',             // Jours d'avance maximum : 30
+            'booking_time_slots' => '12:00,12:30,13:00,13:30,14:00,18:30,19:00,19:30,20:00,20:30,21:00,21:30,22:00', // Créneaux midi et soir
+            'booking_closed_days' => ''                 // Aucun jour de fermeture par défaut
         ];
 
         try {

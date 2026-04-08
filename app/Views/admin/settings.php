@@ -368,46 +368,60 @@ if (!empty($_SESSION['pendingToast'])) {
 
                     <div id="account-options-content" class="accordion-content expanded prevent-auto-close">
                         <div class="options-list">
-                            <?php foreach (['site_online', 'mail_reminder', 'email_notifications'] as $option): ?>
+                            <?php foreach (['site_online', 'mail_reminder', 'hide_dark_mode', 'hide_tour_button', 'email_notifications'] as $option): ?>
                                 <div class="option-item">
                                     <div class="option-header">
                                         <span class="option-label">
-                                            <?=
-                                            $option === 'site_online' ? 'Afficher le site en ligne' : ($option === 'mail_reminder' ? 'Rappel mail pour actualisation' :
-                                                'Notifications par email')
+                                            <?php
+                                            if ($option === 'site_online') echo 'Afficher le site en ligne';
+                                            elseif ($option === 'mail_reminder') echo 'Rappel mail pour actualisation';
+                                            elseif ($option === 'hide_dark_mode') echo 'Masquer le bouton dark mode';
+                                            elseif ($option === 'hide_tour_button') echo 'Masquer le bouton du tour guidé';
+                                            elseif ($option === 'email_notifications') echo 'Recevoir notifications par mail';
                                             ?>
                                         </span>
                                         <div class="option-tooltip">
                                             <span class="tooltip-icon" title="Plus d'infos">i</span>
                                             <div class="tooltip-content">
                                                 <p>
-                                                    <?=
-                                                    $option === 'site_online' ? 'Activez cette option pour rendre votre site visible au public. Si désactivé, votre site sera en maintenance.' : ($option === 'mail_reminder' ? 'Recevez un email de rappel tous les mois pour mettre à jour votre carte. Assurez-vous que vos plats et prix sont à jour.' :
-                                                        'Recevez des notifications par email pour les mises à jour importantes et les activités sur votre compte.')
+                                                    <?php
+                                                    if ($option === 'site_online') echo 'Activez cette option pour rendre votre site visible au public. Si désactivé, votre site sera en maintenance.';
+                                                    elseif ($option === 'mail_reminder') echo 'Recevez un email de rappel tous les mois pour mettre à jour votre carte. Assurez-vous que vos plats et prix sont à jour.';
+                                                    elseif ($option === 'hide_dark_mode') echo 'Masquez le bouton de basculement du mode sombre dans l\'interface d\'administration.';
+                                                    elseif ($option === 'hide_tour_button') echo 'Masquez le bouton du tour guidé dans les pages d\'édition.';
+                                                    elseif ($option === 'email_notifications') echo 'Recevez des notifications par email pour les mises à jour importantes et les activités sur votre compte.';
                                                     ?>
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="option-buttons">
+                                        <?php
+                                        // Valeurs par défaut : site_online=1, mail_reminder=0, hide_dark_mode=0, hide_tour_button=0, email_notifications=1
+                                        $defaultValue = ($option === 'site_online' || $option === 'email_notifications') ? '1' : '0';
+                                        $currentValue = $options[$option] ?? $defaultValue;
+                                        ?>
                                         <button type="button"
-                                            class="option-btn <?= ($options[$option] ?? '1') === '1' ? 'option-active' : '' ?>"
+                                            class="option-btn <?= $currentValue === '1' ? 'option-active' : '' ?>"
                                             data-option="<?= $option ?>"
                                             data-value="1">
-                                            Actif
+                                            Oui
                                         </button>
                                         <button type="button"
-                                            class="option-btn <?= ($options[$option] ?? '1') === '0' ? 'option-active' : '' ?>"
+                                            class="option-btn <?= $currentValue === '0' ? 'option-active' : '' ?>"
                                             data-option="<?= $option ?>"
                                             data-value="0">
-                                            Non actif
+                                            Non
                                         </button>
                                     </div>
                                     <div class="option-description">
                                         <small>
-                                            <?=
-                                            $option === 'site_online' ? 'Contrôle la visibilité publique de votre site.' : ($option === 'mail_reminder' ? 'Recevez des rappels mensuels pour mettre à jour votre carte.' :
-                                                'Activez les notifications importantes par email.')
+                                            <?php
+                                            if ($option === 'site_online') echo 'Contrôle la visibilité publique de votre site.';
+                                            elseif ($option === 'mail_reminder') echo 'Recevez des rappels mensuels pour mettre à jour votre carte.';
+                                            elseif ($option === 'hide_dark_mode') echo 'Afficher ou masquer le bouton de mode sombre.';
+                                            elseif ($option === 'hide_tour_button') echo 'Afficher ou masquer le bouton du tour guidé.';
+                                            elseif ($option === 'email_notifications') echo 'Activez les notifications importantes par email.';
                                             ?>
                                         </small>
                                     </div>
@@ -653,7 +667,7 @@ if (!empty($_SESSION['pendingToast'])) {
                                                         <i class="fas fa-chart-line"></i> Configurer
                                                     </a>
                                                 <?php elseif ($featureKey === 'online_booking'): ?>
-                                                    <a href="?page=reservations" class="btn btn-sm">
+                                                    <a href="?page=reservations&tab=dashboard" class="btn btn-sm">
                                                         <i class="fas fa-calendar-check"></i> Configurer
                                                     </a>
                                                 <?php endif; ?>
@@ -1568,7 +1582,7 @@ if (!empty($_SESSION['pendingToast'])) {
                 <div class="premium-section-cta" style="text-align: center; padding: 40px 20px;">
                     <i class="fas fa-calendar-check" style="font-size: 3rem; color: var(--color-primary); margin-bottom: 16px; display: block;"></i>
                     <p style="margin-bottom: 20px; color: var(--color-text-light);">Gérez vos réservations, configurez les créneaux horaires et suivez les demandes de vos clients.</p>
-                    <a href="?page=reservations" class="btn primary" style="display: inline-flex; align-items: center; gap: 8px;">
+                    <a href="?page=reservations&tab=dashboard" class="btn primary" style="display: inline-flex; align-items: center; gap: 8px;">
                         <i class="fas fa-external-link-alt"></i> Accéder aux réservations
                     </a>
                 </div>
@@ -1623,6 +1637,53 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+</script>
+
+<!-- Définition des étapes du tour guidé pour cette page -->
+<script>
+const tourSteps = [
+    {
+        element: '.settings-container h1',
+        title: 'Bienvenue dans les paramètres',
+        content: 'Gérez tous les <strong>paramètres de votre compte</strong> et de votre site depuis cette page. Utilisez le menu latéral pour naviguer entre les sections.'
+    },
+    {
+        element: '.settings-sidebar',
+        title: 'Menu de navigation',
+        content: 'Accédez rapidement aux différentes sections : <strong>Informations du compte</strong>, <strong>Profil</strong>, <strong>Mot de passe</strong>, <strong>Options</strong>, et <strong>Abonnements</strong>.',
+        position: 'top'
+    },
+    {
+        element: '.settings-sidebar a[href*="section=account"]',
+        title: 'Informations du compte',
+        content: 'Consultez les <strong>informations générales</strong> de votre compte : date de création, dernière modification de la carte, et identifiant unique.'
+    },
+    {
+        element: '.settings-sidebar a[href*="section=profile"]',
+        title: 'Profil utilisateur',
+        content: 'Modifiez votre <strong>nom d\'utilisateur</strong>, <strong>email</strong> et <strong>nom du restaurant</strong>. Ces informations sont utilisées pour votre connexion et l\'affichage de votre site.'
+    },
+    {
+        element: '.settings-sidebar a[href*="section=password"]',
+        title: 'Mot de passe',
+        content: 'Changez votre <strong>mot de passe</strong> en toute sécurité. Vous devrez saisir votre mot de passe actuel pour confirmer le changement.'
+    },
+    {
+        element: '.settings-sidebar a[href*="section=options"]',
+        title: 'Options du compte',
+        content: 'Configurez les <strong>options de votre site</strong> : visibilité en ligne, rappels par email, masquage des boutons, notifications, et fermetures exceptionnelles.'
+    },
+    {
+        element: '.settings-sidebar a[href*="section=premium"]',
+        title: 'Fonctionnalités premium',
+        content: 'Découvrez et activez les <strong>fonctionnalités avancées</strong> : Avis Google, Statistiques avancées, Réservations en ligne, et Intégration livraison.'
+    },
+    {
+        element: '.settings-sidebar a[href*="section=subscriptions"]',
+        title: 'Abonnements',
+        content: 'Gérez votre <strong>abonnement</strong> et vos <strong>options premium</strong>. Consultez votre plan actuel et modifiez vos options à la carte.'
+    }
+];
 </script>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

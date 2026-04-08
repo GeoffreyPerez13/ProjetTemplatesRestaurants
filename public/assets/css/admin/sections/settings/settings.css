@@ -178,6 +178,8 @@
   margin-bottom: var(--spacing-xl);
   padding-bottom: var(--spacing-xl);
   border-bottom: 1px solid var(--color-border);
+  position: relative;
+  z-index: 10;
 }
 
 .option-item:last-child {
@@ -191,6 +193,8 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 15px;
+  position: relative;
+  z-index: 10;
 }
 
 .option-label {
@@ -204,6 +208,7 @@
 .option-tooltip {
   position: relative;
   display: inline-block;
+  z-index: 10000;
 }
 
 .tooltip-icon {
@@ -236,7 +241,7 @@
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
   box-shadow: var(--shadow-lg);
-  z-index: 1000;
+  z-index: 9999;
   font-size: 14px;
   line-height: 1.5;
 }

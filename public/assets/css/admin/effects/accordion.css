@@ -116,7 +116,7 @@
 
 /* Contenu d'accordéon */
 .accordion-content {
-  overflow: hidden;
+  overflow: visible;
   transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
 }
 
@@ -131,6 +131,7 @@
 .accordion-content.expanded {
   max-height: 5000px;
   opacity: 1;
+  overflow: visible;
 }
 
 /* Animation pour l'icône */

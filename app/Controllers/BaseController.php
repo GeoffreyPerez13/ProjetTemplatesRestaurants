@@ -95,6 +95,36 @@ class BaseController
     }
 
     /**
+     * Récupère les options de masquage des boutons (dark mode et tour guidé)
+     * 
+     * @return array Tableau avec hide_dark_mode et hide_tour_button (boolean)
+     */
+    protected function getButtonVisibilityOptions()
+    {
+        if (!$this->isLogged() || empty($_SESSION['admin_id'])) {
+            return ['hide_dark_mode' => false, 'hide_tour_button' => false];
+        }
+
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT option_name, option_value 
+                FROM admin_options 
+                WHERE admin_id = ? AND option_name IN ('hide_dark_mode', 'hide_tour_button')
+            ");
+            $stmt->execute([$_SESSION['admin_id']]);
+            $options = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            return [
+                'hide_dark_mode' => isset($options['hide_dark_mode']) && $options['hide_dark_mode'] === '1',
+                'hide_tour_button' => isset($options['hide_tour_button']) && $options['hide_tour_button'] === '1'
+            ];
+        } catch (Exception $e) {
+            error_log("Erreur getButtonVisibilityOptions: " . $e->getMessage());
+            return ['hide_dark_mode' => false, 'hide_tour_button' => false];
+        }
+    }
+
+    /**
      * Force la connexion : si l'utilisateur n'est pas connecté, il est redirigé vers la page de login
      * 
      * Explication détaillée:
@@ -263,6 +293,17 @@ class BaseController
         // Ajouter le compteur de notifications pour toutes les pages admin
         if (strpos($view, 'admin/') === 0 && !isset($data['pending_reservations_count'])) {
             $data['pending_reservations_count'] = $this->getPendingReservationsCount();
+        }
+
+        // Ajouter les options de masquage des boutons pour toutes les pages admin
+        if (strpos($view, 'admin/') === 0 || strpos($view, 'partials/header') === 0) {
+            $buttonOptions = $this->getButtonVisibilityOptions();
+            if (!isset($data['hide_dark_mode'])) {
+                $data['hide_dark_mode'] = $buttonOptions['hide_dark_mode'];
+            }
+            if (!isset($data['hide_tour_button'])) {
+                $data['hide_tour_button'] = $buttonOptions['hide_tour_button'];
+            }
         }
 
         // Transforme les clés du tableau en variables (EXTR_SKIP évite d'écraser des variables existantes)

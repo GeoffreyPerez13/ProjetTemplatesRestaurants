@@ -164,7 +164,7 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                 <?php endif; ?>
 
                 <?php if (!empty($has_online_booking)): ?>
-                <a href="?page=reservations" class="mobile-menu-item premium">
+                <a href="?page=reservations&tab=dashboard" class="mobile-menu-item premium">
                     <div class="menu-item-icon">
                         <i class="fas fa-calendar-check"></i>
                     </div>
@@ -253,7 +253,7 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                     </a>
                 <?php endif; ?>
                 <?php if (!empty($has_online_booking)): ?>
-                    <a href="?page=reservations" class="btn premium-btn">
+                    <a href="?page=reservations&tab=dashboard" class="btn premium-btn">
                         <i class="fas fa-calendar-check"></i> Réservations en ligne
                     </a>
                 <?php endif; ?>
@@ -432,6 +432,72 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
         <a href="?page=<?= !empty($is_demo) ? 'demo-logout' : 'logout' ?>" class="btn danger mobile-logout">Se déconnecter</a>
     </div>
 </div>
+
+<!-- Définition des étapes du tour guidé pour cette page -->
+<script>
+const tourSteps = [
+    {
+        element: '.dashboard-header',
+        title: 'Bienvenue sur votre tableau de bord',
+        content: 'C\'est votre <strong>centre de contrôle</strong> pour gérer votre site vitrine. Accédez à toutes les fonctionnalités depuis cette page.'
+    },
+    {
+        element: '.welcome-message',
+        title: 'Informations de votre restaurant',
+        content: 'Retrouvez ici votre <strong>nom d\'utilisateur</strong>, le <strong>nom de votre restaurant</strong> et la <strong>dernière modification</strong> de votre carte.'
+    },
+    {
+        element: '.visit-site',
+        title: 'Accès à votre site vitrine',
+        content: 'Cliquez sur ce bouton pour <strong>visualiser votre site</strong> tel que vos clients le verront. Le site s\'ouvre dans un nouvel onglet.'
+    },
+    {
+        element: '.dashboard-top-buttons',
+        title: 'Actions principales',
+        content: 'Accédez aux <strong>5 sections principales</strong> de gestion de votre site :<br>• Carte<br>• Contact<br>• Logo/Bannière<br>• Services<br>• Template'
+    },
+    {
+        element: '.dashboard-top-buttons a[href*="edit-card"]',
+        title: 'Modifier la carte',
+        content: 'Gérez votre <strong>carte de restaurant</strong> : créez des catégories, ajoutez des plats avec photos, prix, descriptions et allergènes.'
+    },
+    {
+        element: '.dashboard-top-buttons a[href*="edit-contact"]',
+        title: 'Modifier le contact',
+        content: 'Configurez vos <strong>coordonnées</strong> : adresse, téléphone, email et horaires d\'ouverture. Ces informations apparaîtront sur votre site.'
+    },
+    {
+        element: '.dashboard-top-buttons a[href*="edit-logo-banner"]',
+        title: 'Modifier logo/bannière',
+        content: 'Personnalisez l\'<strong>identité visuelle</strong> de votre site : téléchargez votre logo et une bannière d\'accueil avec texte personnalisable.'
+    },
+    {
+        element: '.dashboard-top-buttons a[href*="edit-services"]',
+        title: 'Services, paiements & réseaux',
+        content: 'Indiquez vos <strong>services</strong> (sur place, à emporter, livraison), <strong>moyens de paiement</strong> acceptés et <strong>réseaux sociaux</strong>.'
+    },
+    {
+        element: '.dashboard-top-buttons a[href*="edit-template"]',
+        title: 'Choisir un template',
+        content: 'Personnalisez le <strong>design de votre site</strong> : choisissez parmi 7 palettes de couleurs et 3 layouts différents pour un rendu unique.'
+    },
+    {
+        element: '.bottom-left a[href*="view-card"]',
+        title: 'Aperçu de la carte',
+        content: 'Visualisez un <strong>aperçu de votre carte</strong> avant publication. Idéal pour vérifier le rendu final de vos modifications.'
+    },
+    {
+        element: '.settings-icon-btn',
+        title: 'Paramètres du compte',
+        content: 'Accédez à vos <strong>paramètres</strong> : profil, mot de passe, abonnement premium et options du site (maintenance, notifications).'
+    },
+    {
+        element: '.bottom-right a[href*="logout"]',
+        title: 'Déconnexion',
+        content: 'Cliquez ici pour vous <strong>déconnecter</strong> en toute sécurité de votre panel d\'administration.'
+    }
+];
+</script>
 
 <?php
 require __DIR__ . '/../partials/footer.php';

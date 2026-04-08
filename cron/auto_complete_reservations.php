@@ -8,22 +8,12 @@
  * Configuration recommandée : toutes les 15 minutes
  */
 
-// Charger la configuration
-require_once __DIR__ . '/../app/config.php';
+// Charger la configuration (qui crée automatiquement $pdo)
+require_once __DIR__ . '/../config.php';
 
-// Connexion à la base de données
-try {
-    $pdo = new PDO(
-        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
-        DB_USER,
-        DB_PASS,
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        ]
-    );
-} catch (PDOException $e) {
-    error_log("CRON auto_complete_reservations - Erreur DB : " . $e->getMessage());
+// Vérifier que $pdo est bien disponible
+if (!isset($pdo) || !($pdo instanceof PDO)) {
+    error_log("CRON auto_complete_reservations - Erreur : \$pdo non disponible depuis config.php");
     exit(1);
 }
 

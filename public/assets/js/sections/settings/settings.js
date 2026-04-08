@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
       .then((options) => {
         // Mettre à jour les boutons selon les options (uniquement pour les options standards)
-        const standardOptions = ['site_online', 'mail_reminder', 'email_notifications'];
+        const standardOptions = ['site_online', 'mail_reminder', 'hide_dark_mode', 'hide_tour_button', 'email_notifications'];
         Object.keys(options).forEach((option) => {
           // Ignorer les options qui ne sont pas des boutons (comme closure_dates)
           if (!standardOptions.includes(option)) {
@@ -190,7 +190,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     document.body.appendChild(form);
-    ajaxSubmit(form, form.action);
+    ajaxSubmit(form, form.action, {
+      onSuccess: function() {
+        applyButtonVisibility(options);
+      }
+    });
     setTimeout(function() { form.remove(); }, 100);
   }
 
@@ -206,7 +210,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const defaultOptions = {
       site_online: "1",
       mail_reminder: "0",
-      email_notifications: "0",
+      hide_dark_mode: "0",
+      hide_tour_button: "0",
+      email_notifications: "1",
     };
 
     // Créer un formulaire pour soumettre les données
@@ -234,8 +240,25 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     document.body.appendChild(form);
-    ajaxSubmit(form, form.action);
+    ajaxSubmit(form, form.action, {
+      onSuccess: function() {
+        applyButtonVisibility(defaultOptions);
+      }
+    });
     setTimeout(function() { form.remove(); }, 100);
+  }
+
+  function applyButtonVisibility(options) {
+    const darkModeBtn = document.getElementById('dark-mode-toggle');
+    const tourBtn = document.getElementById('tour-toggle');
+
+    if (darkModeBtn) {
+      darkModeBtn.style.display = (options.hide_dark_mode === '1') ? 'none' : '';
+    }
+
+    if (tourBtn) {
+      tourBtn.style.display = (options.hide_tour_button === '1') ? 'none' : '';
+    }
   }
 
   // ==================== VALIDATION DU MOT DE PASSE ====================

@@ -221,6 +221,8 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedDates.delete(dateString);
         updateSelectedDatesList();
         renderCalendar();
+        // Sauvegarder automatiquement après suppression
+        saveDates();
     }
     
     /**
@@ -244,8 +246,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateSelectedDatesList();
                 renderCalendar();
                 
-                // Afficher un message de succès en haut de page
-                showToast('Toutes les dates de fermeture ont été effacées avec succès.', 'success');
+                // Sauvegarder automatiquement après suppression
+                saveDates();
             }
         });
     }

@@ -57,10 +57,16 @@ class SettingsController extends BaseController
         $defaultOptions = [
             'site_online' => '1',
             'mail_reminder' => '0',
-            'email_notifications' => '0'
+            'hide_dark_mode' => '0',
+            'hide_tour_button' => '0',
+            'email_notifications' => '1'
         ];
 
         $options = array_merge($defaultOptions, $userOptions);
+        
+        // Passer les options pour masquer les boutons au header
+        $hide_dark_mode = ($options['hide_dark_mode'] ?? '0') === '0' ? false : true;
+        $hide_tour_button = ($options['hide_tour_button'] ?? '0') === '0' ? false : true;
 
         // Récupérer les dates de fermeture exceptionnelles
         $closureDates = [];
@@ -568,7 +574,7 @@ class SettingsController extends BaseController
                 $messages = [];
 
                 foreach ($options as $option => $value) {
-                    if (in_array($option, ['site_online', 'mail_reminder', 'email_notifications'])) {
+                    if (in_array($option, ['site_online', 'mail_reminder', 'hide_dark_mode', 'hide_tour_button', 'email_notifications'])) {
                         $stmt = $this->pdo->prepare("
                         INSERT INTO admin_options (admin_id, option_name, option_value, created_at, updated_at) 
                         VALUES (?, ?, ?, NOW(), NOW())

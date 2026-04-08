@@ -91,16 +91,23 @@
         </div>
         <?php endif; ?>
         
+        <?php 
+        // Vérifier si le bouton dark mode doit être masqué
+        $hideDarkMode = !empty($_SESSION['admin_id']) && !empty($hide_dark_mode);
+        if (!$hideDarkMode): 
+        ?>
         <button id="dark-mode-toggle" class="dark-mode-toggle-floating" title="Mode sombre / clair">
             <i class="fas fa-moon"></i>
             <i class="fas fa-sun"></i>
         </button>
+        <?php endif; ?>
         
         <?php 
-        // Afficher le bouton tour uniquement sur les pages d'édition
-        $tourPages = ['edit-card', 'edit-contact', 'edit-logo-banner', 'edit-services', 'edit-template'];
+        // Afficher le bouton tour uniquement sur les pages d'édition et si non masqué
+        $tourPages = ['dashboard', 'edit-card', 'edit-contact', 'edit-logo-banner', 'edit-services', 'edit-template', 'reservations', 'settings'];
         $currentPage = $_GET['page'] ?? '';
-        if (in_array($currentPage, $tourPages)): 
+        $hideTourButton = !empty($_SESSION['admin_id']) && !empty($hide_tour_button);
+        if (in_array($currentPage, $tourPages) && !$hideTourButton): 
         ?>
         <button id="tour-toggle" class="tour-toggle-floating" title="Lancer le tour guidé">
             <i class="fas fa-question-circle"></i>

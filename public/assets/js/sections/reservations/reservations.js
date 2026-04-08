@@ -31,7 +31,10 @@ document.addEventListener("DOMContentLoaded", function () {
   // Gestion des clics sur les onglets
   document.querySelectorAll(".tab-btn").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      activateTab(btn.dataset.tab);
+      var tabId = btn.dataset.tab;
+      activateTab(tabId);
+      // Sauvegarder l'onglet actif dans localStorage
+      localStorage.setItem('reservations_active_tab', tabId);
     });
   });
 
@@ -40,9 +43,15 @@ document.addEventListener("DOMContentLoaded", function () {
   var hasFilters = urlParams.has('status') || urlParams.has('date') || urlParams.has('search');
   var hasTabParam = urlParams.get('tab') === 'list';
   
-  // Si des filtres sont présents ou si le paramètre tab=list est présent, activer l'onglet "Réservations"
+  // Restaurer l'onglet actif depuis localStorage
+  var savedTab = localStorage.getItem('reservations_active_tab');
+  
+  // Priorité : paramètres URL > localStorage > onglet par défaut
   if (hasFilters || hasTabParam) {
     activateTab('tab-list');
+    localStorage.setItem('reservations_active_tab', 'tab-list');
+  } else if (savedTab) {
+    activateTab(savedTab);
   }
 
   // ==================== ACTIONS SUR LES RÉSERVATIONS ====================

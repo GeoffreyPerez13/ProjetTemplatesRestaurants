@@ -352,7 +352,7 @@ $statusColors = [
                         </label>
                         <div class="input-group-mini" style="margin-left: 16px;">
                             <label for="booking_meal_duration">Durée (min)</label>
-                            <input type="number" name="booking_meal_duration" id="booking_meal_duration" min="30" max="300" step="15" value="<?= $settings['booking_meal_duration'] ?? 90 ?>">
+                            <input type="number" name="booking_meal_duration" id="booking_meal_duration" min="5" max="300" step="5" value="<?= $settings['booking_meal_duration'] ?? 90 ?>">
                         </div>
                     </div>
                 </div>
@@ -824,6 +824,101 @@ document.addEventListener('DOMContentLoaded', function() {
     // Charger les réservations pour la date initiale (aujourd'hui)
     loadReservationsForDate(dateInput.value);
 });
+</script>
+
+<!-- Définition des étapes du tour guidé pour cette page -->
+<script>
+const tourSteps = [
+    {
+        element: '.reservations-header',
+        title: 'Gestion des réservations',
+        content: 'Bienvenue dans votre système de réservations en ligne ! Gérez toutes vos réservations depuis cette interface centralisée.'
+    },
+    {
+        element: '.reservations-tabs',
+        title: 'Navigation par onglets',
+        content: '<strong>3 onglets disponibles :</strong><br>• <strong>Tableau de bord</strong> : Vue d\'ensemble et réservations du jour<br>• <strong>Réservations</strong> : Liste complète avec filtres<br>• <strong>Paramètres</strong> : Configuration du système'
+    },
+    {
+        element: '#tab-dashboard',
+        title: 'Tableau de bord',
+        content: 'Consultez vos <strong>statistiques clés</strong> (en attente, confirmées, terminées) et visualisez les <strong>réservations du jour</strong> avec navigation par date.',
+        beforeShow: function() {
+            document.querySelector('[data-tab="tab-dashboard"]').click();
+        }
+    },
+    {
+        element: '.reservations-kpis',
+        title: 'Statistiques en temps réel',
+        content: 'Suivez vos <strong>KPIs</strong> : réservations du jour, en attente, confirmées, couverts et cette semaine. Mise à jour automatique.'
+    },
+    {
+        element: '.today-date-selector',
+        title: 'Sélecteur de date',
+        content: 'Naviguez entre les jours avec les <strong>flèches</strong> ou sélectionnez une <strong>date précise</strong>. Les réservations s\'affichent automatiquement.'
+    },
+    {
+        element: '#tab-list',
+        title: 'Liste des réservations',
+        content: 'Accédez à <strong>toutes vos réservations</strong> avec des outils de filtrage et de recherche avancés.',
+        beforeShow: function() {
+            document.querySelector('[data-tab="tab-list"]').click();
+        }
+    },
+    {
+        element: '.filters-form',
+        title: 'Filtres de recherche',
+        content: 'Filtrez par <strong>statut</strong>, <strong>date</strong> ou recherchez par <strong>nom/email/téléphone</strong>. Cliquez sur "Réinitialiser" pour tout effacer.'
+    },
+    {
+        element: '.filter-actions',
+        title: 'Actions rapides',
+        content: 'Utilisez les <strong>boutons d\'action</strong> :<br>• <i class="fas fa-search"></i> Filtrer / <i class="fas fa-undo"></i> Réinitialiser<br>• <i class="fas fa-flag-checkered"></i> Marquer toutes comme terminées<br>• <i class="fas fa-trash-alt"></i> Supprimer réservations terminées<br>• <i class="fas fa-trash"></i> Supprimer toutes les réservations'
+    },
+    {
+        element: '#tab-settings',
+        title: 'Paramètres de réservation',
+        content: 'Configurez votre système : <strong>créneaux horaires</strong>, <strong>capacité</strong>, <strong>validation automatique</strong>, <strong>jours de fermeture</strong> et plus encore.',
+        beforeShow: function() {
+            document.querySelector('[data-tab="tab-settings"]').click();
+        }
+    },
+    {
+        element: 'input[name="booking_enabled"]',
+        title: 'Activer/Désactiver les réservations',
+        content: 'Activez ou désactivez le <strong>formulaire de réservation</strong> sur votre site vitrine en un clic.'
+    },
+    {
+        element: 'input[name="booking_auto_confirm"]',
+        title: 'Validation automatique',
+        content: 'Si activé, les nouvelles réservations sont <strong>automatiquement confirmées</strong> sans intervention manuelle.'
+    },
+    {
+        element: 'input[name="booking_auto_complete"]',
+        title: 'Marquage automatique',
+        content: 'Marquez automatiquement les réservations comme <strong>terminées</strong> après la durée du repas (configurable). Nécessite un CRON job.'
+    },
+    {
+        element: 'input[name="booking_min_party"]',
+        title: 'Nombre de personnes',
+        content: 'Définissez le <strong>nombre minimum et maximum</strong> de personnes par réservation (ex: 1 à 10).'
+    },
+    {
+        element: 'textarea[name="booking_time_slots"]',
+        title: 'Créneaux horaires',
+        content: 'Configurez vos <strong>créneaux disponibles</strong> au format HH:MM, séparés par des virgules.<br>Ex: <code>12:00,12:30,13:00,19:00,19:30,20:00</code>'
+    },
+    {
+        element: '.days-checkboxes',
+        title: 'Jours de fermeture',
+        content: 'Sélectionnez les <strong>jours de la semaine</strong> où votre restaurant est fermé. Les clients ne pourront pas réserver ces jours-là.'
+    },
+    {
+        element: '.settings-actions',
+        title: 'Enregistrer les modifications',
+        content: 'N\'oubliez pas de cliquer sur <strong>"Enregistrer les paramètres"</strong> après chaque modification. Un message de confirmation apparaîtra.'
+    }
+];
 </script>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

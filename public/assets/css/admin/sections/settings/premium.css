@@ -1663,8 +1663,10 @@ body.dark-mode .api-test-result {
     border-radius: var(--radius-lg);
     margin-bottom: 20px;
     box-shadow: var(--shadow-sm);
-    overflow: hidden;
+    overflow: visible;
     border: 1px solid var(--color-border);
+    position: relative;
+    z-index: 1;
 }
 
 .accordion-header {
