@@ -22,6 +22,7 @@ require_once __DIR__ . '/../app/Controllers/StripeController.php';
 require_once __DIR__ . '/../app/Controllers/StatsController.php';
 require_once __DIR__ . '/../app/Controllers/ReservationController.php';
 require_once __DIR__ . '/../app/Controllers/FloorPlanController.php';
+require_once __DIR__ . '/../app/Controllers/NotificationStreamController.php';
 require_once __DIR__ . '/../app/Models/DemoToken.php';
 require_once __DIR__ . '/../app/Helpers/FormHelper.php';
 require_once __DIR__ . '/../app/Helpers/Validator.php';
@@ -542,6 +543,11 @@ switch ($page) {
     case 'get-day-reservations':
         $controller = new ReservationController($pdo);
         $controller->getDayReservations();
+        break;
+
+    case 'notification-stream':
+        $controller = new NotificationStreamController($pdo);
+        $controller->stream();
         break;
 
     // Plan de salle

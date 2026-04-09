@@ -14,6 +14,9 @@
     
     // Compteur de notifications précédent pour détecter les changements
     let previousCount = 0;
+    
+    // Préférence son de notification (localStorage)
+    let soundEnabled = localStorage.getItem('notificationSoundEnabled') !== 'false'; // true par défaut
 
     if (!notificationToggle || !notificationDropdown) {
         return; // Pas de notifications sur cette page
@@ -24,10 +27,20 @@
         previousCount = parseInt(notificationCount.textContent) || 0;
     }
     
-    // Polling automatique toutes les 30 secondes
+    // Polling optimisé toutes les 10 secondes pour notifications quasi temps réel
     setInterval(function() {
         checkForNewReservations();
-    }, 30000);
+    }, 10000); // 10 secondes
+    
+    // Vérification initiale après 2 secondes
+    setTimeout(function() {
+        checkForNewReservations();
+    }, 2000);
+    
+    // Initialiser l'état du bouton son au chargement
+    setTimeout(function() {
+        updateSoundButtonState();
+    }, 100);
 
     // Toggle dropdown au clic sur le bouton
     notificationToggle.addEventListener('click', function(e) {
@@ -439,7 +452,7 @@
         return div.innerHTML;
     }
     
-    // Vérifier les nouvelles réservations en arrière-plan
+    // Vérifier les nouvelles réservations avec notification sonore et visuelle
     function checkForNewReservations() {
         fetch('?page=get-pending-reservations')
             .then(response => response.json())
@@ -447,10 +460,15 @@
                 if (data.success && data.reservations) {
                     const currentCount = data.reservations.length;
                     
-                    // Si le nombre a augmenté, afficher une notification
+                    // Nouvelle réservation détectée !
                     if (currentCount > previousCount) {
                         const newCount = currentCount - previousCount;
-                        showToast(`${newCount} nouvelle${newCount > 1 ? 's' : ''} réservation${newCount > 1 ? 's' : ''} en attente !`, 'info');
+                        
+                        // Notification visuelle avec icône
+                        showToast(`🔔 ${newCount} nouvelle${newCount > 1 ? 's' : ''} réservation${newCount > 1 ? 's' : ''} !`, 'success');
+                        
+                        // Notification sonore
+                        playNotificationSound();
                         
                         // Afficher le bouton de notification s'il était caché
                         if (notificationToggle && notificationToggle.style.display === 'none') {
@@ -472,4 +490,59 @@
                 console.error('Erreur vérification nouvelles réservations:', error);
             });
     }
+
+    // Jouer un son de notification (si activé)
+    function playNotificationSound() {
+        // Vérifier si le son est activé
+        if (!soundEnabled) {
+            return;
+        }
+        
+        try {
+            // Créer un son simple avec Web Audio API
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 800; // Fréquence en Hz
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        } catch (error) {
+            console.log('Son de notification non disponible');
+        }
+    }
+    
+    // Basculer le son de notification
+    function toggleNotificationSound() {
+        soundEnabled = !soundEnabled;
+        localStorage.setItem('notificationSoundEnabled', soundEnabled);
+        updateSoundButtonState();
+        
+        // Feedback visuel
+        const message = soundEnabled ? 'Son activé 🔔' : 'Son désactivé 🔕';
+        showToast(message, 'info');
+    }
+    
+    // Mettre à jour l'état du bouton son
+    function updateSoundButtonState() {
+        const soundButton = document.getElementById('toggle-notification-sound');
+        if (soundButton) {
+            soundButton.innerHTML = soundEnabled 
+                ? '<i class="fas fa-volume-up"></i>' 
+                : '<i class="fas fa-volume-mute"></i>';
+            soundButton.className = soundEnabled ? 'notification-sound-btn active' : 'notification-sound-btn';
+            soundButton.title = soundEnabled ? 'Son activé - Cliquer pour désactiver' : 'Son désactivé - Cliquer pour activer';
+        }
+    }
+    
+    // Exposer la fonction globalement pour qu'elle soit accessible depuis le HTML
+    window.toggleNotificationSound = toggleNotificationSound;
 })();

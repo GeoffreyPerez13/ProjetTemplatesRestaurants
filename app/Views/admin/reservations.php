@@ -1145,6 +1145,33 @@ const tourSteps = [
         element: '.settings-actions',
         title: 'Enregistrer les modifications',
         content: 'N\'oubliez pas de cliquer sur <strong>"Enregistrer les paramètres"</strong> après chaque modification. Un message de confirmation apparaîtra.'
+    },
+    {
+        element: '.notification-toggle-floating',
+        title: '🔔 Notifications en temps réel',
+        content: 'Ce bouton affiche le <strong>nombre de réservations en attente</strong>. Il clignote pour attirer votre attention.<br><br>Les notifications sont <strong>automatiques</strong> : vous recevez une alerte <strong>toutes les 10 secondes</strong> maximum quand une nouvelle réservation arrive !<br><br>Cliquez dessus pour voir la liste et <strong>confirmer/refuser</strong> rapidement. Vous pouvez aussi <strong>activer/désactiver le son</strong> des notifications.',
+        placement: 'right',
+        beforeShow: function() {
+            // Afficher temporairement le bouton de notification même s'il n'y a pas de réservations
+            const notifToggle = document.getElementById('notification-toggle');
+            if (notifToggle) {
+                notifToggle.style.display = '';
+                const badge = document.getElementById('notification-count');
+                if (badge) {
+                    badge.textContent = '1';
+                }
+                // Scroll vers le bouton
+                notifToggle.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        },
+        afterHide: function() {
+            // Masquer le bouton s'il n'y a vraiment pas de réservations
+            const notifToggle = document.getElementById('notification-toggle');
+            const actualCount = parseInt(document.getElementById('notification-count')?.textContent || '0');
+            if (actualCount === 0 && notifToggle) {
+                notifToggle.style.display = 'none';
+            }
+        }
     }
 ];
 </script>

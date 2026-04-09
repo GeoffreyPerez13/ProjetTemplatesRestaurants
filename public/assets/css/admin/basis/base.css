@@ -294,23 +294,57 @@ html.dark-mode .dark-mode-toggle-floating .fa-sun {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
+  padding: 16px 20px;
+  background: var(--color-bg-alt);
   border-bottom: 1px solid var(--color-border);
-  background: var(--color-bg-warm);
   border-radius: var(--radius-md) var(--radius-md) 0 0;
+  gap: 12px;
 }
 
 .notification-dropdown-header h4 {
   margin: 0;
   font-size: 0.95rem;
   color: var(--color-text);
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 1;
 }
 
 .notification-dropdown-header h4 i {
   color: var(--color-warning);
+}
+
+.notification-sound-btn {
+  padding: 8px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.notification-sound-btn:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-primary);
+  transform: scale(1.05);
+}
+
+.notification-sound-btn.active {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.notification-sound-btn i {
+  font-size: 1rem;
 }
 
 .notification-view-all {
