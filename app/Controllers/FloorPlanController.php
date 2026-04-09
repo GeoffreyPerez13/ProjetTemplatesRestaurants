@@ -171,7 +171,7 @@ class FloorPlanController extends BaseController
     }
 
     /**
-     * Supprimer tous les étages d'un admin
+     * Supprimer tous les étages d'un admin (sauf le premier)
      */
     public function deleteAllFloors()
     {
@@ -192,19 +192,35 @@ class FloorPlanController extends BaseController
 
         $admin_id = $_SESSION['admin_id'];
         $floorModel = new Floor($this->pdo);
+        $tableModel = new RestaurantTable($this->pdo);
+        $elementModel = new RestaurantElement($this->pdo);
 
         // Récupérer tous les étages de l'admin
         $floors = $floorModel->getAllByAdmin($admin_id);
 
-        // Supprimer chaque étage (cascade supprime tables et éléments)
-        foreach ($floors as $floor) {
-            $floorModel->delete($floor['id']);
+        if (empty($floors)) {
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Aucun étage à supprimer'
+            ]);
+            exit;
+        }
+
+        // Garder le premier étage (rez-de-chaussée) et vider son contenu
+        $firstFloor = $floors[0];
+        $tableModel->deleteAllByFloor($firstFloor['id']);
+        $elementModel->deleteAllByFloor($firstFloor['id']);
+
+        // Supprimer tous les autres étages
+        for ($i = 1; $i < count($floors); $i++) {
+            $floorModel->delete($floors[$i]['id']);
         }
 
         echo json_encode([
             'success' => true, 
-            'message' => 'Tous les étages supprimés',
-            'csrf_token' => $this->getCsrfToken()
+            'message' => 'Tous les étages supprimés (rez-de-chaussée conservé)',
+            'csrf_token' => $this->getCsrfToken(),
+            'first_floor_id' => $firstFloor['id']
         ]);
         exit;
     }

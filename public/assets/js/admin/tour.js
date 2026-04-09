@@ -126,6 +126,19 @@ class Tour {
     this.els.tooltip.classList.remove('active');
 
     const proceed = () => {
+      // Si element est null, afficher un message centré sans highlight
+      if (!step.element) {
+        this._currentElement = null;
+        this._renderTooltip(step);
+        this._positionTooltipCenter();
+        this.els.svg.innerHTML = ''; // Pas de cutout
+        requestAnimationFrame(() => {
+          this.els.tooltip.classList.add('active');
+          this.isTransitioning = false;
+        });
+        return;
+      }
+
       const el = document.querySelector(step.element);
       if (!el) {
         console.warn(`[Tour] Element not found: ${step.element}`);
@@ -255,6 +268,33 @@ class Tour {
     if (prevBtn && !prevBtn.disabled) {
       prevBtn.addEventListener('click', () => this.previous());
     }
+  }
+
+  /**
+   * Positionne le tooltip au centre de l'écran (pour les messages finaux sans élément)
+   */
+  _positionTooltipCenter() {
+    const tooltip = this.els.tooltip;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const pad = 16;
+
+    const isMobile = vw < 600;
+    const tooltipW = isMobile ? vw - pad * 2 : Math.min(400, vw - pad * 2);
+    tooltip.style.maxWidth = tooltipW + 'px';
+
+    tooltip.style.top = '0';
+    tooltip.style.left = '0';
+    tooltip.className = 'tour-tooltip position-center';
+
+    const tooltipH = tooltip.offsetHeight;
+
+    // Centrer verticalement et horizontalement
+    const top = (vh - tooltipH) / 2 + window.scrollY;
+    const left = (vw - tooltipW) / 2;
+
+    tooltip.style.top = Math.max(pad, top) + 'px';
+    tooltip.style.left = Math.max(pad, left) + 'px';
   }
 
   /**

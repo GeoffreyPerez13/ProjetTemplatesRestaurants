@@ -518,6 +518,11 @@ switch ($page) {
         $controller->saveSettings();
         break;
 
+    case 'reservation-get-tables':
+        $controller = new ReservationController($pdo);
+        $controller->getAvailableTables();
+        break;
+
     // API publique réservations (vitrine)
     case 'booking-submit':
         $controller = new ReservationController($pdo);

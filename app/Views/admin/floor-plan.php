@@ -25,7 +25,7 @@ require __DIR__ . '/../partials/header.php';
         <p class="floor-plan-subtitle">Créez et organisez votre espace restaurant</p>
     </div>
 
-    <!-- Gestion des étages -->
+    <!-- Gestion des salles -->
     <div class="floor-tabs-container">
         <div class="floor-tabs">
             <?php foreach ($floors as $floor): ?>
@@ -35,23 +35,23 @@ require __DIR__ . '/../partials/header.php';
                 </button>
             <?php endforeach; ?>
             <button class="floor-tab-add" id="add-floor-btn">
-                <i class="fas fa-plus"></i> Ajouter un étage
+                <i class="fas fa-plus"></i> Ajouter une salle
             </button>
         </div>
         <div class="floor-actions">
             <button class="btn-icon btn-info" id="recenter-canvas-btn" title="Recentrer la vue">
                 <i class="fas fa-compress-arrows-alt"></i>
             </button>
-            <button class="btn-icon btn-primary" id="edit-floor-btn" title="Modifier l'étage">
+            <button class="btn-icon btn-primary" id="edit-floor-btn" title="Modifier la salle">
                 <i class="fas fa-edit"></i>
             </button>
-            <button class="btn-icon btn-warning" id="clear-floor-btn" title="Vider l'étage">
+            <button class="btn-icon btn-warning" id="clear-floor-btn" title="Vider la salle">
                 <i class="fas fa-broom"></i>
             </button>
-            <button class="btn-icon btn-danger" id="delete-floor-btn" title="Supprimer l'étage">
+            <button class="btn-icon btn-danger" id="delete-floor-btn" title="Supprimer la salle">
                 <i class="fas fa-trash"></i>
             </button>
-            <button class="btn-icon btn-danger-dark" id="delete-all-floors-btn" title="Supprimer tous les étages">
+            <button class="btn-icon btn-danger-dark" id="delete-all-floors-btn" title="Supprimer toutes les salles">
                 <i class="fas fa-trash-alt"></i>
             </button>
         </div>
@@ -126,15 +126,82 @@ require __DIR__ . '/../partials/header.php';
     </div>
 </div>
 
-<!-- Modal ajout étage -->
+<!-- Tour guidé -->
+<script>
+// Définir les étapes du tour pour cette page
+const tourSteps = [
+    {
+        element: '.floor-plan-header',
+        title: 'Plan de salle',
+        content: 'Bienvenue dans l\'éditeur de plan de salle ! Créez et organisez votre espace restaurant en plaçant des tables et des éléments.',
+        position: 'bottom'
+    },
+    {
+        element: '.floor-tabs-container',
+        title: 'Gestion des salles',
+        content: 'Gérez plusieurs salles pour votre restaurant. Ajoutez, modifiez ou supprimez des salles selon vos besoins.',
+        position: 'bottom'
+    },
+    {
+        element: '#add-floor-btn',
+        title: 'Ajouter une salle',
+        content: 'Cliquez ici pour créer une nouvelle salle (ex: Rez-de-chaussée, Salle principale, Terrasse...).',
+        position: 'bottom'
+    },
+    {
+        element: '.floor-actions',
+        title: 'Actions sur la salle',
+        content: 'Recentrez la vue, modifiez le nom de la salle, videz-la ou supprimez-la complètement.',
+        position: 'bottom'
+    },
+    {
+        element: '.toolbar-section:nth-child(1)',
+        title: 'Tables',
+        content: 'Sélectionnez le type de table à ajouter : ronde, carrée ou rectangulaire. Cliquez ensuite sur le canvas pour placer la table.',
+        position: 'right'
+    },
+    {
+        element: '.toolbar-section:nth-child(2)',
+        title: 'Éléments décoratifs',
+        content: 'Ajoutez des murs, portes et fenêtres pour structurer votre plan de salle.',
+        position: 'right'
+    },
+    {
+        element: '.toolbar-section:nth-child(3)',
+        title: 'Actions',
+        content: 'Mode sélection pour déplacer les éléments, ou supprimez les éléments sélectionnés.',
+        position: 'right'
+    },
+    {
+        element: '.floor-canvas-container',
+        title: 'Canvas de dessin',
+        content: 'Votre espace de travail ! Cliquez pour placer des éléments, glissez-déposez pour les déplacer, cliquez pour voir leurs propriétés.',
+        position: 'top'
+    },
+    {
+        element: '.floor-legend',
+        title: 'Aide rapide',
+        content: 'Retrouvez ici les raccourcis et astuces pour utiliser l\'éditeur de plan de salle.',
+        position: 'top'
+    },
+    {
+        element: null,
+        title: 'C\'est parti !',
+        content: 'Vous êtes prêt à créer votre plan de salle. Les modifications sont sauvegardées automatiquement.',
+        position: 'center'
+    }
+];
+</script>
+
+<!-- Modal ajout salle -->
 <div class="modal" id="add-floor-modal" style="display: none;">
     <div class="modal-content">
-        <h3>Ajouter un étage</h3>
+        <h3>Ajouter une salle</h3>
         <form id="add-floor-form">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
             <div class="form-group">
-                <label for="floor-name">Nom de l'étage *</label>
-                <input type="text" id="floor-name" name="name" placeholder="Ex: 1er étage, Terrasse..." required>
+                <label for="floor-name">Nom de la salle *</label>
+                <input type="text" id="floor-name" name="name" placeholder="Ex: Salle principale, Terrasse..." required>
             </div>
             <div class="form-actions">
                 <button type="button" class="btn-secondary" id="cancel-floor-btn">Annuler</button>
@@ -144,15 +211,15 @@ require __DIR__ . '/../partials/header.php';
     </div>
 </div>
 
-<!-- Modal édition étage -->
+<!-- Modal édition salle -->
 <div class="modal" id="edit-floor-modal" style="display: none;">
     <div class="modal-content">
-        <h3>Modifier l'étage</h3>
+        <h3>Modifier la salle</h3>
         <form id="edit-floor-form">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
             <input type="hidden" id="edit-floor-id" name="floor_id">
             <div class="form-group">
-                <label for="edit-floor-name">Nom de l'étage *</label>
+                <label for="edit-floor-name">Nom de la salle *</label>
                 <input type="text" id="edit-floor-name" name="name" required>
             </div>
             <div class="form-actions">

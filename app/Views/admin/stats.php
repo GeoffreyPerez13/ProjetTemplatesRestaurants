@@ -142,4 +142,59 @@ require __DIR__ . '/../partials/header.php';
     </div>
 </div>
 
+<!-- Tour guidé -->
+<script>
+// Définir les étapes du tour pour cette page
+const tourSteps = [
+    {
+        element: '.stats-header',
+        title: 'Statistiques avancées',
+        content: 'Bienvenue dans votre tableau de bord statistiques ! Analysez le trafic de votre site vitrine en détail.',
+        position: 'bottom'
+    },
+    {
+        element: '.stats-period-selector',
+        title: 'Période d\'analyse',
+        content: 'Sélectionnez la période à analyser : 7 jours, 30 jours, 90 jours ou 1 an. Les graphiques se mettent à jour automatiquement.',
+        position: 'bottom'
+    },
+    {
+        element: '.stats-kpi-grid',
+        title: 'Indicateurs clés',
+        content: 'Vue d\'ensemble rapide : visites totales, visiteurs uniques, moyenne par jour et pourcentage de visiteurs mobiles.',
+        position: 'bottom'
+    },
+    {
+        element: '.stats-chart-card.stats-chart-main',
+        title: 'Visites par jour',
+        content: 'Graphique principal montrant l\'évolution des visites totales et des visiteurs uniques sur la période sélectionnée.',
+        position: 'top'
+    },
+    {
+        element: '#chart-devices',
+        title: 'Appareils',
+        content: 'Découvrez quels appareils (mobile, desktop, tablette) utilisent vos visiteurs.',
+        position: 'top'
+    },
+    {
+        element: '#chart-hours',
+        title: 'Heures de pointe',
+        content: 'Identifiez les heures de pointe pour optimiser votre communication.',
+        position: 'top'
+    },
+    {
+        element: '.stats-referrers-table',
+        title: 'Sources de trafic',
+        content: 'Tableau des sites référents : découvrez d\'où viennent vos visiteurs (Google, réseaux sociaux, liens directs...).',
+        position: 'top'
+    },
+    {
+        element: null,
+        title: 'Analysez votre audience !',
+        content: 'Les statistiques sont mises à jour en temps réel. Revenez régulièrement pour suivre l\'évolution de votre trafic.',
+        position: 'center'
+    }
+];
+</script>
+
 <?php require __DIR__ . '/../partials/footer.php'; ?>

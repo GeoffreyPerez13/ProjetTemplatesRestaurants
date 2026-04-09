@@ -152,6 +152,9 @@ $statusColors = [
                                 <div class="reservation-info">
                                     <span class="reservation-name"><i class="fas fa-user"></i> <?= htmlspecialchars($r['customer_name']) ?></span>
                                     <span class="reservation-party"><i class="fas fa-users"></i> <?= $r['party_size'] ?> pers.</span>
+                                    <?php if (!empty($r['table_number'])): ?>
+                                        <span class="reservation-table"><i class="fas fa-chair"></i> <?= htmlspecialchars($r['floor_name']) ?> - Table <?= htmlspecialchars($r['table_number']) ?></span>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="reservation-contact">
                                     <span><i class="fas fa-phone"></i> <?= htmlspecialchars($r['customer_phone']) ?></span>
@@ -263,7 +266,12 @@ $statusColors = [
                                     <?php endif; ?>
                                 </td>
                                 <td data-label="Tél"><?= htmlspecialchars($r['customer_phone']) ?></td>
-                                <td data-label="Couverts"><i class="fas fa-users"></i> <?= $r['party_size'] ?></td>
+                                <td data-label="Couverts">
+                                    <i class="fas fa-users"></i> <?= $r['party_size'] ?>
+                                    <?php if (!empty($r['table_number'])): ?>
+                                        <br><small style="color: var(--color-primary);"><i class="fas fa-chair"></i> <?= htmlspecialchars($r['floor_name']) ?> - T<?= htmlspecialchars($r['table_number']) ?></small>
+                                    <?php endif; ?>
+                                </td>
                                 <td data-label="Statut">
                                     <span class="status-badge badge-<?= $statusColors[$r['status']] ?>">
                                         <i class="fas <?= $statusIcons[$r['status']] ?>"></i>
@@ -276,6 +284,9 @@ $statusColors = [
                                             <button class="btn small success btn-confirm-reservation" data-id="<?= $r['id'] ?>" title="Confirmer"><i class="fas fa-check"></i></button>
                                             <button class="btn small danger btn-cancel-reservation" data-id="<?= $r['id'] ?>" title="Refuser"><i class="fas fa-times"></i></button>
                                         <?php elseif ($r['status'] === 'confirmed'): ?>
+                                            <?php if (($settings['booking_assign_table'] ?? false) && !($settings['booking_auto_confirm'] ?? false)): ?>
+                                                <button class="btn small primary btn-change-table" data-id="<?= $r['id'] ?>" title="Changer de table"><i class="fas fa-chair"></i></button>
+                                            <?php endif; ?>
                                             <button class="btn small btn-complete-reservation" data-id="<?= $r['id'] ?>" title="Terminée"><i class="fas fa-flag-checkered"></i></button>
                                             <button class="btn small danger btn-noshow-reservation" data-id="<?= $r['id'] ?>" title="Absent"><i class="fas fa-user-slash"></i></button>
                                         <?php endif; ?>
@@ -333,7 +344,41 @@ $statusColors = [
                     </div>
                     <div class="setting-control">
                         <label class="toggle-switch">
-                            <input type="checkbox" name="booking_auto_confirm" value="1" <?= ($settings['booking_auto_confirm'] ?? false) ? 'checked' : '' ?>>
+                            <input type="checkbox" name="booking_auto_confirm" value="1" id="booking_auto_confirm" <?= ($settings['booking_auto_confirm'] ?? false) ? 'checked' : '' ?>>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Attribution de table lors de la confirmation -->
+                <div class="setting-row<?= ($settings['booking_auto_confirm'] ?? false) ? ' disabled' : '' ?>" id="assign-table-setting">
+                    <div class="setting-info">
+                        <label>Attribution de table lors de la confirmation</label>
+                        <p class="setting-desc">Lors de la confirmation d'une réservation, attribuer automatiquement une table du plan de salle.</p>
+                        
+                        <?php if ($settings['booking_auto_confirm'] ?? false): ?>
+                            <p class="setting-warning" id="assign-table-disabled-message">
+                                <i class="fas fa-info-circle"></i> 
+                                Cette option est incompatible avec la validation automatique. Désactivez d'abord la validation automatique pour pouvoir l'activer.
+                            </p>
+                        <?php endif; ?>
+                        
+                        <?php if (empty($tablesCount)): ?>
+                            <p class="setting-warning">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                Aucune table configurée. 
+                                <a href="?page=floor-plan" target="_blank" class="info-link">Configurer le plan de salle</a>
+                            </p>
+                        <?php else: ?>
+                            <p class="setting-info-extra">
+                                <i class="fas fa-info-circle"></i> 
+                                <?= $tablesCount ?> table(s) configurée(s) dans le plan de salle
+                            </p>
+                        <?php endif; ?>
+                    </div>
+                    <div class="setting-control">
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="booking_assign_table" value="1" <?= ($settings['booking_assign_table'] ?? false) ? 'checked' : '' ?> <?= ($settings['booking_auto_confirm'] ?? false) ? 'disabled' : '' ?>>
                             <span class="toggle-slider"></span>
                         </label>
                     </div>
@@ -532,6 +577,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <div class="reservation-info">
                                             <span class="reservation-name"><i class="fas fa-user"></i> ${r.customer_name}</span>
                                             <span class="reservation-party"><i class="fas fa-users"></i> ${r.party_size} pers.</span>
+                                            ${r.table_number ? `<span class="reservation-table"><i class="fas fa-chair"></i> ${r.floor_name} - Table ${r.table_number}</span>` : ''}
                                         </div>
                                         <div class="reservation-contact">
                                             <span><i class="fas fa-phone"></i> ${r.customer_phone}</span>
@@ -586,6 +632,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <div class="reservation-info">
                                             <span class="reservation-name"><i class="fas fa-user"></i> ${r.customer_name}</span>
                                             <span class="reservation-party"><i class="fas fa-users"></i> ${r.party_size} pers.</span>
+                                            ${r.table_number ? `<span class="reservation-table"><i class="fas fa-chair"></i> ${r.floor_name} - Table ${r.table_number}</span>` : ''}
                                         </div>
                                         <div class="reservation-contact">
                                             <span><i class="fas fa-phone"></i> ${r.customer_phone}</span>
@@ -655,18 +702,82 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.btn-confirm-reservation').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.dataset.id;
-                Swal.fire({
-                    title: 'Confirmer cette réservation ?',
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#10b981',
-                    confirmButtonText: '<i class="fas fa-check"></i> Confirmer',
-                    cancelButtonText: 'Annuler'
-                }).then(result => {
-                    if (result.isConfirmed) {
-                        updateReservationStatus(id, 'confirmed');
-                    }
-                });
+                const assignTableEnabled = <?= json_encode(($settings['booking_assign_table'] ?? false) && !($settings['booking_auto_confirm'] ?? false)) ?>;
+                
+                if (assignTableEnabled) {
+                    // Charger les tables disponibles
+                    fetch('?page=reservation-get-tables')
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success && data.tables && data.tables.length > 0) {
+                                // Créer les options du select
+                                let tableOptions = '<option value="">Aucune table (confirmation sans attribution)</option>';
+                                data.tables.forEach(table => {
+                                    let label = `${table.floor_name} - Table ${table.table_number} (${table.capacity_min}-${table.capacity_max} pers.)`;
+                                    
+                                    // Ajouter les informations de réservations existantes
+                                    if (table.reservations && table.reservations.length > 0) {
+                                        const times = table.reservations.map(r => r.time).join(', ');
+                                        label += ` ⚠️ Déjà réservée : ${times}`;
+                                    }
+                                    
+                                    tableOptions += `<option value="${table.id}">${label}</option>`;
+                                });
+                                
+                                Swal.fire({
+                                    title: 'Confirmer cette réservation',
+                                    html: `
+                                        <div style="text-align: left; margin-bottom: 15px;">
+                                            <label for="table-select" style="display: block; margin-bottom: 10px; font-weight: 600; color: #1f2937; font-size: 0.95rem;">Attribuer une table :</label>
+                                            <select id="table-select" style="width: 100%; padding: 10px 12px; border: 2px solid #d1d5db; border-radius: 6px; background: #ffffff; color: #1f2937; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
+                                                ${tableOptions}
+                                            </select>
+                                        </div>
+                                    `,
+                                    icon: 'question',
+                                    showCancelButton: true,
+                                    confirmButtonColor: '#10b981',
+                                    confirmButtonText: '<i class="fas fa-check"></i> Confirmer',
+                                    cancelButtonText: 'Annuler',
+                                    preConfirm: () => {
+                                        return document.getElementById('table-select').value;
+                                    }
+                                }).then(result => {
+                                    if (result.isConfirmed) {
+                                        updateReservationStatus(id, 'confirmed', result.value || null);
+                                    }
+                                });
+                            } else {
+                                // Pas de tables configurées, confirmation simple
+                                Swal.fire({
+                                    title: 'Confirmer cette réservation ?',
+                                    icon: 'question',
+                                    showCancelButton: true,
+                                    confirmButtonColor: '#10b981',
+                                    confirmButtonText: '<i class="fas fa-check"></i> Confirmer',
+                                    cancelButtonText: 'Annuler'
+                                }).then(result => {
+                                    if (result.isConfirmed) {
+                                        updateReservationStatus(id, 'confirmed');
+                                    }
+                                });
+                            }
+                        });
+                } else {
+                    // Confirmation simple sans attribution de table
+                    Swal.fire({
+                        title: 'Confirmer cette réservation ?',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10b981',
+                        confirmButtonText: '<i class="fas fa-check"></i> Confirmer',
+                        cancelButtonText: 'Annuler'
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            updateReservationStatus(id, 'confirmed');
+                        }
+                    });
+                }
             });
         });
         
@@ -686,6 +797,88 @@ document.addEventListener('DOMContentLoaded', function() {
                         updateReservationStatus(id, 'cancelled');
                     }
                 });
+            });
+        });
+        
+        // Bouton changer de table
+        document.querySelectorAll('.btn-change-table').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                
+                // Charger les tables disponibles
+                fetch('?page=reservation-get-tables')
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success && data.tables && data.tables.length > 0) {
+                            // Créer les options du select
+                            let tableOptions = '<option value="">Aucune table</option>';
+                            data.tables.forEach(table => {
+                                let label = `${table.floor_name} - Table ${table.table_number} (${table.capacity_min}-${table.capacity_max} pers.)`;
+                                
+                                // Ajouter les informations de réservations existantes
+                                if (table.reservations && table.reservations.length > 0) {
+                                    const times = table.reservations.map(r => r.time).join(', ');
+                                    label += ` ⚠️ Déjà réservée : ${times}`;
+                                }
+                                
+                                tableOptions += `<option value="${table.id}">${label}</option>`;
+                            });
+                            
+                            Swal.fire({
+                                title: 'Changer la table',
+                                html: `
+                                    <div style="text-align: left; margin-bottom: 15px;">
+                                        <label for="table-select-change" style="display: block; margin-bottom: 10px; font-weight: 600; color: #1f2937; font-size: 0.95rem;">Nouvelle table :</label>
+                                        <select id="table-select-change" style="width: 100%; padding: 10px 12px; border: 2px solid #d1d5db; border-radius: 6px; background: #ffffff; color: #1f2937; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
+                                            ${tableOptions}
+                                        </select>
+                                    </div>
+                                `,
+                                icon: 'question',
+                                showCancelButton: true,
+                                confirmButtonColor: '#d97706',
+                                confirmButtonText: '<i class="fas fa-check"></i> Changer',
+                                cancelButtonText: 'Annuler',
+                                preConfirm: () => {
+                                    return document.getElementById('table-select-change').value;
+                                }
+                            }).then(result => {
+                                if (result.isConfirmed) {
+                                    // Mettre à jour la table sans changer le statut
+                                    const csrfToken = document.getElementById('csrf-token').value;
+                                    const formData = new FormData();
+                                    formData.append('csrf_token', csrfToken);
+                                    formData.append('id', id);
+                                    formData.append('status', 'confirmed');
+                                    formData.append('table_id', result.value || '');
+                                    
+                                    fetch('?page=reservation-update-status', {
+                                        method: 'POST',
+                                        body: formData
+                                    })
+                                    .then(r => r.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            if (data.new_csrf_token) {
+                                                document.getElementById('csrf-token').value = data.new_csrf_token;
+                                            }
+                                            Swal.fire({
+                                                title: 'Table modifiée',
+                                                icon: 'success',
+                                                timer: 1500,
+                                                showConfirmButton: false
+                                            });
+                                            loadReservationsForDate(dateInput.value);
+                                        } else {
+                                            Swal.fire('Erreur', data.message || 'Une erreur est survenue', 'error');
+                                        }
+                                    });
+                                }
+                            });
+                        } else {
+                            Swal.fire('Info', 'Aucune table configurée dans le plan de salle', 'info');
+                        }
+                    });
             });
         });
     }
@@ -775,12 +968,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    function updateReservationStatus(id, status) {
+    function updateReservationStatus(id, status, tableId = null) {
         const csrfToken = document.getElementById('csrf-token').value;
         const data = new FormData();
         data.append('csrf_token', csrfToken);
         data.append('id', id);
         data.append('status', status);
+        
+        // Ajouter l'ID de la table si fourni
+        if (tableId) {
+            data.append('table_id', tableId);
+        }
         
         fetch('?page=reservation-update-status', {
             method: 'POST',
@@ -800,6 +998,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     showConfirmButton: false
                 });
                 loadReservationsForDate(dateInput.value);
+                
+                // Rafraîchir le badge de notification
+                updateNotificationBadge();
             } else {
                 Swal.fire('Erreur', data.message || 'Une erreur est survenue', 'error');
             }
@@ -808,6 +1009,33 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Erreur:', error);
             Swal.fire('Erreur', 'Erreur lors de la mise à jour', 'error');
         });
+    }
+    
+    // Fonction pour mettre à jour le badge de notification
+    function updateNotificationBadge() {
+        fetch('?page=get-pending-reservations')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const count = data.reservations ? data.reservations.length : 0;
+                    const notificationCount = document.getElementById('notification-count');
+                    const notificationToggle = document.getElementById('notification-toggle');
+                    
+                    if (notificationCount) {
+                        notificationCount.textContent = count;
+                    }
+                    
+                    // Cacher le bouton si count = 0
+                    if (count === 0 && notificationToggle) {
+                        notificationToggle.style.display = 'none';
+                    } else if (count > 0 && notificationToggle) {
+                        notificationToggle.style.display = '';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Erreur mise à jour badge:', error);
+            });
     }
     
     // Événements initiaux

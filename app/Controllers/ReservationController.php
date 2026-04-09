@@ -47,13 +47,10 @@ class ReservationController extends BaseController
     }
 
     /**
-     * Envoie un email au restaurant pour l'informer d'une nouvelle réservation
+     * Envoie un email de notification au restaurant pour une nouvelle réservation
      */
-    private function sendNewReservationNotificationToRestaurant($reservation, $admin)
+    private function sendNewReservationNotificationToRestaurant($reservation, $restaurantName, $restaurantEmail, $isAutoConfirmed = false)
     {
-        $restaurantEmail = $admin->email;
-        $restaurantName = htmlspecialchars($admin->restaurant_name ?? 'Restaurant');
-        
         $customerName = htmlspecialchars($reservation['customer_name']);
         $date = date('d/m/Y', strtotime($reservation['reservation_date']));
         $time = substr($reservation['reservation_time'], 0, 5);
@@ -62,7 +59,28 @@ class ReservationController extends BaseController
         $email = !empty($reservation['customer_email']) ? htmlspecialchars($reservation['customer_email']) : 'Non renseigné';
         $specialReqs = !empty($reservation['special_requests']) ? htmlspecialchars($reservation['special_requests']) : 'Aucune';
 
-        $subject = "🔔 Nouvelle réservation - $restaurantName";
+        // Adapter le sujet et le contenu selon le type de confirmation
+        if ($isAutoConfirmed) {
+            $subject = "✅ Nouvelle réservation confirmée - $restaurantName";
+            $headerTitle = "✅ Réservation confirmée";
+            $headerColor = "#10b981";
+            $alertHtml = "<div class='alert' style='background: #d1fae5; border-left: 4px solid #10b981;'>
+                <strong>✅ Confirmation automatique :</strong> Une nouvelle réservation a été confirmée automatiquement sur votre site.
+            </div>";
+            $adviceHtml = "<p style='color: #6b7280; font-size: 0.9rem; margin-top: 30px;'>
+                <strong>💡 Info :</strong> Cette réservation a été confirmée automatiquement. Le client a reçu un email de confirmation.
+            </p>";
+        } else {
+            $subject = "🔔 Nouvelle réservation - $restaurantName";
+            $headerTitle = "🔔 Nouvelle réservation";
+            $headerColor = "#b45309";
+            $alertHtml = "<div class='alert' style='background: #fef3c7; border-left: 4px solid #f59e0b;'>
+                <strong>⏰ Action requise :</strong> Une nouvelle demande de réservation vient d'être effectuée sur votre site.
+            </div>";
+            $adviceHtml = "<p style='color: #6b7280; font-size: 0.9rem; margin-top: 30px;'>
+                <strong>💡 Conseil :</strong> Pensez à confirmer ou refuser cette réservation rapidement pour offrir la meilleure expérience à vos clients.
+            </p>";
+        }
         
         $message = "
         <html>
@@ -70,28 +88,26 @@ class ReservationController extends BaseController
             <style>
                 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                .header { background: linear-gradient(135deg, #b45309 0%, #ea580c 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                .header { background: linear-gradient(135deg, $headerColor 0%, " . ($isAutoConfirmed ? '#059669' : '#ea580c') . " 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
                 .header h1 { margin: 0; font-size: 24px; }
                 .content { background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; }
-                .alert { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; margin: 20px 0; border-radius: 4px; }
+                .alert { padding: 16px; margin: 20px 0; border-radius: 4px; }
                 .details-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
                 .details-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
                 .details-table td:first-child { font-weight: 600; color: #6b7280; width: 40%; }
                 .footer { background: #f9fafb; padding: 20px; text-align: center; font-size: 0.9rem; color: #6b7280; border-radius: 0 0 8px 8px; }
-                .btn { display: inline-block; padding: 12px 24px; background: #b45309; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+                .btn { display: inline-block; padding: 12px 24px; background: $headerColor; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
             </style>
         </head>
         <body>
             <div class='container'>
                 <div class='header'>
-                    <h1>🔔 Nouvelle réservation</h1>
+                    <h1>$headerTitle</h1>
                 </div>
                 <div class='content'>
-                    <div class='alert'>
-                        <strong>⏰ Action requise :</strong> Une nouvelle demande de réservation vient d'être effectuée sur votre site.
-                    </div>
+                    $alertHtml
                     
-                    <h2 style='color: #b45309; margin-top: 0;'>Détails de la réservation</h2>
+                    <h2 style='color: $headerColor; margin-top: 0;'>Détails de la réservation</h2>
                     
                     <table class='details-table'>
                         <tr>
@@ -130,9 +146,7 @@ class ReservationController extends BaseController
                         </a>
                     </p>
                     
-                    <p style='color: #6b7280; font-size: 0.9rem; margin-top: 30px;'>
-                        <strong>💡 Conseil :</strong> Pensez à confirmer ou refuser cette réservation rapidement pour offrir la meilleure expérience à vos clients.
-                    </p>
+                    $adviceHtml
                 </div>
                 <div class='footer'>
                     <p>Cet email a été envoyé automatiquement par MenuMiam</p>
@@ -264,6 +278,7 @@ class ReservationController extends BaseController
             'booking_auto_confirm'  => ($options['booking_auto_confirm'] ?? '0') === '1',
             'booking_auto_complete' => ($options['booking_auto_complete'] ?? '0') === '1',
             'booking_meal_duration' => max(30, (int)($options['booking_meal_duration'] ?? 90)),
+            'booking_assign_table'  => ($options['booking_assign_table'] ?? '0') === '1',
         ];
     }
 
@@ -320,6 +335,20 @@ class ReservationController extends BaseController
             $closureDates = [];
         }
 
+        // Compter le nombre de tables configurées
+        $tablesCount = 0;
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT COUNT(*) 
+                FROM restaurant_tables 
+                WHERE floor_id IN (SELECT id FROM restaurant_floors WHERE admin_id = ?)
+            ");
+            $stmt->execute([$adminId]);
+            $tablesCount = (int)$stmt->fetchColumn();
+        } catch (Exception $e) {
+            error_log("Erreur récupération nombre de tables: " . $e->getMessage());
+        }
+
         $messages = $this->getFlashMessages();
 
         $this->render('admin/reservations', [
@@ -332,6 +361,7 @@ class ReservationController extends BaseController
             'settings'           => $settings,
             'filters'            => $filters,
             'closureDates'       => $closureDates,
+            'tablesCount'        => $tablesCount,
             'restaurant_name'    => $admin->restaurant_name ?? '',
         ]);
     }
@@ -371,6 +401,11 @@ class ReservationController extends BaseController
         }
         if (isset($_POST['admin_notes'])) {
             $extra['admin_notes'] = trim($_POST['admin_notes']);
+        }
+        
+        // Gérer l'attribution de table lors de la confirmation
+        if ($status === 'confirmed' && !empty($_POST['table_id'])) {
+            $extra['table_id'] = (int)$_POST['table_id'];
         }
 
         $reservationModel = new Reservation($this->pdo);
@@ -521,6 +556,80 @@ class ReservationController extends BaseController
     }
 
     /**
+     * Récupérer les tables disponibles pour une réservation (AJAX)
+     */
+    public function getAvailableTables()
+    {
+        $this->checkAccess();
+        $adminId = $_SESSION['admin_id'];
+
+        header('Content-Type: application/json');
+
+        try {
+            // Récupérer toutes les tables
+            $stmt = $this->pdo->prepare("
+                SELECT 
+                    rt.id, 
+                    rt.table_number, 
+                    rt.capacity_min, 
+                    rt.capacity_max,
+                    rf.name as floor_name
+                FROM restaurant_tables rt
+                INNER JOIN restaurant_floors rf ON rt.floor_id = rf.id
+                WHERE rf.admin_id = ?
+                ORDER BY rf.name, rt.table_number
+            ");
+            $stmt->execute([$adminId]);
+            $tables = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Récupérer les réservations confirmées du jour avec leurs tables
+            $stmtReservations = $this->pdo->prepare("
+                SELECT 
+                    r.table_id,
+                    r.reservation_time,
+                    r.customer_name
+                FROM reservations r
+                WHERE r.admin_id = ?
+                AND r.status = 'confirmed'
+                AND r.reservation_date = CURDATE()
+                AND r.table_id IS NOT NULL
+                ORDER BY r.reservation_time
+            ");
+            $stmtReservations->execute([$adminId]);
+            $reservations = $stmtReservations->fetchAll(PDO::FETCH_ASSOC);
+
+            // Grouper les réservations par table_id
+            $reservationsByTable = [];
+            foreach ($reservations as $res) {
+                $tableId = $res['table_id'];
+                if (!isset($reservationsByTable[$tableId])) {
+                    $reservationsByTable[$tableId] = [];
+                }
+                $reservationsByTable[$tableId][] = [
+                    'time' => substr($res['reservation_time'], 0, 5),
+                    'customer' => $res['customer_name']
+                ];
+            }
+
+            // Ajouter les informations de réservation à chaque table
+            foreach ($tables as &$table) {
+                $table['reservations'] = $reservationsByTable[$table['id']] ?? [];
+            }
+
+            echo json_encode([
+                'success' => true,
+                'tables' => $tables
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération des tables'
+            ]);
+        }
+        exit;
+    }
+
+    /**
      * Sauvegarder les paramètres de réservation (AJAX)
      */
     public function saveSettings()
@@ -549,9 +658,10 @@ class ReservationController extends BaseController
             'booking_auto_confirm',
             'booking_auto_complete',
             'booking_meal_duration',
+            'booking_assign_table',
         ];
 
-        $checkboxKeys = ['booking_enabled', 'booking_auto_confirm', 'booking_auto_complete'];
+        $checkboxKeys = ['booking_enabled', 'booking_auto_confirm', 'booking_auto_complete', 'booking_assign_table'];
         
         foreach ($settingsKeys as $key) {
             // Pour les checkboxes, on gère le cas où elles ne sont pas présentes dans $_POST
@@ -566,6 +676,11 @@ class ReservationController extends BaseController
                 }
                 $optionModel->set($adminId, $key, (string)$value);
             }
+        }
+        
+        // Si la validation automatique est activée, désactiver l'attribution de table (incompatible)
+        if (isset($_POST['booking_auto_confirm']) && $_POST['booking_auto_confirm'] === '1') {
+            $optionModel->set($adminId, 'booking_assign_table', '0');
         }
 
         echo json_encode([
@@ -726,7 +841,7 @@ class ReservationController extends BaseController
             
             // Envoyer un email au restaurant pour l'informer de la nouvelle réservation
             if ($reservation && !empty($admin->email)) {
-                $this->sendNewReservationNotificationToRestaurant($reservation, $admin);
+                $this->sendNewReservationNotificationToRestaurant($reservation, $admin->restaurant_name ?? '', $admin->email, $autoConfirm);
             }
 
             $message = $autoConfirm 

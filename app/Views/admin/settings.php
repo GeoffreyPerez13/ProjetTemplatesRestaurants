@@ -1177,7 +1177,14 @@ if (!empty($_SESSION['pendingToast'])) {
             <link rel="stylesheet" href="/assets/css/admin/sections/settings/google-reviews.css">
             <div class="settings-section">
                 <h2><i class="fas fa-star"></i> Avis Google</h2>
-                <p class="section-description">Affichez les avis Google de votre restaurant directement sur votre site vitrine.</p>
+                <p class="section-description">Intégrez et affichez vos avis Google sur votre site vitrine.</p>
+                
+                <!-- Bouton tour spécifique pour Google Reviews -->
+                <div style="margin-bottom: 20px; text-align: right;">
+                    <button type="button" class="btn secondary" id="gr-tour-btn">
+                        <i class="fas fa-question-circle"></i> Lancer le tour guidé
+                    </button>
+                </div>
 
                 <?php
                     $grPlaceId = $options['google_place_id'] ?? '';
@@ -1365,6 +1372,74 @@ if (!empty($_SESSION['pendingToast'])) {
                     </div>
                 </div>
                 <?php endif; ?>
+                
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const grTourBtn = document.getElementById('gr-tour-btn');
+                    if (!grTourBtn) return;
+                    
+                    const grTourSteps = [
+                        {
+                            element: '.settings-section h2',
+                            title: 'Avis Google',
+                            content: 'Intégrez et affichez vos avis Google directement sur votre site vitrine pour renforcer votre crédibilité.',
+                            position: 'bottom'
+                        },
+                        {
+                            element: '.gr-status-cards',
+                            title: 'État de l\'intégration',
+                            content: 'Vérifiez si vos avis sont visibles sur le site et consultez votre note moyenne et le nombre d\'avis.',
+                            position: 'bottom'
+                        },
+                        {
+                            element: '.gr-config-section',
+                            title: 'Configuration',
+                            content: 'Configurez votre Google Place ID et votre clé API pour récupérer automatiquement vos avis.',
+                            position: 'top'
+                        },
+                        {
+                            element: '#google_place_id',
+                            title: 'Google Place ID',
+                            content: 'Identifiant unique de votre établissement sur Google Maps. Cliquez sur le lien d\'aide pour savoir comment le trouver.',
+                            position: 'bottom'
+                        },
+                        {
+                            element: '#google_api_key',
+                            title: 'Clé API Google',
+                            content: 'Clé d\'accès à l\'API Places (New). Créez-la depuis la Console Google Cloud.',
+                            position: 'bottom'
+                        },
+                        {
+                            element: '.checkbox-label',
+                            title: 'Activation',
+                            content: 'Cochez cette case pour afficher vos avis Google sur votre site vitrine.',
+                            position: 'bottom'
+                        },
+                        {
+                            element: '.gr-config-section h3',
+                            title: 'Configuration terminée',
+                            content: 'Une fois la configuration enregistrée, vos avis Google seront automatiquement récupérés et affichés sur votre site vitrine.',
+                            position: 'top'
+                        },
+                        {
+                            element: null,
+                            title: 'Renforcez votre crédibilité !',
+                            content: 'Les avis Google sont un excellent moyen de rassurer vos visiteurs et d\'augmenter vos réservations.',
+                            position: 'center'
+                        }
+                    ];
+                    
+                    grTourBtn.addEventListener('click', function() {
+                        if (!window.tour) {
+                            window.tour = new Tour(grTourSteps);
+                        } else {
+                            window.tour.steps = grTourSteps;
+                            window.tour.currentStep = 0;
+                        }
+                        window.tour.start();
+                    });
+                });
+                </script>
 
                 <!-- Gestion des avis de test (uniquement pour développement) -->
                 <div class="gr-test-management-section">
@@ -1445,6 +1520,13 @@ if (!empty($_SESSION['pendingToast'])) {
             <link rel="stylesheet" href="/assets/css/admin/sections/stats/stats.css">
             <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
             <div class="settings-section">
+                <!-- Bouton tour spécifique pour Stats -->
+                <div style="margin-bottom: 20px; text-align: right;">
+                    <button type="button" class="btn secondary" id="stats-tour-btn">
+                        <i class="fas fa-question-circle"></i> Lancer le tour guidé
+                    </button>
+                </div>
+                
                 <div class="stats-page stats-page-embedded">
                     <div class="stats-header">
                         <div class="stats-header-left">
@@ -1573,6 +1655,74 @@ if (!empty($_SESSION['pendingToast'])) {
                 </div>
             </div>
             <script src="/assets/js/sections/stats/stats.js"></script>
+            
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const statsTourBtn = document.getElementById('stats-tour-btn');
+                if (!statsTourBtn) return;
+                
+                const statsTourSteps = [
+                    {
+                        element: '.stats-header',
+                        title: 'Statistiques avancées',
+                        content: 'Analysez le trafic de votre site vitrine en détail depuis les paramètres.',
+                        position: 'bottom'
+                    },
+                    {
+                        element: '.stats-period-selector',
+                        title: 'Période d\'analyse',
+                        content: 'Sélectionnez la période : 7j, 30j, 90j ou 1an. Les graphiques se mettent à jour automatiquement.',
+                        position: 'bottom'
+                    },
+                    {
+                        element: '.stats-kpi-grid',
+                        title: 'Indicateurs clés',
+                        content: 'Visites totales, visiteurs uniques, moyenne par jour et pourcentage mobile.',
+                        position: 'bottom'
+                    },
+                    {
+                        element: '.stats-chart-card.stats-chart-main',
+                        title: 'Visites par jour',
+                        content: 'Évolution des visites totales et des visiteurs uniques.',
+                        position: 'top'
+                    },
+                    {
+                        element: '#chart-devices',
+                        title: 'Appareils',
+                        content: 'Découvrez quels appareils utilisent vos visiteurs.',
+                        position: 'top'
+                    },
+                    {
+                        element: '#chart-hours',
+                        title: 'Heures de pointe',
+                        content: 'Identifiez les heures de pointe.',
+                        position: 'top'
+                    },
+                    {
+                        element: '.stats-referrers-table',
+                        title: 'Sources de trafic',
+                        content: 'Découvrez d\'où viennent vos visiteurs (Google, réseaux sociaux...).',
+                        position: 'top'
+                    },
+                    {
+                        element: null,
+                        title: 'Analysez votre audience !',
+                        content: 'Les statistiques sont mises à jour en temps réel.',
+                        position: 'center'
+                    }
+                ];
+                
+                statsTourBtn.addEventListener('click', function() {
+                    if (!window.tour) {
+                        window.tour = new Tour(statsTourSteps);
+                    } else {
+                        window.tour.steps = statsTourSteps;
+                        window.tour.currentStep = 0;
+                    }
+                    window.tour.start();
+                });
+            });
+            </script>
 
         <?php elseif ($current_section === 'online-booking' && !empty($premium_statuses['online_booking'])): ?>
             <!-- Section Réservations en ligne -->

@@ -49,7 +49,7 @@
         if (toast === 'floor-created') {
             Swal.fire({
                 icon: 'success',
-                title: 'Étage créé',
+                title: 'Salle créée',
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
@@ -204,7 +204,7 @@
         data.append('floor_id', currentFloorId);
         data.append('table_number', tableNumber);
         data.append('shape', shape);
-        data.append('capacity_min', '2');
+        data.append('capacity_min', '1');
         data.append('capacity_max', '4');
         // Position déjà snapée à la grille, pas besoin de centrer
         data.append('position_x', x);
@@ -1081,7 +1081,7 @@
     }
 
     /**
-     * Recharger les données de l'étage
+     * Recharger les données de la salle
      */
     function reloadFloorData() {
         fetch(`?page=floor-plan-get-data&floor_id=${currentFloorId}`)
@@ -1097,7 +1097,7 @@
     }
 
     /**
-     * Configuration des onglets d'étages
+     * Configuration des onglets de salles
      */
     function setupFloorTabs() {
         const tabs = document.querySelectorAll('.floor-tab');
@@ -1113,7 +1113,7 @@
      * Configuration des modals
      */
     function setupModals() {
-        // Modal ajout étage
+        // Modal ajout salle
         document.getElementById('add-floor-btn')?.addEventListener('click', () => {
             // Mettre à jour le token CSRF dans le formulaire
             const csrfInput = document.querySelector('#add-floor-form input[name="csrf_token"]');
@@ -1160,7 +1160,7 @@
             }
         });
 
-        // Modal édition/suppression étage
+        // Modal édition/suppression salle
         document.getElementById('edit-floor-btn')?.addEventListener('click', () => {
             const activeTab = document.querySelector('.floor-tab.active');
             if (activeTab) {
@@ -1194,7 +1194,7 @@
                     if (data.csrf_token) csrfToken = data.csrf_token;
                     Swal.fire({
                         icon: 'success',
-                        title: 'Étage mis à jour',
+                        title: 'Salle mise à jour',
                         toast: true,
                         position: 'top-end',
                         showConfirmButton: false,
@@ -1211,11 +1211,11 @@
             });
         });
 
-        // Supprimer l'étage
+        // Supprimer la salle
         document.getElementById('delete-floor-btn')?.addEventListener('click', () => {
             Swal.fire({
-                title: 'Supprimer cet étage ?',
-                text: 'L\'étage et tous ses éléments seront supprimés définitivement.',
+                title: 'Supprimer cette salle ?',
+                text: 'La salle et tous ses éléments seront supprimés définitivement.',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Oui, supprimer',
@@ -1237,7 +1237,7 @@
                     if (data.success) {
                         Swal.fire({
                             icon: 'success',
-                            title: 'Étage supprimé',
+                            title: 'Salle supprimée',
                             toast: true,
                             position: 'top-end',
                             showConfirmButton: false,
@@ -1255,11 +1255,11 @@
             });
         });
 
-        // Supprimer tous les étages
+        // Supprimer toutes les salles
         document.getElementById('delete-all-floors-btn')?.addEventListener('click', () => {
             Swal.fire({
-                title: 'Supprimer TOUS les étages ?',
-                text: 'Tous les étages et leur contenu seront supprimés définitivement. Cette action est irréversible.',
+                title: 'Supprimer TOUTES les salles ?',
+                text: 'Toutes les salles et leur contenu seront supprimés définitivement. Cette action est irréversible.',
                 icon: 'error',
                 showCancelButton: true,
                 confirmButtonText: 'Oui, tout supprimer',
@@ -1279,15 +1279,39 @@
                 .then(data => {
                     if (data.success) {
                         if (data.csrf_token) csrfToken = data.csrf_token;
+                        
+                        // Mettre à jour l'UI immédiatement
+                        const floorTabsContainer = document.querySelector('.floor-tabs');
+                        const allTabs = floorTabsContainer.querySelectorAll('.floor-tab');
+                        
+                        // Supprimer tous les onglets sauf le premier
+                        allTabs.forEach((tab, index) => {
+                            if (index > 0) {
+                                tab.remove();
+                            }
+                        });
+                        
+                        // Activer le premier onglet
+                        if (allTabs.length > 0) {
+                            allTabs[0].classList.add('active');
+                            currentFloorId = data.first_floor_id || allTabs[0].dataset.floorId;
+                        }
+                        
+                        // Vider le canvas
+                        document.getElementById('floor-canvas').innerHTML = '';
+                        document.getElementById('properties-panel').style.display = 'none';
+                        tables = [];
+                        elements = [];
+                        
                         Swal.fire({
                             icon: 'success',
-                            title: 'Tous les étages supprimés',
+                            title: 'Toutes les salles supprimées',
+                            text: 'La salle principale a été conservée et vidée',
                             toast: true,
                             position: 'top-end',
                             showConfirmButton: false,
                             timer: 2000
                         });
-                        setTimeout(() => location.reload(), 2000);
                     } else {
                         Swal.fire({
                             icon: 'error',
@@ -1307,11 +1331,11 @@
             });
         });
 
-        // Vider tous les éléments de l'étage
+        // Vider tous les éléments de la salle
         document.getElementById('clear-floor-btn')?.addEventListener('click', () => {
             Swal.fire({
-                title: 'Vider cet étage ?',
-                text: 'Toutes les tables et éléments de cet étage seront supprimés.',
+                title: 'Vider cette salle ?',
+                text: 'Toutes les tables et éléments de cette salle seront supprimés.',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Oui, tout vider',
@@ -1334,7 +1358,7 @@
                         if (data.csrf_token) csrfToken = data.csrf_token;
                         Swal.fire({
                             icon: 'success',
-                            title: 'Étage vidé',
+                            title: 'Salle vidée',
                             toast: true,
                             position: 'top-end',
                             showConfirmButton: false,

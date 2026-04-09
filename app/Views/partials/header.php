@@ -104,7 +104,7 @@
         
         <?php 
         // Afficher le bouton tour uniquement sur les pages d'édition et si non masqué
-        $tourPages = ['dashboard', 'edit-card', 'edit-contact', 'edit-logo-banner', 'edit-services', 'edit-template', 'reservations', 'settings'];
+        $tourPages = ['dashboard', 'edit-card', 'edit-contact', 'edit-logo-banner', 'edit-services', 'edit-template', 'reservations', 'settings', 'floor-plan', 'stats'];
         $currentPage = $_GET['page'] ?? '';
         $hideTourButton = !empty($_SESSION['admin_id']) && !empty($hide_tour_button);
         if (in_array($currentPage, $tourPages) && !$hideTourButton): 

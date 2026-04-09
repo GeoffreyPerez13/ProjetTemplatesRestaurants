@@ -441,6 +441,7 @@ html.dark-mode .rotation-handle:hover {
     top: 100px;
     right: 20px;
     width: 320px;
+    max-height: calc(100vh - 120px);
     background: var(--color-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
@@ -448,6 +449,7 @@ html.dark-mode .rotation-handle:hover {
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
     z-index: 100;
     overflow: hidden;
+    display: block;
 }
 
 .properties-header {
@@ -457,6 +459,7 @@ html.dark-mode .rotation-handle:hover {
     padding: 16px 20px;
     background: var(--color-primary);
     color: white;
+    flex-shrink: 0;
 }
 
 .properties-panel h3 {
@@ -495,6 +498,8 @@ html.dark-mode .rotation-handle:hover {
 
 #properties-content {
     padding: 20px;
+    overflow-y: auto;
+    max-height: calc(100vh - 180px);
 }
 
 .properties-panel .form-group {
@@ -632,7 +637,7 @@ html.dark-mode .rotation-handle:hover {
 
 /* ==================== RESPONSIVE ==================== */
 
-@media (max-width: 1024px) {
+@media (max-width: 769px) {
     .properties-panel {
         position: fixed;
         top: auto;
@@ -640,9 +645,13 @@ html.dark-mode .rotation-handle:hover {
         left: 0;
         right: 0;
         width: 100%;
-        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        height: auto;
         max-height: 50vh;
-        overflow-y: auto;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    
+    #properties-content {
+        max-height: calc(50vh - 60px);
     }
 
     .floor-toolbar {

@@ -9,6 +9,50 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelector('input[name="csrf_token"]')?.value ||
     "";
 
+  // ==================== GESTION AFFICHAGE ATTRIBUTION TABLE ====================
+
+  // Désactiver/activer l'option d'attribution de table selon la validation automatique
+  var autoConfirmCheckbox = document.getElementById('booking_auto_confirm');
+  var assignTableSetting = document.getElementById('assign-table-setting');
+  var assignTableCheckbox = document.querySelector('input[name="booking_assign_table"]');
+  
+  if (autoConfirmCheckbox && assignTableSetting) {
+    autoConfirmCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        // Griser et désactiver le champ (incompatible avec validation automatique)
+        assignTableSetting.classList.add('disabled');
+        if (assignTableCheckbox) {
+          assignTableCheckbox.checked = false;
+          assignTableCheckbox.disabled = true;
+        }
+        
+        // Afficher le message d'incompatibilité
+        var existingMessage = document.getElementById('assign-table-disabled-message');
+        if (!existingMessage) {
+          var settingInfo = assignTableSetting.querySelector('.setting-info');
+          var settingDesc = settingInfo.querySelector('.setting-desc');
+          var message = document.createElement('p');
+          message.className = 'setting-warning';
+          message.id = 'assign-table-disabled-message';
+          message.innerHTML = '<i class="fas fa-info-circle"></i> Cette option est incompatible avec la validation automatique. Désactivez d\'abord la validation automatique pour pouvoir l\'activer.';
+          settingDesc.after(message);
+        }
+      } else {
+        // Réactiver le champ
+        assignTableSetting.classList.remove('disabled');
+        if (assignTableCheckbox) {
+          assignTableCheckbox.disabled = false;
+        }
+        
+        // Masquer le message d'incompatibilité
+        var message = document.getElementById('assign-table-disabled-message');
+        if (message) {
+          message.remove();
+        }
+      }
+    });
+  }
+
   // ==================== ONGLETS ====================
 
   // Fonction pour activer un onglet
@@ -263,6 +307,12 @@ document.addEventListener("DOMContentLoaded", function () {
       var autoCompleteCheckbox = settingsForm.querySelector('input[name="booking_auto_complete"]');
       if (autoCompleteCheckbox && !autoCompleteCheckbox.checked) {
         formData.set("booking_auto_complete", "0");
+      }
+
+      // Gérer le checkbox booking_assign_table
+      var assignTableCheckbox = settingsForm.querySelector('input[name="booking_assign_table"]');
+      if (assignTableCheckbox && !assignTableCheckbox.checked) {
+        formData.set("booking_assign_table", "0");
       }
 
       // Gérer les jours de fermeture (checkboxes multiples)

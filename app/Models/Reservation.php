@@ -49,38 +49,44 @@ class Reservation
      */
     public function getAll($adminId, $filters = [])
     {
-        $sql = "SELECT * FROM reservations WHERE admin_id = ?";
+        $sql = "SELECT r.*, 
+                rt.table_number, 
+                rf.name as floor_name 
+                FROM reservations r
+                LEFT JOIN restaurant_tables rt ON r.table_id = rt.id
+                LEFT JOIN restaurant_floors rf ON rt.floor_id = rf.id
+                WHERE r.admin_id = ?";
         $params = [$adminId];
 
         if (!empty($filters['status'])) {
-            $sql .= " AND status = ?";
+            $sql .= " AND r.status = ?";
             $params[] = $filters['status'];
         }
 
         if (!empty($filters['date'])) {
-            $sql .= " AND reservation_date = ?";
+            $sql .= " AND r.reservation_date = ?";
             $params[] = $filters['date'];
         }
 
         if (!empty($filters['date_from'])) {
-            $sql .= " AND reservation_date >= ?";
+            $sql .= " AND r.reservation_date >= ?";
             $params[] = $filters['date_from'];
         }
 
         if (!empty($filters['date_to'])) {
-            $sql .= " AND reservation_date <= ?";
+            $sql .= " AND r.reservation_date <= ?";
             $params[] = $filters['date_to'];
         }
 
         if (!empty($filters['search'])) {
-            $sql .= " AND (customer_name LIKE ? OR customer_email LIKE ? OR customer_phone LIKE ?)";
+            $sql .= " AND (r.customer_name LIKE ? OR r.customer_email LIKE ? OR r.customer_phone LIKE ?)";
             $search = '%' . $filters['search'] . '%';
             $params[] = $search;
             $params[] = $search;
             $params[] = $search;
         }
 
-        $sql .= " ORDER BY reservation_date ASC, reservation_time ASC";
+        $sql .= " ORDER BY r.reservation_date ASC, r.reservation_time ASC";
 
         if (!empty($filters['limit'])) {
             $sql .= " LIMIT " . intval($filters['limit']);
@@ -151,6 +157,11 @@ class Reservation
 
         if ($status === 'confirmed') {
             $setClauses[] = "confirmed_at = NOW()";
+            // Gérer l'attribution de table
+            if (isset($extra['table_id'])) {
+                $setClauses[] = "table_id = ?";
+                $params[] = $extra['table_id'] ?: null;
+            }
         } elseif ($status === 'cancelled') {
             $setClauses[] = "cancelled_at = NOW()";
             if (!empty($extra['cancelled_reason'])) {
@@ -162,6 +173,12 @@ class Reservation
         if (isset($extra['admin_notes'])) {
             $setClauses[] = "admin_notes = ?";
             $params[] = $extra['admin_notes'];
+        }
+        
+        // Permettre de changer la table même si déjà confirmée
+        if (isset($extra['table_id']) && $status !== 'confirmed') {
+            $setClauses[] = "table_id = ?";
+            $params[] = $extra['table_id'] ?: null;
         }
 
         $params[] = $id;
