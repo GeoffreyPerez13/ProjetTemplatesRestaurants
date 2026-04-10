@@ -61,19 +61,6 @@ require __DIR__ . '/../partials/header.php';
                         </label>
                     </div>
                     <div class="service-item">
-                        <label><i class="fas fa-truck"></i> Livraison</label>
-                        <div class="livraison-options">
-                            <label>
-                                <input type="checkbox" name="service_livraison_ubereats" value="1" <?= $services['service_livraison_ubereats'] == '1' ? 'checked' : '' ?>>
-                                Uber Eats / Deliveroo
-                            </label>
-                            <label>
-                                <input type="checkbox" name="service_livraison_etablissement" value="1" <?= $services['service_livraison_etablissement'] == '1' ? 'checked' : '' ?>>
-                                Livraison par l'établissement
-                            </label>
-                        </div>
-                    </div>
-                    <div class="service-item">
                         <label>
                             <input type="checkbox" name="service_wifi" value="1" <?= $services['service_wifi'] == '1' ? 'checked' : '' ?>>
                             <i class="fas fa-wifi"></i> Wi-Fi
@@ -86,8 +73,25 @@ require __DIR__ . '/../partials/header.php';
                         </label>
                     </div>
                     <div class="service-item">
-                        <label for="service_pmr"><i class="fas fa-wheelchair"></i> Accès PMR</label>
-                        <input type="checkbox" name="service_pmr" id="service_pmr" value="1" <?= $services['service_pmr'] == '1' ? 'checked' : '' ?>>
+                        <label>
+                            <input type="checkbox" name="service_pmr" id="service_pmr" value="1" <?= $services['service_pmr'] == '1' ? 'checked' : '' ?>>
+                            <i class="fas fa-wheelchair"></i> Accès PMR
+                        </label>
+                    </div>
+                    <!-- Séparateur pour forcer Livraison et Animaux sur une nouvelle ligne -->
+                    <div class="service-separator"></div>
+                    <div class="service-item">
+                        <label><i class="fas fa-truck"></i> Livraison</label>
+                        <div class="livraison-options">
+                            <label>
+                                <input type="checkbox" name="service_livraison_ubereats" value="1" <?= $services['service_livraison_ubereats'] == '1' ? 'checked' : '' ?>>
+                                Uber Eats / Deliveroo
+                            </label>
+                            <label>
+                                <input type="checkbox" name="service_livraison_etablissement" value="1" <?= $services['service_livraison_etablissement'] == '1' ? 'checked' : '' ?>>
+                                Livraison par l'établissement
+                            </label>
+                        </div>
                     </div>
                     <div class="service-item">
                         <label><i class="fas fa-paw"></i> Animaux</label>

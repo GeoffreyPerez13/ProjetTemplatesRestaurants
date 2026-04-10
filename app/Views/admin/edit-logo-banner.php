@@ -59,7 +59,6 @@ require __DIR__ . '/../partials/header.php';
                 </div>
             </div>
         </div>
-        <div class="logo-separator"><span>OU</span></div>
     <?php endif; ?>
 
     <div class="accordion-section upload-logo-accordion" id="upload-logo">
@@ -163,7 +162,22 @@ require __DIR__ . '/../partials/header.php';
                 </button>
             </div>
             <div id="banner-text-content" class="accordion-content collapsed">
-                <p class="info-message"><i class="fas fa-info-circle"></i> Vous devez d'abord uploader une bannière pour pouvoir ajouter du texte dessus.</p>
+                <p class="info-message" id="banner-text-info"><i class="fas fa-info-circle"></i> Sélectionnez d'abord une bannière pour pouvoir ajouter du texte dessus.</p>
+                <form method="post" action="?page=edit-logo-banner&action=updateBannerText" class="banner-text-form" id="banner-text-form-no-banner" style="display: none;">
+                    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                    <input type="hidden" name="anchor" value="banner-text">
+
+                    <div class="form-group">
+                        <label for="banner_text_temp">Saisissez le texte à afficher sur la bannière :</label>
+                        <textarea name="banner_text" id="banner_text_temp" rows="3" class="form-control" placeholder="Ex : Bienvenue chez nous !"></textarea>
+                        <p class="form-text text-muted"><i class="fas fa-info-circle"></i> Ce texte apparaîtra en superposition sur la bannière (position par défaut : centré).</p>
+                        <p class="form-text text-muted"><i class="fas fa-check-circle"></i> <strong>Astuce :</strong> Vous pouvez utiliser le bouton "Tout enregistrer" pour uploader la bannière et le texte en une seule fois !</p>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn success" disabled id="save-banner-text-temp"><i class="fas fa-save"></i> Enregistrer le texte</button>
+                    </div>
+                </form>
             </div>
         </div>
     <?php else: ?>
@@ -203,6 +217,16 @@ require __DIR__ . '/../partials/header.php';
             </div>
         </div>
     <?php endif; ?>
+    
+    <!-- Bouton global pour tout enregistrer -->
+    <div class="global-save-section">
+        <button type="button" id="save-all-btn" class="btn success btn-large">
+            <i class="fas fa-save"></i> Tout enregistrer
+        </button>
+        <p class="global-save-info">
+            <i class="fas fa-info-circle"></i> Ce bouton enregistre tous les formulaires actifs de la page en une seule fois.
+        </p>
+    </div>
 </div>
 
 <!-- Lightbox globale -->
@@ -286,6 +310,183 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             ajaxSubmit(this, '?page=edit-logo-banner&action=updateBannerText');
         });
+    }
+    
+    // Bouton "Tout enregistrer"
+    const saveAllBtn = document.getElementById('save-all-btn');
+    if (saveAllBtn) {
+        saveAllBtn.addEventListener('click', function() {
+            const formsToSubmit = [];
+            
+            // Vérifier si un logo est sélectionné
+            const logoInput = document.getElementById('logo-input');
+            const uploadLogoBtn = document.getElementById('uploadLogoBtn');
+            if (logoInput && logoInput.files.length > 0 && uploadLogoBtn && !uploadLogoBtn.disabled) {
+                formsToSubmit.push({ form: document.getElementById('upload-logo-form'), name: 'Logo' });
+            }
+            
+            // Vérifier si une bannière est sélectionnée
+            const bannerInput = document.getElementById('banner-input');
+            const uploadBannerBtn = document.getElementById('uploadBannerBtn');
+            if (bannerInput && bannerInput.files.length > 0 && uploadBannerBtn && !uploadBannerBtn.disabled) {
+                formsToSubmit.push({ form: document.getElementById('upload-banner-form'), name: 'Bannière' });
+            }
+            
+            // Vérifier si le texte de bannière est rempli (formulaire temporaire ou existant)
+            const bannerTextFormTemp = document.getElementById('banner-text-form-no-banner');
+            const bannerTextInput = document.getElementById('banner_text_temp');
+            if (bannerTextFormTemp && bannerTextFormTemp.style.display !== 'none' && bannerTextInput && bannerTextInput.value.trim() !== '') {
+                formsToSubmit.push({ form: bannerTextFormTemp, name: 'Texte de bannière' });
+            }
+            
+            // Vérifier aussi le formulaire de texte si bannière existe déjà
+            const bannerTextForm = document.querySelector('.banner-text-form:not(#banner-text-form-no-banner)');
+            const bannerTextInputExisting = document.getElementById('banner_text');
+            if (bannerTextForm && bannerTextForm.style.display !== 'none' && bannerTextInputExisting && bannerTextInputExisting.value.trim() !== '') {
+                formsToSubmit.push({ form: bannerTextForm, name: 'Texte de bannière' });
+            }
+            
+            if (formsToSubmit.length === 0) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Aucune modification',
+                        text: 'Aucun formulaire actif à enregistrer.',
+                        icon: 'info'
+                    });
+                } else {
+                    alert('Aucun formulaire actif à enregistrer.');
+                }
+                return;
+            }
+            
+            // Confirmation avant enregistrement
+            const formsList = formsToSubmit.map(f => f.name).join(', ');
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'Tout enregistrer',
+                    html: `<p>Vous allez enregistrer :</p><ul style="text-align: left;">${formsToSubmit.map(f => '<li>' + f.name + '</li>').join('')}</ul><p>Continuer ?</p>`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#10b981',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '<i class="fas fa-save"></i> Oui, tout enregistrer',
+                    cancelButtonText: 'Annuler'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        submitAllForms(formsToSubmit);
+                    }
+                });
+            } else {
+                if (confirm('Enregistrer : ' + formsList + ' ?')) {
+                    submitAllForms(formsToSubmit);
+                }
+            }
+        });
+    }
+    
+    function submitAllForms(formsToSubmit) {
+        let completed = 0;
+        let errors = 0;
+        let successCount = 0;
+        
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Enregistrement en cours...',
+                html: `<p>Progression : <span id="save-all-progress">0 / ${formsToSubmit.length}</span></p>`,
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => Swal.showLoading()
+            });
+        }
+        
+        // Fonction récursive pour soumettre les formulaires un par un
+        function submitNext(index) {
+            if (index >= formsToSubmit.length) {
+                // Tous les formulaires ont été traités
+                if (typeof Swal !== 'undefined') {
+                    if (errors === 0) {
+                        Swal.fire({
+                            title: 'Succès !',
+                            text: `Tous les éléments ont été enregistrés avec succès.`,
+                            icon: 'success'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Terminé avec erreurs',
+                            text: `${successCount} élément(s) enregistré(s), ${errors} erreur(s)`,
+                            icon: 'warning'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    }
+                } else {
+                    alert(`Enregistrement terminé : ${successCount} succès, ${errors} erreurs`);
+                    location.reload();
+                }
+                return;
+            }
+            
+            const item = formsToSubmit[index];
+            const formData = new FormData(item.form);
+            const url = item.form.getAttribute('action');
+            
+            console.log(`[Tout enregistrer] Soumission ${index + 1}/${formsToSubmit.length}: ${item.name}`);
+            console.log(`[Tout enregistrer] URL: ${url}`);
+            console.log(`[Tout enregistrer] FormData entries:`, Array.from(formData.entries()));
+            
+            // Utiliser XMLHttpRequest pour gérer correctement les fichiers
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            
+            xhr.onload = function() {
+                completed++;
+                const progressSpan = document.getElementById('save-all-progress');
+                if (progressSpan) {
+                    progressSpan.textContent = `${completed} / ${formsToSubmit.length}`;
+                }
+                
+                console.log(`[Tout enregistrer] Réponse pour ${item.name} (status ${xhr.status}):`, xhr.responseText);
+                
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    if (data.success) {
+                        successCount++;
+                        console.log(`[Tout enregistrer] ✓ Succès pour ${item.name}`);
+                    } else {
+                        errors++;
+                        console.error(`[Tout enregistrer] ✗ Erreur pour ${item.name}:`, data.message || 'Erreur inconnue', data);
+                    }
+                } catch (e) {
+                    errors++;
+                    console.error(`[Tout enregistrer] ✗ Erreur de parsing pour ${item.name}:`, e);
+                    console.error(`[Tout enregistrer] Réponse brute:`, xhr.responseText);
+                }
+                
+                // Attendre 500ms avant de soumettre le suivant
+                setTimeout(() => submitNext(index + 1), 500);
+            };
+            
+            xhr.onerror = function() {
+                completed++;
+                errors++;
+                const progressSpan = document.getElementById('save-all-progress');
+                if (progressSpan) {
+                    progressSpan.textContent = `${completed} / ${formsToSubmit.length}`;
+                }
+                console.error(`[Tout enregistrer] ✗ Erreur réseau pour ${item.name}`);
+                
+                // Attendre 500ms avant de soumettre le suivant
+                setTimeout(() => submitNext(index + 1), 500);
+            };
+            
+            xhr.send(formData);
+        }
+        
+        // Démarrer la soumission avec le premier formulaire
+        submitNext(0);
     }
 });
 </script>

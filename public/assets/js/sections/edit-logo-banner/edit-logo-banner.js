@@ -97,6 +97,37 @@
             this.enableUploadButton();
 
             if (this.uploadArea) this.uploadArea.classList.add('file-selected');
+
+            // Si c'est une bannière, activer le formulaire de texte de bannière
+            if (this.prefix === 'banner') {
+                this.enableBannerTextForm();
+            }
+        }
+
+        enableBannerTextForm() {
+            const bannerTextInfo = document.getElementById('banner-text-info');
+            const bannerTextForm = document.getElementById('banner-text-form-no-banner');
+            const saveBannerTextBtn = document.getElementById('save-banner-text-temp');
+
+            if (bannerTextInfo && bannerTextForm) {
+                bannerTextInfo.style.display = 'none';
+                bannerTextForm.style.display = 'block';
+                
+                // Activer le bouton d'enregistrement du texte
+                if (saveBannerTextBtn) {
+                    saveBannerTextBtn.disabled = false;
+                }
+            }
+        }
+
+        disableBannerTextForm() {
+            const bannerTextInfo = document.getElementById('banner-text-info');
+            const bannerTextForm = document.getElementById('banner-text-form-no-banner');
+
+            if (bannerTextInfo && bannerTextForm) {
+                bannerTextInfo.style.display = 'block';
+                bannerTextForm.style.display = 'none';
+            }
         }
 
         updatePreview(file) {
@@ -133,6 +164,11 @@
                 if (removeBtn) {
                     removeBtn.addEventListener('click', () => this.resetSelection());
                 }
+                
+                // Scroll automatique vers l'aperçu
+                setTimeout(() => {
+                    this.previewContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
             };
             reader.readAsDataURL(file);
         }
@@ -199,6 +235,11 @@
                 this.disableUploadButton();
                 if (this.uploadArea) this.uploadArea.classList.remove('file-selected');
                 this.selectedFile = null;
+                
+                // Si c'est une bannière, masquer le formulaire de texte
+                if (this.prefix === 'banner') {
+                    this.disableBannerTextForm();
+                }
             };
 
             if (typeof Swal !== "undefined") {

@@ -81,7 +81,7 @@
         <div class="notification-dropdown" id="notification-dropdown" style="display: none;">
             <div class="notification-dropdown-header">
                 <h4><i class="fas fa-bell"></i> Réservations en attente</h4>
-                <button type="button" id="toggle-notification-sound" class="notification-sound-btn" onclick="toggleNotificationSound()" title="Son activé - Cliquer pour désactiver">
+                <button type="button" id="toggle-notification-sound" class="notification-sound-btn" onclick="toggleNotificationSound(event)" title="Son activé - Cliquer pour désactiver">
                     <i class="fas fa-volume-up"></i>
                 </button>
                 <a href="?page=reservations" class="notification-view-all">Tout voir</a>

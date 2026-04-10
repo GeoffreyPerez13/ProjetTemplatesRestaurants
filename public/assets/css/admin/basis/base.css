@@ -472,6 +472,11 @@ html.dark-mode .dark-mode-toggle-floating .fa-sun {
   align-items: center;
   justify-content: center;
   gap: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.notification-item-actions .btn.danger {
+  border-radius: var(--radius-sm) !important;
 }
 
 .notification-empty {

@@ -38,11 +38,24 @@ class FloorPlanController extends BaseController
         $tables = $tableModel->getAllByFloor($selected_floor_id);
         $elements = $elementModel->getAllByFloor($selected_floor_id);
 
+        // Récupérer TOUTES les tables de TOUS les étages pour calculer le prochain numéro
+        $all_tables = $tableModel->getAllByAdmin($admin_id);
+        $max_table_number = 0;
+        foreach ($all_tables as $table) {
+            if (preg_match('/\d+/', $table['table_number'], $matches)) {
+                $number = intval($matches[0]);
+                if ($number > $max_table_number) {
+                    $max_table_number = $number;
+                }
+            }
+        }
+
         $this->render('admin/floor-plan', [
             'floors' => $floors,
             'selected_floor_id' => $selected_floor_id,
             'tables' => $tables,
             'elements' => $elements,
+            'max_table_number' => $max_table_number,
             'csrf_token' => $this->getCsrfToken()
         ]);
     }

@@ -152,10 +152,12 @@ $statusColors = [
                                 <div class="reservation-info">
                                     <span class="reservation-name"><i class="fas fa-user"></i> <?= htmlspecialchars($r['customer_name']) ?></span>
                                     <span class="reservation-party"><i class="fas fa-users"></i> <?= $r['party_size'] ?> pers.</span>
-                                    <?php if (!empty($r['table_number'])): ?>
-                                        <span class="reservation-table"><i class="fas fa-chair"></i> <?= htmlspecialchars($r['floor_name']) ?> - Table <?= htmlspecialchars($r['table_number']) ?></span>
-                                    <?php endif; ?>
                                 </div>
+                                <?php if (!empty($r['table_number'])): ?>
+                                    <div class="reservation-table-info">
+                                        <span class="reservation-table"><i class="fas fa-chair"></i> <?= htmlspecialchars($r['floor_name']) ?> - Table <?= htmlspecialchars($r['table_number']) ?></span>
+                                    </div>
+                                <?php endif; ?>
                                 <div class="reservation-contact">
                                     <span><i class="fas fa-phone"></i> <?= htmlspecialchars($r['customer_phone']) ?></span>
                                     <?php if (!empty($r['customer_email'])): ?>
@@ -577,8 +579,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <div class="reservation-info">
                                             <span class="reservation-name"><i class="fas fa-user"></i> ${r.customer_name}</span>
                                             <span class="reservation-party"><i class="fas fa-users"></i> ${r.party_size} pers.</span>
-                                            ${r.table_number ? `<span class="reservation-table"><i class="fas fa-chair"></i> ${r.floor_name} - Table ${r.table_number}</span>` : ''}
                                         </div>
+                                        ${r.table_number ? `
+                                            <div class="reservation-table-info">
+                                                <span class="reservation-table"><i class="fas fa-chair"></i> ${r.floor_name} - Table ${r.table_number}</span>
+                                            </div>
+                                        ` : ''}
                                         <div class="reservation-contact">
                                             <span><i class="fas fa-phone"></i> ${r.customer_phone}</span>
                                             ${r.customer_email ? `<span><i class="fas fa-envelope"></i> ${r.customer_email}</span>` : ''}
@@ -632,8 +638,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <div class="reservation-info">
                                             <span class="reservation-name"><i class="fas fa-user"></i> ${r.customer_name}</span>
                                             <span class="reservation-party"><i class="fas fa-users"></i> ${r.party_size} pers.</span>
-                                            ${r.table_number ? `<span class="reservation-table"><i class="fas fa-chair"></i> ${r.floor_name} - Table ${r.table_number}</span>` : ''}
                                         </div>
+                                        ${r.table_number ? `
+                                            <div class="reservation-table-info">
+                                                <span class="reservation-table"><i class="fas fa-chair"></i> ${r.floor_name} - Table ${r.table_number}</span>
+                                            </div>
+                                        ` : ''}
                                         <div class="reservation-contact">
                                             <span><i class="fas fa-phone"></i> ${r.customer_phone}</span>
                                             ${r.customer_email ? `<span><i class="fas fa-envelope"></i> ${r.customer_email}</span>` : ''}
@@ -892,80 +902,235 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        const reservationIds = Array.from(pendingCards).map(card => card.dataset.id);
+        
+        // Récupérer les paramètres de réservation pour vérifier l'attribution de table
+        fetch('?page=reservation-get-settings')
+            .then(r => r.json())
+            .then(settingsData => {
+                if (!settingsData.success) {
+                    throw new Error('Impossible de récupérer les paramètres');
+                }
+                
+                const settings = settingsData.settings;
+                const assignTableEnabled = settings.booking_assign_table && !settings.booking_auto_confirm;
+                
+                if (assignTableEnabled) {
+                    // Charger les tables disponibles
+                    return fetch('?page=reservation-get-tables')
+                        .then(r => r.json())
+                        .then(data => ({ settings, tablesData: data }));
+                } else {
+                    return { settings, tablesData: null };
+                }
+            })
+            .then(({ settings, tablesData }) => {
+                const assignTableEnabled = settings.booking_assign_table && !settings.booking_auto_confirm;
+                
+                if (assignTableEnabled && tablesData && tablesData.success && tablesData.tables && tablesData.tables.length > 0) {
+                    // Demander l'attribution de table pour chaque réservation
+                    showTableAssignmentModal(reservationIds, tablesData.tables);
+                } else {
+                    // Confirmation simple sans attribution de table
+                    confirmAllReservations(reservationIds, null);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la validation en masse:', error);
+                Swal.fire({
+                    title: 'Erreur',
+                    text: 'Impossible de charger les paramètres de réservation.',
+                    icon: 'error'
+                });
+            });
+    }
+    
+    function showTableAssignmentModal(reservationIds, tables) {
+        // Récupérer les informations des réservations depuis le DOM
+        const reservationsData = reservationIds.map(id => {
+            const card = document.querySelector(`.pending-reservation-card[data-id="${id}"]`);
+            if (!card) return null;
+            
+            const nameEl = card.querySelector('.reservation-name');
+            const timeEl = card.querySelector('.reservation-time');
+            const partyEl = card.querySelector('.reservation-party');
+            
+            return {
+                id: id,
+                name: nameEl ? nameEl.textContent.replace(/.*?\s/, '').trim() : 'Client',
+                time: timeEl ? timeEl.textContent.replace(/.*?\s/, '').trim() : '',
+                party: partyEl ? partyEl.textContent.replace(/.*?\s/, '').trim() : ''
+            };
+        }).filter(r => r !== null);
+        
+        // Créer les options du select
+        let tableOptions = '<option value="">Aucune table</option>';
+        tables.forEach(table => {
+            let label = `${table.floor_name} - Table ${table.table_number} (${table.capacity_min}-${table.capacity_max} pers.)`;
+            
+            if (table.reservations && table.reservations.length > 0) {
+                const times = table.reservations.map(r => r.time).join(', ');
+                label += ` ⚠️ ${times}`;
+            }
+            
+            tableOptions += `<option value="${table.id}">${label}</option>`;
+        });
+        
+        // Créer le HTML pour chaque réservation avec son propre sélecteur
+        let reservationsHtml = '';
+        reservationsData.forEach((res, index) => {
+            reservationsHtml += `
+                <div style="margin-bottom: 15px; padding: 12px; background: #f9fafb; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <strong style="color: #1f2937;">${res.name}</strong>
+                        <span style="color: #6b7280; font-size: 0.85rem;">${res.time} • ${res.party}</span>
+                    </div>
+                    <select id="table-select-${index}" data-reservation-id="${res.id}" class="table-selector" style="width: 100%; padding: 8px 10px; border: 2px solid #d1d5db; border-radius: 6px; background: #ffffff; color: #1f2937; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
+                        ${tableOptions}
+                    </select>
+                </div>
+            `;
+        });
+        
+        // Récupérer la date affichée
+        const dateInput = document.getElementById('dashboard-date');
+        const selectedDate = dateInput ? new Date(dateInput.value) : new Date();
+        const dateStr = selectedDate.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        
         Swal.fire({
-            title: 'Valider toutes les réservations ?',
-            text: `Vous allez confirmer ${pendingCards.length} réservation(s) en attente.`,
+            title: `Attribuer les tables - ${dateStr}`,
+            html: `
+                <p style="margin-bottom: 15px; color: #6b7280;">Choisissez une table pour chaque réservation :</p>
+                <div style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                    ${reservationsHtml}
+                </div>
+            `,
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#10b981',
             confirmButtonText: '<i class="fas fa-check-double"></i> Tout valider',
-            cancelButtonText: 'Annuler'
+            cancelButtonText: 'Annuler',
+            width: '600px',
+            preConfirm: () => {
+                // Récupérer les tables sélectionnées pour chaque réservation
+                const tableAssignments = {};
+                document.querySelectorAll('.table-selector').forEach(select => {
+                    const reservationId = select.dataset.reservationId;
+                    const tableId = select.value || null;
+                    tableAssignments[reservationId] = tableId;
+                });
+                return tableAssignments;
+            }
         }).then(result => {
             if (result.isConfirmed) {
-                const csrfToken = document.getElementById('csrf-token').value;
-                const reservationIds = Array.from(pendingCards).map(card => card.dataset.id);
-                
-                // Afficher un loader
-                Swal.fire({
-                    title: 'Validation en cours...',
-                    html: `<div class="swal-progress">0 / ${reservationIds.length}</div>`,
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-                
-                // Valider toutes les réservations une par une
-                let completed = 0;
-                let errors = 0;
-                
-                const promises = reservationIds.map(id => {
-                    const data = new FormData();
-                    data.append('csrf_token', csrfToken);
-                    data.append('id', id);
-                    data.append('status', 'confirmed');
-                    
-                    return fetch('?page=reservation-update-status', {
-                        method: 'POST',
-                        body: data
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        completed++;
-                        document.querySelector('.swal-progress').textContent = `${completed} / ${reservationIds.length}`;
-                        if (!data.success) errors++;
-                        return data;
-                    })
-                    .catch(error => {
-                        completed++;
-                        errors++;
-                        document.querySelector('.swal-progress').textContent = `${completed} / ${reservationIds.length}`;
-                        return { success: false };
-                    });
-                });
-                
-                Promise.all(promises).then(() => {
-                    if (errors === 0) {
-                        Swal.fire({
-                            title: 'Succès !',
-                            text: `${reservationIds.length} réservation(s) confirmée(s)`,
-                            icon: 'success',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Terminé avec erreurs',
-                            text: `${reservationIds.length - errors} réservation(s) confirmée(s), ${errors} erreur(s)`,
-                            icon: 'warning'
-                        });
-                    }
-                    loadReservationsForDate(dateInput.value);
-                });
+                confirmAllReservationsIndividually(result.value);
             }
         });
+    }
+    
+    async function confirmAllReservationsIndividually(tableAssignments) {
+        const reservationIds = Object.keys(tableAssignments);
+        
+        // Afficher un loader
+        Swal.fire({
+            title: 'Validation en cours...',
+            html: `<div class="swal-progress">0 / ${reservationIds.length}</div>`,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        // Valider toutes les réservations une par une SÉQUENTIELLEMENT avec leur table respective
+        let completed = 0;
+        let errors = 0;
+        let errorMessages = [];
+        
+        // Traiter les réservations une par une pour éviter les problèmes de CSRF token
+        for (const id of reservationIds) {
+            try {
+                // Récupérer le token CSRF actuel à chaque itération
+                const csrfToken = document.getElementById('csrf-token').value;
+                
+                const data = new FormData();
+                data.append('csrf_token', csrfToken);
+                data.append('id', id);
+                data.append('status', 'confirmed');
+                
+                const tableId = tableAssignments[id];
+                if (tableId) {
+                    data.append('table_id', tableId);
+                }
+                
+                const response = await fetch('?page=reservation-update-status', {
+                    method: 'POST',
+                    body: data
+                });
+                
+                const result = await response.json();
+                
+                completed++;
+                const progressEl = document.querySelector('.swal-progress');
+                if (progressEl) {
+                    progressEl.textContent = `${completed} / ${reservationIds.length}`;
+                }
+                
+                if (!result.success) {
+                    errors++;
+                    errorMessages.push(`Réservation #${id}: ${result.message || 'Erreur inconnue'}`);
+                } else {
+                    // Mettre à jour le token CSRF si le serveur en renvoie un nouveau
+                    if (result.new_csrf_token) {
+                        const csrfTokenElement = document.getElementById('csrf-token');
+                        if (csrfTokenElement) {
+                            csrfTokenElement.value = result.new_csrf_token;
+                        }
+                    }
+                }
+            } catch (error) {
+                completed++;
+                errors++;
+                const progressEl = document.querySelector('.swal-progress');
+                if (progressEl) {
+                    progressEl.textContent = `${completed} / ${reservationIds.length}`;
+                }
+                errorMessages.push(`Réservation #${id}: Erreur réseau`);
+                console.error(`Erreur pour réservation ${id}:`, error);
+            }
+        }
+        
+        // Afficher le résultat final
+        if (errors === 0) {
+            Swal.fire({
+                title: 'Succès !',
+                text: `${reservationIds.length} réservation(s) confirmée(s)`,
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        } else {
+            Swal.fire({
+                title: 'Terminé avec erreurs',
+                html: `
+                    <p>${reservationIds.length - errors} réservation(s) confirmée(s), ${errors} erreur(s)</p>
+                    <details style="margin-top: 15px; text-align: left;">
+                        <summary style="cursor: pointer; font-weight: 600; color: #ef4444;">Voir les erreurs</summary>
+                        <ul style="margin-top: 10px; font-size: 0.85rem; color: #6b7280;">
+                            ${errorMessages.map(msg => `<li>${msg}</li>`).join('')}
+                        </ul>
+                    </details>
+                `,
+                icon: 'warning'
+            });
+        }
+        
+        // Rafraîchir l'affichage
+        const dateInput = document.getElementById('dashboard-date');
+        if (dateInput) {
+            loadReservationsForDate(dateInput.value);
+        }
     }
     
     function updateReservationStatus(id, status, tableId = null) {
@@ -1051,6 +1216,76 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Charger les réservations pour la date initiale (aujourd'hui)
     loadReservationsForDate(dateInput.value);
+    
+    // Exposer la fonction globalement pour les appels depuis les notifications
+    window.loadReservationsForDate = loadReservationsForDate;
+    
+    // Polling automatique pour rafraîchir les réservations en attente toutes les 15 secondes
+    let previousPendingCount = 0;
+    
+    function autoRefreshPendingReservations() {
+        // Ne rafraîchir que si on est sur l'onglet Dashboard
+        const dashboardTab = document.querySelector('[data-tab="tab-dashboard"]');
+        if (!dashboardTab || !dashboardTab.classList.contains('active')) {
+            return;
+        }
+        
+        // Récupérer la date actuellement affichée
+        const currentDate = dateInput.value;
+        
+        fetch(`?page=get-day-reservations&date=${currentDate}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const newPendingCount = data.pendingReservations ? data.pendingReservations.length : 0;
+                    const hasChanged = newPendingCount !== previousPendingCount;
+                    
+                    // Si le nombre de réservations en attente a changé, rafraîchir l'affichage
+                    if (hasChanged) {
+                        console.log(`[Auto-refresh] Changement détecté: ${previousPendingCount} → ${newPendingCount} réservations en attente`);
+                        
+                        // Si de nouvelles réservations sont arrivées, afficher une notification
+                        if (newPendingCount > previousPendingCount) {
+                            const diff = newPendingCount - previousPendingCount;
+                            showAutoRefreshNotification(diff);
+                        }
+                        
+                        previousPendingCount = newPendingCount;
+                        loadReservationsForDate(currentDate);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('[Auto-refresh] Erreur:', error);
+            });
+    }
+    
+    function showAutoRefreshNotification(count) {
+        // Afficher une notification discrète
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'info',
+                title: `${count} nouvelle(s) réservation(s) en attente`,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        }
+    }
+    
+    // Démarrer le polling toutes les 15 secondes
+    setInterval(autoRefreshPendingReservations, 15000);
+    
+    // Initialiser le compteur au chargement
+    fetch(`?page=get-day-reservations&date=${dateInput.value}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.pendingReservations) {
+                previousPendingCount = data.pendingReservations.length;
+            }
+        });
 });
 </script>
 

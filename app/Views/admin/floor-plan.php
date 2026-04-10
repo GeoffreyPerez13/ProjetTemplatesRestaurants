@@ -8,6 +8,7 @@ $inline_script = "
         currentFloorId: " . $selected_floor_id . ",
         tables: " . json_encode($tables) . ",
         elements: " . json_encode($elements) . ",
+        maxTableNumber: " . $max_table_number . ",
         csrfToken: '" . $csrf_token . "'
     };
 </script>

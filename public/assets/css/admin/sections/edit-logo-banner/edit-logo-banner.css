@@ -982,6 +982,55 @@
     }
 }
 
+/* ==================== BOUTON GLOBAL TOUT ENREGISTRER ==================== */
+.global-save-section {
+    margin-top: 40px;
+    padding: 30px;
+    background: linear-gradient(135deg, var(--color-bg-alt), var(--color-bg));
+    border: 2px solid var(--color-primary-light);
+    border-radius: var(--radius-lg);
+    text-align: center;
+}
+
+.global-save-section .btn-large {
+    font-size: 1.1rem;
+    padding: 16px 40px;
+    font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s ease;
+}
+
+.global-save-section .btn-large:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+.global-save-info {
+    margin-top: 15px;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.global-save-info i {
+    color: var(--color-primary);
+}
+
+@media (max-width: 768px) {
+    .global-save-section {
+        padding: 20px;
+    }
+    
+    .global-save-section .btn-large {
+        width: 100%;
+        font-size: 1rem;
+        padding: 14px 30px;
+    }
+}
+
 @media print {
     .edit-logo-container,
     .edit-banner-container {

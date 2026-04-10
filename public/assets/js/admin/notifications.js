@@ -14,6 +14,7 @@
     
     // Compteur de notifications précédent pour détecter les changements
     let previousCount = 0;
+    let isFirstCheck = true; // Flag pour la première vérification
     
     // Préférence son de notification (localStorage)
     let soundEnabled = localStorage.getItem('notificationSoundEnabled') !== 'false'; // true par défaut
@@ -22,17 +23,12 @@
         return; // Pas de notifications sur cette page
     }
     
-    // Initialiser le compteur précédent
-    if (notificationCount) {
-        previousCount = parseInt(notificationCount.textContent) || 0;
-    }
-    
     // Polling optimisé toutes les 10 secondes pour notifications quasi temps réel
     setInterval(function() {
         checkForNewReservations();
     }, 10000); // 10 secondes
     
-    // Vérification initiale après 2 secondes
+    // Vérification initiale après 2 secondes pour initialiser le compteur
     setTimeout(function() {
         checkForNewReservations();
     }, 2000);
@@ -59,9 +55,14 @@
     document.addEventListener('click', function(e) {
         // Ne pas fermer si on clique sur le bouton (géré par le toggle) ou dans le dropdown
         // Ne pas fermer non plus si une action est en cours de traitement
+        // Ne pas fermer si on clique sur le bouton de son
+        const soundButton = document.getElementById('toggle-notification-sound');
+        const clickedOnSoundButton = soundButton && (e.target === soundButton || soundButton.contains(e.target));
+        
         if (!isProcessingAction && 
             !notificationDropdown.contains(e.target) && 
-            !notificationToggle.contains(e.target)) {
+            !notificationToggle.contains(e.target) &&
+            !clickedOnSoundButton) {
             notificationDropdown.style.display = 'none';
         }
     });
@@ -172,80 +173,72 @@
             return;
         }
 
-        // Vérifier si l'attribution de table est activée
-        const assignTableCheckbox = document.querySelector('input[name="booking_assign_table"]');
-        const autoConfirmCheckbox = document.getElementById('booking_auto_confirm');
-        const assignTableEnabled = assignTableCheckbox && assignTableCheckbox.checked && 
-                                   (!autoConfirmCheckbox || !autoConfirmCheckbox.checked);
+        // Récupérer les paramètres de réservation depuis le serveur
+        fetch('?page=reservation-get-settings')
+            .then(r => r.json())
+            .then(settingsData => {
+                if (!settingsData.success) {
+                    throw new Error('Impossible de récupérer les paramètres');
+                }
+                
+                const settings = settingsData.settings;
+                const assignTableEnabled = settings.booking_assign_table && !settings.booking_auto_confirm;
 
-        if (assignTableEnabled) {
-            // Charger les tables disponibles
-            fetch('?page=reservation-get-tables')
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success && data.tables && data.tables.length > 0) {
-                        // Créer les options du select
-                        let tableOptions = '<option value="">Aucune table (confirmation sans attribution)</option>';
-                        data.tables.forEach(table => {
-                            let label = `${table.floor_name} - Table ${table.table_number} (${table.capacity_min}-${table.capacity_max} pers.)`;
-                            
-                            // Ajouter les informations de réservations existantes
-                            if (table.reservations && table.reservations.length > 0) {
-                                const times = table.reservations.map(r => r.time).join(', ');
-                                label += ` ⚠️ Déjà réservée : ${times}`;
-                            }
-                            
-                            tableOptions += `<option value="${table.id}">${label}</option>`;
-                        });
+                if (assignTableEnabled) {
+                    // Charger les tables disponibles
+                    return fetch('?page=reservation-get-tables')
+                        .then(r => r.json())
+                        .then(data => ({ settings, tablesData: data }));
+                } else {
+                    // Pas d'attribution de table, confirmation simple
+                    return { settings, tablesData: null };
+                }
+            })
+            .then(({ settings, tablesData }) => {
+                const assignTableEnabled = settings.booking_assign_table && !settings.booking_auto_confirm;
+                
+                if (assignTableEnabled && tablesData && tablesData.success && tablesData.tables && tablesData.tables.length > 0) {
+                    // Créer les options du select
+                    let tableOptions = '<option value="">Aucune table (confirmation sans attribution)</option>';
+                    tablesData.tables.forEach(table => {
+                        let label = `${table.floor_name} - Table ${table.table_number} (${table.capacity_min}-${table.capacity_max} pers.)`;
                         
-                        Swal.fire({
-                            title: 'Confirmer cette réservation',
-                            html: `
-                                <div style="text-align: left; margin-bottom: 15px;">
-                                    <label for="table-select-notif" style="display: block; margin-bottom: 10px; font-weight: 600; color: #1f2937; font-size: 0.95rem;">Attribuer une table :</label>
-                                    <select id="table-select-notif" style="width: 100%; padding: 10px 12px; border: 2px solid #d1d5db; border-radius: 6px; background: #ffffff; color: #1f2937; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
-                                        ${tableOptions}
-                                    </select>
-                                </div>
-                            `,
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonColor: '#10b981',
-                            confirmButtonText: '<i class="fas fa-check"></i> Confirmer',
-                            cancelButtonText: 'Annuler',
-                            preConfirm: () => {
-                                return document.getElementById('table-select-notif').value;
-                            }
-                        }).then(result => {
-                            if (result.isConfirmed) {
-                                updateReservationStatus(id, 'confirmed', { table_id: result.value || null });
-                            } else {
-                                isProcessingAction = false;
-                            }
-                        });
-                    } else {
-                        // Pas de tables, confirmation simple
-                        Swal.fire({
-                            title: 'Confirmer la réservation ?',
-                            text: 'Le client sera considéré comme attendu.',
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonColor: '#10b981',
-                            cancelButtonColor: '#6b7280',
-                            confirmButtonText: '<i class="fas fa-check"></i> Confirmer',
-                            cancelButtonText: 'Annuler'
-                        }).then(function(result) {
-                            if (result.isConfirmed) {
-                                updateReservationStatus(id, 'confirmed');
-                            } else {
-                                isProcessingAction = false;
-                            }
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Erreur chargement tables:', error);
-                    // En cas d'erreur, confirmation simple
+                        // Ajouter les informations de réservations existantes
+                        if (table.reservations && table.reservations.length > 0) {
+                            const times = table.reservations.map(r => r.time).join(', ');
+                            label += ` ⚠️ Déjà réservée : ${times}`;
+                        }
+                        
+                        tableOptions += `<option value="${table.id}">${label}</option>`;
+                    });
+                    
+                    Swal.fire({
+                        title: 'Confirmer cette réservation',
+                        html: `
+                            <div style="text-align: left; margin-bottom: 15px;">
+                                <label for="table-select-notif" style="display: block; margin-bottom: 10px; font-weight: 600; color: #1f2937; font-size: 0.95rem;">Attribuer une table :</label>
+                                <select id="table-select-notif" style="width: 100%; padding: 10px 12px; border: 2px solid #d1d5db; border-radius: 6px; background: #ffffff; color: #1f2937; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; outline: none;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#d1d5db'">
+                                    ${tableOptions}
+                                </select>
+                            </div>
+                        `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#10b981',
+                        confirmButtonText: '<i class="fas fa-check"></i> Confirmer',
+                        cancelButtonText: 'Annuler',
+                        preConfirm: () => {
+                            return document.getElementById('table-select-notif').value;
+                        }
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            updateReservationStatus(id, 'confirmed', { table_id: result.value || null });
+                        } else {
+                            isProcessingAction = false;
+                        }
+                    });
+                } else {
+                    // Confirmation simple sans attribution de table
                     Swal.fire({
                         title: 'Confirmer la réservation ?',
                         text: 'Le client sera considéré comme attendu.',
@@ -262,26 +255,17 @@
                             isProcessingAction = false;
                         }
                     });
-                });
-        } else {
-            // Confirmation simple sans attribution de table
-            Swal.fire({
-                title: 'Confirmer la réservation ?',
-                text: 'Le client sera considéré comme attendu.',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#10b981',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: '<i class="fas fa-check"></i> Confirmer',
-                cancelButtonText: 'Annuler'
-            }).then(function(result) {
-                if (result.isConfirmed) {
-                    updateReservationStatus(id, 'confirmed');
-                } else {
-                    isProcessingAction = false;
                 }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la confirmation:', error);
+                isProcessingAction = false;
+                Swal.fire({
+                    title: 'Erreur',
+                    text: 'Impossible de charger les paramètres de réservation.',
+                    icon: 'error'
+                });
             });
-        }
     }
 
     // Refuser une réservation
@@ -385,6 +369,22 @@
                         }
                     }, 300);
                 }
+                
+                // Si c'est une confirmation, mettre à jour l'interface de la page reservations
+                if (status === 'confirmed') {
+                    // Vérifier si nous sommes sur la page reservations et si la fonction loadReservationsForDate existe
+                    if (typeof loadReservationsForDate === 'function') {
+                        const dateInput = document.getElementById('dashboard-date');
+                        if (dateInput) {
+                            loadReservationsForDate(dateInput.value);
+                        }
+                    }
+                }
+                
+                // IMPORTANT: Forcer une vérification immédiate pour réinitialiser le compteur
+                setTimeout(function() {
+                    checkForNewReservations();
+                }, 1000);
             } else {
                 showToast(data.message || 'Erreur', 'error');
                 isProcessingAction = false; // Réactiver en cas d'erreur
@@ -460,8 +460,8 @@
                 if (data.success && data.reservations) {
                     const currentCount = data.reservations.length;
                     
-                    // Nouvelle réservation détectée !
-                    if (currentCount > previousCount) {
+                    // Nouvelle réservation détectée (mais pas lors de la première vérification)
+                    if (!isFirstCheck && currentCount > previousCount) {
                         const newCount = currentCount - previousCount;
                         
                         // Notification visuelle avec icône
@@ -474,6 +474,11 @@
                         if (notificationToggle && notificationToggle.style.display === 'none') {
                             notificationToggle.style.display = '';
                         }
+                    }
+                    
+                    // Marquer que la première vérification est terminée
+                    if (isFirstCheck) {
+                        isFirstCheck = false;
                     }
                     
                     // Mettre à jour le compteur
@@ -521,7 +526,12 @@
     }
     
     // Basculer le son de notification
-    function toggleNotificationSound() {
+    function toggleNotificationSound(event) {
+        // Empêcher la propagation de l'événement pour ne pas fermer le dropdown
+        if (event) {
+            event.stopPropagation();
+        }
+        
         soundEnabled = !soundEnabled;
         localStorage.setItem('notificationSoundEnabled', soundEnabled);
         updateSoundButtonState();

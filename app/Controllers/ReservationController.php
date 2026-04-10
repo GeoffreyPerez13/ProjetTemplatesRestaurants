@@ -556,6 +556,30 @@ class ReservationController extends BaseController
     }
 
     /**
+     * API AJAX : récupérer les paramètres de réservation
+     */
+    public function getBookingSettings()
+    {
+        header('Content-Type: application/json');
+        $this->checkAccess();
+        $adminId = $_SESSION['admin_id'];
+
+        try {
+            $settings = $this->getSettings($adminId);
+            echo json_encode([
+                'success' => true,
+                'settings' => $settings
+            ]);
+        } catch (Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Erreur lors de la récupération des paramètres'
+            ]);
+        }
+        exit;
+    }
+
+    /**
      * Récupérer les tables disponibles pour une réservation (AJAX)
      */
     public function getAvailableTables()

@@ -106,9 +106,14 @@ class Reservation
     public function getByDate($adminId, $date)
     {
         $stmt = $this->pdo->prepare("
-            SELECT * FROM reservations 
-            WHERE admin_id = ? AND reservation_date = ? 
-            ORDER BY reservation_time ASC
+            SELECT r.*, 
+                   rt.table_number, 
+                   rf.name as floor_name 
+            FROM reservations r
+            LEFT JOIN restaurant_tables rt ON r.table_id = rt.id
+            LEFT JOIN restaurant_floors rf ON rt.floor_id = rf.id
+            WHERE r.admin_id = ? AND r.reservation_date = ? 
+            ORDER BY r.reservation_time ASC
         ");
         $stmt->execute([$adminId, $date]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

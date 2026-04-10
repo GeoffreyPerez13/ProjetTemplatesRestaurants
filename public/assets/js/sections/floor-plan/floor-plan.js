@@ -17,8 +17,8 @@
     let elements = window.floorPlanData?.elements || [];
     let csrfToken = window.floorPlanData?.csrfToken || '';
 
-    // Compteurs pour numérotation auto
-    let tableCounter = tables.length + 1;
+    // Compteurs pour numérotation auto (basé sur TOUTES les tables de TOUTES les salles)
+    let tableCounter = (window.floorPlanData?.maxTableNumber || 0) + 1;
     const SNAP_THRESHOLD = 15; // pixels de distance pour le snapping
     const ANGLE_SNAP_THRESHOLD = 10; // degrés de tolérance pour snapping d'angle
     const GRID_SIZE = 20; // taille de la grille en pixels
@@ -1090,6 +1090,19 @@
                 if (data.success) {
                     tables = data.tables;
                     elements = data.elements;
+                    
+                    // Réinitialiser le compteur de tables si aucune table n'existe
+                    if (tables.length === 0) {
+                        tableCounter = 1;
+                    } else {
+                        // Sinon, continuer après le plus grand numéro
+                        const maxNumber = Math.max(...tables.map(t => {
+                            const match = t.table_number.match(/\d+/);
+                            return match ? parseInt(match[0]) : 0;
+                        }));
+                        tableCounter = maxNumber + 1;
+                    }
+                    
                     renderCanvas();
                 }
             })
@@ -1120,6 +1133,7 @@
             if (csrfInput) {
                 csrfInput.value = csrfToken;
             }
+            
             document.getElementById('add-floor-modal').style.display = 'flex';
         });
 
@@ -1139,6 +1153,7 @@
             .then(data => {
                 if (data.success) {
                     // Recharger immédiatement avec paramètre pour afficher le toast
+                    // La numérotation continuera automatiquement grâce à maxTableNumber
                     window.location.href = '?page=floor-plan&toast=floor-created';
                 } else {
                     Swal.fire({
@@ -1302,6 +1317,9 @@
                         document.getElementById('properties-panel').style.display = 'none';
                         tables = [];
                         elements = [];
+                        
+                        // Réinitialiser le compteur de tables à 1
+                        tableCounter = 1;
                         
                         Swal.fire({
                             icon: 'success',
