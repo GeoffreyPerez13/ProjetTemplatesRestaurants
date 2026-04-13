@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion - MenuMiam</title>
-    <link rel="stylesheet" href="/public/assets/css/admin/auth.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/css/admin/auth.css">
 </head>
 <body>
     <div class="auth-container">
@@ -26,7 +26,7 @@
                 </div>
             <?php endif; ?>
 
-            <form method="POST" action="/login" class="auth-form">
+            <form method="POST" action="<?= BASE_URL ?>/public/login" class="auth-form">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
 
                 <div class="form-group">
@@ -43,21 +43,49 @@
 
                 <div class="form-group">
                     <label for="password">Mot de passe</label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password" 
-                        required
-                    >
+                    <div class="password-wrapper">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            required
+                        >
+                        <button type="button" class="toggle-password" data-target="password">
+                            <span class="show-icon">👁️</span>
+                            <span class="hide-icon" style="display:none;">👁️‍🗨️</span>
+                        </button>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn btn-primary">Se connecter</button>
             </form>
 
             <div class="auth-footer">
-                <p>Pas encore de compte ? <a href="/register">Inscrivez-vous</a></p>
+                <p>Pas encore de compte ? <a href="<?= BASE_URL ?>/public/register">Inscrivez-vous</a></p>
             </div>
         </div>
     </div>
+    
+    <script>
+        // Toggle password visibility
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const input = document.getElementById(targetId);
+                const showIcon = this.querySelector('.show-icon');
+                const hideIcon = this.querySelector('.hide-icon');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    showIcon.style.display = 'none';
+                    hideIcon.style.display = 'inline';
+                } else {
+                    input.type = 'password';
+                    showIcon.style.display = 'inline';
+                    hideIcon.style.display = 'none';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

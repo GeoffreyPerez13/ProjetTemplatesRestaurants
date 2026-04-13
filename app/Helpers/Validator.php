@@ -112,4 +112,38 @@ class Validator
     {
         return $this->errors[$field][0] ?? null;
     }
+
+    /**
+     * Valider la complexité du mot de passe
+     * Doit contenir : minuscule, majuscule, chiffre, caractère spécial
+     */
+    public function strongPassword(string $field, string $message = null): self
+    {
+        if (!isset($this->data[$field])) {
+            return $this;
+        }
+
+        $password = $this->data[$field];
+        $errors = [];
+
+        if (!preg_match('/[a-z]/', $password)) {
+            $errors[] = 'une minuscule';
+        }
+        if (!preg_match('/[A-Z]/', $password)) {
+            $errors[] = 'une majuscule';
+        }
+        if (!preg_match('/[0-9]/', $password)) {
+            $errors[] = 'un chiffre';
+        }
+        if (!preg_match('/[^a-zA-Z0-9]/', $password)) {
+            $errors[] = 'un caractère spécial';
+        }
+
+        if (!empty($errors)) {
+            $defaultMessage = 'Le mot de passe doit contenir au moins ' . implode(', ', $errors) . '.';
+            $this->errors[$field][] = $message ?? $defaultMessage;
+        }
+
+        return $this;
+    }
 }

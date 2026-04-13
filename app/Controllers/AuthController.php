@@ -109,6 +109,7 @@ class AuthController extends BaseController
                   ->email('email', 'L\'email n\'est pas valide.')
                   ->required('password', 'Le mot de passe est requis.')
                   ->min('password', 8, 'Le mot de passe doit contenir au moins 8 caractères.')
+                  ->strongPassword('password')
                   ->required('password_confirm', 'La confirmation du mot de passe est requise.')
                   ->match('password', 'password_confirm', 'Les mots de passe ne correspondent pas.')
                   ->required('restaurant_name', 'Le nom du restaurant est requis.')

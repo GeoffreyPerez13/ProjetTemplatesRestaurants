@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($page_title ?? 'Dashboard') ?> - MenuMiam</title>
-    <link rel="stylesheet" href="/public/assets/css/admin/dashboard.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/css/admin/dashboard.css">
 </head>
 <body>
     <?php require APP_PATH . '/Views/partials/header.php'; ?>
@@ -31,25 +31,25 @@
             <div class="dashboard-card">
                 <h2>📋 Ma Carte</h2>
                 <p>Gérez votre carte en ligne</p>
-                <a href="/carte" class="btn btn-primary">Accéder</a>
+                <a href="<?= BASE_URL ?>/public/carte" class="btn btn-primary">Accéder</a>
             </div>
 
             <div class="dashboard-card">
                 <h2>📞 Contact</h2>
                 <p>Informations de contact</p>
-                <a href="/contact" class="btn btn-primary">Modifier</a>
+                <a href="<?= BASE_URL ?>/public/contact" class="btn btn-primary">Modifier</a>
             </div>
 
             <div class="dashboard-card">
                 <h2>🎨 Apparence</h2>
                 <p>Logo, bannière, templates</p>
-                <a href="/apparence" class="btn btn-primary">Personnaliser</a>
+                <a href="<?= BASE_URL ?>/public/apparence" class="btn btn-primary">Personnaliser</a>
             </div>
 
             <div class="dashboard-card">
                 <h2>⚙️ Paramètres</h2>
                 <p>Configuration du compte</p>
-                <a href="/settings" class="btn btn-primary">Configurer</a>
+                <a href="<?= BASE_URL ?>/public/settings" class="btn btn-primary">Configurer</a>
             </div>
         </div>
 

@@ -12,8 +12,7 @@
 
 # Sécurité - Empêcher l'accès aux fichiers sensibles
 <FilesMatch "\.(env|ini|log|sh|sql)$">
-    Order allow,deny
-    Deny from all
+    Require all denied
 </FilesMatch>
 
 # Compression GZIP

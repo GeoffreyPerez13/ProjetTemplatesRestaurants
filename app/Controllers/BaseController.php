@@ -31,8 +31,20 @@ class BaseController
      */
     protected function redirect(string $url): void
     {
+        // Si l'URL ne commence pas par http, ajouter le chemin de base
+        if (strpos($url, 'http') !== 0) {
+            $url = BASE_URL . '/public' . $url;
+        }
         header("Location: {$url}");
         exit;
+    }
+    
+    /**
+     * Générer une URL avec le chemin de base
+     */
+    protected function url(string $path): string
+    {
+        return BASE_URL . '/public' . $path;
     }
 
     /**

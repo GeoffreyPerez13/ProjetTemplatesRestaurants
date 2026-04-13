@@ -8,7 +8,7 @@ namespace App\Core;
 class Router
 {
     private array $routes = [];
-    private string $notFoundHandler = '';
+    private $notFoundHandler = null;
 
     /**
      * Ajouter une route GET
@@ -77,6 +77,19 @@ class Router
     {
         // Supprimer les query strings
         $uri = strtok($uri, '?');
+        
+        // Supprimer le chemin de base (script name) pour obtenir le chemin relatif
+        $scriptName = $_SERVER['SCRIPT_NAME'];
+        $basePath = str_replace('/index.php', '', $scriptName);
+        
+        if (strpos($uri, $basePath) === 0) {
+            $uri = substr($uri, strlen($basePath));
+        }
+        
+        // S'assurer que l'URI commence par /
+        if (empty($uri) || $uri[0] !== '/') {
+            $uri = '/' . $uri;
+        }
         
         // Conversion du pattern en regex
         $pattern = preg_replace('/\{([a-zA-Z0-9_]+)\}/', '(?P<$1>[^/]+)', $pattern);
