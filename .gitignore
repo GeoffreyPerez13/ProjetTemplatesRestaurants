@@ -49,6 +49,7 @@ uploads/
 
 # --- Sauvegardes de base de données
 *.sql
+!database/**/*.sql
 *.sql.gz
 *.sqlite
 *.db
