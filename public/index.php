@@ -44,6 +44,7 @@ $request = new Request();
 
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
+use App\Controllers\SettingsController;
 
 // Page d'accueil - Redirection vers login
 $router->get('/', function() {
@@ -60,6 +61,10 @@ $router->get('/logout', [AuthController::class, 'logout']);
 
 // Dashboard
 $router->get('/dashboard', [DashboardController::class, 'index']);
+
+// Paramètres
+$router->get('/settings', [SettingsController::class, 'index']);
+$router->post('/settings/update-profile', [SettingsController::class, 'updateProfile']);
 
 // Route de test
 $router->get('/test', function() {

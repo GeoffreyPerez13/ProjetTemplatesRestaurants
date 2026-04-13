@@ -59,6 +59,45 @@ class BaseController
     }
 
     /**
+     * Réponse JSON de succès standardisée
+     */
+    protected function jsonSuccess(string $message, array $data = [], string $redirect = null): void
+    {
+        $response = [
+            'success' => true,
+            'message' => $message,
+            'data' => $data
+        ];
+
+        if ($redirect) {
+            $response['redirect'] = $redirect;
+        }
+
+        $this->json($response);
+    }
+
+    /**
+     * Réponse JSON d'erreur standardisée
+     */
+    protected function jsonError(string $message, array $errors = [], int $statusCode = 400): void
+    {
+        $this->json([
+            'success' => false,
+            'message' => $message,
+            'errors' => $errors
+        ], $statusCode);
+    }
+
+    /**
+     * Vérifier si la requête est AJAX
+     */
+    protected function isAjax(): bool
+    {
+        return isset($_SERVER['HTTP_X_REQUESTED_WITH']) 
+            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+    }
+
+    /**
      * Générer un token CSRF
      */
     protected function generateCsrfToken(): string
