@@ -6,7 +6,12 @@ $scripts = [
     "js/effects/accordion.js",
     "js/sections/settings/closure-dates.js",
     "js/sections/settings/subscriptions.js",
+    "js/sections/settings/delivery.js",
     "js/admin/premium.js"
+];
+
+$styles = [
+    "css/admin/sections/settings/delivery.css"
 ];
 
 require __DIR__ . '/../partials/header.php';
@@ -1740,14 +1745,269 @@ if (!empty($_SESSION['pendingToast'])) {
 
         <?php elseif ($current_section === 'delivery' && !empty($premium_statuses['delivery_integration'])): ?>
             <!-- Section Intégration livraison -->
-            <div class="settings-section">
+            <div class="settings-section delivery-section">
                 <h2><i class="fas fa-motorcycle"></i> Intégration livraison</h2>
-                <p class="section-description">Connectez Uber Eats, Deliveroo et autres plateformes de livraison à votre site.</p>
-                <div class="premium-section-placeholder">
-                    <i class="fas fa-hard-hat"></i>
-                    <p>Cette fonctionnalité est en cours de développement.</p>
+                <p class="section-description">Connectez vos plateformes de livraison pour centraliser la gestion de vos commandes.</p>
+
+                <!-- Bouton tour spécifique pour Delivery -->
+                <div style="margin-bottom: 20px; text-align: right;">
+                    <button type="button" class="btn secondary" id="delivery-tour-btn">
+                        <i class="fas fa-question-circle"></i> Lancer le tour guidé
+                    </button>
+                </div>
+
+                <!-- Uber Eats -->
+                <div class="delivery-card" data-platform="ubereats">
+                    <div class="delivery-header">
+                        <div class="delivery-info">
+                            <div class="delivery-logo">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div>
+                                <h3>Uber Eats</h3>
+                                <span class="delivery-status" data-status="inactive">
+                                    <i class="fas fa-circle"></i> Non connecté
+                                </span>
+                            </div>
+                        </div>
+                        <label class="delivery-toggle">
+                            <input type="checkbox" class="delivery-switch" data-platform="ubereats">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="delivery-config" style="display: none;">
+                        <div class="config-group">
+                            <label>Clé API</label>
+                            <input type="password" class="form-control" data-field="api_key" placeholder="Votre clé API Uber Eats">
+                        </div>
+                        <div class="config-group">
+                            <label>ID Restaurant</label>
+                            <input type="text" class="form-control" data-field="store_id" placeholder="ID de votre restaurant">
+                        </div>
+                        <div class="config-group">
+                            <label>URL Webhook (lecture seule)</label>
+                            <input type="text" class="form-control webhook-url" readonly>
+                            <small>Cette URL sera utilisée par Uber Eats pour les notifications</small>
+                        </div>
+                        <div class="config-actions">
+                            <button type="button" class="btn-secondary test-connection">
+                                <i class="fas fa-plug"></i> Tester
+                            </button>
+                            <button type="button" class="btn-primary save-config">
+                                <i class="fas fa-save"></i> Enregistrer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deliveroo -->
+                <div class="delivery-card" data-platform="deliveroo">
+                    <div class="delivery-header">
+                        <div class="delivery-info">
+                            <div class="delivery-logo">
+                                <i class="fas fa-motorcycle"></i>
+                            </div>
+                            <div>
+                                <h3>Deliveroo</h3>
+                                <span class="delivery-status" data-status="inactive">
+                                    <i class="fas fa-circle"></i> Non connecté
+                                </span>
+                            </div>
+                        </div>
+                        <label class="delivery-toggle">
+                            <input type="checkbox" class="delivery-switch" data-platform="deliveroo">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="delivery-config" style="display: none;">
+                        <div class="config-group">
+                            <label>Clé API</label>
+                            <input type="password" class="form-control" data-field="api_key" placeholder="Votre clé API Deliveroo">
+                        </div>
+                        <div class="config-group">
+                            <label>ID Restaurant</label>
+                            <input type="text" class="form-control" data-field="store_id" placeholder="ID de votre restaurant">
+                        </div>
+                        <div class="config-group">
+                            <label>URL Webhook (lecture seule)</label>
+                            <input type="text" class="form-control webhook-url" readonly>
+                            <small>Cette URL sera utilisée par Deliveroo pour les notifications</small>
+                        </div>
+                        <div class="config-actions">
+                            <button type="button" class="btn-secondary test-connection">
+                                <i class="fas fa-plug"></i> Tester
+                            </button>
+                            <button type="button" class="btn-primary save-config">
+                                <i class="fas fa-save"></i> Enregistrer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Just Eat -->
+                <div class="delivery-card" data-platform="justeat">
+                    <div class="delivery-header">
+                        <div class="delivery-info">
+                            <div class="delivery-logo">
+                                <i class="fas fa-hamburger"></i>
+                            </div>
+                            <div>
+                                <h3>Just Eat</h3>
+                                <span class="delivery-status" data-status="inactive">
+                                    <i class="fas fa-circle"></i> Non connecté
+                                </span>
+                            </div>
+                        </div>
+                        <label class="delivery-toggle">
+                            <input type="checkbox" class="delivery-switch" data-platform="justeat">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="delivery-config" style="display: none;">
+                        <div class="config-group">
+                            <label>Clé API</label>
+                            <input type="password" class="form-control" data-field="api_key" placeholder="Votre clé API Just Eat">
+                        </div>
+                        <div class="config-group">
+                            <label>ID Restaurant</label>
+                            <input type="text" class="form-control" data-field="store_id" placeholder="ID de votre restaurant">
+                        </div>
+                        <div class="config-group">
+                            <label>URL Webhook (lecture seule)</label>
+                            <input type="text" class="form-control webhook-url" readonly>
+                            <small>Cette URL sera utilisée par Just Eat pour les notifications</small>
+                        </div>
+                        <div class="config-actions">
+                            <button type="button" class="btn-secondary test-connection">
+                                <i class="fas fa-plug"></i> Tester
+                            </button>
+                            <button type="button" class="btn-primary save-config">
+                                <i class="fas fa-save"></i> Enregistrer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistiques -->
+                <div class="delivery-stats">
+                    <h3>Statistiques</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <i class="fas fa-plug"></i>
+                            <div>
+                                <span class="stat-value" id="connected-platforms">0</span>
+                                <span class="stat-label">Plateformes connectées</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-shopping-bag"></i>
+                            <div>
+                                <span class="stat-value" id="today-orders">0</span>
+                                <span class="stat-label">Commandes aujourd'hui</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <span class="stat-value" id="last-sync">Jamais</span>
+                                <span class="stat-label">Dernière synchro</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const deliveryTourBtn = document.getElementById('delivery-tour-btn');
+                if (!deliveryTourBtn) return;
+                
+                const deliveryTourSteps = [
+                    {
+                        element: '.delivery-section h2',
+                        title: 'Intégration livraison',
+                        content: 'Connectez vos plateformes de livraison (Uber Eats, Deliveroo, Just Eat) pour centraliser la gestion de vos commandes.',
+                        position: 'bottom'
+                    },
+                    {
+                        element: '.delivery-card[data-platform="ubereats"]',
+                        title: 'Uber Eats',
+                        content: 'Activez le toggle pour afficher la configuration et connecter votre compte Uber Eats.',
+                        position: 'bottom'
+                    },
+                    {
+                        element: '.delivery-card[data-platform="ubereats"] .delivery-toggle',
+                        title: 'Activation de la plateforme',
+                        content: 'Cliquez sur le toggle pour activer ou désactiver l\'intégration avec cette plateforme.',
+                        position: 'left'
+                    },
+                    {
+                        element: '.delivery-card[data-platform="ubereats"] [data-field="api_key"]',
+                        title: 'Clé API',
+                        content: 'Entrez votre clé API fournie par Uber Eats pour authentifier les requêtes.',
+                        position: 'bottom'
+                    },
+                    {
+                        element: '.delivery-card[data-platform="ubereats"] [data-field="store_id"]',
+                        title: 'ID Restaurant',
+                        content: 'Identifiant unique de votre restaurant sur la plateforme Uber Eats.',
+                        position: 'bottom'
+                    },
+                    {
+                        element: '.delivery-card[data-platform="ubereats"] .webhook-url',
+                        title: 'URL Webhook',
+                        content: 'URL générée automatiquement pour recevoir les notifications de commandes. Copiez-la dans votre compte Uber Eats.',
+                        position: 'top'
+                    },
+                    {
+                        element: '.delivery-card[data-platform="ubereats"] .test-connection',
+                        title: 'Tester la connexion',
+                        content: 'Vérifiez que vos identifiants sont valides avant de sauvegarder.',
+                        position: 'top'
+                    },
+                    {
+                        element: '.delivery-card[data-platform="ubereats"] .save-config',
+                        title: 'Enregistrer',
+                        content: 'Sauvegardez votre configuration pour activer l\'intégration.',
+                        position: 'top'
+                    },
+                    {
+                        element: '.delivery-card[data-platform="deliveroo"]',
+                        title: 'Deliveroo',
+                        content: 'Même processus pour Deliveroo : activez, configurez, testez et enregistrez.',
+                        position: 'bottom'
+                    },
+                    {
+                        element: '.delivery-card[data-platform="justeat"]',
+                        title: 'Just Eat',
+                        content: 'Configurez également Just Eat si vous utilisez cette plateforme.',
+                        position: 'bottom'
+                    },
+                    {
+                        element: '.delivery-stats',
+                        title: 'Statistiques',
+                        content: 'Suivez le nombre de plateformes connectées, les commandes du jour et la dernière synchronisation.',
+                        position: 'top'
+                    },
+                    {
+                        element: null,
+                        title: 'Centralisez vos commandes !',
+                        content: 'Avec l\'intégration livraison, recevez toutes vos commandes au même endroit et gérez-les efficacement.',
+                        position: 'center'
+                    }
+                ];
+                
+                deliveryTourBtn.addEventListener('click', function() {
+                    if (!window.tour) {
+                        window.tour = new Tour(deliveryTourSteps);
+                    } else {
+                        window.tour.steps = deliveryTourSteps;
+                        window.tour.currentStep = 0;
+                    }
+                    window.tour.start();
+                });
+            });
+            </script>
 
         <?php endif; ?>
     </div>

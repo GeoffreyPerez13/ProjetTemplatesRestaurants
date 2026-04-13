@@ -199,6 +199,15 @@ switch ($page) {
             case 'save-closure-dates':
                 $controller->saveClosureDates();
                 break;
+            case 'test-delivery-connection':
+                $controller->testDeliveryConnection();
+                break;
+            case 'save-delivery-config':
+                $controller->saveDeliveryConfig();
+                break;
+            case 'get-delivery-configs':
+                $controller->getDeliveryConfigs();
+                break;
             default:
                 $controller->show();
                 break;

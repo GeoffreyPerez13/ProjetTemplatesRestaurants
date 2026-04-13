@@ -1,24 +1,32 @@
 # 📋 Cahier des Charges - MenuMiam V2
-## Transformation CDA pour Produit SaaS Commercial
+## Application SaaS de Gestion de Carte Digitale pour Restaurants
+### Conception CDA - Niveau 6 (RNCP 37273)
+
+**Date de mise à jour** : Avril 2026  
+**Version** : 2.0 (État actuel complet)  
+**Statut** : En production avec fonctionnalités premium actives
 
 ---
 
 ## 🎯 **1. VISION ET OBJECTIFS**
 
 ### **Vision Stratégique**
-Devenir la **solution leader** de gestion de carte digitale pour restaurants indépendants en Europe, avec une expérience utilisateur exceptionnelle et une scalabilité industrielle.
+Devenir la **solution leader** de gestion de carte digitale pour restaurants indépendants en Europe, avec une expérience utilisateur exceptionnelle, une approche **Mobile First** et une scalabilité industrielle.
 
 ### **Objectifs Commerciaux**
 - **1000 restaurants actifs** dans 12 mois
 - **Taux de rétention** > 85% après 6 mois
 - **Expansion internationale** : 5 langues supportées
 - **Revenue mensuel récurrent** : €50K+ en 18 mois
+- **Taux de conversion freemium → premium** : > 30%
 
 ### **Objectifs Techniques**
 - **99.9% uptime** garanti
-- **< 2s temps de chargement** worldwide
+- **< 2s temps de chargement** worldwide (Mobile First)
 - **Support 10K+ restaurants** simultanés
 - **Tests coverage** > 90%
+- **Responsive Design** : 100% des pages adaptées mobile/tablette/desktop
+- **Accessibilité** : Conformité WCAG 2.1 niveau AA
 
 ---
 
@@ -49,33 +57,41 @@ Devenir la **solution leader** de gestion de carte digitale pour restaurants ind
 
 ### **2.2 Module Premium (Options Payantes)**
 
-#### **Réservations Avancées (+8€/mois)**
-- **Calendrier intelligent** avec disponibilités
-- **Gestion des tables** et capacités
-- **Notifications SMS/Email** automatiques
-- **Système d'attente** et liste prioritaire
-- **Dépôt confirmatoire** en ligne
+#### **Réservations Avancées (+8€/mois)** ✅ IMPLÉMENTÉ
+- **Système de réservation en ligne** complet
+- **Gestion des tables** avec plan de salle interactif (Floor Plan)
+- **Calendrier intelligent** avec créneaux horaires configurables
+- **Notifications email** automatiques (confirmation, rappel)
+- **Dashboard réservations** : en attente, confirmées, complétées
+- **Statuts multiples** : pending, confirmed, cancelled, completed
+- **Auto-complétion** des réservations passées (CRON)
+- **Gestion des salles** multiples avec numérotation globale des tables
+- **Drag & drop** pour organisation du plan de salle
+- **Capacité par table** configurable
 
-#### **Analytics & Stats (+5€/mois)**
-- **Dashboard analytics** temps réel
-- **Tracking des vues** de carte
-- **Analytics QR codes** par table
-- **Rapports de fréquentation**
+#### **Analytics & Stats (+5€/mois)** ✅ IMPLÉMENTÉ
+- **Dashboard analytics** temps réel avec graphiques interactifs
+- **Tracking des vues** de carte par période
+- **Statistiques de réservations** : taux de remplissage, créneaux populaires
+- **Graphiques visuels** : courbes de tendance, camemberts
 - **Export données** pour comptabilité
+- **Analyse comparative** : semaine/mois/année
 
-#### **Avis Clients (+5€/mois)**
-- **Système d'avis** avec modération
-- **Intégration Google Reviews** automatique
-- **Widget témoignages** personnalisable
-- **Notifications nouvelles critiques**
-- **Réponse aux avis** template
+#### **Avis Clients (+5€/mois)** ✅ IMPLÉMENTÉ
+- **Intégration Google Reviews** via API Places (New)
+- **Configuration Google Place ID** et API Key
+- **Affichage automatique** des avis sur la vitrine
+- **Note moyenne** et nombre d'avis en temps réel
+- **Activation/désactivation** de l'affichage
+- **Mode test** avec avis fictifs pour développement
 
-#### **Livraison (+7€/mois)**
-- **Intégration UberEats/Deliveroo**
-- **Tracking commandes** temps réel
-- **Gestion zones** de livraison
-- **Calcul frais** automatique
-- **Status dashboard** livreur
+#### **Livraison (+7€/mois)** ✅ IMPLÉMENTÉ
+- **Intégration multi-plateformes** : Uber Eats, Deliveroo, Just Eat
+- **Configuration API** avec test de connexion
+- **Webhooks automatiques** pour notifications de commandes
+- **Dashboard statistiques** : plateformes connectées, commandes du jour
+- **Gestion indépendante** de chaque plateforme
+- **Sauvegarde sécurisée** des credentials API
 
 ### **2.3 Module Multi-Établissements**
 

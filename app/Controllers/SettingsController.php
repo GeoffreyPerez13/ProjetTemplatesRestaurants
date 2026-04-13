@@ -14,7 +14,9 @@ class SettingsController extends BaseController
 {
     private function isAjax()
     {
-        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+        // Vérifier le header X-Requested-With OU si c'est une requête POST (pour fetch API)
+        return (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
+            || $_SERVER['REQUEST_METHOD'] === 'POST';
     }
 
     private function jsonResponse($success, $message, $extra = [])
@@ -1309,6 +1311,132 @@ class SettingsController extends BaseController
             echo "→ <a href='?page=seed-reviews&action=clear'>Vider tous les avis</a><br>";
         } else {
             echo "❌ Erreur lors de l'ajout : " . print_r($stmt->errorInfo(), true);
+        }
+    }
+
+    /**
+     * Tester la connexion à une plateforme de livraison
+     */
+    public function testDeliveryConnection()
+    {
+        $this->requireLogin();
+        
+        if (!$this->isAjax()) {
+            http_response_code(405);
+            $this->jsonResponse(false, 'Méthode non autorisée');
+        }
+
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            http_response_code(403);
+            $this->jsonResponse(false, 'Token CSRF invalide');
+        }
+
+        $platform = $_POST['platform'] ?? '';
+        $api_key = $_POST['api_key'] ?? '';
+        $store_id = $_POST['store_id'] ?? '';
+
+        if (empty($platform) || empty($api_key) || empty($store_id)) {
+            $this->jsonResponse(false, 'Paramètres manquants', ['csrf_token' => $this->getCsrfToken()]);
+        }
+
+        // Simulation de test de connexion (à remplacer par de vraies API calls)
+        // Pour l'instant, on simule un succès aléatoire pour la démo
+        $success = (strlen($api_key) > 10 && strlen($store_id) > 3);
+
+        if ($success) {
+            $this->jsonResponse(true, 'Connexion réussie', ['csrf_token' => $this->getCsrfToken()]);
+        } else {
+            $this->jsonResponse(false, 'Identifiants invalides', ['csrf_token' => $this->getCsrfToken()]);
+        }
+    }
+
+    /**
+     * Sauvegarder la configuration d'une plateforme de livraison
+     */
+    public function saveDeliveryConfig()
+    {
+        $this->requireLogin();
+        
+        if (!$this->isAjax()) {
+            http_response_code(405);
+            $this->jsonResponse(false, 'Méthode non autorisée');
+        }
+
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            http_response_code(403);
+            $this->jsonResponse(false, 'Token CSRF invalide');
+        }
+
+        $admin_id = $_SESSION['admin_id'];
+        $platform = $_POST['platform'] ?? '';
+        $api_key = $_POST['api_key'] ?? '';
+        $store_id = $_POST['store_id'] ?? '';
+        $enabled = $_POST['enabled'] ?? '0';
+
+        if (empty($platform)) {
+            $this->jsonResponse(false, 'Plateforme non spécifiée', ['csrf_token' => $this->getCsrfToken()]);
+        }
+
+        try {
+            $optionModel = new OptionModel($this->pdo);
+            
+            // Sauvegarder les options
+            $optionModel->set($admin_id, "delivery_{$platform}_enabled", $enabled);
+            
+            if ($enabled === '1') {
+                $optionModel->set($admin_id, "delivery_{$platform}_api_key", $api_key);
+                $optionModel->set($admin_id, "delivery_{$platform}_store_id", $store_id);
+            } else {
+                // Supprimer les données si désactivé
+                $optionModel->set($admin_id, "delivery_{$platform}_api_key", '');
+                $optionModel->set($admin_id, "delivery_{$platform}_store_id", '');
+            }
+
+            $this->jsonResponse(true, 'Configuration sauvegardée', ['csrf_token' => $this->getCsrfToken()]);
+        } catch (Exception $e) {
+            error_log('Erreur sauvegarde delivery config: ' . $e->getMessage());
+            $this->jsonResponse(false, 'Erreur lors de la sauvegarde', ['csrf_token' => $this->getCsrfToken()]);
+        }
+    }
+
+    /**
+     * Récupérer les configurations de livraison
+     */
+    public function getDeliveryConfigs()
+    {
+        $this->requireLogin();
+
+        $admin_id = $_SESSION['admin_id'];
+
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT option_name, option_value 
+                FROM admin_options 
+                WHERE admin_id = ? AND option_name LIKE 'delivery_%'
+            ");
+            $stmt->execute([$admin_id]);
+            $options = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+            // Organiser par plateforme
+            $configs = [];
+            foreach ($options as $key => $value) {
+                // Extraire le nom de la plateforme et le champ
+                if (preg_match('/^delivery_([^_]+)_(.+)$/', $key, $matches)) {
+                    $platform = $matches[1];
+                    $field = $matches[2];
+                    
+                    if (!isset($configs[$platform])) {
+                        $configs[$platform] = [];
+                    }
+                    
+                    $configs[$platform][$field] = $value;
+                }
+            }
+
+            $this->jsonResponse(true, 'Configurations récupérées', ['configs' => $configs]);
+        } catch (Exception $e) {
+            error_log('Erreur récupération delivery configs: ' . $e->getMessage());
+            $this->jsonResponse(false, 'Erreur lors de la récupération');
         }
     }
 }
