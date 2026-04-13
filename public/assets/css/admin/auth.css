@@ -123,6 +123,83 @@ body {
     opacity: 0.7;
 }
 
+/* Password requirements indicators */
+.password-requirements {
+    margin-top: 12px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+}
+
+.requirement {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #666;
+    transition: color 0.3s;
+}
+
+.requirement-icon {
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.requirement.valid {
+    color: #22c55e;
+}
+
+.requirement.valid .requirement-icon {
+    color: #22c55e;
+}
+
+.requirement.valid .requirement-icon::before {
+    content: '✓';
+}
+
+.requirement:not(.valid) .requirement-icon::before {
+    content: '○';
+}
+
+/* Password match feedback */
+.password-match-feedback {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    transition: all 0.3s;
+}
+
+.password-match-feedback.match {
+    background: #dcfce7;
+    color: #22c55e;
+}
+
+.password-match-feedback.no-match {
+    background: #fee;
+    color: #ef4444;
+}
+
+.match-icon {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.password-match-feedback.match .match-icon::before {
+    content: '✓';
+}
+
+.password-match-feedback.no-match .match-icon::before {
+    content: '✗';
+}
+
 .btn {
     padding: 12px 24px;
     border: none;
@@ -174,5 +251,18 @@ body {
     
     .auth-header h1 {
         font-size: 28px;
+    }
+    
+    .password-requirements {
+        grid-template-columns: 1fr;
+        gap: 6px;
+    }
+    
+    .requirement {
+        font-size: 12px;
+    }
+    
+    .password-match-feedback {
+        font-size: 12px;
     }
 }

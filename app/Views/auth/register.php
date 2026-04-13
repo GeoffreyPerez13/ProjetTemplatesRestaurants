@@ -64,13 +64,34 @@
                             type="password" 
                             id="password" 
                             name="password" 
-                            placeholder="Min. 8 caractères, 1 majuscule, 1 chiffre, 1 caractère spécial"
                             required
                         >
                         <button type="button" class="toggle-password" data-target="password">
                             <span class="show-icon">👁️</span>
                             <span class="hide-icon" style="display:none;">👁️‍🗨️</span>
                         </button>
+                    </div>
+                    <div class="password-requirements">
+                        <div class="requirement" data-requirement="length">
+                            <span class="requirement-icon">○</span>
+                            <span class="requirement-text">Au moins 8 caractères</span>
+                        </div>
+                        <div class="requirement" data-requirement="lowercase">
+                            <span class="requirement-icon">○</span>
+                            <span class="requirement-text">Une minuscule</span>
+                        </div>
+                        <div class="requirement" data-requirement="uppercase">
+                            <span class="requirement-icon">○</span>
+                            <span class="requirement-text">Une majuscule</span>
+                        </div>
+                        <div class="requirement" data-requirement="number">
+                            <span class="requirement-icon">○</span>
+                            <span class="requirement-text">Un chiffre</span>
+                        </div>
+                        <div class="requirement" data-requirement="special">
+                            <span class="requirement-icon">○</span>
+                            <span class="requirement-text">Un caractère spécial</span>
+                        </div>
                     </div>
                 </div>
 
@@ -87,6 +108,10 @@
                             <span class="show-icon">👁️</span>
                             <span class="hide-icon" style="display:none;">👁️‍🗨️</span>
                         </button>
+                    </div>
+                    <div class="password-match-feedback" id="password-match-feedback" style="display:none;">
+                        <span class="match-icon">○</span>
+                        <span class="match-text">Les mots de passe correspondent</span>
                     </div>
                 </div>
 
@@ -119,6 +144,63 @@
                 }
             });
         });
+
+        // Password validation in real-time
+        const passwordInput = document.getElementById('password');
+        const passwordConfirmInput = document.getElementById('password_confirm');
+        const matchFeedback = document.getElementById('password-match-feedback');
+
+        // Validation rules
+        const requirements = {
+            length: (password) => password.length >= 8,
+            lowercase: (password) => /[a-z]/.test(password),
+            uppercase: (password) => /[A-Z]/.test(password),
+            number: (password) => /[0-9]/.test(password),
+            special: (password) => /[^a-zA-Z0-9]/.test(password)
+        };
+
+        // Update requirement indicators
+        function updateRequirements(password) {
+            Object.keys(requirements).forEach(key => {
+                const requirementElement = document.querySelector(`[data-requirement="${key}"]`);
+                if (requirements[key](password)) {
+                    requirementElement.classList.add('valid');
+                } else {
+                    requirementElement.classList.remove('valid');
+                }
+            });
+        }
+
+        // Check password match
+        function checkPasswordMatch() {
+            const password = passwordInput.value;
+            const passwordConfirm = passwordConfirmInput.value;
+
+            if (passwordConfirm.length === 0) {
+                matchFeedback.style.display = 'none';
+                return;
+            }
+
+            matchFeedback.style.display = 'flex';
+
+            if (password === passwordConfirm) {
+                matchFeedback.classList.remove('no-match');
+                matchFeedback.classList.add('match');
+                matchFeedback.querySelector('.match-text').textContent = 'Les mots de passe correspondent';
+            } else {
+                matchFeedback.classList.remove('match');
+                matchFeedback.classList.add('no-match');
+                matchFeedback.querySelector('.match-text').textContent = 'Les mots de passe ne correspondent pas';
+            }
+        }
+
+        // Event listeners
+        passwordInput.addEventListener('input', function() {
+            updateRequirements(this.value);
+            checkPasswordMatch();
+        });
+
+        passwordConfirmInput.addEventListener('input', checkPasswordMatch);
     </script>
 </body>
 </html>
