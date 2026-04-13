@@ -28,6 +28,20 @@
             </div>
         <?php endif; ?>
 
+        <div class="dashboard-actions">
+            <a href="<?= BASE_URL ?>/public/card" class="dashboard-card">
+                <i class="fas fa-utensils"></i>
+                <h3>Ma carte</h3>
+                <p>Gérer mes catégories et plats</p>
+            </a>
+            
+            <a href="<?= BASE_URL ?>/public/settings" class="dashboard-card">
+                <i class="fas fa-cog"></i>
+                <h3>Paramètres</h3>
+                <p>Gérer mon compte</p>
+            </a>
+        </div>
+
         <div class="dashboard-grid">
             <div class="dashboard-card">
                 <h2>📋 Ma Carte</h2>

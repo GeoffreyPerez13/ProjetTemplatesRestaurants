@@ -45,6 +45,7 @@ $request = new Request();
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\SettingsController;
+use App\Controllers\CardController;
 
 // Page d'accueil - Redirection vers login
 $router->get('/', function() {
@@ -65,6 +66,17 @@ $router->get('/dashboard', [DashboardController::class, 'index']);
 // Paramètres
 $router->get('/settings', [SettingsController::class, 'index']);
 $router->post('/settings/update-profile', [SettingsController::class, 'updateProfile']);
+
+// Gestion de la carte
+$router->get('/card', [CardController::class, 'index']);
+$router->post('/card/category/create', [CardController::class, 'createCategory']);
+$router->post('/card/category/update', [CardController::class, 'updateCategory']);
+$router->post('/card/category/delete', [CardController::class, 'deleteCategory']);
+$router->post('/card/category/reorder', [CardController::class, 'reorderCategories']);
+$router->post('/card/dish/create', [CardController::class, 'createDish']);
+$router->post('/card/dish/update', [CardController::class, 'updateDish']);
+$router->post('/card/dish/delete', [CardController::class, 'deleteDish']);
+$router->post('/card/dish/reorder', [CardController::class, 'reorderDishes']);
 
 // Route de test
 $router->get('/test', function() {
