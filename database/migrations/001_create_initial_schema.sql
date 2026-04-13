@@ -72,14 +72,13 @@ CREATE TABLE dishes (
     category_id INT NOT NULL,
     name VARCHAR(100) NOT NULL,
     description TEXT NULL,
-    price DECIMAL(10,2) NOT NULL,
+    price DECIMAL(10,2) NULL,
     image VARCHAR(255) NULL,
     display_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_category (category_id),
     INDEX idx_order (display_order),
-    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
-    CONSTRAINT chk_price CHECK (price >= 0)
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================

@@ -346,7 +346,7 @@
                 <h3 id="category-modal-title">Nouvelle catégorie</h3>
                 <button class="close-modal" onclick="closeCategoryModal()">&times;</button>
             </div>
-            <form id="category-form" class="ajax-form" method="POST" action="<?= BASE_URL ?>/public/card/category/create">
+            <form id="category-form" method="POST" action="<?= BASE_URL ?>/public/card/category/create">
                 <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                 <input type="hidden" name="id" id="category-id">
                 
@@ -370,7 +370,7 @@
                 <h3 id="dish-modal-title">Nouveau plat</h3>
                 <button class="close-modal" onclick="closeDishModal()">&times;</button>
             </div>
-            <form id="dish-form" class="ajax-form" method="POST" action="<?= BASE_URL ?>/public/card/dish/create">
+            <form id="dish-form" method="POST" action="<?= BASE_URL ?>/public/card/dish/create">
                 <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                 <input type="hidden" name="id" id="dish-id">
                 <input type="hidden" name="category_id" id="dish-category-id">
@@ -475,11 +475,14 @@
             form.reset();
             document.getElementById('dish-category-id').value = categoryId;
             
+            // Décocher tous les allergènes
+            document.querySelectorAll('input[name="allergenes[]"]').forEach(cb => cb.checked = false);
+            
             if (dishId) {
                 title.textContent = 'Modifier le plat';
                 form.action = baseUrl + '/card/dish/update';
                 document.getElementById('dish-id').value = dishId;
-                // Charger les données du plat...
+                // TODO: Charger les données du plat via AJAX
             } else {
                 title.textContent = 'Nouveau plat';
                 form.action = baseUrl + '/card/dish/create';
@@ -492,6 +495,28 @@
             document.getElementById('dish-modal').classList.remove('show');
         }
 
+        function editDish(dishId) {
+            // TODO: Récupérer la catégorie du plat
+            openDishModal(null, dishId);
+        }
+
+        function deleteDish(dishId) {
+            if (!confirm('Supprimer ce plat ?')) return;
+            
+            const formData = new FormData();
+            formData.append('csrf_token', csrfToken);
+            formData.append('id', dishId);
+            
+            App.ajaxRequest({
+                url: baseUrl + '/card/dish/delete',
+                method: 'POST',
+                data: formData,
+                onSuccess: () => {
+                    location.reload();
+                }
+            });
+        }
+
         // Fermer modals en cliquant à l'extérieur
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
@@ -501,12 +526,13 @@
             });
         });
 
-        // Recharger après succès
+        // Soumettre les formulaires
         document.getElementById('category-form').addEventListener('submit', (e) => {
             e.preventDefault();
             App.ajaxForm(e.target, {
                 onSuccess: () => {
-                    setTimeout(() => location.reload(), 1000);
+                    closeCategoryModal();
+                    setTimeout(() => location.reload(), 500);
                 }
             });
         });
@@ -515,7 +541,8 @@
             e.preventDefault();
             App.ajaxForm(e.target, {
                 onSuccess: () => {
-                    setTimeout(() => location.reload(), 1000);
+                    closeDishModal();
+                    setTimeout(() => location.reload(), 500);
                 }
             });
         });

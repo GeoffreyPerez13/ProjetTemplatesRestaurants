@@ -46,7 +46,7 @@
             <div class="dashboard-card">
                 <h2>📋 Ma Carte</h2>
                 <p>Gérez votre carte en ligne</p>
-                <a href="<?= BASE_URL ?>/public/carte" class="btn btn-primary">Accéder</a>
+                <a href="<?= BASE_URL ?>/public/card" class="btn btn-primary">Accéder</a>
             </div>
 
             <div class="dashboard-card">

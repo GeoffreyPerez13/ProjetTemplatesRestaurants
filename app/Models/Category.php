@@ -15,10 +15,10 @@ class Category
      */
     public static function create(array $data): int
     {
-        $db = Database::getInstance()->getConnection();
+        $db = Database::getInstance();
         
-        $sql = "INSERT INTO categories (admin_id, name, image, display_order, created_at, updated_at) 
-                VALUES (:admin_id, :name, :image, :display_order, NOW(), NOW())";
+        $sql = "INSERT INTO categories (admin_id, name, image, display_order, created_at) 
+                VALUES (:admin_id, :name, :image, :display_order, NOW())";
         
         $stmt = $db->prepare($sql);
         $stmt->execute([
@@ -36,11 +36,11 @@ class Category
      */
     public static function getAllByAdmin(int $adminId): array
     {
-        $db = Database::getInstance()->getConnection();
+        $db = Database::getInstance();
         
         $sql = "SELECT c.*, COUNT(p.id) as plats_count 
                 FROM categories c
-                LEFT JOIN plats p ON c.id = p.category_id
+                LEFT JOIN dishes p ON c.id = p.category_id
                 WHERE c.admin_id = :admin_id
                 GROUP BY c.id
                 ORDER BY c.display_order ASC, c.created_at ASC";
@@ -56,7 +56,7 @@ class Category
      */
     public static function findById(int $id, int $adminId): ?array
     {
-        $db = Database::getInstance()->getConnection();
+        $db = Database::getInstance();
         
         $sql = "SELECT * FROM categories WHERE id = :id AND admin_id = :admin_id";
         
@@ -72,12 +72,11 @@ class Category
      */
     public static function update(int $id, int $adminId, array $data): bool
     {
-        $db = Database::getInstance()->getConnection();
+        $db = Database::getInstance();
         
         $sql = "UPDATE categories 
                 SET name = :name, 
-                    image = :image,
-                    updated_at = NOW()
+                    image = :image
                 WHERE id = :id AND admin_id = :admin_id";
         
         $stmt = $db->prepare($sql);
@@ -94,7 +93,7 @@ class Category
      */
     public static function delete(int $id, int $adminId): bool
     {
-        $db = Database::getInstance()->getConnection();
+        $db = Database::getInstance();
         
         // Vérifier que la catégorie appartient à l'admin
         $category = self::findById($id, $adminId);
@@ -122,7 +121,7 @@ class Category
      */
     public static function updateOrder(array $order, int $adminId): bool
     {
-        $db = Database::getInstance()->getConnection();
+        $db = Database::getInstance();
         
         try {
             $db->beginTransaction();
@@ -151,7 +150,7 @@ class Category
      */
     public static function countByAdmin(int $adminId): int
     {
-        $db = Database::getInstance()->getConnection();
+        $db = Database::getInstance();
         
         $sql = "SELECT COUNT(*) FROM categories WHERE admin_id = :admin_id";
         

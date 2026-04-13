@@ -15,9 +15,9 @@ class Allergene
      */
     public static function getAll(): array
     {
-        $db = Database::getInstance()->getConnection();
+        $db = Database::getInstance();
         
-        $sql = "SELECT * FROM allergenes ORDER BY nom ASC";
+        $sql = "SELECT * FROM allergens ORDER BY nom ASC";
         
         $stmt = $db->query($sql);
         
@@ -29,9 +29,9 @@ class Allergene
      */
     public static function findById(int $id): ?array
     {
-        $db = Database::getInstance()->getConnection();
+        $db = Database::getInstance();
         
-        $sql = "SELECT * FROM allergenes WHERE id = :id";
+        $sql = "SELECT * FROM allergens WHERE id = :id";
         
         $stmt = $db->prepare($sql);
         $stmt->execute(['id' => $id]);
@@ -45,10 +45,10 @@ class Allergene
      */
     public static function seed(): bool
     {
-        $db = Database::getInstance()->getConnection();
+        $db = Database::getInstance();
         
         // Vérifier si des allergènes existent déjà
-        $count = $db->query("SELECT COUNT(*) FROM allergenes")->fetchColumn();
+        $count = $db->query("SELECT COUNT(*) FROM allergens")->fetchColumn();
         if ($count > 0) {
             return true; // Déjà seedé
         }
@@ -73,7 +73,7 @@ class Allergene
         try {
             $db->beginTransaction();
             
-            $sql = "INSERT INTO allergenes (nom, icone, created_at) VALUES (:nom, :icone, NOW())";
+            $sql = "INSERT INTO allergens (nom, icone) VALUES (:nom, :icone)";
             $stmt = $db->prepare($sql);
             
             foreach ($allergenes as $allergene) {
@@ -93,16 +93,16 @@ class Allergene
      */
     public static function getByDish(int $platId): array
     {
-        $db = Database::getInstance()->getConnection();
+        $db = Database::getInstance();
         
         $sql = "SELECT a.* 
-                FROM allergenes a
-                INNER JOIN plat_allergenes pa ON a.id = pa.allergene_id
-                WHERE pa.plat_id = :plat_id
+                FROM allergens a
+                INNER JOIN dish_allergens pa ON a.id = pa.allergen_id
+                WHERE pa.dish_id = :dish_id
                 ORDER BY a.nom ASC";
         
         $stmt = $db->prepare($sql);
-        $stmt->execute(['plat_id' => $platId]);
+        $stmt->execute(['dish_id' => $platId]);
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
