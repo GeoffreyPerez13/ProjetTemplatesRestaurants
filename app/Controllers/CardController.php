@@ -349,6 +349,55 @@ class CardController extends BaseController
     }
 
     /**
+     * Récupérer les plats d'une catégorie (API)
+     */
+    public function getDishes(string $id): void
+    {
+        $this->requireAuth();
+
+        $categoryId = (int) $id;
+        $adminId = $this->getAuthId();
+        
+        // Vérifier que la catégorie appartient à l'admin
+        $category = Category::findById($categoryId, $adminId);
+        if (!$category) {
+            $this->jsonError('Catégorie non trouvée');
+        }
+
+        $dishes = Dish::getAllByCategory($categoryId);
+
+        $this->jsonSuccess('Plats récupérés', [
+            'dishes' => $dishes
+        ]);
+    }
+
+    /**
+     * Récupérer un plat par ID (API pour édition)
+     */
+    public function getDish(string $id): void
+    {
+        $this->requireAuth();
+
+        $dishId = (int) $id;
+        $dish = Dish::findById($dishId);
+        
+        if (!$dish) {
+            $this->jsonError('Plat non trouvé');
+        }
+
+        // Vérifier que le plat appartient à l'admin via la catégorie
+        $adminId = $this->getAuthId();
+        $category = Category::findById($dish['category_id'], $adminId);
+        if (!$category) {
+            $this->jsonError('Accès non autorisé');
+        }
+
+        $this->jsonSuccess('Plat récupéré', [
+            'dish' => $dish
+        ]);
+    }
+
+    /**
      * Upload une image de catégorie
      */
     private function uploadCategoryImage(array $file): ?string

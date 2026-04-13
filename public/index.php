@@ -69,6 +69,8 @@ $router->post('/settings/update-profile', [SettingsController::class, 'updatePro
 
 // Gestion de la carte
 $router->get('/card', [CardController::class, 'index']);
+$router->get('/card/dishes/{id}', [CardController::class, 'getDishes']);
+$router->get('/card/dish/{id}', [CardController::class, 'getDish']);
 $router->post('/card/category/create', [CardController::class, 'createCategory']);
 $router->post('/card/category/update', [CardController::class, 'updateCategory']);
 $router->post('/card/category/delete', [CardController::class, 'deleteCategory']);
