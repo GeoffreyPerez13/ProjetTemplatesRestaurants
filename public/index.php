@@ -42,10 +42,24 @@ $request = new Request();
 // ROUTES
 // ============================================================
 
-// Page d'accueil
+use App\Controllers\AuthController;
+use App\Controllers\DashboardController;
+
+// Page d'accueil - Redirection vers login
 $router->get('/', function() {
-    echo "MenuMiam V2 - Bienvenue !";
+    header('Location: /login');
+    exit;
 });
+
+// Authentification
+$router->get('/login', [AuthController::class, 'showLogin']);
+$router->post('/login', [AuthController::class, 'login']);
+$router->get('/register', [AuthController::class, 'showRegister']);
+$router->post('/register', [AuthController::class, 'register']);
+$router->get('/logout', [AuthController::class, 'logout']);
+
+// Dashboard
+$router->get('/dashboard', [DashboardController::class, 'index']);
 
 // Route de test
 $router->get('/test', function() {

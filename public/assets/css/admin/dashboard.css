@@ -1,0 +1,255 @@
+/* MenuMiam V2 - Styles du dashboard */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+}
+
+/* Header */
+.main-header {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: #667eea;
+    text-decoration: none;
+}
+
+.header-nav {
+    display: flex;
+    gap: 24px;
+}
+
+.header-nav a {
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.header-nav a:hover {
+    color: #667eea;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.user-name {
+    font-size: 14px;
+    color: #666;
+}
+
+.btn-logout {
+    padding: 8px 16px;
+    background: #f44336;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.btn-logout:hover {
+    background: #d32f2f;
+}
+
+/* Dashboard */
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+}
+
+.dashboard-header {
+    margin-bottom: 40px;
+}
+
+.dashboard-header h1 {
+    font-size: 32px;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.dashboard-header p {
+    font-size: 16px;
+    color: #666;
+}
+
+.alert {
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-size: 14px;
+}
+
+.alert-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+.alert-error {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.dashboard-card {
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-card h2 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.dashboard-card p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5568d3;
+}
+
+.dashboard-info {
+    background: white;
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-info h3 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.dashboard-info ul {
+    list-style: none;
+}
+
+.dashboard-info li {
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    color: #666;
+}
+
+.dashboard-info li:last-child {
+    border-bottom: none;
+}
+
+.dashboard-info strong {
+    color: #333;
+    margin-right: 8px;
+}
+
+/* Footer */
+.main-footer {
+    background: white;
+    border-top: 1px solid #eee;
+    margin-top: 60px;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    text-align: center;
+}
+
+.footer-container p {
+    font-size: 14px;
+    color: #666;
+    margin: 4px 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .header-nav {
+        width: 100%;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .header-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 24px;
+    }
+}
