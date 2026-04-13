@@ -73,23 +73,23 @@
                     </div>
                     <div class="password-requirements">
                         <div class="requirement" data-requirement="length">
-                            <span class="requirement-icon">○</span>
+                            <span class="requirement-icon"></span>
                             <span class="requirement-text">Au moins 8 caractères</span>
                         </div>
                         <div class="requirement" data-requirement="lowercase">
-                            <span class="requirement-icon">○</span>
+                            <span class="requirement-icon"></span>
                             <span class="requirement-text">Une minuscule</span>
                         </div>
                         <div class="requirement" data-requirement="uppercase">
-                            <span class="requirement-icon">○</span>
+                            <span class="requirement-icon"></span>
                             <span class="requirement-text">Une majuscule</span>
                         </div>
                         <div class="requirement" data-requirement="number">
-                            <span class="requirement-icon">○</span>
+                            <span class="requirement-icon"></span>
                             <span class="requirement-text">Un chiffre</span>
                         </div>
                         <div class="requirement" data-requirement="special">
-                            <span class="requirement-icon">○</span>
+                            <span class="requirement-icon"></span>
                             <span class="requirement-text">Un caractère spécial</span>
                         </div>
                     </div>
@@ -110,7 +110,7 @@
                         </button>
                     </div>
                     <div class="password-match-feedback" id="password-match-feedback" style="display:none;">
-                        <span class="match-icon">○</span>
+                        <span class="match-icon"></span>
                         <span class="match-text">Les mots de passe correspondent</span>
                     </div>
                 </div>
