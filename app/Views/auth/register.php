@@ -67,8 +67,8 @@
                             required
                         >
                         <button type="button" class="toggle-password" data-target="password">
-                            <span class="show-icon">👁️</span>
-                            <span class="hide-icon" style="display:none;">👁️‍🗨️</span>
+                            <span class="show-icon">👁</span>
+                            <span class="hide-icon" style="display:none;">⦻</span>
                         </button>
                     </div>
                     <div class="password-requirements">
@@ -105,8 +105,8 @@
                             required
                         >
                         <button type="button" class="toggle-password" data-target="password_confirm">
-                            <span class="show-icon">👁️</span>
-                            <span class="hide-icon" style="display:none;">👁️‍🗨️</span>
+                            <span class="show-icon">👁</span>
+                            <span class="hide-icon" style="display:none;">⦻</span>
                         </button>
                     </div>
                     <div class="password-match-feedback" id="password-match-feedback" style="display:none;">

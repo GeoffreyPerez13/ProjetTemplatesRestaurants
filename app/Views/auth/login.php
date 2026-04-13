@@ -51,8 +51,8 @@
                             required
                         >
                         <button type="button" class="toggle-password" data-target="password">
-                            <span class="show-icon">👁️</span>
-                            <span class="hide-icon" style="display:none;">👁️‍🗨️</span>
+                            <span class="show-icon">👁</span>
+                            <span class="hide-icon" style="display:none;">⦻</span>
                         </button>
                     </div>
                 </div>
