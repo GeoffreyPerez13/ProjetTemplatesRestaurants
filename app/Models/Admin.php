@@ -1,0 +1,733 @@
+<?php
+
+require_once __DIR__ . '/../Helpers/Mailer.php';
+
+/**
+ * Modèle Admin : gestion des administrateurs, invitations et authentification
+ * Représente un enregistrement de la table `admins`
+ */
+class Admin
+{
+    /** @var PDO Connexion à la base de données */
+    private $pdo;
+
+    /** @var Mailer Service d'envoi d'emails */
+    private $mailer;
+
+    /** @var int|null Identifiant unique de l'admin */
+    public $id;
+    /** @var string|null Nom d'utilisateur (unique) */
+    public $username;
+    /** @var string|null Adresse email */
+    public $email;
+    /** @var string|null Mot de passe hashé (bcrypt) */
+    public $password;
+    /** @var string Rôle : 'SUPER_ADMIN' ou 'ADMIN' */
+    public $role;
+    /** @var string|null Nom du restaurant associé */
+    public $restaurant_name;
+    /** @var int|null FK vers restaurants.id */
+    public $restaurant_id;
+    /** @var string Mode de carte : 'editable' ou 'images' */
+    public $carte_mode;
+    /** @var string|null Token de réinitialisation de mot de passe */
+    public $reset_token;
+    /** @var string|null Date d'expiration du token de reset */
+    public $reset_token_expiry;
+    /** @var int Email vérifié (0 = non, 1 = oui) */
+    public $email_verified = 1;
+    /** @var string|null Token de vérification d'email */
+    public $verification_token;
+
+    /**
+     * @param PDO $pdo Connexion à la base de données
+     */
+    public function __construct($pdo)
+    {
+        $this->pdo = $pdo;
+        $this->mailer = new Mailer();
+    }
+
+    /**
+     * Construit l'URL de base du projet (scheme + host + path)
+     *
+     * @return string URL de base (ex: http://localhost/ProjetTemplatesRestaurants/)
+     */
+    private function getBaseUrl(): string
+    {
+        $scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+        $basePath = rtrim(dirname($scriptName), '/\\');
+        return $scheme . '://' . $host . $basePath . '/';
+    }
+
+    // --- INVITATIONS ---
+
+    /**
+     * Crée une invitation et envoie le lien d'inscription par email
+     *
+     * @param string $email          Email du destinataire
+     * @param string $restaurantName Nom du restaurant à créer
+     * @param string $token          Token unique d'invitation
+     * @return bool Succès de l'envoi
+     */
+    public function createInvitation($email, $restaurantName, $token)
+    {
+        $expiry = date('Y-m-d H:i:s', strtotime('+24 hours'));
+
+        try {
+            $sql = "INSERT INTO invitations (email, restaurant_name, token, expiry) VALUES (?, ?, ?, ?)";
+            $stmt = $this->pdo->prepare($sql);
+            $result = $stmt->execute([$email, $restaurantName, $token, $expiry]);
+
+            if ($result) {
+                $inviteLink = $this->getBaseUrl() . '?page=register&token=' . urlencode($token);
+
+                $subject = "Invitation à créer votre compte restaurant";
+                $body = "
+                <html>
+                <body>
+                    <h2>Invitation Menumiam</h2>
+                    <p>Bonjour,</p>
+                    <p>Vous avez été invité à créer un compte pour gérer la carte en ligne de votre restaurant <strong>" . htmlspecialchars($restaurantName) . "</strong> sur Menumiam.</p>
+                    <p>Cliquez sur le lien ci-dessous pour créer votre compte :</p>
+                    <p><a href='$inviteLink' style='background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;'>Créer mon compte</a></p>
+                    <p>Ou copiez ce lien :<br>
+                    <code style='background-color: #f4f4f4; padding: 5px; border-radius: 3px;'>$inviteLink</code></p>
+                    <p><strong>Attention :</strong> Ce lien expirera dans 24 heures.</p>
+                    <br>
+                    <p>Cordialement,<br>L'équipe Menumiam</p>
+                </body>
+                </html>
+                ";
+
+                return $this->mailer->send($email, $subject, $body);
+            }
+
+            return false;
+        } catch (PDOException $e) {
+            error_log("Erreur createInvitation: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Récupère une invitation non utilisée par son token
+     *
+     * @param string $token Token d'invitation
+     * @return object|false Invitation ou false si introuvable
+     */
+    public function getInvitation($token)
+    {
+        $sql = "SELECT * FROM invitations WHERE token = ? AND used = 0";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$token]);
+        $result = $stmt->fetch(PDO::FETCH_OBJ);
+        return $result;
+    }
+
+    // --- GESTION DES COMPTES ---
+
+    /**
+     * Crée un compte admin à partir d'une invitation (transaction)
+     * Crée aussi le restaurant et les options par défaut
+     *
+     * @param object $invitation Invitation validée
+     * @param string $username   Nom d'utilisateur choisi
+     * @param string $password   Mot de passe en clair (sera hashé)
+     * @return bool Succès de la création
+     */
+    public function createAccount($invitation, $username, $password)
+    {
+        try {
+            $this->pdo->beginTransaction();
+
+            // Vérifie si le username existe déjà
+            $stmt = $this->pdo->prepare("SELECT id FROM admins WHERE username = ?");
+            $stmt->execute([$username]);
+            if ($stmt->fetch()) {
+                $this->pdo->rollBack();
+                error_log("Erreur: Username déjà existant");
+                return false;
+            }
+
+            // 1. CRÉER LE RESTAURANT
+            $slug = $this->generateSlug($invitation->restaurant_name);
+
+            $stmt = $this->pdo->prepare("
+                INSERT INTO restaurants (name, slug, created_at, updated_at) 
+                VALUES (?, ?, NOW(), NOW())
+            ");
+            $stmt->execute([$invitation->restaurant_name, $slug]);
+            $restaurantId = $this->pdo->lastInsertId();
+
+            // Hashage du mot de passe
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+            // 2. CRÉER L'ADMIN avec l'ID du restaurant
+            $sql = "INSERT INTO admins (username, email, password, restaurant_name, restaurant_id, role) 
+                    VALUES (?, ?, ?, ?, ?, 'ADMIN')";
+            $stmt = $this->pdo->prepare($sql);
+            $success = $stmt->execute([
+                $username,
+                $invitation->email,
+                $hashedPassword,
+                $invitation->restaurant_name,
+                $restaurantId
+            ]);
+
+            if (!$success) {
+                throw new Exception("Erreur lors de l'insertion dans la table admins");
+            }
+
+            // Récupérer l'ID de l'admin créé
+            $adminId = $this->pdo->lastInsertId();
+
+            // 3. CRÉER LES OPTIONS PAR DÉFAUT POUR L'ADMIN
+            $this->createDefaultOptions($adminId);
+
+            // 4. Marquer l'invitation comme utilisée
+            $sql = "UPDATE invitations SET used = 1 WHERE id = ?";
+            $stmt = $this->pdo->prepare($sql);
+            $success = $stmt->execute([$invitation->id]);
+
+            if (!$success) {
+                throw new Exception("Erreur lors de la mise à jour de l'invitation");
+            }
+
+            $this->pdo->commit();
+
+            // Log de succès
+            error_log("[DEBUG] Compte, restaurant et options créés avec succès:");
+            error_log("  - Username: $username");
+            error_log("  - Restaurant: " . $invitation->restaurant_name);
+            error_log("  - Restaurant ID créé: $restaurantId");
+            error_log("  - Admin ID: $adminId");
+            error_log("  - Slug: $slug");
+
+            return true;
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            error_log("Erreur création compte: " . $e->getMessage());
+            error_log("Trace: " . $e->getTraceAsString());
+            return false;
+        }
+    }
+
+    /**
+     * Crée un compte directement (inscription libre depuis la page vitrine)
+     * Sans invitation, l'utilisateur fournit tous les champs
+     *
+     * @param string $username       Nom d'utilisateur
+     * @param string $email          Email
+     * @param string $restaurantName Nom du restaurant
+     * @param string $password       Mot de passe en clair (sera hashé)
+     * @return int|false             ID de l'admin créé ou false en cas d'erreur
+     */
+    public function createAccountDirect($username, $email, $restaurantName, $password)
+    {
+        try {
+            $this->pdo->beginTransaction();
+
+            // Vérifier si le username existe déjà
+            $stmt = $this->pdo->prepare("SELECT id FROM admins WHERE username = ?");
+            $stmt->execute([$username]);
+            if ($stmt->fetch()) {
+                $this->pdo->rollBack();
+                return false;
+            }
+
+            // Vérifier si l'email existe déjà
+            $stmt = $this->pdo->prepare("SELECT id FROM admins WHERE email = ?");
+            $stmt->execute([$email]);
+            if ($stmt->fetch()) {
+                $this->pdo->rollBack();
+                return false;
+            }
+
+            // 1. Créer le restaurant
+            $slug = $this->generateSlug($restaurantName);
+
+            $stmt = $this->pdo->prepare("
+                INSERT INTO restaurants (name, slug, created_at, updated_at) 
+                VALUES (?, ?, NOW(), NOW())
+            ");
+            $stmt->execute([$restaurantName, $slug]);
+            $restaurantId = $this->pdo->lastInsertId();
+
+            // 2. Créer l'admin avec token de vérification email
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $verificationToken = bin2hex(random_bytes(32));
+
+            $stmt = $this->pdo->prepare("
+                INSERT INTO admins (username, email, email_verified, verification_token, password, restaurant_name, restaurant_id, role) 
+                VALUES (?, ?, 0, ?, ?, ?, ?, 'ADMIN')
+            ");
+            $stmt->execute([$username, $email, $verificationToken, $hashedPassword, $restaurantName, $restaurantId]);
+            $adminId = $this->pdo->lastInsertId();
+
+            // 3. Créer les options par défaut
+            $this->createDefaultOptions($adminId);
+
+            $this->pdo->commit();
+
+            // 4. Envoyer l'email de confirmation (hors transaction)
+            $this->sendVerificationEmail($email, $username, $verificationToken);
+
+            return $adminId;
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            error_log("Erreur création compte direct: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Initialise les options par défaut pour un nouvel admin
+     *
+     * @param int $adminId ID du nouvel admin
+     * @return bool Succès
+     */
+    private function createDefaultOptions($adminId)
+    {
+        // Définir les options par défaut selon vos préférences
+        $defaultOptions = [
+            'site_online' => '1',           // Site actif par défaut
+            'mail_reminder' => '0',         // Rappel mail désactivé par défaut
+            'email_notifications' => '0',   // Notifications désactivées par défaut
+            
+            // Options de réservation
+            'booking_enabled' => '1',                   // Réservations activées par défaut
+            'booking_auto_confirm' => '1',              // Validation automatique activée
+            'booking_auto_complete' => '0',             // Marquage automatique désactivé
+            'booking_meal_duration' => '90',            // Durée de repas : 90 minutes
+            'booking_min_party_size' => '1',            // Nombre de personnes min : 1
+            'booking_max_party_size' => '10',           // Nombre de personnes max : 10
+            'booking_max_per_slot' => '5',              // Réservations par créneau : 5
+            'booking_advance_days' => '30',             // Jours d'avance maximum : 30
+            'booking_time_slots' => '12:00,12:30,13:00,13:30,14:00,18:30,19:00,19:30,20:00,20:30,21:00,21:30,22:00', // Créneaux midi et soir
+            'booking_closed_days' => ''                 // Aucun jour de fermeture par défaut
+        ];
+
+        try {
+            // Préparer la requête pour insérer les options
+            $stmt = $this->pdo->prepare("
+                INSERT INTO admin_options (admin_id, option_name, option_value, created_at, updated_at) 
+                VALUES (?, ?, ?, NOW(), NOW())
+            ");
+
+            // Insérer chaque option par défaut
+            foreach ($defaultOptions as $name => $value) {
+                $stmt->execute([$adminId, $name, $value]);
+                error_log("[DEBUG] Option créée: $name = $value pour admin $adminId");
+            }
+
+            return true;
+        } catch (Exception $e) {
+            error_log("Erreur création options par défaut: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Génère un slug URL-friendly unique à partir du nom du restaurant
+     *
+     * @param string $name Nom du restaurant
+     * @return string Slug unique (ex: 'mon-restaurant-2')
+     */
+    private function generateSlug($name)
+    {
+        // Remplace les caractères spéciaux
+        $slug = strtolower($name);
+        $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
+        $slug = preg_replace('/\s+/', '-', $slug);
+        $slug = preg_replace('/-+/', '-', $slug);
+        $slug = trim($slug, '-');
+
+        // Vérifier si le slug existe déjà
+        $originalSlug = $slug;
+        $counter = 1;
+
+        while ($this->slugExists($slug)) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
+    /**
+     * @param string $slug Slug à vérifier
+     * @return bool true si le slug existe déjà en BDD
+     */
+    private function slugExists($slug)
+    {
+        $stmt = $this->pdo->prepare("SELECT id FROM restaurants WHERE slug = ?");
+        $stmt->execute([$slug]);
+        return $stmt->fetch() !== false;
+    }
+
+    /**
+     * Récupère le mode de carte de l'admin ('editable' ou 'images')
+     *
+     * @param int $adminId ID de l'admin
+     * @return string Mode de carte
+     */
+    public function getCarteMode($adminId)
+    {
+        $stmt = $this->pdo->prepare("SELECT carte_mode FROM admins WHERE id = ?");
+        $stmt->execute([$adminId]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['carte_mode'] ?? 'editable';
+    }
+
+    /**
+     * Met à jour le mode de carte de l'admin
+     *
+     * @param int    $adminId ID de l'admin
+     * @param string $mode    'editable' ou 'images'
+     * @return bool Succès
+     */
+    public function updateCarteMode($adminId, $mode)
+    {
+        $stmt = $this->pdo->prepare("UPDATE admins SET carte_mode = ? WHERE id = ?");
+        return $stmt->execute([$mode, $adminId]);
+    }
+
+    // --- RECHERCHES / LOGIN ---
+
+    /**
+     * @param string $username Nom d'utilisateur
+     * @return self|null L'admin trouvé ou null
+     */
+    public function findByUsername($username)
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM admins WHERE username = ?");
+        $stmt->execute([$username]);
+        $data = $stmt->fetch();
+        if ($data) {
+            $this->fill($data);
+            return $this;
+        }
+        return null;
+    }
+
+    /**
+     * @param int $id ID de l'admin
+     * @return self|null L'admin trouvé ou null
+     */
+    public function findById($id)
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM admins WHERE id = ?");
+        $stmt->execute([$id]);
+        $data = $stmt->fetch();
+        if ($data) {
+            $this->fill($data);
+            return $this;
+        }
+        return null;
+    }
+
+    /**
+     * @param int $restaurantId ID du restaurant
+     * @return self|null L'admin trouvé ou null
+     */
+    public function findByRestaurantId($restaurantId)
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM admins WHERE restaurant_id = ? LIMIT 1");
+        $stmt->execute([$restaurantId]);
+        $data = $stmt->fetch();
+        if ($data) {
+            $this->fill($data);
+            return $this;
+        }
+        return null;
+    }
+
+    /**
+     * Vérifie un mot de passe en clair contre le hash stocké
+     *
+     * @param string $password Mot de passe en clair
+     * @return bool true si le mot de passe correspond
+     */
+    public function verifyPassword($password)
+    {
+        return password_verify($password, $this->password);
+    }
+
+    /**
+     * Authentifie un admin par username + mot de passe
+     *
+     * @param string $username Nom d'utilisateur
+     * @param string $password Mot de passe en clair
+     * @return self|null L'admin authentifié ou null
+     */
+    public function login($username, $password)
+    {
+        $admin = $this->findByUsername($username);
+        if (!$admin || !$admin->verifyPassword($password)) {
+            return null;
+        }
+        if (isset($admin->email_verified) && !(int)$admin->email_verified) {
+            return 'NOT_VERIFIED';
+        }
+        return $admin;
+    }
+
+    /**
+     * Envoie un email de confirmation de compte
+     *
+     * @param string $email Email du destinataire
+     * @param string $username Nom d'utilisateur
+     * @param string $token Token de vérification
+     * @return bool
+     */
+    public function sendVerificationEmail($email, $username, $token)
+    {
+        $verifyLink = $this->getBaseUrl() . '?page=verify-email&token=' . urlencode($token);
+
+        $subject = "Confirmez votre adresse email — MenuMiam";
+        $body = "
+        <html><body style='font-family: Arial, sans-serif; color: #1c1917; max-width: 600px; margin: 0 auto;'>
+            <div style='background: linear-gradient(135deg, #b45309, #d4a853); padding: 24px; border-radius: 12px 12px 0 0; text-align: center;'>
+                <h1 style='color: white; margin: 0; font-size: 1.5rem;'>🍽️ MenuMiam</h1>
+            </div>
+            <div style='background: #fef7ed; padding: 32px; border-radius: 0 0 12px 12px; border: 1px solid #fde68a;'>
+                <h2 style='color: #92400e; margin-top: 0;'>Confirmez votre adresse email</h2>
+                <p>Bonjour <strong>" . htmlspecialchars($username) . "</strong>,</p>
+                <p>Votre compte MenuMiam a été créé. Cliquez sur le bouton ci-dessous pour confirmer votre adresse email et activer votre compte.</p>
+                <div style='text-align: center; margin: 32px 0;'>
+                    <a href='$verifyLink' style='background: linear-gradient(135deg, #b45309, #d4a853); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 1rem; display: inline-block;'>Confirmer mon email</a>
+                </div>
+                <p style='color: #78716c; font-size: 0.85rem;'>Ou copiez ce lien dans votre navigateur :<br>
+                <code style='background: #fff; padding: 8px; border-radius: 4px; word-break: break-all; display: block; margin-top: 8px;'>$verifyLink</code></p>
+                <hr style='border: 1px solid #fde68a; margin: 24px 0;'>
+                <p style='color: #a8a29e; font-size: 0.8rem;'>Si vous n'avez pas créé de compte MenuMiam, ignorez cet email.</p>
+            </div>
+        </body></html>";
+
+        return $this->mailer->send($email, $subject, $body);
+    }
+
+    /**
+     * Crée un nouvel admin directement (sans invitation)
+     *
+     * @param string $username        Nom d'utilisateur
+     * @param string $password        Mot de passe en clair
+     * @param string $role            'SUPER_ADMIN' ou 'ADMIN'
+     * @param string $restaurant_name Nom du restaurant
+     * @return self L'admin créé
+     */
+    public function create($username, $password, $role, $restaurant_name)
+    {
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO admins (username, password, role, restaurant_name) VALUES (?, ?, ?, ?)"
+        );
+        $stmt->execute([$username, $hash, $role, $restaurant_name]);
+        $this->id = $this->pdo->lastInsertId();
+        $this->username = $username;
+        $this->password = $hash;
+        $this->role = $role;
+        $this->restaurant_name = $restaurant_name;
+        return $this;
+    }
+
+    /**
+     * Hydrate les propriétés de l'objet depuis un tableau associatif (row BDD)
+     *
+     * @param array $data Ligne de la table admins
+     */
+    private function fill($data)
+    {
+        $this->id = $data['id'];
+        $this->username = $data['username'];
+        $this->email = $data['email'] ?? null;
+        $this->password = $data['password'];
+        $this->role = $data['role'];
+        $this->restaurant_name = $data['restaurant_name'];
+        $this->restaurant_id = $data['restaurant_id'] ?? null;
+        $this->carte_mode = $data['carte_mode'] ?? 'editable';
+        $this->reset_token = $data['reset_token'] ?? null;
+        $this->reset_token_expiry = $data['reset_token_expiry'] ?? null;
+    }
+
+    // --- RÉINITIALISATION DE MOT DE PASSE ---
+
+    /**
+     * Génère un token de réinitialisation et envoie le lien par email
+     *
+     * @param string $email Email de l'admin
+     * @return bool true si le processus a réussi (même si l'email n'existe pas, pour sécurité)
+     */
+    public function requestPasswordReset($email)
+    {
+        error_log("[DEBUG] Tentative de réinitialisation pour email: " . $email);
+
+        $stmt = $this->pdo->prepare("SELECT id FROM admins WHERE email = ?");
+        $stmt->execute([$email]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            error_log("[DEBUG] Email non trouvé: " . $email);
+            return false;
+        }
+
+        $token = bin2hex(random_bytes(32));
+        $expiry = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+        $stmt = $this->pdo->prepare("UPDATE admins SET reset_token = ?, reset_token_expiry = ? WHERE email = ?");
+        $ok = $stmt->execute([$token, $expiry, $email]);
+
+        if ($ok) {
+            $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "?page=reset-password&token=" . $token;
+
+            $subject = "Réinitialisation de votre mot de passe";
+            $body = "<p>Bonjour,</p><p>Cliquez sur ce lien pour réinitialiser votre mot de passe : <a href='$resetLink'>$resetLink</a></p>";
+
+            $mailSent = $this->mailer->send($email, $subject, $body);
+            error_log("[DEBUG] Envoi mail: " . ($mailSent ? "OK" : "ÉCHEC"));
+
+            return true;
+        }
+
+        error_log("[DEBUG] Échec de la mise à jour en base");
+        return false;
+    }
+
+    /**
+     * Réinitialise le mot de passe via un token valide et non expiré
+     *
+     * @param string $token       Token de réinitialisation
+     * @param string $newPassword Nouveau mot de passe en clair
+     * @return bool Succès de la réinitialisation
+     */
+    public function resetPassword($token, $newPassword)
+    {
+        $sql = "SELECT id, reset_token_expiry FROM admins WHERE reset_token = ?";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$token]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Vérifie que le token est valide et non expiré
+        if (!$row) return false;
+        $expiry = $row['reset_token_expiry'] ?? null;
+        if (empty($expiry) || strtotime($expiry) < time()) return false;
+
+        $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        // Met à jour le mot de passe et supprime le token
+        $this->pdo->beginTransaction();
+        try {
+            $sql = "UPDATE admins SET password = ?, reset_token = NULL, reset_token_expiry = NULL WHERE id = ?";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([$hashed, $row['id']]);
+            $this->pdo->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            return false;
+        }
+    }
+
+    /**
+     * Get the value of id
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set the value of id
+     *
+     * @return  self
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of username
+     */
+    public function getUsername()
+    {
+        return $this->username;
+    }
+
+    /**
+     * Set the value of username
+     *
+     * @return  self
+     */
+    public function setUsername($username)
+    {
+        $this->username = $username;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of password
+     */
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+    /**
+     * Set the value of password
+     *
+     * @return  self
+     */
+    public function setPassword($password)
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of role
+     */
+    public function getRole()
+    {
+        return $this->role;
+    }
+
+    /**
+     * Set the value of role
+     *
+     * @return  self
+     */
+    public function setRole($role)
+    {
+        $this->role = $role;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of restaurant_name
+     */
+    public function getRestaurant_name()
+    {
+        return $this->restaurant_name;
+    }
+
+    /**
+     * Set the value of restaurant_name
+     *
+     * @return  self
+     */
+    public function setRestaurant_name($restaurant_name)
+    {
+        $this->restaurant_name = $restaurant_name;
+
+        return $this;
+    }
+}

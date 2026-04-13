@@ -1,0 +1,203 @@
+/* ==================== TEMPLATE MODERNE ==================== */
+/* Override CSS pour le template "Modern" — tons bleu nuit, minimaliste */
+
+body.template-modern {
+  --color-primary: #2563eb;
+  --color-primary-dark: #1e40af;
+  --color-primary-light: #3b82f6;
+  --color-bg: #ffffff;
+  --color-bg-alt: #f8fafc;
+  --color-bg-warm: #f0f9ff;
+  --color-bg-dark: #0f172a;
+  --color-text: #0f172a;
+  --color-text-light: #475569;
+  --color-text-muted: #94a3b8;
+  --color-border: #e2e8f0;
+  --font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-family-heading: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Header — fond blanc pur, bordure subtile */
+body.template-modern header {
+  background: rgba(255, 255, 255, 0.98);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+body.template-modern .logo-area h1 {
+  font-weight: 800;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #0f172a;
+}
+
+body.template-modern .nav-menu ul li a {
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #475569;
+  border-radius: 0;
+  padding: 8px 16px;
+  border-bottom: 2px solid transparent;
+}
+
+body.template-modern .nav-menu ul li a:hover {
+  color: #2563eb;
+  background: transparent;
+  border-bottom-color: #2563eb;
+}
+
+/* Banner — plus haute, overlay plus prononcé */
+body.template-modern .banner {
+  min-height: 550px;
+  background-position: center;
+  background-size: cover;
+}
+
+body.template-modern .banner::before {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.3) 0%, rgba(15, 23, 42, 0.7) 100%);
+}
+
+body.template-modern .banner-content h2 {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-transform: none;
+}
+
+body.template-modern .banner-content h2::after {
+  display: none;
+}
+
+body.template-modern .banner-text {
+  font-size: 1.15rem;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  opacity: 0.9;
+}
+
+body.template-modern .banner-fallback {
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+}
+
+/* Section h2 — trait bleu */
+body.template-modern h2 {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+body.template-modern h2::after {
+  background: #2563eb;
+  width: 60px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+/* Carte — cards avec ombre plus prononcée */
+body.template-modern .category-section {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  border: 1px solid #e2e8f0;
+}
+
+body.template-modern .plat-card {
+  border-radius: 12px;
+  border-color: #e2e8f0;
+  transition: all 0.25s ease;
+}
+
+body.template-modern .plat-card:hover {
+  border-color: #2563eb;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.1);
+}
+
+body.template-modern .plat-price {
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+/* Images carte */
+body.template-modern .image-card {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+body.template-modern .image-card:hover {
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.15);
+}
+
+/* Services — fond blanc, cartes avec bordure bleue au hover */
+body.template-modern #services {
+  background: #ffffff;
+}
+
+body.template-modern .service-card {
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.25s ease;
+}
+
+body.template-modern .service-card:hover {
+  border-color: #2563eb;
+  transform: translateY(-2px);
+}
+
+body.template-modern .service-card i {
+  color: #2563eb;
+}
+
+/* Footer — fond bleu nuit */
+body.template-modern footer {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+body.template-modern footer h2 {
+  color: #ffffff;
+}
+
+body.template-modern footer h2::after {
+  background: #3b82f6;
+}
+
+body.template-modern footer a {
+  color: #94a3b8;
+}
+
+body.template-modern footer a:hover {
+  color: #3b82f6;
+}
+
+body.template-modern .social-links a {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+body.template-modern .social-links a:hover {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+/* Selection */
+body.template-modern ::selection {
+  background: #3b82f6;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  body.template-modern .banner {
+    min-height: 400px;
+  }
+
+  body.template-modern .category-section {
+    padding: 20px;
+    border-radius: 12px;
+  }
+}

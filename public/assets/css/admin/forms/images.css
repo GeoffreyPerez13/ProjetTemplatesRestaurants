@@ -1,0 +1,51 @@
+/* ==================== IMAGES ==================== */
+.image-preview {
+  max-width: 100%;
+  max-height: 150px;
+  border-radius: var(--radius-md);
+  margin: 10px 0;
+  border: 2px solid var(--color-border);
+  object-fit: cover;
+}
+
+.image-upload-container {
+  padding: 15px;
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+.image-upload-container label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: var(--color-text);
+}
+
+.image-upload-container input[type="file"] {
+  margin: 8px 0;
+  padding: 8px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  width: 100%;
+}
+
+.image-upload-container small {
+  color: var(--color-text-muted);
+  font-size: 0.85em;
+}
+
+.current-image {
+  padding: 10px;
+  background: var(--color-bg-warm);
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--color-primary);
+}
+
+.current-image label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: var(--color-text);
+}

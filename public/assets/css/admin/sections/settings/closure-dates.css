@@ -1,0 +1,449 @@
+/* ==================== FERMETURES EXCEPTIONNELLES ==================== */
+
+.closure-dates-container {
+  background: var(--color-bg);
+  padding: 24px;
+}
+
+.closure-dates-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  background: var(--color-bg-warm);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--color-primary);
+  gap: 12px;
+}
+
+/* Bouton 'Tout effacer' déplacé dans selected-dates-container */
+
+.closure-dates-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-text-light);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.closure-dates-info i {
+  color: var(--color-primary);
+  font-size: 1.1em;
+  flex-shrink: 0;
+}
+
+/* Calendrier */
+.closure-calendar-container {
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid var(--color-border);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: var(--color-bg-warm);
+  border-radius: var(--radius-md);
+}
+
+.calendar-header h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+  flex: 1;
+}
+
+.calendar-header .btn.small {
+  flex-shrink: 0;
+  min-width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  text-align: center;
+}
+
+.calendar-day-header {
+  padding: 8px 4px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-weight: 500;
+  font-size: 0.9em;
+  color: var(--color-text);
+  position: relative;
+}
+
+.calendar-day:hover {
+  background: var(--color-bg-warm);
+  border-color: var(--color-primary-light);
+  transform: translateY(-1px);
+}
+
+.calendar-day.other-month {
+  color: var(--color-text-muted);
+  background: var(--color-bg-alt);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.calendar-day.other-month:hover {
+  background: var(--color-bg-alt);
+  border-color: var(--color-border);
+  transform: none;
+}
+
+.calendar-day.today {
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.calendar-day.selected {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary-dark);
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(180, 83, 9, 0.3);
+}
+
+.calendar-day.selected:hover {
+  background: var(--color-primary-dark);
+}
+
+.calendar-day.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 1px;
+  right: 3px;
+  font-size: 0.6em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Liste des dates sélectionnées */
+.selected-dates-container {
+  background: var(--color-bg-alt);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  margin-bottom: 20px;
+  border: 1px solid var(--color-border);
+}
+
+.selected-dates-header-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 14px;
+}
+
+.selected-dates-header-row h4 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.btn-clear-dates {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.selected-dates-container h4 span {
+  background: var(--color-primary);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+  min-width: 24px;
+  text-align: center;
+}
+
+.selected-dates-list {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Scrollbar stylée */
+.selected-dates-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.selected-dates-list::-webkit-scrollbar-track {
+  background: var(--color-bg);
+  border-radius: 3px;
+}
+
+.selected-dates-list::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+
+.selected-date-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.selected-date-item:hover {
+  border-color: var(--color-primary-light);
+  background: var(--color-bg-warm);
+}
+
+.selected-date-text {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text);
+  font-weight: 500;
+  font-size: 0.88rem;
+}
+
+.selected-date-text i {
+  color: var(--color-primary);
+  font-size: 0.85em;
+}
+
+.remove-date-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85em;
+}
+
+.remove-date-btn:hover {
+  background: var(--color-danger);
+  color: white;
+}
+
+.no-dates {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-style: italic;
+  padding: 24px 16px;
+  width: 100%;
+}
+
+/* Actions */
+.closure-dates-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 1024px) {
+  .closure-dates-header {
+    text-align: center;
+  }
+
+  .closure-dates-info {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .closure-dates-container {
+    padding: 16px;
+  }
+
+  .calendar-grid {
+    gap: 4px;
+  }
+
+  .calendar-day {
+    font-size: 0.85em;
+  }
+
+  .calendar-day-header {
+    font-size: 0.72em;
+    padding: 6px 2px;
+  }
+
+  .selected-dates-list {
+    max-height: 160px;
+  }
+
+  .closure-dates-actions {
+    flex-direction: column;
+  }
+
+  .closure-dates-actions .btn {
+    width: 100%;
+  }
+
+}
+
+/* Contrer la règle globale edit-card.css : .btn { width:100% } sous 600px */
+@media (max-width: 600px) {
+  .calendar-header .btn.small {
+    width: auto;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    font-size: inherit;
+  }
+
+  .btn-clear-dates {
+    width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .closure-dates-container {
+    padding: 12px;
+  }
+
+  .closure-dates-header {
+    padding: 12px;
+  }
+
+  .closure-dates-info {
+    font-size: 0.85rem;
+  }
+
+  .closure-calendar-container {
+    padding: 10px;
+  }
+
+  .calendar-header {
+    padding: 10px 12px;
+  }
+
+  .calendar-header h3 {
+    font-size: 0.95rem;
+  }
+
+  .calendar-day {
+    font-size: 0.78em;
+    border-radius: 4px;
+  }
+
+  .calendar-day.selected::after {
+    display: none;
+  }
+
+  .selected-dates-container {
+    padding: 12px;
+  }
+
+  .selected-date-item {
+    padding: 6px 10px;
+    font-size: 0.85em;
+  }
+}
+
+@media (max-width: 450px) {
+  /* Cacher le compteur et les parenthèses */
+  .selected-dates-header-row h4 {
+    font-size: 0.9rem;
+    white-space: normal; /* Permettre le retour à la ligne si nécessaire */
+    line-height: 1.3;
+  }
+  
+  .selected-dates-header-row h4 .count-wrapper {
+    display: none; /* Cacher les parenthèses et le compteur */
+  }
+}
+
+@media (max-width: 415px) {
+  .closure-calendar-container {
+    padding: 8px;
+    overflow-x: auto;
+  }
+
+  .calendar-grid {
+    gap: 2px;
+    min-width: 280px;
+  }
+
+  .calendar-day {
+    font-size: 0.72em;
+  }
+
+  .calendar-day-header {
+    font-size: 0.65em;
+    padding: 4px 1px;
+  }
+
+  .calendar-header {
+    padding: 8px 10px;
+  }
+
+  .calendar-header h3 {
+    font-size: 0.88rem;
+  }
+
+  .selected-dates-header-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+}
+
+/* ==================== DARK MODE ==================== */
+body.dark-mode .closure-dates-header {
+  background: var(--color-bg-alt);
+}
+
+body.dark-mode .calendar-header {
+  background: var(--color-bg-alt);
+}
+
+body.dark-mode .calendar-day.selected {
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.35);
+}

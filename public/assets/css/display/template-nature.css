@@ -1,0 +1,192 @@
+/* ==================== TEMPLATE NATURE ==================== */
+/* Override CSS pour le template "Nature" — tons verts, organique, chaleureux */
+
+body.template-nature {
+  --color-primary: #16a34a;
+  --color-primary-dark: #15803d;
+  --color-primary-light: #22c55e;
+  --color-bg: #ffffff;
+  --color-bg-alt: #f7fdf9;
+  --color-bg-warm: #f0fdf4;
+  --color-bg-dark: #14532d;
+  --color-text: #1a2e1a;
+  --color-text-light: #3d5a3d;
+  --color-text-muted: #6b8f6b;
+  --color-border: #d1e7d1;
+  --font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-family-heading: 'Inter', 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Header — fond blanc verdâtre, glassmorphism */
+body.template-nature header {
+  background: rgba(247, 253, 249, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid #d1e7d1;
+}
+
+body.template-nature .logo-area h1 {
+  font-weight: 700;
+  color: #14532d;
+}
+
+body.template-nature .nav-menu ul li a {
+  font-weight: 500;
+  color: #3d5a3d;
+  letter-spacing: 0.04em;
+}
+
+body.template-nature .nav-menu ul li a:hover {
+  color: #16a34a;
+  background: #f0fdf4;
+}
+
+/* Hamburger */
+body.template-nature .hamburger span {
+  background: #14532d;
+}
+
+/* Banner — overlay vert naturel */
+body.template-nature .banner {
+  min-height: 480px;
+}
+
+body.template-nature .banner::before {
+  background: linear-gradient(180deg, rgba(20, 83, 45, 0.2) 0%, rgba(20, 83, 45, 0.65) 100%);
+}
+
+body.template-nature .banner-content h2 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+}
+
+body.template-nature .banner-content h2::after {
+  background: #22c55e;
+  width: 50px;
+  height: 3px;
+}
+
+body.template-nature .banner-fallback {
+  background: linear-gradient(135deg, #14532d 0%, #16a34a 50%, #22c55e 100%);
+}
+
+/* Section h2 — trait vert */
+body.template-nature h2 {
+  color: #1a2e1a;
+}
+
+body.template-nature h2::after {
+  background: #16a34a;
+  width: 48px;
+  height: 3px;
+}
+
+/* Carte — cartes avec accent vert */
+body.template-nature .category-section {
+  background: #f7fdf9;
+  border: 1px solid #d1e7d1;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 28px;
+}
+
+body.template-nature .category-section h3 {
+  color: #14532d;
+}
+
+body.template-nature .plat-card {
+  border-color: #d1e7d1;
+  border-radius: 12px;
+}
+
+body.template-nature .plat-card:hover {
+  border-color: #16a34a;
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.1);
+}
+
+body.template-nature .plat-price {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+/* Images carte */
+body.template-nature .image-card {
+  border-radius: 12px;
+}
+
+body.template-nature .image-card:hover {
+  box-shadow: 0 10px 28px rgba(22, 163, 74, 0.12);
+}
+
+/* Services — fond vert pâle */
+body.template-nature #services {
+  background: #f0fdf4;
+}
+
+body.template-nature .service-card {
+  background: #ffffff;
+  border: 1px solid #d1e7d1;
+  border-radius: 12px;
+}
+
+body.template-nature .service-card:hover {
+  border-color: #16a34a;
+  transform: translateY(-2px);
+}
+
+body.template-nature .service-card i {
+  color: #16a34a;
+}
+
+/* Footer — fond vert foncé */
+body.template-nature footer {
+  background: #14532d;
+  color: #d1e7d1;
+}
+
+body.template-nature footer h2 {
+  color: #ffffff;
+}
+
+body.template-nature footer h2::after {
+  background: #22c55e;
+}
+
+body.template-nature footer p,
+body.template-nature footer a {
+  color: #86efac;
+}
+
+body.template-nature footer a:hover {
+  color: #22c55e;
+}
+
+body.template-nature .social-links a {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+body.template-nature .social-links a:hover {
+  background: #22c55e;
+  color: #14532d;
+  border-color: #22c55e;
+}
+
+/* Selection */
+body.template-nature ::selection {
+  background: #22c55e;
+  color: white;
+}
+
+/* Mobile nav */
+@media (max-width: 768px) {
+  body.template-nature .nav-menu {
+    background: #f7fdf9;
+  }
+
+  body.template-nature .nav-menu ul li a:hover {
+    background: #f0fdf4;
+    color: #16a34a;
+  }
+}

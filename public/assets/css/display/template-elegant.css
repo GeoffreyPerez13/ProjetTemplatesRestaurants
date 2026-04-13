@@ -1,0 +1,260 @@
+/* ==================== TEMPLATE ÉLÉGANT ==================== */
+/* Override CSS pour le template "Elegant" — fond sombre, accents dorés, raffiné */
+
+body.template-elegant {
+  --color-primary: #d4a853;
+  --color-primary-dark: #b8922e;
+  --color-primary-light: #e8c874;
+  --color-bg: #12121f;
+  --color-bg-alt: #1a1a2e;
+  --color-bg-warm: #1e1e32;
+  --color-bg-dark: #0a0a14;
+  --color-text: #f5f0e8;
+  --color-text-light: #c8c0b0;
+  --color-text-muted: #8a8278;
+  --color-border: #2a2a3d;
+  --font-family: 'Playfair Display', 'Georgia', 'Times New Roman', serif;
+  --font-family-heading: 'Playfair Display', 'Georgia', serif;
+
+  color-scheme: dark;
+}
+
+/* Header — fond sombre avec transparence */
+body.template-elegant header {
+  background: rgba(13, 13, 26, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(212, 168, 83, 0.15);
+}
+
+body.template-elegant .logo-area h1 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #f5f0e8;
+  letter-spacing: 0.05em;
+}
+
+body.template-elegant .nav-menu ul li a {
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #c8c0b0;
+}
+
+body.template-elegant .nav-menu ul li a:hover {
+  color: #d4a853;
+  background: rgba(212, 168, 83, 0.08);
+}
+
+/* Hamburger */
+body.template-elegant .hamburger span {
+  background: #f5f0e8;
+}
+
+body.template-elegant .hamburger:hover {
+  background: rgba(212, 168, 83, 0.1);
+}
+
+/* Banner — overlay sombre, texte doré */
+body.template-elegant .banner {
+  min-height: 520px;
+}
+
+body.template-elegant .banner::before {
+  background: linear-gradient(180deg, rgba(10, 10, 20, 0.4) 0%, rgba(10, 10, 20, 0.8) 100%);
+}
+
+body.template-elegant .banner-content h2 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  font-style: italic;
+  color: #f5f0e8;
+  letter-spacing: 0.02em;
+}
+
+body.template-elegant .banner-content h2::after {
+  background: #d4a853;
+  width: 60px;
+  height: 2px;
+}
+
+body.template-elegant .banner-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  color: #c8c0b0;
+}
+
+body.template-elegant .banner-fallback {
+  background: linear-gradient(135deg, #0a0a14 0%, #1a1a2e 50%, #2a2a3d 100%);
+}
+
+/* Section h2 — doré, style serif */
+body.template-elegant h2 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  font-weight: 700;
+  color: #f5f0e8;
+}
+
+body.template-elegant h2::after {
+  background: #d4a853;
+  width: 40px;
+  height: 2px;
+}
+
+/* Carte — fond sombre, bordures subtiles */
+body.template-elegant #carte {
+  background: #12121f;
+}
+
+body.template-elegant .category-section {
+  background: #1a1a2e;
+  border: 1px solid #2a2a3d;
+  border-radius: 8px;
+  padding: 32px;
+  margin-bottom: 32px;
+}
+
+body.template-elegant .category-section h3 {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  color: #d4a853;
+  font-weight: 600;
+  font-style: italic;
+}
+
+body.template-elegant .plat-card {
+  background: #1e1e32;
+  border-color: #2a2a3d;
+  border-radius: 8px;
+}
+
+body.template-elegant .plat-card:hover {
+  border-color: rgba(212, 168, 83, 0.4);
+  box-shadow: 0 4px 20px rgba(212, 168, 83, 0.08);
+}
+
+body.template-elegant .plat-name {
+  font-family: 'Playfair Display', 'Georgia', serif;
+  color: #f5f0e8;
+}
+
+body.template-elegant .plat-description {
+  color: #8a8278;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+}
+
+body.template-elegant .plat-price {
+  color: #d4a853;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Images carte */
+body.template-elegant .image-card {
+  border-radius: 8px;
+  border: 1px solid #2a2a3d;
+}
+
+body.template-elegant .image-card:hover {
+  box-shadow: 0 8px 24px rgba(212, 168, 83, 0.1);
+  border-color: rgba(212, 168, 83, 0.3);
+}
+
+/* Services — fond alterné */
+body.template-elegant #services {
+  background: #1a1a2e;
+}
+
+body.template-elegant .service-card {
+  background: #1e1e32;
+  border: 1px solid #2a2a3d;
+  border-radius: 8px;
+}
+
+body.template-elegant .service-card:hover {
+  border-color: rgba(212, 168, 83, 0.3);
+}
+
+body.template-elegant .service-card i {
+  color: #d4a853;
+}
+
+/* Footer — très sombre */
+body.template-elegant footer {
+  background: #0a0a14;
+  border-top: 1px solid rgba(212, 168, 83, 0.1);
+}
+
+body.template-elegant footer h2 {
+  color: #f5f0e8;
+}
+
+body.template-elegant footer h2::after {
+  background: #d4a853;
+}
+
+body.template-elegant footer p,
+body.template-elegant footer a {
+  color: #8a8278;
+  font-family: 'Inter', sans-serif;
+}
+
+body.template-elegant footer a:hover {
+  color: #d4a853;
+}
+
+body.template-elegant .social-links a {
+  background: rgba(212, 168, 83, 0.08);
+  border-color: rgba(212, 168, 83, 0.15);
+  color: #d4a853;
+}
+
+body.template-elegant .social-links a:hover {
+  background: #d4a853;
+  color: #0a0a14;
+  border-color: #d4a853;
+}
+
+/* Cookie banner */
+body.template-elegant .cookie-banner {
+  background: #1e1e32;
+  border-color: #2a2a3d;
+  color: #c8c0b0;
+}
+
+/* Selection */
+body.template-elegant ::selection {
+  background: #d4a853;
+  color: #0a0a14;
+}
+
+/* Mobile nav */
+@media (max-width: 768px) {
+  body.template-elegant .nav-menu {
+    background: #0d0d1a;
+    border-left: 1px solid #2a2a3d;
+  }
+
+  body.template-elegant .nav-menu ul li a {
+    color: #c8c0b0;
+  }
+
+  body.template-elegant .nav-menu ul li a:hover {
+    background: rgba(212, 168, 83, 0.1);
+    color: #d4a853;
+  }
+
+  body.template-elegant .banner {
+    min-height: 380px;
+  }
+
+  body.template-elegant .category-section {
+    padding: 20px;
+  }
+}

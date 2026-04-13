@@ -1,0 +1,104 @@
+/* ==================== Bandeau de prévisualisation admin ==================== */
+.preview-banner {
+  background: linear-gradient(135deg, #ff6b35, #f7931e);
+  color: white;
+  text-align: center;
+  padding: 12px 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.preview-banner i {
+  margin-right: 8px;
+}
+
+.preview-banner a {
+  color: white;
+  text-decoration: underline;
+  margin-left: 10px;
+  font-weight: 700;
+}
+
+.preview-banner a:hover {
+  opacity: 0.85;
+}
+
+/* Quand le bandeau preview est visible, décaler le header sticky */
+.preview-banner + header {
+  top: 44px;
+}
+
+/* ==================== Bandeau démo vitrine ==================== */
+.demo-banner-vitrine {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: white;
+  text-align: center;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+  box-shadow: 0 2px 12px rgba(124, 58, 237, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.demo-banner-vitrine i {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.demo-banner-vitrine span {
+  line-height: 1.4;
+}
+
+.demo-banner-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.demo-banner-link:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+}
+
+/* Décaler le header quand le bandeau démo est visible */
+.demo-banner-vitrine + .preview-banner + header {
+  top: 88px;
+}
+
+.demo-banner-vitrine + header {
+  top: 44px;
+}
+
+@media (max-width: 600px) {
+  .demo-banner-vitrine {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    gap: 6px;
+  }
+
+  .demo-banner-link {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+  }
+}

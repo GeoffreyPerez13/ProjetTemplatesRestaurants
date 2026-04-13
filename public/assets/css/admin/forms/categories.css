@@ -1,0 +1,220 @@
+/* ==================== CATEGORIES ==================== */
+.category-block {
+  position: relative;
+  border: 1px solid var(--color-border);
+  padding: 20px;
+  border-radius: var(--radius-md);
+  margin-bottom: 25px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.category-delete-form {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.category-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  padding: 0;
+  margin-bottom: 12px;
+  line-height: 1;
+  border: 1.5px solid #f87171;
+  border-radius: 50%;
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: 0.7em;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.category-delete-btn:hover {
+  background: #dc2626;
+  color: #fff;
+  border-color: #dc2626;
+  transform: none;
+  box-shadow: none;
+}
+
+.category-header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.category-left {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.category-left strong {
+  font-size: 1.2rem;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.category-accordion-controls {
+  flex-basis: 100%;
+  width: 100%;
+}
+
+.category-order-control {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.category-order-icon {
+  color: var(--color-text-muted);
+  font-size: 0.85em;
+  cursor: help;
+}
+
+.category-order-label {
+  display: none;
+}
+
+.category-order-input {
+  width: 56px;
+  padding: 6px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.85em;
+  text-align: center;
+  -moz-appearance: textfield;
+  appearance: textfield;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.category-order-input::-webkit-outer-spin-button,
+.category-order-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.category-order-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.category-order-status {
+  font-size: 0.8em;
+  width: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.category-order-status.saving { color: var(--color-text-muted); }
+.category-order-status.saved  { color: #16a34a; }
+.category-order-status.error  { color: #dc2626; }
+
+.edit-card-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.categories-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+/* ==================== RESPONSIVE CATEGORIES ==================== */
+/* Tablette et desktop (770px et plus) : Maximum 2 colonnes */
+@media (min-width: 770px) {
+  .edit-card-container {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .categories-grid {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 20px !important;
+  }
+
+  .category-block {
+    flex: 0 0 calc(50% - 10px) !important;
+    max-width: calc(50% - 10px) !important;
+    align-self: flex-start !important;
+  }
+}
+
+/* Corriger les boutons form-actions en mode 2-3 colonnes */
+@media (min-width: 770px) {
+  .category-block .form-actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+  
+  .category-block .form-actions .btn {
+    width: 100% !important;
+    flex: 1 !important;
+    justify-content: center !important;
+  }
+}
+
+/* Desktop large (1500px et plus) : 3 colonnes */
+@media (min-width: 1500px) {
+  .category-block {
+    flex: 0 0 calc(33.333% - 15px) !important;
+    max-width: calc(33.333% - 15px) !important;
+  }
+}
+
+/* Responsive mobile */
+@media (max-width: 768px) {
+  .category-accordion-controls .btn.small {
+    padding: 6px 10px;
+    font-size: 0.8em;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-accordion-controls {
+    flex-wrap: wrap;
+  }
+
+  .category-accordion-controls .btn.small {
+    flex: 1;
+    min-width: calc(50% - 3px);
+    font-size: 0.75em;
+    padding: 6px 8px;
+  }
+}

@@ -1,0 +1,159 @@
+/* Footer admin */
+.admin-footer {
+  background: var(--color-bg-dark);
+  color: rgba(255, 255, 255, 0.9);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-lg) auto;
+  border-radius: var(--radius-lg);
+  max-width: 850px;
+}
+
+/* Adapter la largeur du footer en fonction de la page */
+body[data-page="dashboard"] .admin-footer {
+  max-width: 1200px;
+}
+
+body[data-page="edit-card"] .admin-footer {
+  max-width: 1400px;
+}
+
+body[data-page="edit-contact"] .admin-footer {
+  max-width: 700px;
+}
+
+/* Forcer l'empilement vertical sur edit-contact */
+body[data-page="edit-contact"] .footer-content {
+  flex-direction: column;
+  text-align: center;
+  gap: var(--spacing-md);
+}
+
+body[data-page="edit-contact"] .separator {
+  display: none;
+}
+
+body[data-page="edit-logo-banner"] .admin-footer {
+  max-width: 1100px;
+}
+
+body[data-page="edit-services"] .admin-footer {
+  max-width: 1100px;
+}
+
+body[data-page="settings"] .admin-footer {
+  max-width: 100%;
+}
+
+body[data-page="edit-template"] .admin-footer {
+  max-width: 1100px;
+}
+
+body[data-page="auto-register"] .admin-footer {
+  max-width: 500px;
+}
+
+body[data-page="reservations"] .admin-footer {
+  max-width: 1200px;
+}
+
+body[data-page="floor-plan"] .admin-footer {
+  max-width: 1400px;
+}
+
+body[data-page="stats"] .admin-footer {
+  max-width: 1100px;
+}
+
+body[data-page="legal"] .admin-footer {
+  max-width: 1200px;
+}
+
+.footer-content {
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+}
+
+.footer-left p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  justify-content: center;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 0.825rem;
+  transition: color var(--transition-fast);
+  padding: 4px 0;
+}
+
+.footer-links a:hover {
+  color: var(--color-primary-light);
+}
+
+.separator {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 0.75rem;
+}
+
+/* ---- Responsive footer ---- */
+/* Empiler footer-left et footer-links quand les liens ne tiennent pas sur une ligne */
+@media (max-width: 950px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-md);
+  }
+
+  .separator {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-links a {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-footer {
+    max-width: 100%;
+    margin: var(--spacing-md);
+  }
+}
+
+@media (max-width: 400px) {
+  .footer-links {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .footer-links a {
+    width: 100%;
+    text-align: center;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .footer-links a:last-child {
+    border-bottom: none;
+  }
+
+  .admin-footer {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+  }
+}

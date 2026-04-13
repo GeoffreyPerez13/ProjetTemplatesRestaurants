@@ -1,248 +1,236 @@
-# TemplatesRestaurants  
-## Système d'administration de carte pour restaurants
+# 🍽️ MenuMiam V2 - Application SaaS de Gestion de Carte Digitale
+## Refonte Complète - Architecture MVC Moderne
 
-## Description
-TemplatesRestaurants est une application web complète permettant aux restaurateurs de gérer et présenter leur carte en ligne selon deux modes distincts :
-
-- **Mode éditable** : création et organisation des catégories et plats
-- **Mode images** : affichage de cartes scannées ou conçues (images/PDF)
-
-Le système inclut un panneau d'administration sécurisé, une base de données MySQL et une interface responsive adaptée à tous les appareils.  
-Il est conçu pour fonctionner avec **WampServer** ou **XAMPP** sous Windows.
+**Version** : 2.0 (En développement)  
+**Statut** : Refonte from scratch basée sur conception CDA complète  
+**Branche** : V2-refonte
 
 ---
 
-## Étapes effectuées et explications
+## 🎯 **À Propos**
 
-### 1. Migration vers une architecture MVC-like
-- Système de routage centralisé via `index.php`
-- Création d'un dossier `pages/` contenant toutes les pages de l'application
-- Implémentation d'un contrôleur frontal gérant les accès sécurisés
+MenuMiam V2 est une **refonte complète** de l'application, développée selon les standards **CDA (Concepteur Développeur d'Application) Niveau 6**.
 
-**Pourquoi :**  
-Permet une meilleure organisation du code, une sécurité renforcée et une maintenance facilitée.
-
----
-
-### 2. Système de gestion de contenu avancé
-Base de données MySQL avec plusieurs tables principales :
-
-- `admins` : gestion des administrateurs
-- `categories` : catégories de la carte
-- `plats` : plats avec prix et descriptions
-- `card_images` : images/PDF du mode images
-- `contact`, `logos`, `invitations`, `restaurants`
-
-Deux modes d'opération :
-
-- **Mode Éditable** : interface de gestion des catégories et plats
-- **Mode Images** : galerie d'images/PDF uploadés
-
-**Pourquoi :**  
-Offre plus de flexibilité, avec de meilleures performances et une gestion plus robuste.
+Cette version est construite **from scratch** en suivant une conception professionnelle complète incluant :
+- ✅ Architecture MVC robuste
+- ✅ Approche Mobile First & Responsive
+- ✅ Optimisation tablette (iPad, Galaxy Tab)
+- ✅ Sécurité renforcée (CSRF, XSS, SQLi)
+- ✅ Performance optimisée (< 2s)
+- ✅ Base de données normalisée (3NF)
 
 ---
 
-### 3. Panneau d'administration complet
-Interface organisée en sections :
+## 📚 **Documentation Complète**
 
-- Dashboard : vue d'ensemble et changement de mode
-- Édition de carte : gestion des catégories et plats avec upload d'images
-- Aperçu de carte : visualisation selon le mode sélectionné
-- Gestion des comptes : connexion, inscription, réinitialisation de mot de passe
+Toute la conception est disponible dans `_dev/cda/conception/` :
 
-Fonctionnalités supplémentaires :
-- Système d'accordéons pour une navigation intuitive
-- Lightbox intégrée pour l'affichage des images en grand
-
-**Pourquoi :**  
-Fournit une expérience utilisateur professionnelle et intuitive pour les restaurateurs.
+### **Documents Essentiels**
+- 📊 [`RESUME_EXECUTIF_V2.md`](_dev/cda/conception/RESUME_EXECUTIF_V2.md) - Vue d'ensemble complète
+- 📋 [`CAHIER_DES_CHARGES.md`](_dev/cda/conception/01-analyse-besoins/CAHIER_DES_CHARGES.md) - Spécifications
+- 📱 [`MOBILE_FIRST_RESPONSIVE.md`](_dev/cda/conception/01-analyse-besoins/MOBILE_FIRST_RESPONSIVE.md) - Guide responsive
+- 🗄️ [`BDD_COMPLETE_V2.md`](_dev/cda/conception/04-modelisation-bdd/BDD_COMPLETE_V2.md) - Modélisation BDD
+- 📱 [`OPTIMISATION_TABLETTE.md`](_dev/cda/conception/01-analyse-besoins/OPTIMISATION_TABLETTE.md) - Optimisation tablette
+- 📚 [`INDEX_DOCUMENTATION.md`](_dev/cda/conception/INDEX_DOCUMENTATION.md) - Guide navigation
 
 ---
 
-### 4. Architecture CSS modulaire
-Organisation des styles en dossiers thématiques :
+## 🏗️ **Architecture V2**
 
-- `basis/` : styles de base, boutons, composants
-- `effects/` : animations, lightbox, accordéons
-- `forms/` : styles spécifiques aux formulaires
-- `sections/` : CSS par page ou section
+### **Stack Technique**
 
-Un fichier principal `admin.css` importe tous les modules.
+**Frontend** :
+- HTML5 sémantique
+- CSS3 (Variables CSS, Grid, Flexbox)
+- JavaScript ES6+ (Vanilla JS)
+- Mobile First (320px → 1440px+)
 
-**Pourquoi :**  
-Facilite la maintenance, permet la réutilisation de composants et améliore la performance globale.
+**Backend** :
+- PHP 8.0+ (MVC custom)
+- MySQL 8.0+ (InnoDB)
+- Apache 2.4+
+- Composer (autoloading PSR-4)
 
----
+**Sécurité** :
+- Protection CSRF
+- Validation stricte
+- Hashage bcrypt
+- Requêtes préparées
 
-### 5. Configuration des environnements de développement
-Le projet supporte deux configurations selon l'environnement.
+### **Structure du Projet**
 
-#### Environnement travail (port 80)
-```text
-http://templatesrestaurants.local/admin/login.php
-http://localhost/phpmyadmin
 ```
-#### Environnement domicile (port 8080)
-```text
-http://templatesrestaurants.local/admin/login.php
-http://localhost/phpmyadmin
-```
-
-**Pourquoi cette différence :**  
-- Le port 80 est souvent occupé à domicile (IIS, Skype, autres services)
-- Apache est configuré pour écouter sur le port 8080
-- La structure d'URL a évolué vers un système de routage centralisé
-
-#### Fichiers de configuration modifiés
-#### Fichier hosts
-```text
-127.0.0.1    templatesrestaurants.local
-127.0.0.1    phpmyadmin.local
-```
-#### Virtual Hosts Apache
-```apache
-<VirtualHost *:80>
-  ServerName templatesrestaurants.local
-  DocumentRoot "C:/xampp/htdocs/templates-restaurants"
-  <Directory "C:/xampp/htdocs/templates-restaurants">
-      Options Indexes FollowSymLinks
-      AllowOverride All
-      Require all granted
-  </Directory>
-</VirtualHost>
-
-<VirtualHost *:8080>
-  ServerName templatesrestaurants.local
-  DocumentRoot "C:/xampp/htdocs/templates-restaurants"
-  <Directory "C:/xampp/htdocs/templates-restaurants">
-      Options Indexes FollowSymLinks
-      AllowOverride All
-      Require all granted
-  </Directory>
-</VirtualHost>
-```
-#### Configuration Apache
-```apache
-# Environnement de travail
-Listen 80
-ServerName localhost:80
-
-# Environnement domicile
-Listen 8080
-ServerName localhost:8080
-```
-#### Système de mail box virtuelle avec MailHog
-- Création d'un fichier mailhog.bat à la racine du projet pour lancer Mailhog.
-- Exécutable avec la commande ```.\mailhog.bat``` depuis la racine du projet ```PS C:\wamp64\www\ProjetTemplatesRestaurants>```. Fermer l'onglet du navigateur arrêtera le service.
-
----
-
-### 6. Sécurité renforcée
-- Hachage des mots de passe avec `password_hash()`
-- Protection XSS avec `htmlspecialchars()` sur toutes les sorties
-- Requêtes préparées pour prévenir les injections SQL
-- Validation des uploads (types MIME et tailles limitées)
-- Sessions sécurisées avec régénération d'identifiant
-- Protection des dossiers sensibles via `.htaccess`
-
-**Pourquoi :**
-Assure la sécurité des données des restaurateurs et de leurs contenus.
-
----
-
-### 7. Organisation du système des fichiers
-```text
-templates-restaurants/
-├── assets/
-│   ├── css/admin/
-│   ├── js/effects/
+ProjetTemplatesRestaurants/
+├── _dev/                    # Conception CDA complète ✅
+│   └── cda/conception/
+│
+├── app/                     # Backend MVC (à créer)
+│   ├── Controllers/
+│   ├── Models/
+│   ├── Views/
+│   ├── Core/
+│   └── Helpers/
+│
+├── public/                  # Point d'entrée web (à créer)
+│   ├── index.php
+│   ├── assets/
 │   └── uploads/
-├── database/
-├── partials/
-├── pages/
-├── index.php
-├── config.php
-└── .htaccess
+│
+├── config/                  # Configuration (à créer)
+├── database/                # SQL (à créer)
+├── tests/                   # Tests (à créer)
+├── vendor/                  # Dépendances Composer
+├── .gitignore
+├── composer.json
+└── README.md
 ```
 
-**Pourquoi :**
-Structure claire séparant les responsabilités et facilitant l'évolution du projet.
+---
+
+## 🚀 **Fonctionnalités Prévues**
+
+### **Module Core (Gratuit)**
+- Gestion de carte (catégories, plats, allergènes)
+- 3 Templates (Classic, Modern, Elegant)
+- Personnalisation (logo, bannière, couleurs)
+- Contact & Services
+- Interface admin responsive
+
+### **Modules Premium**
+- **Réservations** (+8€/mois) : Système complet + Floor Plan
+- **Statistiques** (+5€/mois) : Analytics avec graphiques
+- **Avis Google** (+5€/mois) : Intégration API Places
+- **Livraison** (+7€/mois) : Uber Eats, Deliveroo, Just Eat
 
 ---
 
-### 8. Fonctionnalités techniques avancées
-- Réorganisation intuitive des catégories et plats
-- Lightbox personnalisée pour l'affichage des images
-- Upload sécurisé (JPG, PNG, GIF, WebP, PDF – 5 MB maximum)
-- Design responsive (mobile, tablette et desktop)
-- Accordéons interactifs
-- Notifications de succès et d'erreur en temps réel
+## 📋 **Prérequis**
 
-**Pourquoi :**
-Offre une expérience utilisateur moderne et professionnelle.
+- PHP 8.0+
+- MySQL 8.0+
+- Apache 2.4+ (avec mod_rewrite)
+- Composer
+- WAMP/XAMPP (développement)
 
 ---
 
-### Tests en local
-#### Environnement travail
-```text
-[http://templatesrestaurants.local/admin/login.php
-http://localhost/phpmyadmin](http://templatesrestaurants.local/
-http://templatesrestaurants.local/admin/login.php
-)
+## 🛠️ **Installation (V2 en développement)**
+
+### **1. Cloner le Repository**
+
+```bash
+git clone https://github.com/GeoffreyPerez13/ProjetTemplatesRestaurants.git
+cd ProjetTemplatesRestaurants
 ```
-#### Environnement domicile
-```text
-[http://templatesrestaurants.local/admin/login.php
-http://localhost/phpmyadmin](http://templatesrestaurants.local:8080/
-http://templatesrestaurants.local:8080/?page=login
-)
+
+### **2. Basculer sur la Branche V2**
+
+```bash
+git checkout V2-refonte
 ```
 
-Vérifications effectuées :
-- Toutes les sections s'affichent correctement
-- Le mode éditable fonctionne
-- Le mode images affiche correctement les fichiers uploadés
-- La lightbox fonctionne
-- L'interface est totalement responsive
+### **3. Installer les Dépendances**
+
+```bash
+composer install
+```
+
+### **4. Configuration Base de Données**
+
+```bash
+# Créer la base de données
+mysql -u root -p
+CREATE DATABASE menumiam_v2 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+EXIT;
+
+# Importer le schéma (à venir)
+mysql -u root -p menumiam_v2 < database/schema.sql
+```
+
+### **5. Configuration**
+
+```bash
+# Copier le fichier de configuration
+cp config/database.example.php config/database.php
+
+# Éditer avec vos identifiants
+nano config/database.php
+```
+
+### **6. Accès**
+
+```
+http://localhost/ProjetTemplatesRestaurants
+```
 
 ---
 
-### Résultat final
-- Application web complète pour la gestion de cartes de restaurant
-- Deux modes d'utilisation adaptés à différents besoins
-- Interface administrateur intuitive et sécurisée
-- Architecture modulaire facile à maintenir et à faire évoluer
-- Configuration multi-environnements flexible
-- Sécurité renforcée à tous les niveaux
+## 🌿 **Branches Git**
+
+- `main` : Production (V1 stable)
+- `testRefonte` : Développement V1
+- `V1Projet` : **Sauvegarde V1** (tag: v1.0-final) 📌
+- `V2-refonte` : **Développement V2** (from scratch) 🚀
 
 ---
 
-### Démarrage rapide
-#### Prérequis
-- PHP 7.4 ou supérieur
-- MySQL 5.7 ou supérieur
-- WampServer ou XAMPP
-#### Installation
-- Cloner le projet dans le dossier htdocs
-- Importer la base de données depuis database/database.sql
-- Configurer config.php avec vos identifiants MySQL
-- Configurer les Virtual Hosts selon votre environnement
-- Vérifier les permissions du dossier assets/uploads/
-- Redémarrer Apache
-- Accéder à l'URL configurée
-#### Configuration des URLS
-- Utiliser le port 80 si disponible
-- Sinon, configurer Apache sur le port 8080
-- Adapter les URLs dans le navigateur en conséquence
+## 📊 **Roadmap V2**
+
+### **Phase 1 : Core & Architecture** (Semaine 1-2)
+- [ ] Structure MVC de base
+- [ ] Classes Core (Database, Router, Request, Response)
+- [ ] Autoloading PSR-4
+- [ ] Sécurité de base (CSRF, validation)
+
+### **Phase 2 : Authentification** (Semaine 2)
+- [ ] Système login/logout
+- [ ] Gestion sessions
+- [ ] Rôles et permissions
+
+### **Phase 3 : Modules Core** (Semaine 3-4)
+- [ ] Dashboard
+- [ ] Gestion de carte
+- [ ] Contact & Services
+- [ ] Templates
+
+### **Phase 4 : Modules Premium** (Semaine 5-8)
+- [ ] Réservations + Floor Plan
+- [ ] Statistiques
+- [ ] Avis Google
+- [ ] Intégration Livraison
+
+### **Phase 5 : Optimisations** (Semaine 9-10)
+- [ ] Responsive complet (Mobile + Tablette)
+- [ ] Performance
+- [ ] Accessibilité
+- [ ] Tests
 
 ---
 
-### Notes importantes
-- Migration réussie d'un système JSON vers une base de données relationnelle
-- Architecture MVC-like améliorant la maintenabilité
-- Configuration flexible supportant plusieurs environnements
-- Code documenté en français avec une structure claire
-- Sécurité prioritaire à chaque étape du développement
-- Projet prêt pour une utilisation professionnelle ou des évolutions futures (export PDF, multi-langue, API, etc.)
+## 🎓 **Projet CDA**
+
+Ce projet est réalisé dans le cadre de la formation **Concepteur Développeur d'Application (CDA)** - Niveau 6 (RNCP 37273).
+
+**Compétences validées** :
+- Concevoir et développer des composants d'interface
+- Concevoir et développer la persistance des données
+- Développer une application multicouche répartie
+- Préparer le déploiement d'une application
+
+---
+
+## 👨‍💻 **Auteur**
+
+**Geoffrey Perez**  
+Formation CDA - Concepteur Développeur d'Application  
+GitHub: [@GeoffreyPerez13](https://github.com/GeoffreyPerez13)
+
+---
+
+## 📝 **Licence**
+
+Propriétaire - Tous droits réservés
+
+---
+
+**Note** : Cette branche (`V2-refonte`) contient la refonte complète de MenuMiam. Pour accéder à la V1, basculez sur la branche `V1Projet`.

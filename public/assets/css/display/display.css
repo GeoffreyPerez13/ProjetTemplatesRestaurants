@@ -1,0 +1,19 @@
+/* ==================== DISPLAY CSS — Point d'entrée avec @import ==================== */
+/* Ce fichier importe tous les modules CSS pour la page vitrine */
+
+/* Variables */
+@import url("../shared/_variables.css");
+@import url("_display-variables.css");
+
+/* Modules */
+@import url("base.css");
+@import url("header.css");
+@import url("banner.css");
+@import url("carte.css");
+@import url("services.css");
+@import url("footer.css");
+@import url("lightbox.css");
+@import url("cookies.css");
+@import url("reviews.css");
+@import url("preview.css");
+@import url("maintenance.css");
