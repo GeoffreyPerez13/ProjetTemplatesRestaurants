@@ -1,0 +1,37 @@
+/**
+ * Variables CSS globales pour les tailles d'images
+ * Utilisées dans toute l'application (admin + vitrine)
+ */
+
+:root {
+    /* Images de catégories */
+    --img-category-size: 60px;
+    --img-category-radius: 6px;
+    
+    /* Images de plats */
+    --img-dish-size: 50px;
+    --img-dish-radius: 4px;
+    
+    /* Images dans les modals/formulaires */
+    --img-preview-max-width: 200px;
+    --img-preview-max-height: 200px;
+    --img-preview-radius: 8px;
+    
+    /* Lightbox */
+    --lightbox-img-max-width: 70%;
+    --lightbox-img-max-height: 70vh;
+    --lightbox-img-radius: 8px;
+    
+    /* Lightbox mobile */
+    --lightbox-img-max-width-mobile: 85%;
+    --lightbox-img-max-height-mobile: 80vh;
+    
+    /* Icônes de statistiques */
+    --stat-icon-size: 56px;
+    --stat-icon-size-mobile: 48px;
+    --stat-icon-radius: 12px;
+    
+    /* Bouton de suppression d'image */
+    --remove-btn-size: 28px;
+    --remove-btn-radius: 50%;
+}

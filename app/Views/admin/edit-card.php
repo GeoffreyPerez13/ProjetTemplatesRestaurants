@@ -4,14 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($page_title ?? 'Gérer ma carte') ?> - MenuMiam</title>
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/css/shared/image-variables.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/css/shared/container-variables.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/css/admin/dashboard.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/css/shared/toast.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .card-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 24px;
+            max-width: var(--container-max-width);
+            margin: var(--container-margin);
+            padding: var(--container-padding-desktop);
+        }
+
+        @media (max-width: 768px) {
+            .card-container {
+                padding: var(--container-padding-tablet);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-container {
+                padding: var(--container-padding-mobile);
+            }
         }
 
         .section {
@@ -306,8 +320,8 @@
 
         .image-preview img {
             display: block;
-            max-width: 200px;
-            max-height: 200px;
+            max-width: var(--img-preview-max-width);
+            max-height: var(--img-preview-max-height);
             object-fit: cover;
         }
 
@@ -315,9 +329,9 @@
             position: absolute;
             top: 8px;
             right: 8px;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
+            width: var(--remove-btn-size);
+            height: var(--remove-btn-size);
+            border-radius: var(--remove-btn-radius);
             background: rgba(239, 68, 68, 0.9);
             color: white;
             border: none;
@@ -335,10 +349,10 @@
         }
 
         .category-item img {
-            width: 60px;
-            height: 60px;
+            width: var(--img-category-size);
+            height: var(--img-category-size);
             object-fit: cover;
-            border-radius: 6px;
+            border-radius: var(--img-category-radius);
             margin-right: 12px;
             cursor: pointer;
             transition: all 0.3s;
@@ -347,6 +361,149 @@
         .category-item img:hover {
             transform: scale(1.05);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Drag & Drop */
+        .category-item[draggable="true"] {
+            cursor: move;
+        }
+
+        .category-item.dragging {
+            opacity: 0.5;
+            border: 2px dashed #667eea;
+        }
+
+        .category-item.drag-over {
+            border-top: 3px solid #667eea;
+        }
+
+        .dish-item[draggable="true"] {
+            cursor: move;
+        }
+
+        .dish-item.dragging {
+            opacity: 0.5;
+            border: 2px dashed #667eea;
+        }
+
+        .dish-item.drag-over {
+            border-top: 3px solid #667eea;
+        }
+
+        /* Barre de recherche */
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            align-items: center;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 16px;
+        }
+
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 12px 16px 12px 48px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .search-input-wrapper input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .category-item.hidden,
+        .dish-item.hidden {
+            display: none !important;
+        }
+
+        /* Statistiques */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-icon {
+            width: var(--stat-icon-size);
+            height: var(--stat-icon-size);
+            border-radius: var(--stat-icon-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .stat-card {
+                padding: 16px;
+            }
+
+            .stat-icon {
+                width: var(--stat-icon-size-mobile);
+                height: var(--stat-icon-size-mobile);
+                font-size: 20px;
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
         }
 
         /* Lightbox */
@@ -369,18 +526,18 @@
         }
 
         .lightbox-image {
-            max-width: 70%;
-            max-height: 70vh;
+            max-width: var(--lightbox-img-max-width);
+            max-height: var(--lightbox-img-max-height);
             object-fit: contain;
-            border-radius: 8px;
+            border-radius: var(--lightbox-img-radius);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             animation: zoomIn 0.3s;
         }
 
         @media (max-width: 768px) {
             .lightbox-image {
-                max-width: 85%;
-                max-height: 80vh;
+                max-width: var(--lightbox-img-max-width-mobile);
+                max-height: var(--lightbox-img-max-height-mobile);
             }
         }
 
@@ -438,6 +595,49 @@
             <p>Organisez vos catégories et plats</p>
         </div>
 
+        <!-- Statistiques -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <i class="fas fa-folder"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-categories"><?= count($categories) ?></span>
+                    <span class="stat-label">Catégorie<?= count($categories) > 1 ? 's' : '' ?></span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-dishes">0</span>
+                    <span class="stat-label">Plat(s)</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <i class="fas fa-image"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-images">0</span>
+                    <span class="stat-label">Image(s)</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-allergens">0</span>
+                    <span class="stat-label">Allergène(s) utilisé(s)</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Section Catégories -->
         <div class="section">
             <div class="section-header">
@@ -452,6 +652,17 @@
                 </div>
             </div>
 
+            <!-- Barre de recherche -->
+            <div class="search-bar">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Rechercher une catégorie ou un plat..." onkeyup="filterCards()">
+                </div>
+                <button class="btn btn-secondary" onclick="clearSearch()" id="clear-search-btn" style="display: none;">
+                    <i class="fas fa-times"></i> Effacer
+                </button>
+            </div>
+
             <div id="categories-container" class="categories-list">
                 <?php if (empty($categories)): ?>
                     <div class="empty-state">
@@ -461,7 +672,7 @@
                     </div>
                 <?php else: ?>
                     <?php foreach ($categories as $category): ?>
-                        <div class="category-item" data-id="<?= $category['id'] ?>">
+                        <div class="category-item" data-id="<?= $category['id'] ?>" draggable="true">
                             <div class="category-header">
                                 <div style="display: flex; align-items: center; flex: 1; cursor: pointer;" onclick="toggleCategoryDishes(<?= $category['id'] ?>)">
                                     <i class="fas fa-chevron-right category-toggle" id="toggle-<?= $category['id'] ?>" style="margin-right: 12px; color: #667eea; transition: transform 0.3s;"></i>
@@ -609,7 +820,122 @@
             categories.forEach(category => {
                 loadDishes(category.id);
             });
+            initCategoryDragDrop();
         });
+
+        // Mettre à jour les statistiques
+        function updateStats() {
+            let totalDishes = 0;
+            let totalImages = 0;
+            const allergensUsed = new Set();
+
+            document.querySelectorAll('.dish-item').forEach(dish => {
+                totalDishes++;
+                
+                // Compter les images
+                if (dish.querySelector('img')) {
+                    totalImages++;
+                }
+            });
+
+            // Compter les images de catégories
+            document.querySelectorAll('.category-item img').forEach(() => {
+                totalImages++;
+            });
+
+            // Compter les allergènes utilisés (à partir des données)
+            categories.forEach(category => {
+                loadDishes(category.id);
+            });
+
+            document.getElementById('stat-dishes').textContent = totalDishes;
+            document.getElementById('stat-images').textContent = totalImages;
+        }
+
+        // Initialiser le drag & drop pour les catégories
+        function initCategoryDragDrop() {
+            const categoryItems = document.querySelectorAll('.category-item[draggable="true"]');
+            let draggedElement = null;
+
+            categoryItems.forEach(item => {
+                item.addEventListener('dragstart', function(e) {
+                    draggedElement = this;
+                    this.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/html', this.innerHTML);
+                });
+
+                item.addEventListener('dragend', function(e) {
+                    this.classList.remove('dragging');
+                    document.querySelectorAll('.category-item').forEach(cat => {
+                        cat.classList.remove('drag-over');
+                    });
+                });
+
+                item.addEventListener('dragover', function(e) {
+                    if (e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    e.dataTransfer.dropEffect = 'move';
+                    
+                    if (this !== draggedElement) {
+                        this.classList.add('drag-over');
+                    }
+                    return false;
+                });
+
+                item.addEventListener('dragleave', function(e) {
+                    this.classList.remove('drag-over');
+                });
+
+                item.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (draggedElement !== this) {
+                        // Réorganiser les éléments
+                        const allCategories = Array.from(document.querySelectorAll('.category-item'));
+                        const draggedIndex = allCategories.indexOf(draggedElement);
+                        const targetIndex = allCategories.indexOf(this);
+
+                        if (draggedIndex < targetIndex) {
+                            this.parentNode.insertBefore(draggedElement, this.nextSibling);
+                        } else {
+                            this.parentNode.insertBefore(draggedElement, this);
+                        }
+
+                        // Sauvegarder le nouvel ordre
+                        saveCategoryOrder();
+                    }
+
+                    this.classList.remove('drag-over');
+                    return false;
+                });
+            });
+        }
+
+        // Sauvegarder l'ordre des catégories
+        function saveCategoryOrder() {
+            const categoryItems = document.querySelectorAll('.category-item');
+            const order = Array.from(categoryItems).map(item => item.dataset.id);
+
+            const formData = new FormData();
+            formData.append('csrf_token', csrfToken);
+            formData.append('order', JSON.stringify(order));
+
+            App.ajaxRequest({
+                url: baseUrl + '/card/category/reorder',
+                method: 'POST',
+                data: formData,
+                onSuccess: (data) => {
+                    App.showToast('Ordre des catégories mis à jour', 'success');
+                },
+                onError: (error) => {
+                    App.showToast('Erreur lors de la mise à jour de l\'ordre', 'error');
+                    location.reload(); // Recharger en cas d'erreur
+                }
+            });
+        }
 
         // Toggle les plats d'une catégorie
         function toggleCategoryDishes(categoryId) {
@@ -679,15 +1005,15 @@
             }
 
             container.innerHTML = dishes.map(dish => `
-                <div class="dish-item">
+                <div class="dish-item" data-id="${dish.id}" data-category-id="${categoryId}" draggable="true">
                     <div class="dish-info" style="display: flex; align-items: center; gap: 12px;">
-                        ${dish.image ? `<img src="${baseUrl}/uploads/plats/${dish.image}" alt="${dish.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; cursor: pointer; transition: all 0.3s;" onclick="openLightbox('${baseUrl}/uploads/plats/${dish.image}')" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">` : ''}
-                        <div>
+                        ${dish.image ? `<img src="${baseUrl}/uploads/plats/${dish.image}" alt="${dish.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; cursor: pointer; transition: all 0.3s;" onclick="event.stopPropagation(); openLightbox('${baseUrl}/uploads/plats/${dish.image}')" onmousedown="event.stopPropagation()" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">` : ''}
+                        <div style="flex: 1;">
                             <span class="dish-name">${dish.name}</span>
                             ${dish.price ? `<span class="dish-price">${parseFloat(dish.price).toFixed(2)} €</span>` : ''}
                         </div>
                     </div>
-                    <div style="display: flex; gap: 8px;">
+                    <div style="display: flex; gap: 8px;" onmousedown="event.stopPropagation()">
                         <button class="icon-btn" onclick="editDish(${dish.id})" title="Modifier">
                             <i class="fas fa-edit"></i>
                         </button>
@@ -697,6 +1023,159 @@
                     </div>
                 </div>
             `).join('');
+            
+            // Initialiser le drag & drop pour les plats de cette catégorie
+            initDishDragDrop(categoryId);
+            
+            // Mettre à jour les statistiques
+            setTimeout(updateStats, 100);
+        }
+
+        // Initialiser le drag & drop pour les plats d'une catégorie
+        function initDishDragDrop(categoryId) {
+            const dishItems = document.querySelectorAll(`#dishes-${categoryId} .dish-item[draggable="true"]`);
+            let draggedElement = null;
+
+            dishItems.forEach(item => {
+                item.addEventListener('dragstart', function(e) {
+                    draggedElement = this;
+                    this.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/html', this.innerHTML);
+                });
+
+                item.addEventListener('dragend', function(e) {
+                    this.classList.remove('dragging');
+                    document.querySelectorAll('.dish-item').forEach(dish => {
+                        dish.classList.remove('drag-over');
+                    });
+                });
+
+                item.addEventListener('dragover', function(e) {
+                    if (e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    e.dataTransfer.dropEffect = 'move';
+                    
+                    if (this !== draggedElement) {
+                        this.classList.add('drag-over');
+                    }
+                    return false;
+                });
+
+                item.addEventListener('dragleave', function(e) {
+                    this.classList.remove('drag-over');
+                });
+
+                item.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (draggedElement !== this && draggedElement.dataset.categoryId === this.dataset.categoryId) {
+                        // Réorganiser les éléments
+                        const allDishes = Array.from(document.querySelectorAll(`#dishes-${categoryId} .dish-item`));
+                        const draggedIndex = allDishes.indexOf(draggedElement);
+                        const targetIndex = allDishes.indexOf(this);
+
+                        if (draggedIndex < targetIndex) {
+                            this.parentNode.insertBefore(draggedElement, this.nextSibling);
+                        } else {
+                            this.parentNode.insertBefore(draggedElement, this);
+                        }
+
+                        // Sauvegarder le nouvel ordre
+                        saveDishOrder(categoryId);
+                    }
+
+                    this.classList.remove('drag-over');
+                    return false;
+                });
+            });
+        }
+
+        // Sauvegarder l'ordre des plats
+        function saveDishOrder(categoryId) {
+            const dishItems = document.querySelectorAll(`#dishes-${categoryId} .dish-item`);
+            const order = Array.from(dishItems).map(item => item.dataset.id);
+
+            const formData = new FormData();
+            formData.append('csrf_token', csrfToken);
+            formData.append('order', JSON.stringify(order));
+            formData.append('category_id', categoryId);
+
+            App.ajaxRequest({
+                url: baseUrl + '/card/dish/reorder',
+                method: 'POST',
+                data: formData,
+                onSuccess: (data) => {
+                    App.showToast('Ordre des plats mis à jour', 'success');
+                },
+                onError: (error) => {
+                    App.showToast('Erreur lors de la mise à jour de l\'ordre', 'error');
+                    loadDishes(categoryId); // Recharger en cas d'erreur
+                }
+            });
+        }
+
+        // Filtrer les catégories et plats
+        function filterCards() {
+            const searchInput = document.getElementById('search-input');
+            const clearBtn = document.getElementById('clear-search-btn');
+            const query = searchInput.value.toLowerCase().trim();
+
+            // Afficher/masquer le bouton effacer
+            clearBtn.style.display = query ? 'block' : 'none';
+
+            if (!query) {
+                // Réinitialiser : tout afficher
+                document.querySelectorAll('.category-item').forEach(cat => {
+                    cat.classList.remove('hidden');
+                });
+                document.querySelectorAll('.dish-item').forEach(dish => {
+                    dish.classList.remove('hidden');
+                });
+                return;
+            }
+
+            // Filtrer les catégories et plats
+            document.querySelectorAll('.category-item').forEach(category => {
+                const categoryName = category.querySelector('.category-name').textContent.toLowerCase();
+                const dishes = category.querySelectorAll('.dish-item');
+                let hasVisibleDish = false;
+
+                // Filtrer les plats de cette catégorie
+                dishes.forEach(dish => {
+                    const dishName = dish.querySelector('.dish-name').textContent.toLowerCase();
+                    if (dishName.includes(query)) {
+                        dish.classList.remove('hidden');
+                        hasVisibleDish = true;
+                    } else {
+                        dish.classList.add('hidden');
+                    }
+                });
+
+                // Afficher la catégorie si son nom correspond OU si elle a des plats visibles
+                if (categoryName.includes(query) || hasVisibleDish) {
+                    category.classList.remove('hidden');
+                    // Déplier automatiquement si des plats correspondent
+                    if (hasVisibleDish && !categoryName.includes(query)) {
+                        const dishesContainer = document.getElementById('dishes-' + category.dataset.id);
+                        const toggleIcon = document.getElementById('toggle-' + category.dataset.id);
+                        if (dishesContainer && dishesContainer.style.display === 'none') {
+                            dishesContainer.style.display = 'grid';
+                            toggleIcon.style.transform = 'rotate(90deg)';
+                        }
+                    }
+                } else {
+                    category.classList.add('hidden');
+                }
+            });
+        }
+
+        // Effacer la recherche
+        function clearSearch() {
+            document.getElementById('search-input').value = '';
+            filterCards();
         }
 
         // Ouvrir la lightbox
