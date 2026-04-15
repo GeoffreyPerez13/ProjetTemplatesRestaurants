@@ -75,10 +75,12 @@ $router->post('/card/category/create', [CardController::class, 'createCategory']
 $router->post('/card/category/update', [CardController::class, 'updateCategory']);
 $router->post('/card/category/delete', [CardController::class, 'deleteCategory']);
 $router->post('/card/category/reorder', [CardController::class, 'reorderCategories']);
+$router->post('/card/category/update-order', [CardController::class, 'updateCategoryOrder']);
 $router->post('/card/dish/create', [CardController::class, 'createDish']);
 $router->post('/card/dish/update', [CardController::class, 'updateDish']);
 $router->post('/card/dish/delete', [CardController::class, 'deleteDish']);
 $router->post('/card/dish/reorder', [CardController::class, 'reorderDishes']);
+$router->post('/card/dish/update-order', [CardController::class, 'updateDishOrder']);
 
 // Route de test
 $router->get('/test', function() {

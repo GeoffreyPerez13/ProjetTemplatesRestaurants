@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/css/shared/container-variables.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/css/admin/dashboard.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/css/shared/toast.css">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/css/admin/form-validation.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .card-container {
@@ -25,6 +26,47 @@
         @media (max-width: 480px) {
             .card-container {
                 padding: var(--container-padding-mobile);
+            }
+        }
+
+        /* Style pour input file dans modal bulk */
+        .bulk-image {
+            height: 38px;
+            line-height: 38px;
+        }
+        
+        .bulk-image::file-selector-button {
+            height: 34px;
+            padding: 6px 12px;
+            margin-right: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f9fafb;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .bulk-image::file-selector-button:hover {
+            background: #f3f4f6;
+            border-color: #ccc;
+        }
+
+        /* Responsive pour modal création multiple catégories */
+        @media (max-width: 768px) {
+            .bulk-category-row {
+                grid-template-columns: 1fr !important;
+                gap: 8px !important;
+            }
+            
+            .bulk-category-row > div:last-child {
+                padding-top: 0 !important;
+                display: flex;
+                justify-content: flex-end;
+            }
+            
+            #bulk-category-modal .modal-content {
+                max-width: 95% !important;
+                margin: 20px auto;
             }
         }
 
@@ -133,14 +175,17 @@
             width: 36px;
             height: 36px;
             border: none;
+            background: #f3f4f6;
+            color: #667eea;
             border-radius: 6px;
-            background: white;
-            color: #666;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
+            pointer-events: auto;
+            position: relative;
+            z-index: 10;
         }
 
         .icon-btn:hover {
@@ -377,18 +422,6 @@
             border-top: 3px solid #667eea;
         }
 
-        .dish-item[draggable="true"] {
-            cursor: move;
-        }
-
-        .dish-item.dragging {
-            opacity: 0.5;
-            border: 2px dashed #667eea;
-        }
-
-        .dish-item.drag-over {
-            border-top: 3px solid #667eea;
-        }
 
         /* Barre de recherche */
         .search-bar {
@@ -649,6 +682,9 @@
                     <button class="btn btn-primary" onclick="openCategoryModal()">
                         <i class="fas fa-plus"></i> Nouvelle catégorie
                     </button>
+                    <button class="btn btn-secondary" onclick="openBulkCategoryModal()" style="margin-left: 8px;" title="Créer plusieurs catégories">
+                        <i class="fas fa-layer-group"></i>
+                    </button>
                 </div>
             </div>
 
@@ -687,6 +723,18 @@
                                     </div>
                                 </div>
                                 <div class="category-actions">
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-right: 12px;">
+                                        <label style="font-size: 13px; color: #666;">Ordre:</label>
+                                        <input type="number" 
+                                               class="order-input category-order-input" 
+                                               value="<?= $category['display_order'] ?>" 
+                                               min="1" 
+                                               max="<?= count($categories) ?>"
+                                               data-category-id="<?= $category['id'] ?>"
+                                               onchange="updateCategoryOrder(<?= $category['id'] ?>, this.value)"
+                                               onclick="event.stopPropagation()"
+                                               style="width: 60px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; text-align: center;">
+                                    </div>
                                     <button class="icon-btn" onclick="openDishModal(<?= $category['id'] ?>)" title="Ajouter un plat">
                                         <i class="fas fa-plus"></i>
                                     </button>
@@ -720,8 +768,8 @@
                 <input type="hidden" name="id" id="category-id">
                 
                 <div class="form-group">
-                    <label for="category-name">Nom de la catégorie *</label>
-                    <input type="text" id="category-name" name="name" required>
+                    <label for="category-name">Nom de la catégorie <span class="required-asterisk" style="color: #ef4444; font-weight: bold;">*</span></label>
+                    <input type="text" id="category-name" name="name">
                 </div>
 
                 <div class="form-group">
@@ -741,6 +789,28 @@
         </div>
     </div>
 
+    <!-- Modal Création Multiple de Catégories -->
+    <div id="bulk-category-modal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>Créer plusieurs catégories</h3>
+                <button class="close-modal" onclick="closeBulkCategoryModal()">&times;</button>
+            </div>
+            <div style="padding: 20px;">
+                <div id="bulk-categories-container">
+                    <!-- Les lignes de catégories seront ajoutées ici dynamiquement -->
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addBulkCategoryRow()" style="margin-top: 12px;">
+                    <i class="fas fa-plus"></i> Ajouter une catégorie
+                </button>
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeBulkCategoryModal()">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="saveBulkCategories()">Enregistrer toutes les catégories</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Plat -->
     <div id="dish-modal" class="modal">
         <div class="modal-content">
@@ -754,8 +824,8 @@
                 <input type="hidden" name="category_id" id="dish-category-id">
                 
                 <div class="form-group">
-                    <label for="dish-name">Nom du plat *</label>
-                    <input type="text" id="dish-name" name="name" required>
+                    <label for="dish-name">Nom du plat <span class="required-asterisk" style="color: #ef4444; font-weight: bold;">*</span></label>
+                    <input type="text" id="dish-name" name="name">
                 </div>
 
                 <div class="form-group">
@@ -764,7 +834,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="dish-price">Prix (€)</label>
+                    <label for="dish-price">Prix (€) <span class="required-asterisk" style="color: #ef4444; font-weight: bold;">*</span></label>
                     <input type="number" id="dish-price" name="price" step="0.01" min="0">
                 </div>
 
@@ -806,6 +876,7 @@
     <?php require APP_PATH . '/Views/partials/footer.php'; ?>
     
     <script src="<?= BASE_URL ?>/public/assets/js/app.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/js/admin/form-validation.js"></script>
     <script>
         // Données des catégories
         const categories = <?= json_encode($categories) ?>;
@@ -821,13 +892,24 @@
                 loadDishes(category.id);
             });
             initCategoryDragDrop();
+            
+            // Afficher le message de succès stocké après rechargement
+            const successMessage = sessionStorage.getItem('successMessage');
+            if (successMessage) {
+                App.showToast(successMessage, 'success');
+                sessionStorage.removeItem('successMessage');
+            }
+            
+            // Stocker l'ordre original dans les inputs pour validation
+            document.querySelectorAll('input[data-category-id]').forEach(input => {
+                input.setAttribute('data-original-order', input.value);
+            });
         });
 
         // Mettre à jour les statistiques
         function updateStats() {
             let totalDishes = 0;
             let totalImages = 0;
-            const allergensUsed = new Set();
 
             document.querySelectorAll('.dish-item').forEach(dish => {
                 totalDishes++;
@@ -841,11 +923,6 @@
             // Compter les images de catégories
             document.querySelectorAll('.category-item img').forEach(() => {
                 totalImages++;
-            });
-
-            // Compter les allergènes utilisés (à partir des données)
-            categories.forEach(category => {
-                loadDishes(category.id);
             });
 
             document.getElementById('stat-dishes').textContent = totalDishes;
@@ -870,6 +947,8 @@
                     document.querySelectorAll('.category-item').forEach(cat => {
                         cat.classList.remove('drag-over');
                     });
+                    // Afficher le message de succès une seule fois après le drag
+                    showCategoryOrderSuccess();
                 });
 
                 item.addEventListener('dragover', function(e) {
@@ -914,25 +993,168 @@
             });
         }
 
-        // Sauvegarder l'ordre des catégories
-        function saveCategoryOrder() {
-            const categoryItems = document.querySelectorAll('.category-item');
-            const order = Array.from(categoryItems).map(item => item.dataset.id);
+        // Timer pour le debounce de la sauvegarde
+        let saveCategoryOrderTimer = null;
+        let isSavingCategoryOrder = false;
+        let categoryOrderChanged = false;
 
+        // Sauvegarder l'ordre des catégories (avec debounce, sans message)
+        function saveCategoryOrder() {
+            categoryOrderChanged = true;
+            
+            // Annuler le timer précédent s'il existe
+            if (saveCategoryOrderTimer) {
+                clearTimeout(saveCategoryOrderTimer);
+            }
+
+            // Attendre 200ms avant de sauvegarder (pour grouper les changements multiples)
+            saveCategoryOrderTimer = setTimeout(() => {
+                // Si une sauvegarde est déjà en cours, ne rien faire
+                if (isSavingCategoryOrder) return;
+
+                isSavingCategoryOrder = true;
+
+                const categoryItems = document.querySelectorAll('.category-item');
+                const order = Array.from(categoryItems).map(item => item.dataset.id);
+                
+                // Mettre à jour les inputs d'ordre après drag&drop
+                categoryItems.forEach((item, index) => {
+                    const orderInput = item.querySelector('input[data-category-id]');
+                    if (orderInput) {
+                        orderInput.value = index + 1;
+                    }
+                });
+
+                const formData = new FormData();
+                formData.append('csrf_token', csrfToken);
+                formData.append('order', JSON.stringify(order));
+
+                fetch(baseUrl + '/card/category/reorder', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    isSavingCategoryOrder = false;
+                    if (!data.success) {
+                        App.showToast('Erreur lors de la mise à jour de l\'ordre', 'error');
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    App.showToast('Erreur lors de la mise à jour de l\'ordre', 'error');
+                    isSavingCategoryOrder = false;
+                    categoryOrderChanged = false;
+                    location.reload();
+                });
+            }, 200);
+        }
+
+        // Afficher le message de succès après le drag (une seule fois)
+        function showCategoryOrderSuccess() {
+            if (categoryOrderChanged) {
+                // Attendre que la sauvegarde soit terminée
+                const checkInterval = setInterval(() => {
+                    if (!isSavingCategoryOrder) {
+                        clearInterval(checkInterval);
+                        App.showToast('Ordre des catégories mis à jour', 'success');
+                        categoryOrderChanged = false;
+                    }
+                }, 50);
+            }
+        }
+
+        // Mettre à jour l'ordre d'une catégorie manuellement
+        function updateCategoryOrder(categoryId, newOrder) {
+            // Validation : empêcher ordre 0
+            if (parseInt(newOrder) < 1) {
+                App.showToast('L\'ordre doit être supérieur ou égal à 1', 'error');
+                // Réinitialiser la valeur
+                const input = document.querySelector(`input[data-category-id="${categoryId}"]`);
+                if (input) input.value = input.getAttribute('data-original-order') || 1;
+                return;
+            }
+            
             const formData = new FormData();
             formData.append('csrf_token', csrfToken);
-            formData.append('order', JSON.stringify(order));
+            formData.append('category_id', categoryId);
+            formData.append('new_order', newOrder);
+
+            fetch(baseUrl + '/card/category/update-order', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Stocker le message pour l'afficher après rechargement
+                    sessionStorage.setItem('successMessage', 'Ordre de la catégorie mis à jour');
+                    location.reload();
+                } else {
+                    App.showToast(data.message || 'Erreur lors de la mise à jour', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                App.showToast('Erreur lors de la mise à jour de l\'ordre', 'error');
+            });
+        }
+
+        // Réorganiser les catégories dans le DOM selon leur ordre
+        function reorganizeCategoriesDOM() {
+            const categoriesList = document.querySelector('.categories-list');
+            if (!categoriesList) return;
+            
+            const categoryItems = Array.from(categoriesList.querySelectorAll('.category-item'));
+            
+            // Trier les catégories par leur ordre affiché dans l'input
+            categoryItems.sort((a, b) => {
+                const inputA = a.querySelector('input[data-category-id]');
+                const inputB = b.querySelector('input[data-category-id]');
+                if (!inputA || !inputB) return 0;
+                
+                const orderA = parseInt(inputA.value) || 0;
+                const orderB = parseInt(inputB.value) || 0;
+                return orderA - orderB;
+            });
+            
+            // Réinsérer dans le bon ordre avec animation
+            categoryItems.forEach((item, index) => {
+                categoriesList.appendChild(item);
+                
+                // Mettre à jour visuellement l'ordre si nécessaire
+                const orderInput = item.querySelector('input[data-category-id]');
+                if (orderInput) {
+                    orderInput.value = index + 1;
+                }
+            });
+        }
+
+        // Mettre à jour l'ordre d'un plat manuellement
+        function updateDishOrder(dishId, categoryId, newOrder) {
+            const formData = new FormData();
+            formData.append('csrf_token', csrfToken);
+            formData.append('dish_id', dishId);
+            formData.append('category_id', categoryId);
+            formData.append('new_order', newOrder);
 
             App.ajaxRequest({
-                url: baseUrl + '/card/category/reorder',
+                url: baseUrl + '/card/dish/update-order',
                 method: 'POST',
                 data: formData,
                 onSuccess: (data) => {
-                    App.showToast('Ordre des catégories mis à jour', 'success');
+                    App.showToast('Ordre du plat mis à jour', 'success');
+                    loadDishes(categoryId); // Recharger les plats de cette catégorie
                 },
                 onError: (error) => {
                     App.showToast('Erreur lors de la mise à jour de l\'ordre', 'error');
-                    location.reload(); // Recharger en cas d'erreur
                 }
             });
         }
@@ -1004,118 +1226,89 @@
                 return;
             }
 
+            const totalDishes = dishes.length;
+            
+            // Ajouter le CSS pour le tooltip allergènes si pas déjà présent
+            if (!document.getElementById('allergenes-tooltip-style')) {
+                const style = document.createElement('style');
+                style.id = 'allergenes-tooltip-style';
+                style.textContent = `
+                    .allergenes-icon:hover .allergenes-tooltip {
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
             container.innerHTML = dishes.map(dish => `
-                <div class="dish-item" data-id="${dish.id}" data-category-id="${categoryId}" draggable="true">
+                <div class="dish-item" data-id="${dish.id}" data-category-id="${categoryId}">
                     <div class="dish-info" style="display: flex; align-items: center; gap: 12px;">
-                        ${dish.image ? `<img src="${baseUrl}/uploads/plats/${dish.image}" alt="${dish.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; cursor: pointer; transition: all 0.3s;" onclick="event.stopPropagation(); openLightbox('${baseUrl}/uploads/plats/${dish.image}')" onmousedown="event.stopPropagation()" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">` : ''}
+                        ${dish.image ? `<img src="${baseUrl}/uploads/plats/${dish.image}" alt="${dish.name}" draggable="false" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; cursor: pointer; transition: all 0.3s;" onclick="event.stopPropagation(); openLightbox('${baseUrl}/uploads/plats/${dish.image}')" onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none'">` : ''}
                         <div style="flex: 1;">
                             <span class="dish-name">${dish.name}</span>
                             ${dish.price ? `<span class="dish-price">${parseFloat(dish.price).toFixed(2)} €</span>` : ''}
+                            ${dish.allergenes && dish.allergenes.length > 0 ? `
+                                <span class="allergenes-icon" style="position: relative; display: inline-block; margin-left: 8px;">
+                                    <i class="fas fa-exclamation-triangle" style="color: #f59e0b; font-size: 14px; cursor: help;"></i>
+                                    <span class="allergenes-tooltip" style="
+                                        visibility: hidden;
+                                        opacity: 0;
+                                        position: absolute;
+                                        bottom: 125%;
+                                        left: 50%;
+                                        transform: translateX(-50%);
+                                        background: #1f2937;
+                                        color: white;
+                                        padding: 8px 12px;
+                                        border-radius: 6px;
+                                        font-size: 12px;
+                                        white-space: nowrap;
+                                        z-index: 100;
+                                        transition: opacity 0.3s, visibility 0.3s;
+                                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                                    ">
+                                        <strong>Allergènes:</strong><br>
+                                        ${dish.allergenes.map(a => a.name).join(', ')}
+                                        <span style="
+                                            position: absolute;
+                                            top: 100%;
+                                            left: 50%;
+                                            transform: translateX(-50%);
+                                            border: 6px solid transparent;
+                                            border-top-color: #1f2937;
+                                        "></span>
+                                    </span>
+                                </span>
+                            ` : ''}
                         </div>
                     </div>
-                    <div style="display: flex; gap: 8px;" onmousedown="event.stopPropagation()">
-                        <button class="icon-btn" onclick="editDish(${dish.id})" title="Modifier">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label style="font-size: 13px; color: #666;">Ordre:</label>
+                            <input type="number" 
+                                   class="order-input" 
+                                   value="${dish.display_order || 1}" 
+                                   min="1" 
+                                   max="${totalDishes}"
+                                   data-dish-id="${dish.id}"
+                                   onchange="updateDishOrder(${dish.id}, ${categoryId}, this.value)"
+                                   style="width: 60px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; text-align: center;">
+                        </div>
+                        <button class="icon-btn" draggable="false" onclick="event.stopPropagation(); editDish(${dish.id})" title="Modifier">
                             <i class="fas fa-edit"></i>
                         </button>
-                        <button class="icon-btn delete" onclick="deleteDish(${dish.id})" title="Supprimer">
+                        <button class="icon-btn delete" draggable="false" onclick="event.stopPropagation(); deleteDish(${dish.id})" title="Supprimer">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
                 </div>
             `).join('');
             
-            // Initialiser le drag & drop pour les plats de cette catégorie
-            initDishDragDrop(categoryId);
-            
             // Mettre à jour les statistiques
             setTimeout(updateStats, 100);
         }
 
-        // Initialiser le drag & drop pour les plats d'une catégorie
-        function initDishDragDrop(categoryId) {
-            const dishItems = document.querySelectorAll(`#dishes-${categoryId} .dish-item[draggable="true"]`);
-            let draggedElement = null;
-
-            dishItems.forEach(item => {
-                item.addEventListener('dragstart', function(e) {
-                    draggedElement = this;
-                    this.classList.add('dragging');
-                    e.dataTransfer.effectAllowed = 'move';
-                    e.dataTransfer.setData('text/html', this.innerHTML);
-                });
-
-                item.addEventListener('dragend', function(e) {
-                    this.classList.remove('dragging');
-                    document.querySelectorAll('.dish-item').forEach(dish => {
-                        dish.classList.remove('drag-over');
-                    });
-                });
-
-                item.addEventListener('dragover', function(e) {
-                    if (e.preventDefault) {
-                        e.preventDefault();
-                    }
-                    e.dataTransfer.dropEffect = 'move';
-                    
-                    if (this !== draggedElement) {
-                        this.classList.add('drag-over');
-                    }
-                    return false;
-                });
-
-                item.addEventListener('dragleave', function(e) {
-                    this.classList.remove('drag-over');
-                });
-
-                item.addEventListener('drop', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    if (draggedElement !== this && draggedElement.dataset.categoryId === this.dataset.categoryId) {
-                        // Réorganiser les éléments
-                        const allDishes = Array.from(document.querySelectorAll(`#dishes-${categoryId} .dish-item`));
-                        const draggedIndex = allDishes.indexOf(draggedElement);
-                        const targetIndex = allDishes.indexOf(this);
-
-                        if (draggedIndex < targetIndex) {
-                            this.parentNode.insertBefore(draggedElement, this.nextSibling);
-                        } else {
-                            this.parentNode.insertBefore(draggedElement, this);
-                        }
-
-                        // Sauvegarder le nouvel ordre
-                        saveDishOrder(categoryId);
-                    }
-
-                    this.classList.remove('drag-over');
-                    return false;
-                });
-            });
-        }
-
-        // Sauvegarder l'ordre des plats
-        function saveDishOrder(categoryId) {
-            const dishItems = document.querySelectorAll(`#dishes-${categoryId} .dish-item`);
-            const order = Array.from(dishItems).map(item => item.dataset.id);
-
-            const formData = new FormData();
-            formData.append('csrf_token', csrfToken);
-            formData.append('order', JSON.stringify(order));
-            formData.append('category_id', categoryId);
-
-            App.ajaxRequest({
-                url: baseUrl + '/card/dish/reorder',
-                method: 'POST',
-                data: formData,
-                onSuccess: (data) => {
-                    App.showToast('Ordre des plats mis à jour', 'success');
-                },
-                onError: (error) => {
-                    App.showToast('Erreur lors de la mise à jour de l\'ordre', 'error');
-                    loadDishes(categoryId); // Recharger en cas d'erreur
-                }
-            });
-        }
 
         // Filtrer les catégories et plats
         function filterCards() {
@@ -1214,6 +1407,12 @@
             
             form.reset();
             
+            // Réinitialiser tous les styles de validation
+            form.querySelectorAll('input, textarea').forEach(field => {
+                field.removeAttribute('style');
+                field.classList.remove('field-valid', 'field-invalid');
+            });
+            
             if (categoryId) {
                 const category = categories.find(c => c.id == categoryId);
                 title.textContent = 'Modifier la catégorie';
@@ -1243,13 +1442,26 @@
             formData.append('csrf_token', csrfToken);
             formData.append('id', id);
             
-            App.ajaxRequest({
-                url: baseUrl + '/card/category/delete',
+            fetch(baseUrl + '/card/category/delete', {
                 method: 'POST',
-                data: formData,
-                onSuccess: () => {
-                    location.reload();
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Stocker le message pour l'afficher après rechargement
+                    sessionStorage.setItem('successMessage', 'Catégorie supprimée avec succès');
+                    location.reload();
+                } else {
+                    App.showToast(data.message || 'Erreur lors de la suppression', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                App.showToast('Erreur lors de la suppression', 'error');
             });
         }
 
@@ -1261,6 +1473,12 @@
             
             form.reset();
             document.getElementById('dish-category-id').value = categoryId;
+            
+            // Réinitialiser tous les styles de validation
+            form.querySelectorAll('input, textarea').forEach(field => {
+                field.removeAttribute('style');
+                field.classList.remove('field-valid', 'field-invalid');
+            });
             
             // Décocher tous les allergènes
             document.querySelectorAll('input[name="allergenes[]"]').forEach(cb => cb.checked = false);
@@ -1280,6 +1498,29 @@
 
         function closeDishModal() {
             document.getElementById('dish-modal').classList.remove('show');
+        }
+        
+        // Mettre à jour le compteur de plats d'une catégorie
+        function updateDishCount(categoryId) {
+            fetch(baseUrl + '/card/dishes/' + categoryId, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.data.dishes) {
+                    const count = data.data.dishes.length;
+                    const categoryItem = document.querySelector(`.category-item[data-id="${categoryId}"]`);
+                    if (categoryItem) {
+                        const countSpan = categoryItem.querySelector('.category-name').nextElementSibling;
+                        if (countSpan) {
+                            countSpan.textContent = `(${count} plat${count > 1 ? 's' : ''})`;
+                        }
+                    }
+                }
+            })
+            .catch(error => console.error('Erreur mise à jour compteur:', error));
         }
 
         function editDish(dishId) {
@@ -1340,17 +1581,38 @@
         function deleteDish(dishId) {
             if (!confirm('Supprimer ce plat ?')) return;
             
+            // Récupérer la catégorie du plat avant suppression
+            const dishElement = document.querySelector(`.dish-item[data-id="${dishId}"]`);
+            const categoryId = dishElement ? dishElement.dataset.categoryId : null;
+            
             const formData = new FormData();
             formData.append('csrf_token', csrfToken);
             formData.append('id', dishId);
             
-            App.ajaxRequest({
-                url: baseUrl + '/card/dish/delete',
+            fetch(baseUrl + '/card/dish/delete', {
                 method: 'POST',
-                data: formData,
-                onSuccess: () => {
-                    location.reload();
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    App.showToast('Plat supprimé avec succès', 'success');
+                    
+                    // Recharger les plats de la catégorie (garde l'accordéon ouvert)
+                    if (categoryId) {
+                        loadDishes(categoryId);
+                        updateDishCount(categoryId);
+                    }
+                } else {
+                    App.showToast(data.message || 'Erreur lors de la suppression', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                App.showToast('Erreur lors de la suppression', 'error');
             });
         }
 
@@ -1404,23 +1666,298 @@
         // Soumettre les formulaires
         document.getElementById('category-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            App.ajaxForm(e.target, {
-                onSuccess: () => {
-                    closeCategoryModal();
-                    setTimeout(() => location.reload(), 500);
+            console.log('Formulaire catégorie soumis');
+            
+            // Validation manuelle
+            const nameInput = document.getElementById('category-name');
+            console.log('Valeur du champ:', nameInput.value);
+            
+            if (!nameInput.value.trim()) {
+                console.log('Champ vide - application style rouge');
+                // Appliquer les styles de validation invalide
+                nameInput.setAttribute('style', 'border: 2px solid #ef4444 !important; background-color: #fef2f2 !important;');
+                nameInput.classList.add('field-invalid');
+                nameInput.classList.remove('field-valid');
+                App.showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                nameInput.focus();
+                return;
+            } else {
+                console.log('Champ valide - application style vert');
+                // Appliquer les styles de validation valide
+                nameInput.setAttribute('style', 'border: 2px solid #10b981 !important; background-color: #f0fdf4 !important;');
+                nameInput.classList.add('field-valid');
+                nameInput.classList.remove('field-invalid');
+            }
+            
+            const formData = new FormData(e.target);
+            const categoryId = document.getElementById('category-id').value;
+            const url = categoryId ? baseUrl + '/card/category/update' : baseUrl + '/card/category/create';
+            
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const message = categoryId ? 'Catégorie modifiée avec succès' : 'Catégorie créée avec succès';
+                    // Stocker le message pour l'afficher après rechargement
+                    sessionStorage.setItem('successMessage', message);
+                    closeCategoryModal();
+                    location.reload();
+                } else {
+                    App.showToast(data.message || 'Erreur lors de l\'enregistrement', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                App.showToast('Erreur lors de l\'enregistrement', 'error');
             });
         });
 
         document.getElementById('dish-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            App.ajaxForm(e.target, {
-                onSuccess: () => {
-                    closeDishModal();
-                    setTimeout(() => location.reload(), 500);
+            console.log('Formulaire plat soumis');
+            
+            // Validation manuelle
+            const nameInput = document.getElementById('dish-name');
+            const priceInput = document.getElementById('dish-price');
+            let isValid = true;
+            
+            console.log('Valeur du champ nom:', nameInput.value);
+            console.log('Valeur du champ prix:', priceInput.value);
+            
+            // Valider le nom
+            if (!nameInput.value.trim()) {
+                console.log('Champ nom vide - application style rouge');
+                nameInput.setAttribute('style', 'border: 2px solid #ef4444 !important; background-color: #fef2f2 !important;');
+                nameInput.classList.add('field-invalid');
+                nameInput.classList.remove('field-valid');
+                isValid = false;
+            } else {
+                console.log('Champ nom valide - application style vert');
+                nameInput.setAttribute('style', 'border: 2px solid #10b981 !important; background-color: #f0fdf4 !important;');
+                nameInput.classList.add('field-valid');
+                nameInput.classList.remove('field-invalid');
+            }
+            
+            // Valider le prix
+            if (!priceInput.value || parseFloat(priceInput.value) < 0) {
+                console.log('Champ prix vide ou invalide - application style rouge');
+                priceInput.setAttribute('style', 'border: 2px solid #ef4444 !important; background-color: #fef2f2 !important;');
+                priceInput.classList.add('field-invalid');
+                priceInput.classList.remove('field-valid');
+                isValid = false;
+            } else {
+                console.log('Champ prix valide - application style vert');
+                priceInput.setAttribute('style', 'border: 2px solid #10b981 !important; background-color: #f0fdf4 !important;');
+                priceInput.classList.add('field-valid');
+                priceInput.classList.remove('field-invalid');
+            }
+            
+            if (!isValid) {
+                App.showToast('Veuillez remplir tous les champs obligatoires', 'error');
+                return;
+            }
+            
+            const formData = new FormData(e.target);
+            const dishId = document.getElementById('dish-id').value;
+            const categoryId = document.getElementById('dish-category-id').value;
+            const url = dishId ? baseUrl + '/card/dish/update' : baseUrl + '/card/dish/create';
+            
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const message = dishId ? 'Plat modifié avec succès' : 'Plat créé avec succès';
+                    App.showToast(message, 'success');
+                    closeDishModal();
+                    
+                    // Recharger les plats et mettre à jour le compteur
+                    loadDishes(categoryId);
+                    updateDishCount(categoryId);
+                    
+                    // Ouvrir l'accordéon de la catégorie
+                    const dishesContainer = document.getElementById('dishes-' + categoryId);
+                    const toggleIcon = document.getElementById('toggle-' + categoryId);
+                    if (dishesContainer && toggleIcon) {
+                        dishesContainer.style.display = 'grid';
+                        toggleIcon.style.transform = 'rotate(90deg)';
+                    }
+                } else {
+                    App.showToast(data.message || 'Erreur lors de l\'enregistrement', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                App.showToast('Erreur lors de l\'enregistrement', 'error');
             });
         });
+
+        // ========== CRÉATION MULTIPLE DE CATÉGORIES ==========
+        
+        let bulkCategoryCounter = 0;
+        
+        function openBulkCategoryModal() {
+            const modal = document.getElementById('bulk-category-modal');
+            const container = document.getElementById('bulk-categories-container');
+            
+            // Réinitialiser
+            container.innerHTML = '';
+            bulkCategoryCounter = 0;
+            
+            // Ajouter 1 ligne par défaut
+            addBulkCategoryRow();
+            
+            modal.classList.add('show');
+        }
+        
+        function closeBulkCategoryModal() {
+            document.getElementById('bulk-category-modal').classList.remove('show');
+        }
+        
+        function addBulkCategoryRow() {
+            const container = document.getElementById('bulk-categories-container');
+            const currentCategories = document.querySelectorAll('.category-item').length;
+            const nextOrder = currentCategories + bulkCategoryCounter + 1;
+            
+            const row = document.createElement('div');
+            row.className = 'bulk-category-row';
+            row.dataset.index = bulkCategoryCounter;
+            row.style.cssText = 'display: grid; grid-template-columns: 80px 1fr 200px 40px; gap: 12px; align-items: center; padding: 12px; background: #f9fafb; border-radius: 8px; margin-bottom: 12px;';
+            
+            row.innerHTML = `
+                <div>
+                    <label style="font-size: 13px; color: #666; display: block; margin-bottom: 4px;">Ordre</label>
+                    <input type="number" 
+                           class="bulk-order" 
+                           value="${nextOrder}" 
+                           min="1" 
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="font-size: 13px; color: #666; display: block; margin-bottom: 4px;">Nom <span style="color: #ef4444;">*</span></label>
+                    <input type="text" 
+                           class="bulk-name" 
+                           placeholder="Ex: Entrées" 
+                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="font-size: 13px; color: #666; display: block; margin-bottom: 4px;">Image</label>
+                    <input type="file" 
+                           class="bulk-image" 
+                           accept="image/jpeg,image/jpg,image/png,image/webp"
+                           style="font-size: 11px; max-width: 100%; padding: 6px;">
+                </div>
+                <div style="padding-top: 20px;">
+                    <button type="button" 
+                            class="icon-btn delete" 
+                            onclick="removeBulkCategoryRow(${bulkCategoryCounter})"
+                            title="Supprimer">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            container.appendChild(row);
+            bulkCategoryCounter++;
+        }
+        
+        function removeBulkCategoryRow(index) {
+            const row = document.querySelector(`.bulk-category-row[data-index="${index}"]`);
+            if (row) {
+                row.remove();
+            }
+        }
+        
+        async function saveBulkCategories() {
+            const rows = document.querySelectorAll('.bulk-category-row');
+            
+            if (rows.length === 0) {
+                App.showToast('Veuillez ajouter au moins une catégorie', 'error');
+                return;
+            }
+            
+            const categories = [];
+            let hasError = false;
+            
+            rows.forEach(row => {
+                const name = row.querySelector('.bulk-name').value.trim();
+                const order = parseInt(row.querySelector('.bulk-order').value);
+                const imageFile = row.querySelector('.bulk-image').files[0];
+                
+                if (!name) {
+                    hasError = true;
+                    row.querySelector('.bulk-name').style.borderColor = '#ef4444';
+                    return;
+                } else {
+                    row.querySelector('.bulk-name').style.borderColor = '#10b981';
+                }
+                
+                categories.push({
+                    name: name,
+                    order: order,
+                    imageFile: imageFile
+                });
+            });
+            
+            if (hasError) {
+                App.showToast('Veuillez remplir tous les noms de catégories', 'error');
+                return;
+            }
+            
+            // Créer les catégories une par une
+            let successCount = 0;
+            
+            for (const category of categories) {
+                const formData = new FormData();
+                formData.append('csrf_token', csrfToken);
+                formData.append('name', category.name);
+                formData.append('display_order', category.order);
+                
+                if (category.imageFile) {
+                    formData.append('image', category.imageFile);
+                }
+                
+                try {
+                    const response = await fetch(baseUrl + '/card/category/create', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        successCount++;
+                    } else {
+                        console.error('Erreur création catégorie:', category.name, data.message);
+                    }
+                } catch (error) {
+                    console.error('Erreur:', error);
+                }
+            }
+            
+            closeBulkCategoryModal();
+            
+            if (successCount > 0) {
+                sessionStorage.setItem('successMessage', `${successCount} catégorie${successCount > 1 ? 's créées' : ' créée'} avec succès`);
+                location.reload();
+            } else {
+                App.showToast('Erreur lors de la création des catégories', 'error');
+            }
+        }
     </script>
 </body>
 </html>

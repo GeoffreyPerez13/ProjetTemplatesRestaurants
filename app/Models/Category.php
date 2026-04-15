@@ -146,6 +146,91 @@ class Category
     }
 
     /**
+     * Mettre à jour l'ordre d'une seule catégorie
+     */
+    public static function updateSingleOrder(int $categoryId, int $newOrder, int $adminId): bool
+    {
+        $db = Database::getInstance();
+        
+        try {
+            $db->beginTransaction();
+            
+            // Compter le nombre total de catégories
+            $sql = "SELECT COUNT(*) FROM categories WHERE admin_id = :admin_id";
+            $stmt = $db->prepare($sql);
+            $stmt->execute(['admin_id' => $adminId]);
+            $totalCategories = (int) $stmt->fetchColumn();
+            
+            // Valider que newOrder est dans les limites
+            if ($newOrder < 1 || $newOrder > $totalCategories) {
+                $db->rollBack();
+                return false;
+            }
+            
+            // Récupérer l'ordre actuel de la catégorie
+            $sql = "SELECT display_order FROM categories WHERE id = :id AND admin_id = :admin_id";
+            $stmt = $db->prepare($sql);
+            $stmt->execute(['id' => $categoryId, 'admin_id' => $adminId]);
+            $currentOrder = (int) $stmt->fetchColumn();
+            
+            if ($currentOrder === $newOrder) {
+                $db->commit();
+                return true;
+            }
+            
+            // Réorganiser toutes les catégories
+            // 1. Mettre la catégorie cible à un ordre temporaire négatif
+            $sql = "UPDATE categories SET display_order = -1 WHERE id = :id AND admin_id = :admin_id";
+            $stmt = $db->prepare($sql);
+            $stmt->execute(['id' => $categoryId, 'admin_id' => $adminId]);
+            
+            // 2. Décaler les autres catégories
+            if ($newOrder < $currentOrder) {
+                // Déplacer vers le haut : décaler les catégories entre newOrder et currentOrder vers le bas
+                $sql = "UPDATE categories 
+                        SET display_order = display_order + 1 
+                        WHERE admin_id = :admin_id 
+                        AND display_order >= :new_order 
+                        AND display_order < :current_order";
+                $stmt = $db->prepare($sql);
+                $stmt->execute([
+                    'admin_id' => $adminId,
+                    'new_order' => $newOrder,
+                    'current_order' => $currentOrder
+                ]);
+            } else {
+                // Déplacer vers le bas : décaler les catégories entre currentOrder et newOrder vers le haut
+                $sql = "UPDATE categories 
+                        SET display_order = display_order - 1 
+                        WHERE admin_id = :admin_id 
+                        AND display_order > :current_order 
+                        AND display_order <= :new_order";
+                $stmt = $db->prepare($sql);
+                $stmt->execute([
+                    'admin_id' => $adminId,
+                    'current_order' => $currentOrder,
+                    'new_order' => $newOrder
+                ]);
+            }
+            
+            // 3. Mettre la catégorie cible au nouvel ordre
+            $sql = "UPDATE categories SET display_order = :order WHERE id = :id AND admin_id = :admin_id";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([
+                'order' => $newOrder,
+                'id' => $categoryId,
+                'admin_id' => $adminId
+            ]);
+            
+            $db->commit();
+            return true;
+        } catch (\Exception $e) {
+            $db->rollBack();
+            return false;
+        }
+    }
+
+    /**
      * Compter les catégories d'un admin
      */
     public static function countByAdmin(int $adminId): int

@@ -1,0 +1,83 @@
+/**
+ * Styles pour la validation visuelle des formulaires (rouge/vert)
+ * Valable pour toute l'application MenuMiam
+ */
+
+/* Astérisque rouge pour champs obligatoires (ajouté par JavaScript) */
+.required-asterisk {
+    color: #ef4444;
+    font-weight: bold;
+    margin-left: 2px;
+}
+
+/* Champ valide (vert) */
+.field-valid {
+    border-color: #10b981 !important;
+    background-color: #f0fdf4 !important;
+}
+
+.field-valid:focus {
+    outline: 2px solid #10b981 !important;
+    outline-offset: 2px;
+}
+
+/* Champ invalide (rouge) */
+.field-invalid {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2 !important;
+}
+
+.field-invalid:focus {
+    outline: 2px solid #ef4444 !important;
+    outline-offset: 2px;
+}
+
+/* Message d'erreur */
+.field-error-message {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    animation: slideDown 0.2s ease-out;
+}
+
+.field-error-message::before {
+    content: "⚠";
+    font-size: 14px;
+}
+
+/* Animation d'apparition */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Dark mode support */
+body.dark-mode .field-valid {
+    background-color: #064e3b !important;
+    border-color: #34d399 !important;
+}
+
+body.dark-mode .field-invalid {
+    background-color: #450a0a !important;
+    border-color: #fca5a5 !important;
+}
+
+body.dark-mode .field-error-message {
+    color: #fca5a5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .field-error-message {
+        font-size: 11px;
+    }
+}

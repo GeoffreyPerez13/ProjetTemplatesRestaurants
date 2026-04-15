@@ -188,6 +188,91 @@ class Dish
     }
 
     /**
+     * Mettre à jour l'ordre d'un seul plat
+     */
+    public static function updateSingleOrder(int $dishId, int $newOrder, int $categoryId): bool
+    {
+        $db = Database::getInstance();
+        
+        try {
+            $db->beginTransaction();
+            
+            // Compter le nombre total de plats dans cette catégorie
+            $sql = "SELECT COUNT(*) FROM dishes WHERE category_id = :category_id";
+            $stmt = $db->prepare($sql);
+            $stmt->execute(['category_id' => $categoryId]);
+            $totalDishes = (int) $stmt->fetchColumn();
+            
+            // Valider que newOrder est dans les limites
+            if ($newOrder < 1 || $newOrder > $totalDishes) {
+                $db->rollBack();
+                return false;
+            }
+            
+            // Récupérer l'ordre actuel du plat
+            $sql = "SELECT display_order FROM dishes WHERE id = :id AND category_id = :category_id";
+            $stmt = $db->prepare($sql);
+            $stmt->execute(['id' => $dishId, 'category_id' => $categoryId]);
+            $currentOrder = (int) $stmt->fetchColumn();
+            
+            if ($currentOrder === $newOrder) {
+                $db->commit();
+                return true;
+            }
+            
+            // Réorganiser tous les plats
+            // 1. Mettre le plat cible à un ordre temporaire négatif
+            $sql = "UPDATE dishes SET display_order = -1 WHERE id = :id AND category_id = :category_id";
+            $stmt = $db->prepare($sql);
+            $stmt->execute(['id' => $dishId, 'category_id' => $categoryId]);
+            
+            // 2. Décaler les autres plats de la même catégorie
+            if ($newOrder < $currentOrder) {
+                // Déplacer vers le haut : décaler les plats entre newOrder et currentOrder vers le bas
+                $sql = "UPDATE dishes 
+                        SET display_order = display_order + 1 
+                        WHERE category_id = :category_id 
+                        AND display_order >= :new_order 
+                        AND display_order < :current_order";
+                $stmt = $db->prepare($sql);
+                $stmt->execute([
+                    'category_id' => $categoryId,
+                    'new_order' => $newOrder,
+                    'current_order' => $currentOrder
+                ]);
+            } else {
+                // Déplacer vers le bas : décaler les plats entre currentOrder et newOrder vers le haut
+                $sql = "UPDATE dishes 
+                        SET display_order = display_order - 1 
+                        WHERE category_id = :category_id 
+                        AND display_order > :current_order 
+                        AND display_order <= :new_order";
+                $stmt = $db->prepare($sql);
+                $stmt->execute([
+                    'category_id' => $categoryId,
+                    'current_order' => $currentOrder,
+                    'new_order' => $newOrder
+                ]);
+            }
+            
+            // 3. Mettre le plat cible au nouvel ordre
+            $sql = "UPDATE dishes SET display_order = :order WHERE id = :id AND category_id = :category_id";
+            $stmt = $db->prepare($sql);
+            $stmt->execute([
+                'order' => $newOrder,
+                'id' => $dishId,
+                'category_id' => $categoryId
+            ]);
+            
+            $db->commit();
+            return true;
+        } catch (\Exception $e) {
+            $db->rollBack();
+            return false;
+        }
+    }
+
+    /**
      * Associer des allergènes à un plat
      */
     public static function syncAllergenes(int $platId, array $allergeneIds): bool

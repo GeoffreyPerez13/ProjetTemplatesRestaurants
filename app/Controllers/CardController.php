@@ -70,7 +70,7 @@ class CardController extends BaseController
             'admin_id' => $adminId,
             'name' => $_POST['name'],
             'image' => $imageName,
-            'display_order' => Category::countByAdmin($adminId)
+            'display_order' => Category::countByAdmin($adminId) + 1
         ]);
 
         $category = Category::findById($categoryId, $adminId);
@@ -172,7 +172,35 @@ class CardController extends BaseController
         $adminId = $this->getAuthId();
 
         if (Category::updateOrder($order, $adminId)) {
-            $this->jsonSuccess('Ordre des catégories mis à jour');
+            $this->jsonSuccess(''); // Message géré côté JavaScript
+        } else {
+            $this->jsonError('Erreur lors de la mise à jour de l\'ordre');
+        }
+    }
+
+    /**
+     * Mettre à jour l'ordre d'une catégorie manuellement
+     */
+    public function updateCategoryOrder(): void
+    {
+        $this->requireAuth();
+
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            $this->jsonError('Token de sécurité invalide');
+        }
+
+        $categoryId = (int) ($_POST['category_id'] ?? 0);
+        $newOrder = (int) ($_POST['new_order'] ?? 0);
+        $adminId = $this->getAuthId();
+
+        // Vérifier que la catégorie appartient à l'admin
+        $category = Category::findById($categoryId, $adminId);
+        if (!$category) {
+            $this->jsonError('Catégorie non trouvée');
+        }
+
+        if (Category::updateSingleOrder($categoryId, $newOrder, $adminId)) {
+            $this->jsonSuccess('Ordre mis à jour');
         } else {
             $this->jsonError('Erreur lors de la mise à jour de l\'ordre');
         }
@@ -193,7 +221,8 @@ class CardController extends BaseController
         $validator->required('category_id', 'La catégorie est requise.')
                   ->required('name', 'Le nom du plat est requis.')
                   ->min('name', 2, 'Le nom doit contenir au moins 2 caractères.')
-                  ->max('name', 200, 'Le nom ne doit pas dépasser 200 caractères.');
+                  ->max('name', 200, 'Le nom ne doit pas dépasser 200 caractères.')
+                  ->required('price', 'Le prix est requis.');
 
         if ($validator->fails()) {
             $errors = $validator->errors();
@@ -225,7 +254,7 @@ class CardController extends BaseController
             'description' => $_POST['description'] ?? null,
             'price' => !empty($_POST['price']) ? (float) $_POST['price'] : null,
             'image' => $imageName,
-            'display_order' => Dish::countByCategory($categoryId)
+            'display_order' => Dish::countByCategory($categoryId) + 1
         ]);
 
         // Associer les allergènes
@@ -349,6 +378,34 @@ class CardController extends BaseController
     }
 
     /**
+     * Mettre à jour l'ordre d'un plat manuellement
+     */
+    public function updateDishOrder(): void
+    {
+        $this->requireAuth();
+
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            $this->jsonError('Token de sécurité invalide');
+        }
+
+        $dishId = (int) ($_POST['dish_id'] ?? 0);
+        $categoryId = (int) ($_POST['category_id'] ?? 0);
+        $newOrder = (int) ($_POST['new_order'] ?? 0);
+
+        // Vérifier que le plat existe
+        $dish = Dish::findById($dishId);
+        if (!$dish) {
+            $this->jsonError('Plat non trouvé');
+        }
+
+        if (Dish::updateSingleOrder($dishId, $newOrder, $categoryId)) {
+            $this->jsonSuccess(''); // Message géré côté JavaScript
+        } else {
+            $this->jsonError('Erreur lors de la mise à jour de l\'ordre');
+        }
+    }
+
+    /**
      * Récupérer les plats d'une catégorie (API)
      */
     public function getDishes(string $id): void
@@ -365,6 +422,28 @@ class CardController extends BaseController
         }
 
         $dishes = Dish::getAllByCategory($categoryId);
+        
+        // Transformer les allergènes en tableau d'objets
+        foreach ($dishes as &$dish) {
+            $allergenes = [];
+            if (!empty($dish['allergene_ids'])) {
+                $ids = explode(',', $dish['allergene_ids']);
+                $noms = explode(',', $dish['allergene_noms']);
+                $icones = explode(',', $dish['allergene_icones']);
+                
+                for ($i = 0; $i < count($ids); $i++) {
+                    $allergenes[] = [
+                        'id' => $ids[$i],
+                        'name' => $noms[$i] ?? '',
+                        'icon' => $icones[$i] ?? ''
+                    ];
+                }
+            }
+            $dish['allergenes'] = $allergenes;
+            
+            // Nettoyer les champs concaténés
+            unset($dish['allergene_ids'], $dish['allergene_noms'], $dish['allergene_icones']);
+        }
 
         $this->jsonSuccess('Plats récupérés', [
             'dishes' => $dishes
