@@ -3,6 +3,9 @@
         <div class="header-left">
             <a href="<?= BASE_URL ?>/public/dashboard" class="logo">MenuMiam</a>
         </div>
+        <button class="hamburger-menu" onclick="toggleMobileMenu()" aria-label="Menu">
+            <i class="fas fa-bars"></i>
+        </button>
         <nav class="header-nav">
             <a href="<?= BASE_URL ?>/public/dashboard">Tableau de bord</a>
             <a href="<?= BASE_URL ?>/public/carte">Ma Carte</a>
@@ -15,3 +18,20 @@
         </div>
     </div>
 </header>
+
+<script>
+function toggleMobileMenu() {
+    const nav = document.querySelector('.header-nav');
+    const hamburger = document.querySelector('.hamburger-menu');
+    nav.classList.toggle('active');
+    hamburger.classList.toggle('active');
+}
+
+// Fermer le menu si on clique sur un lien
+document.querySelectorAll('.header-nav a').forEach(link => {
+    link.addEventListener('click', () => {
+        document.querySelector('.header-nav').classList.remove('active');
+        document.querySelector('.hamburger-menu').classList.remove('active');
+    });
+});
+</script>

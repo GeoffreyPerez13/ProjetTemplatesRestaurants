@@ -81,6 +81,101 @@ body {
     background: #d32f2f;
 }
 
+/* Menu hamburger (caché par défaut) */
+.hamburger-menu {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #667eea;
+    cursor: pointer;
+    padding: 8px;
+    transition: color 0.3s;
+}
+
+.hamburger-menu:hover {
+    color: #5568d3;
+}
+
+.hamburger-menu.active i {
+    transform: rotate(90deg);
+}
+
+/* Responsive mobile */
+@media (max-width: 768px) {
+    .header-container {
+        padding: 12px 16px;
+        position: relative;
+        flex-wrap: nowrap;
+    }
+    
+    .header-left {
+        flex-shrink: 0;
+    }
+    
+    .hamburger-menu {
+        display: block;
+        margin-left: auto;
+        position: relative;
+        z-index: 101;
+        order: 3;
+    }
+    
+    .header-nav {
+        order: 4;
+    }
+    
+    .header-right {
+        order: 5;
+    }
+    
+    .header-nav {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: white;
+        flex-direction: column;
+        gap: 0;
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: max-height 0.3s ease, padding 0.3s ease;
+        z-index: 100;
+    }
+    
+    .header-nav.active {
+        max-height: 300px;
+        padding: 16px 0;
+    }
+    
+    .header-nav a {
+        padding: 12px 24px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .header-nav a:last-child {
+        border-bottom: none;
+    }
+    
+    .header-right {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        padding: 16px;
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        justify-content: space-between;
+        z-index: 99;
+    }
+    
+    .logo {
+        font-size: 20px;
+    }
+}
+
 /* Dashboard */
 .dashboard-container {
     max-width: var(--container-max-width);
@@ -235,24 +330,8 @@ body {
     margin: 4px 0;
 }
 
-/* Responsive */
+/* Responsive dashboard */
 @media (max-width: 768px) {
-    .header-container {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .header-nav {
-        width: 100%;
-        flex-direction: column;
-        gap: 12px;
-    }
-    
-    .header-right {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
     .dashboard-container {
         padding: var(--container-padding-tablet);
     }

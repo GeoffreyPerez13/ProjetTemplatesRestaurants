@@ -1,0 +1,126 @@
+/* MenuMiam - Modals Réutilisables */
+
+/* ========== MODAL OVERLAY ========== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+/* ========== MODAL CONTENT ========== */
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* ========== MODAL HEADER ========== */
+.modal-header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+/* ========== CLOSE BUTTON ========== */
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #666;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    padding: 0;
+    line-height: 1;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.close-modal:hover {
+    color: #333;
+}
+
+/* ========== MODAL ACTIONS ========== */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+/* ========== RESPONSIVE MOBILE (< 768px) ========== */
+@media (max-width: 768px) {
+    .modal-content {
+        max-width: 95%;
+        margin: 20px auto;
+    }
+    
+    /* Modal-header : titre en dessous de la croix */
+    .modal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding-top: 8px;
+    }
+    
+    .modal-header h3 {
+        width: 100%;
+        text-align: left;
+        margin-top: 32px;
+    }
+    
+    /* Close-modal reste positionné par rapport au modal-content */
+    .close-modal {
+        top: 12px;
+        right: 12px;
+    }
+}
+
+/* ========== RESPONSIVE PETIT MOBILE (< 500px) ========== */
+@media (max-width: 500px) {
+    /* Modal-header : ajuster padding pour close-modal */
+    .modal-header {
+        padding-right: 40px;
+        position: relative;
+    }
+    
+    /* Boutons modals en colonne pleine largeur */
+    .modal-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .modal-actions .btn {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+        font-size: 13px;
+    }
+}

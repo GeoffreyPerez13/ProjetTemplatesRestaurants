@@ -1,0 +1,60 @@
+/* MenuMiam - Typographie Responsive Réutilisable */
+
+/* ========== BREAKPOINTS ========== */
+/* Desktop : > 768px */
+/* Tablette/Mobile : 768px - 501px */
+/* Petit mobile : ≤ 500px */
+
+/* ========== TAILLES DE BASE ========== */
+:root {
+    --font-size-xs: 12px;
+    --font-size-sm: 13px;
+    --font-size-base: 14px;
+    --font-size-md: 15px;
+    --font-size-lg: 16px;
+    --font-size-xl: 18px;
+    --font-size-2xl: 20px;
+    --font-size-3xl: 24px;
+    --font-size-4xl: 32px;
+}
+
+/* ========== CLASSES UTILITAIRES ========== */
+.text-xs { font-size: var(--font-size-xs); }
+.text-sm { font-size: var(--font-size-sm); }
+.text-base { font-size: var(--font-size-base); }
+.text-md { font-size: var(--font-size-md); }
+.text-lg { font-size: var(--font-size-lg); }
+.text-xl { font-size: var(--font-size-xl); }
+.text-2xl { font-size: var(--font-size-2xl); }
+.text-3xl { font-size: var(--font-size-3xl); }
+.text-4xl { font-size: var(--font-size-4xl); }
+
+/* ========== RESPONSIVE MOBILE (< 768px) ========== */
+@media (max-width: 768px) {
+    :root {
+        --font-size-xs: 11px;
+        --font-size-sm: 12px;
+        --font-size-base: 13px;
+        --font-size-md: 14px;
+        --font-size-lg: 15px;
+        --font-size-xl: 16px;
+        --font-size-2xl: 18px;
+        --font-size-3xl: 20px;
+        --font-size-4xl: 24px;
+    }
+}
+
+/* ========== RESPONSIVE PETIT MOBILE (< 500px) ========== */
+@media (max-width: 500px) {
+    :root {
+        --font-size-xs: 10px;
+        --font-size-sm: 11px;
+        --font-size-base: 12px;
+        --font-size-md: 13px;
+        --font-size-lg: 14px;
+        --font-size-xl: 15px;
+        --font-size-2xl: 16px;
+        --font-size-3xl: 18px;
+        --font-size-4xl: 20px;
+    }
+}

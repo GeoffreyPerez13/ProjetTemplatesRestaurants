@@ -1,0 +1,106 @@
+/* MenuMiam - Boutons Responsive Réutilisables */
+
+/* ========== BOUTONS DE BASE ========== */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: var(--font-size-base, 14px);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: #667eea;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5568d3;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+}
+
+/* ========== BOUTONS ICÔNES ========== */
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #667eea;
+    font-size: 18px;
+}
+
+.icon-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.icon-btn.danger {
+    color: #ef4444;
+}
+
+.icon-btn.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* ========== RESPONSIVE TABLETTE/MOBILE (< 768px) ========== */
+@media (max-width: 768px) {
+    .btn {
+        padding: 9px 16px;
+        font-size: var(--font-size-sm, 13px);
+        gap: 6px;
+    }
+    
+    .icon-btn {
+        padding: 6px;
+        font-size: 16px;
+    }
+}
+
+/* ========== RESPONSIVE PETIT MOBILE (< 500px) ========== */
+@media (max-width: 500px) {
+    .btn {
+        padding: 8px 14px;
+        font-size: var(--font-size-sm, 13px);
+        gap: 6px;
+    }
+    
+    /* Boutons modals : pleine largeur, centrés */
+    .modal .btn {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+    
+    .icon-btn {
+        padding: 5px;
+        font-size: 14px;
+    }
+}
