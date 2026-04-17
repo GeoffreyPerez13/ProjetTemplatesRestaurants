@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/css/shared/toast.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/css/admin/form-validation.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <!-- CSS Partages -->
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/css/shared/responsive-typography.css">
@@ -182,7 +183,7 @@
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">Annuler</button>
                     <button type="submit" class="btn btn-primary">Enregistrer</button>
                 </div>
@@ -202,9 +203,9 @@
                     <!-- Les lignes de catégories seront ajoutées ici dynamiquement -->
                 </div>
                 <button type="button" class="btn btn-secondary" onclick="addBulkCategoryRow()" style="margin-top: 12px;">
-                    <i class="fas fa-plus"></i> Ajouter une catégorie
+                    Ajouter une catégorie
                 </button>
-                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px;">
+                <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeBulkCategoryModal()">Annuler</button>
                     <button type="button" class="btn btn-primary" onclick="saveBulkCategories()">Enregistrer toutes les catégories</button>
                 </div>
