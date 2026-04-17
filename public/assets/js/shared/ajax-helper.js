@@ -163,3 +163,12 @@ function resetFormValidation(form) {
         field.classList.remove('is-valid', 'is-invalid');
     });
 }
+
+// ========== EXPOSITION GLOBALE ==========
+
+// Exposer les fonctions nécessaires globalement
+window.ajaxRequest = ajaxRequest;
+window.showToast = showToast;
+window.confirmAction = confirmAction;
+window.validateForm = validateForm;
+window.resetFormValidation = resetFormValidation;

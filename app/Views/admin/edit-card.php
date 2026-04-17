@@ -286,13 +286,26 @@
     <script src="<?= BASE_URL ?>/public/assets/js/sections/edit-card/edit-card.js"></script>
     
     <script>
+        // Diagnostic : vérifier que les fonctions sont bien chargées
+        console.log('=== DIAGNOSTIC EDIT-CARD ===');
+        console.log('ajax-helper.js chargé:', typeof showToast !== 'undefined');
+        console.log('edit-card.js chargé:', typeof initEditCard !== 'undefined');
+        console.log('openCategoryModal disponible:', typeof openCategoryModal !== 'undefined');
+        console.log('openBulkCategoryModal disponible:', typeof openBulkCategoryModal !== 'undefined');
+        
         // Initialisation de edit-card.js
         document.addEventListener('DOMContentLoaded', () => {
-            initEditCard(
-                <?= json_encode($categories) ?>,
-                '<?= $csrf_token ?>',
-                '<?= BASE_URL ?>/public'
-            );
+            console.log('DOMContentLoaded - Initialisation...');
+            if (typeof initEditCard === 'function') {
+                initEditCard(
+                    <?= json_encode($categories) ?>,
+                    '<?= $csrf_token ?>',
+                    '<?= BASE_URL ?>/public'
+                );
+                console.log('initEditCard() exécuté avec succès');
+            } else {
+                console.error('ERREUR: initEditCard() n\'est pas définie !');
+            }
         });
     </script>
 </body>
