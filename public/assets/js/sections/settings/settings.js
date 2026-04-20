@@ -145,11 +145,9 @@ document.addEventListener("DOMContentLoaded", function () {
           }
         });
 
-        // Afficher un message si succès
-        console.log("Options chargées avec succès");
+        // Le message d'erreur sera affiché côté PHP après redirection
       })
       .catch((error) => {
-        console.error("Erreur:", error);
         // Le message d'erreur sera affiché côté PHP après redirection
       });
   }

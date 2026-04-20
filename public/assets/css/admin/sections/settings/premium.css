@@ -1226,9 +1226,6 @@ body.dark-mode .status-badge.inactive {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
-    position: sticky;
-    bottom: 20px;
-    z-index: 100;
     margin-top: var(--spacing-lg);
     padding: 14px 16px;
     background: var(--color-bg-alt, #fff);
@@ -1681,6 +1678,15 @@ body.dark-mode .api-test-result {
     position: relative;
     min-height: 60px;
     width: 100%;
+    border-top-left-radius: calc(var(--radius-lg) - 1px);
+    border-top-right-radius: calc(var(--radius-lg) - 1px);
+}
+
+/* Coins inférieurs arrondis quand l'accordéon est fermé */
+.accordion-section:not(:has(.accordion-content.expanded)) .accordion-header {
+    border-bottom-left-radius: calc(var(--radius-lg) - 1px);
+    border-bottom-right-radius: calc(var(--radius-lg) - 1px);
+    border-bottom: none;
 }
 
 .accordion-header:hover {
@@ -1743,6 +1749,9 @@ body.dark-mode .api-test-result {
 .accordion-content {
     padding: 25px;
     transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+    overflow: hidden;
 }
 
 .accordion-content.collapsed {

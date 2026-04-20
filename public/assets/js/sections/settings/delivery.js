@@ -23,9 +23,10 @@
             console.error('Container .settings-container non trouvé');
         }
 
-        setupToggles();
+        setupToggleButtons();
         setupTestButtons();
         setupSaveButtons();
+        setupPasswordToggles();
         loadConfigurations();
         generateWebhookUrls();
         updateStats();
@@ -34,9 +35,35 @@
     }
 
     /**
+     * Configuration des toggles pour afficher/masquer les mots de passe
+     */
+    function setupPasswordToggles() {
+        document.querySelectorAll('.password-toggle-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const card = this.closest('.delivery-card');
+                const target = this.dataset.target;
+                const input = card.querySelector(`[data-field="${target}"]`);
+                const icon = this.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                    this.setAttribute('aria-label', `Masquer ${target === 'api_key' ? 'la clé API' : "l'ID restaurant"}`);
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                    this.setAttribute('aria-label', `Afficher ${target === 'api_key' ? 'la clé API' : "l'ID restaurant"}`);
+                }
+            });
+        });
+    }
+
+    /**
      * Configuration des toggles
      */
-    function setupToggles() {
+    function setupToggleButtons() {
         document.querySelectorAll('.delivery-switch').forEach(toggle => {
             toggle.addEventListener('change', function() {
                 const platform = this.dataset.platform;
@@ -373,10 +400,10 @@
             console.error('Élément #connected-platforms non trouvé');
         }
 
-        // Simuler les autres stats (à remplacer par de vraies données)
+        // Commandes du jour (0 en dev, à remplacer par de vraies données en prod)
         const ordersElement = document.getElementById('today-orders');
         if (ordersElement) {
-            ordersElement.textContent = Math.floor(Math.random() * 50);
+            ordersElement.textContent = 0;
         }
 
         const syncElement = document.getElementById('last-sync');

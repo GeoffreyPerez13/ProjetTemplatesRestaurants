@@ -1,4 +1,7 @@
 <?php
+// Démarrer la session
+session_start();
+
 require_once __DIR__ . '/../config.php';
 
 // Configuration SMTP (valeurs définies dans config.php, sinon fallback dev)
@@ -109,6 +112,21 @@ switch ($page) {
     case 'dashboard':
         $controller = new AdminController($pdo);
         $controller->dashboard();  // Tableau de bord admin
+        break;
+
+    case 'google-reviews-roadmap':
+        // Vérifier que l'utilisateur est super admin
+        if (!isset($_SESSION['admin_logged']) || !$_SESSION['admin_logged']) {
+            header('Location: ?page=login');
+            exit;
+        }
+        $adminModel = new Admin($pdo);
+        $admin = $adminModel->findById($_SESSION['admin_id']);
+        if (!$admin || $admin->role !== 'SUPER_ADMIN') {
+            header('Location: ?page=dashboard');
+            exit;
+        }
+        require_once APP_PATH . '/Views/admin/google-reviews-roadmap.php';
         break;
 
     case 'edit-card':

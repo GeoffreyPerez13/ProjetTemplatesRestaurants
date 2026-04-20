@@ -3,6 +3,7 @@ $title = $title ?? "Paramètres";
 $scripts = [
     "js/sections/settings/settings.js",
     "js/sections/settings/premium-cart.js",
+    "js/sections/settings/combined-checkout.js",
     "js/effects/accordion.js",
     "js/sections/settings/closure-dates.js",
     "js/sections/settings/subscriptions.js",
@@ -793,7 +794,7 @@ if (!empty($_SESSION['pendingToast'])) {
                         <p>Sélectionnez votre abonnement basique et les options premium en un seul paiement</p>
                     </div>
                     
-                    <form method="post" action="?page=stripe-checkout" class="combined-cart-form" id="combined-cart-form">
+                    <form method="post" class="combined-cart-form" id="combined-cart-form">
                         <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                         
                         <div class="cart-summary">
@@ -822,7 +823,7 @@ if (!empty($_SESSION['pendingToast'])) {
                         </div>
                         
                         <div class="combined-cart-actions">
-                            <button type="submit" class="btn btn-primary combined-checkout-btn" id="combined-checkout-btn" disabled>
+                            <button type="button" class="btn btn-primary combined-checkout-btn" id="combined-checkout-btn" disabled onclick="submitCombinedCheckout()">
                                 <i class="fab fa-stripe-s"></i> Payer et activer
                             </button>
                         </div>
@@ -1778,11 +1779,21 @@ if (!empty($_SESSION['pendingToast'])) {
                     <div class="delivery-config" style="display: none;">
                         <div class="config-group">
                             <label>Clé API</label>
-                            <input type="password" class="form-control" data-field="api_key" placeholder="Votre clé API Uber Eats">
+                            <div class="input-with-toggle">
+                                <input type="password" class="form-control" data-field="api_key" placeholder="Votre clé API Uber Eats">
+                                <button type="button" class="password-toggle-btn" data-target="api_key" aria-label="Afficher la clé API">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="config-group">
                             <label>ID Restaurant</label>
-                            <input type="text" class="form-control" data-field="store_id" placeholder="ID de votre restaurant">
+                            <div class="input-with-toggle">
+                                <input type="password" class="form-control" data-field="store_id" placeholder="ID de votre restaurant">
+                                <button type="button" class="password-toggle-btn" data-target="store_id" aria-label="Afficher l'ID restaurant">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="config-group">
                             <label>URL Webhook (lecture seule)</label>
@@ -1822,11 +1833,21 @@ if (!empty($_SESSION['pendingToast'])) {
                     <div class="delivery-config" style="display: none;">
                         <div class="config-group">
                             <label>Clé API</label>
-                            <input type="password" class="form-control" data-field="api_key" placeholder="Votre clé API Deliveroo">
+                            <div class="input-with-toggle">
+                                <input type="password" class="form-control" data-field="api_key" placeholder="Votre clé API Deliveroo">
+                                <button type="button" class="password-toggle-btn" data-target="api_key" aria-label="Afficher la clé API">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="config-group">
                             <label>ID Restaurant</label>
-                            <input type="text" class="form-control" data-field="store_id" placeholder="ID de votre restaurant">
+                            <div class="input-with-toggle">
+                                <input type="password" class="form-control" data-field="store_id" placeholder="ID de votre restaurant">
+                                <button type="button" class="password-toggle-btn" data-target="store_id" aria-label="Afficher l'ID restaurant">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="config-group">
                             <label>URL Webhook (lecture seule)</label>
@@ -1866,11 +1887,21 @@ if (!empty($_SESSION['pendingToast'])) {
                     <div class="delivery-config" style="display: none;">
                         <div class="config-group">
                             <label>Clé API</label>
-                            <input type="password" class="form-control" data-field="api_key" placeholder="Votre clé API Just Eat">
+                            <div class="input-with-toggle">
+                                <input type="password" class="form-control" data-field="api_key" placeholder="Votre clé API Just Eat">
+                                <button type="button" class="password-toggle-btn" data-target="api_key" aria-label="Afficher la clé API">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="config-group">
                             <label>ID Restaurant</label>
-                            <input type="text" class="form-control" data-field="store_id" placeholder="ID de votre restaurant">
+                            <div class="input-with-toggle">
+                                <input type="password" class="form-control" data-field="store_id" placeholder="ID de votre restaurant">
+                                <button type="button" class="password-toggle-btn" data-target="store_id" aria-label="Afficher l'ID restaurant">
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="config-group">
                             <label>URL Webhook (lecture seule)</label>
@@ -1932,55 +1963,25 @@ if (!empty($_SESSION['pendingToast'])) {
                     {
                         element: '.delivery-card[data-platform="ubereats"]',
                         title: 'Uber Eats',
-                        content: 'Activez le toggle pour afficher la configuration et connecter votre compte Uber Eats.',
+                        content: 'Carte de configuration pour Uber Eats. Activez le toggle pour afficher les champs de configuration.',
                         position: 'bottom'
                     },
                     {
                         element: '.delivery-card[data-platform="ubereats"] .delivery-toggle',
                         title: 'Activation de la plateforme',
-                        content: 'Cliquez sur le toggle pour activer ou désactiver l\'intégration avec cette plateforme.',
+                        content: 'Cliquez sur le toggle pour activer ou désactiver l\'intégration avec cette plateforme. Une fois activé, les champs de configuration apparaîtront.',
                         position: 'left'
-                    },
-                    {
-                        element: '.delivery-card[data-platform="ubereats"] [data-field="api_key"]',
-                        title: 'Clé API',
-                        content: 'Entrez votre clé API fournie par Uber Eats pour authentifier les requêtes.',
-                        position: 'bottom'
-                    },
-                    {
-                        element: '.delivery-card[data-platform="ubereats"] [data-field="store_id"]',
-                        title: 'ID Restaurant',
-                        content: 'Identifiant unique de votre restaurant sur la plateforme Uber Eats.',
-                        position: 'bottom'
-                    },
-                    {
-                        element: '.delivery-card[data-platform="ubereats"] .webhook-url',
-                        title: 'URL Webhook',
-                        content: 'URL générée automatiquement pour recevoir les notifications de commandes. Copiez-la dans votre compte Uber Eats.',
-                        position: 'top'
-                    },
-                    {
-                        element: '.delivery-card[data-platform="ubereats"] .test-connection',
-                        title: 'Tester la connexion',
-                        content: 'Vérifiez que vos identifiants sont valides avant de sauvegarder.',
-                        position: 'top'
-                    },
-                    {
-                        element: '.delivery-card[data-platform="ubereats"] .save-config',
-                        title: 'Enregistrer',
-                        content: 'Sauvegardez votre configuration pour activer l\'intégration.',
-                        position: 'top'
                     },
                     {
                         element: '.delivery-card[data-platform="deliveroo"]',
                         title: 'Deliveroo',
-                        content: 'Même processus pour Deliveroo : activez, configurez, testez et enregistrez.',
+                        content: 'Carte de configuration pour Deliveroo. Même processus : activez le toggle, puis remplissez les champs de configuration.',
                         position: 'bottom'
                     },
                     {
                         element: '.delivery-card[data-platform="justeat"]',
                         title: 'Just Eat',
-                        content: 'Configurez également Just Eat si vous utilisez cette plateforme.',
+                        content: 'Carte de configuration pour Just Eat. Configurez cette plateforme si vous l\'utilisez.',
                         position: 'bottom'
                     },
                     {
@@ -1991,8 +1992,14 @@ if (!empty($_SESSION['pendingToast'])) {
                     },
                     {
                         element: null,
+                        title: 'Configuration des plateformes',
+                        content: '<strong>Pour chaque plateforme :</strong><br>1. Activez le toggle<br>2. Remplissez la <strong>Clé API</strong> et l\'<strong>ID Restaurant</strong><br>3. Copiez l\'<strong>URL Webhook</strong> dans votre compte plateforme<br>4. Testez la connexion<br>5. Enregistrez',
+                        position: 'center'
+                    },
+                    {
+                        element: null,
                         title: 'Centralisez vos commandes !',
-                        content: 'Avec l\'intégration livraison, recevez toutes vos commandes au même endroit et gérez-les efficacement.',
+                        content: 'Avec l\'intégration livraison, recevez toutes vos commandes au même endroit et gérez-les efficacement depuis votre panel admin.',
                         position: 'center'
                     }
                 ];

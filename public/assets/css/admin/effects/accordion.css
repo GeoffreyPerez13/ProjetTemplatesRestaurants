@@ -1,5 +1,30 @@
 /* ==================== ACCORDÉON ==================== */
 
+/* Section accordéon - Styles par défaut uniquement si non définis ailleurs */
+.accordion-section {
+  border-radius: 12px;
+  overflow: visible;
+}
+
+/* En-tête d'accordéon - radius légèrement plus petit pour laisser voir la bordure */
+.accordion-section .accordion-header {
+  border-top-left-radius: 11px;
+  border-top-right-radius: 11px;
+}
+
+/* Quand l'accordéon est fermé, arrondir aussi les coins du bas */
+.accordion-section:has(.accordion-content.collapsed) .accordion-header,
+.accordion-section:not(:has(.accordion-content.expanded)) .accordion-header {
+  border-bottom-left-radius: 11px;
+  border-bottom-right-radius: 11px;
+}
+
+/* Contenu d'accordéon */
+.accordion-section .accordion-content {
+  border-bottom-left-radius: 11px;
+  border-bottom-right-radius: 11px;
+}
+
 /* Styles pour les contrôles d'accordéon généraux */
 .global-accordion-controls {
   display: flex;

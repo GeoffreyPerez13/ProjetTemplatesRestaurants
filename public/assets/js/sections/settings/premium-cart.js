@@ -191,10 +191,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (checkoutBtn) {
             checkoutBtn.disabled = selectedFeatures.size === 0;
         }
-
+        
         const combinedCheckoutBtn = document.getElementById('combined-checkout-btn');
         if (combinedCheckoutBtn) {
-            combinedCheckoutBtn.disabled = !basiqueSelected && !hasBasiqueSubscription;
+            combinedCheckoutBtn.disabled = !basiqueSelected;
         }
     }
 

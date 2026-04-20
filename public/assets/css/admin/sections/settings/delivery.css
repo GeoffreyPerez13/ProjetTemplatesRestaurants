@@ -186,6 +186,41 @@
     font-size: 14px;
 }
 
+.input-with-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-toggle .form-control {
+    padding-right: 45px;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+    z-index: 10;
+}
+
+.password-toggle-btn:hover {
+    color: var(--color-primary);
+}
+
+.password-toggle-btn:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
 .config-group .form-control {
     width: 100%;
     padding: 10px 14px;

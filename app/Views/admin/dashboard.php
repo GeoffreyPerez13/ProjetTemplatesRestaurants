@@ -246,6 +246,9 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                     <a href="?page=manage-clients" class="btn premium-btn">
                         <i class="fas fa-crown"></i> Gérer les clients Premium
                     </a>
+                    <a href="?page=google-reviews-roadmap" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <i class="fab fa-google"></i> Feuille de route Google Reviews
+                    </a>
                 <?php endif; ?>
                 <?php if (!empty($has_advanced_stats)): ?>
                     <a href="?page=stats" class="btn premium-btn">

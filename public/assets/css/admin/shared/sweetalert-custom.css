@@ -1,0 +1,26 @@
+/* ==================== SWEETALERT2 CUSTOMIZATION ==================== */
+
+/* Centrer les listes à puces dans les modales */
+.swal2-html-container ul {
+    text-align: left;
+    display: inline-block;
+    margin: 0 auto;
+}
+
+.swal2-html-container ul li {
+    text-align: left;
+}
+
+/* Dark mode support */
+body.dark-mode .swal2-popup {
+    background: #1a1a1a;
+    color: #fff;
+}
+
+body.dark-mode .swal2-title {
+    color: #fff;
+}
+
+body.dark-mode .swal2-html-container {
+    color: #e0e0e0;
+}
