@@ -380,8 +380,7 @@
   background: var(--color-bg);
   border-radius: 12px;
   border: 2px dashed var(--color-border);
-  margin: 0 auto;
-  max-width: 500px;
+  max-width: 100%;
   min-height: 400px;
   display: flex;
   flex-direction: column;

@@ -292,6 +292,7 @@ $statusColors = [
                                             <button class="btn small btn-complete-reservation" data-id="<?= $r['id'] ?>" title="Terminée"><i class="fas fa-flag-checkered"></i></button>
                                             <button class="btn small danger btn-noshow-reservation" data-id="<?= $r['id'] ?>" title="Absent"><i class="fas fa-user-slash"></i></button>
                                         <?php endif; ?>
+                                        <button class="btn small info btn-edit-datetime" data-id="<?= $r['id'] ?>" data-date="<?= $r['reservation_date'] ?>" data-time="<?= substr($r['reservation_time'], 0, 5) ?>" title="Modifier date/heure"><i class="fas fa-calendar-alt"></i></button>
                                         <button class="btn small danger btn-delete-reservation" data-id="<?= $r['id'] ?>" title="Supprimer"><i class="fas fa-trash"></i></button>
                                     </div>
                                 </td>
@@ -324,7 +325,7 @@ $statusColors = [
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
 
                 <!-- Activation -->
-                <div class="setting-row">
+                <div class="setting-row" id="setting-booking-enabled">
                     <div class="setting-info">
                         <label>Réservations activées</label>
                         <p class="setting-desc">Activer ou désactiver les réservations sur votre site vitrine.</p>
@@ -338,7 +339,7 @@ $statusColors = [
                 </div>
 
                 <!-- Validation automatique -->
-                <div class="setting-row">
+                <div class="setting-row" id="setting-booking-auto-confirm">
                     <div class="setting-info">
                         <label>Validation automatique</label>
                         <p class="setting-desc">Confirmer automatiquement les nouvelles réservations sans validation manuelle.</p>
@@ -387,7 +388,7 @@ $statusColors = [
                 </div>
 
                 <!-- Marquage automatique comme terminée -->
-                <div class="setting-row">
+                <div class="setting-row" id="setting-booking-auto-complete">
                     <div class="setting-info">
                         <label>Marquage automatique comme terminée</label>
                         <p class="setting-desc">Marquer automatiquement les réservations confirmées comme terminées après la durée du repas.</p>
@@ -709,7 +710,7 @@ document.addEventListener('DOMContentLoaded', function() {
             btnValidateAll.addEventListener('click', validateAllReservations);
         }
         
-        document.querySelectorAll('.btn-confirm-reservation').forEach(btn => {
+        document.querySelectorAll('#tab-dashboard .btn-confirm-reservation').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.dataset.id;
                 const assignTableEnabled = <?= json_encode(($settings['booking_assign_table'] ?? false) && !($settings['booking_auto_confirm'] ?? false)) ?>;
@@ -791,7 +792,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        document.querySelectorAll('.btn-cancel-reservation').forEach(btn => {
+        document.querySelectorAll('#tab-dashboard .btn-cancel-reservation').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.dataset.id;
                 Swal.fire({
@@ -810,8 +811,105 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Bouton changer de table
-        document.querySelectorAll('.btn-change-table').forEach(btn => {
+        // Bouton modifier date/heure - Délégation d'événements
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.btn-edit-datetime')) {
+                const btn = e.target.closest('.btn-edit-datetime');
+                const id = btn.dataset.id;
+                const currentDate = btn.dataset.date;
+                const currentTime = btn.dataset.time;
+                
+                Swal.fire({
+                    title: 'Modifier la date et l\'heure',
+                    html: `
+                        <div style="text-align: left; margin-bottom: 15px;">
+                            <label for="new-date" style="display: block; margin-bottom: 8px; font-weight: 600; color: #1f2937; font-size: 0.95rem;">Nouvelle date :</label>
+                            <input type="date" id="new-date" value="${currentDate}" style="width: 100%; padding: 10px 12px; border: 2px solid #d1d5db; border-radius: 6px; background: #ffffff; color: #1f2937; font-size: 0.9rem; outline: none; cursor: pointer;" onfocus="this.style.borderColor='#3b82f6'; this.showPicker();" onblur="this.style.borderColor='#d1d5db'" onclick="this.showPicker();">
+                        </div>
+                        <div style="text-align: left;">
+                            <label for="new-time" style="display: block; margin-bottom: 8px; font-weight: 600; color: #1f2937; font-size: 0.95rem;">Nouvelle heure :</label>
+                            <input type="time" id="new-time" value="${currentTime}" style="width: 100%; padding: 10px 12px; border: 2px solid #d1d5db; border-radius: 6px; background: #ffffff; color: #1f2937; font-size: 0.9rem; outline: none; cursor: pointer;" onfocus="this.style.borderColor='#3b82f6'; this.showPicker();" onblur="this.style.borderColor='#d1d5db'" onclick="this.showPicker();">
+                        </div>
+                    `,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d97706',
+                    confirmButtonText: '<i class="fas fa-check"></i> Modifier',
+                    cancelButtonText: 'Annuler',
+                    didOpen: () => {
+                        // Forcer l'ouverture du calendrier au chargement de la modal
+                        const dateInput = document.getElementById('new-date');
+                        if (dateInput) {
+                            setTimeout(() => {
+                                try {
+                                    dateInput.showPicker();
+                                } catch (e) {
+                                    // showPicker() peut ne pas être supporté sur certains navigateurs
+                                    console.log('showPicker() non supporté');
+                                }
+                            }, 100);
+                        }
+                    },
+                    preConfirm: () => {
+                        const newDate = document.getElementById('new-date').value;
+                        const newTime = document.getElementById('new-time').value;
+                        
+                        if (!newDate || !newTime) {
+                            Swal.showValidationMessage('Veuillez renseigner la date et l\'heure');
+                            return false;
+                        }
+                        
+                        return { date: newDate, time: newTime };
+                    }
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        const csrfToken = document.getElementById('csrf-token').value;
+                        const formData = new FormData();
+                        formData.append('csrf_token', csrfToken);
+                        formData.append('id', id);
+                        formData.append('reservation_date', result.value.date);
+                        formData.append('reservation_time', result.value.time);
+                        
+                        fetch('?page=reservation-update-datetime', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success) {
+                                if (data.new_csrf_token) {
+                                    document.getElementById('csrf-token').value = data.new_csrf_token;
+                                }
+                                Swal.fire({
+                                    title: 'Date et heure modifiées',
+                                    icon: 'success',
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+                                
+                                // Rafraîchir la liste
+                                if (typeof window.refreshReservationsList === 'function') {
+                                    window.refreshReservationsList();
+                                } else {
+                                    setTimeout(function() {
+                                        window.location.href = '?page=reservations&tab=list';
+                                    }, 300);
+                                }
+                            } else {
+                                Swal.fire('Erreur', data.message || 'Une erreur est survenue', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erreur:', error);
+                            Swal.fire('Erreur', 'Erreur de communication avec le serveur', 'error');
+                        });
+                    }
+                });
+            }
+        });
+        
+        // Bouton changer de table (dashboard uniquement)
+        document.querySelectorAll('#tab-dashboard .btn-change-table').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.dataset.id;
                 
@@ -1183,18 +1281,32 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     const count = data.reservations ? data.reservations.length : 0;
-                    const notificationCount = document.getElementById('notification-count');
-                    const notificationToggle = document.getElementById('notification-toggle');
+                    let notificationToggle = document.getElementById('notification-toggle');
                     
-                    if (notificationCount) {
-                        notificationCount.textContent = count;
-                    }
-                    
-                    // Cacher le bouton si count = 0
-                    if (count === 0 && notificationToggle) {
+                    if (count > 0) {
+                        // Si le bouton n'existe pas, le créer
+                        if (!notificationToggle) {
+                            const floatingButtons = document.querySelector('.floating-buttons');
+                            if (floatingButtons) {
+                                notificationToggle = document.createElement('button');
+                                notificationToggle.type = 'button';
+                                notificationToggle.className = 'notification-toggle-floating';
+                                notificationToggle.id = 'notification-toggle';
+                                notificationToggle.title = 'Réservations en attente';
+                                notificationToggle.innerHTML = '<i class="fas fa-bell"></i><span class="notification-badge" id="notification-count">' + count + '</span>';
+                                floatingButtons.insertBefore(notificationToggle, floatingButtons.firstChild);
+                            }
+                        } else {
+                            // Mettre à jour le compteur et afficher le bouton
+                            const notificationCount = document.getElementById('notification-count');
+                            if (notificationCount) {
+                                notificationCount.textContent = count;
+                            }
+                            notificationToggle.style.display = '';
+                        }
+                    } else if (count === 0 && notificationToggle) {
+                        // Cacher le bouton si count = 0
                         notificationToggle.style.display = 'none';
-                    } else if (count > 0 && notificationToggle) {
-                        notificationToggle.style.display = '';
                     }
                 }
             })
@@ -1224,11 +1336,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let previousPendingCount = 0;
     
     function autoRefreshPendingReservations() {
-        // Ne rafraîchir que si on est sur l'onglet Dashboard
         const dashboardTab = document.querySelector('[data-tab="tab-dashboard"]');
-        if (!dashboardTab || !dashboardTab.classList.contains('active')) {
-            return;
-        }
+        const isDashboardActive = dashboardTab && dashboardTab.classList.contains('active');
         
         // Récupérer la date actuellement affichée
         const currentDate = dateInput.value;
@@ -1240,7 +1349,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     const newPendingCount = data.pendingReservations ? data.pendingReservations.length : 0;
                     const hasChanged = newPendingCount !== previousPendingCount;
                     
-                    // Si le nombre de réservations en attente a changé, rafraîchir l'affichage
+                    // Toujours mettre à jour le badge de notification
+                    updateNotificationBadge();
+                    
+                    // Si le nombre de réservations en attente a changé
                     if (hasChanged) {
                         console.log(`[Auto-refresh] Changement détecté: ${previousPendingCount} → ${newPendingCount} réservations en attente`);
                         
@@ -1251,7 +1363,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                         
                         previousPendingCount = newPendingCount;
-                        loadReservationsForDate(currentDate);
+                        
+                        // Ne rafraîchir l'affichage que si on est sur l'onglet Dashboard
+                        if (isDashboardActive) {
+                            loadReservationsForDate(currentDate);
+                        }
                     }
                 }
             })
@@ -1278,14 +1394,73 @@ document.addEventListener('DOMContentLoaded', function() {
     // Démarrer le polling toutes les 15 secondes
     setInterval(autoRefreshPendingReservations, 15000);
     
-    // Initialiser le compteur au chargement
+    // Initialiser le compteur au chargement et faire un premier check immédiat
     fetch(`?page=get-day-reservations&date=${dateInput.value}`)
         .then(response => response.json())
         .then(data => {
             if (data.success && data.pendingReservations) {
                 previousPendingCount = data.pendingReservations.length;
+                
+                // Si des réservations en attente existent dès le chargement, afficher la notification
+                if (previousPendingCount > 0) {
+                    showAutoRefreshNotification(previousPendingCount);
+                }
             }
         });
+    
+    // Faire un premier check après 2 secondes pour détecter les nouvelles réservations
+    setTimeout(autoRefreshPendingReservations, 2000);
+    
+    // Fonction pour rafraîchir instantanément le tableau de l'onglet liste
+    window.refreshReservationsList = function() {
+        const currentUrl = window.location.href;
+        fetch(currentUrl)
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const newDoc = parser.parseFromString(html, 'text/html');
+                const currentTableContainer = document.querySelector('.reservations-table-container');
+                const newTableContainer = newDoc.querySelector('.reservations-table-container');
+                const currentEmptyState = document.querySelector('#tab-list .empty-state');
+                const newEmptyState = newDoc.querySelector('#tab-list .empty-state');
+                
+                // Remplacer le tableau ou l'empty state
+                if (newTableContainer && currentTableContainer) {
+                    currentTableContainer.innerHTML = newTableContainer.innerHTML;
+                } else if (newEmptyState && !currentTableContainer) {
+                    // Afficher l'empty state si le tableau n'existe plus
+                    const tabList = document.getElementById('tab-list');
+                    const filtersDiv = tabList.querySelector('.reservations-filters');
+                    if (filtersDiv && filtersDiv.nextElementSibling) {
+                        filtersDiv.nextElementSibling.remove();
+                    }
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.innerHTML = newEmptyState.outerHTML;
+                    filtersDiv.after(emptyDiv.firstChild);
+                } else if (newTableContainer && currentEmptyState) {
+                    // Remplacer l'empty state par le tableau
+                    currentEmptyState.remove();
+                    const tabList = document.getElementById('tab-list');
+                    const filtersDiv = tabList.querySelector('.reservations-filters');
+                    const tableDiv = document.createElement('div');
+                    tableDiv.innerHTML = newTableContainer.outerHTML;
+                    filtersDiv.after(tableDiv.firstChild);
+                }
+            })
+            .catch(error => {
+                console.error('[Refresh list] Erreur:', error);
+            });
+    };
+    
+    // Polling pour l'onglet Réservations (tab-list) pour détecter les nouvelles réservations
+    setInterval(function() {
+        const listTab = document.querySelector('[data-tab="tab-list"]');
+        const isListTabActive = listTab && listTab.classList.contains('active');
+        
+        if (isListTabActive && typeof window.refreshReservationsList === 'function') {
+            window.refreshReservationsList();
+        }
+    }, 15000); // Vérifier toutes les 15 secondes
 });
 </script>
 
@@ -1347,17 +1522,17 @@ const tourSteps = [
         }
     },
     {
-        element: 'input[name="booking_enabled"]',
+        element: '#setting-booking-enabled',
         title: 'Activer/Désactiver les réservations',
         content: 'Activez ou désactivez le <strong>formulaire de réservation</strong> sur votre site vitrine en un clic.'
     },
     {
-        element: 'input[name="booking_auto_confirm"]',
+        element: '#setting-booking-auto-confirm',
         title: 'Validation automatique',
         content: 'Si activé, les nouvelles réservations sont <strong>automatiquement confirmées</strong> sans intervention manuelle.'
     },
     {
-        element: 'input[name="booking_auto_complete"]',
+        element: '#setting-booking-auto-complete',
         title: 'Marquage automatique',
         content: 'Marquez automatiquement les réservations comme <strong>terminées</strong> après la durée du repas (configurable). Nécessite un CRON job.'
     },
@@ -1382,29 +1557,65 @@ const tourSteps = [
         content: 'N\'oubliez pas de cliquer sur <strong>"Enregistrer les paramètres"</strong> après chaque modification. Un message de confirmation apparaîtra.'
     },
     {
-        element: '.notification-toggle-floating',
+        element: '#notification-toggle',
         title: '🔔 Notifications en temps réel',
         content: 'Ce bouton affiche le <strong>nombre de réservations en attente</strong>. Il clignote pour attirer votre attention.<br><br>Les notifications sont <strong>automatiques</strong> : vous recevez une alerte <strong>toutes les 10 secondes</strong> maximum quand une nouvelle réservation arrive !<br><br>Cliquez dessus pour voir la liste et <strong>confirmer/refuser</strong> rapidement. Vous pouvez aussi <strong>activer/désactiver le son</strong> des notifications.',
-        placement: 'right',
+        placement: 'bottom',
         beforeShow: function() {
             // Afficher temporairement le bouton de notification même s'il n'y a pas de réservations
-            const notifToggle = document.getElementById('notification-toggle');
-            if (notifToggle) {
+            let notifToggle = document.getElementById('notification-toggle');
+            
+            // Si le bouton n'existe pas, le créer temporairement
+            if (!notifToggle) {
+                const floatingButtons = document.querySelector('.floating-buttons');
+                if (floatingButtons) {
+                    notifToggle = document.createElement('button');
+                    notifToggle.type = 'button';
+                    notifToggle.className = 'notification-toggle-floating';
+                    notifToggle.id = 'notification-toggle';
+                    notifToggle.title = 'Réservations en attente';
+                    notifToggle.innerHTML = '<i class="fas fa-bell"></i><span class="notification-badge" id="notification-count">1</span>';
+                    notifToggle.setAttribute('data-tour-temp', 'true');
+                    floatingButtons.insertBefore(notifToggle, floatingButtons.firstChild);
+                }
+            } else {
+                // Le bouton existe, juste s'assurer qu'il est visible
                 notifToggle.style.display = '';
                 const badge = document.getElementById('notification-count');
                 if (badge) {
+                    badge.setAttribute('data-original-count', badge.textContent);
                     badge.textContent = '1';
                 }
+            }
+            
+            if (notifToggle) {
                 // Scroll vers le bouton
-                notifToggle.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => {
+                    notifToggle.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
             }
         },
         afterHide: function() {
-            // Masquer le bouton s'il n'y a vraiment pas de réservations
             const notifToggle = document.getElementById('notification-toggle');
-            const actualCount = parseInt(document.getElementById('notification-count')?.textContent || '0');
-            if (actualCount === 0 && notifToggle) {
-                notifToggle.style.display = 'none';
+            
+            if (notifToggle) {
+                // Si c'était un bouton temporaire, le supprimer
+                if (notifToggle.getAttribute('data-tour-temp') === 'true') {
+                    notifToggle.remove();
+                } else {
+                    // Restaurer le compteur original
+                    const badge = document.getElementById('notification-count');
+                    if (badge && badge.hasAttribute('data-original-count')) {
+                        badge.textContent = badge.getAttribute('data-original-count');
+                        badge.removeAttribute('data-original-count');
+                    }
+                    
+                    // Masquer le bouton s'il n'y a vraiment pas de réservations
+                    const actualCount = parseInt(badge?.textContent || '0');
+                    if (actualCount === 0) {
+                        notifToggle.style.display = 'none';
+                    }
+                }
             }
         }
     }

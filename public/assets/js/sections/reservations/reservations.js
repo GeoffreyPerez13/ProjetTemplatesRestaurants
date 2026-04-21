@@ -77,8 +77,6 @@ document.addEventListener("DOMContentLoaded", function () {
     btn.addEventListener("click", function () {
       var tabId = btn.dataset.tab;
       activateTab(tabId);
-      // Sauvegarder l'onglet actif dans localStorage
-      localStorage.setItem('reservations_active_tab', tabId);
     });
   });
 
@@ -87,23 +85,126 @@ document.addEventListener("DOMContentLoaded", function () {
   var hasFilters = urlParams.has('status') || urlParams.has('date') || urlParams.has('search');
   var hasTabParam = urlParams.get('tab') === 'list';
   
-  // Restaurer l'onglet actif depuis localStorage
-  var savedTab = localStorage.getItem('reservations_active_tab');
-  
-  // Priorité : paramètres URL > localStorage > onglet par défaut
+  // Si des filtres sont présents dans l'URL, ouvrir l'onglet liste
+  // Sinon, toujours ouvrir le tableau de bord par défaut
   if (hasFilters || hasTabParam) {
     activateTab('tab-list');
-    localStorage.setItem('reservations_active_tab', 'tab-list');
-  } else if (savedTab) {
-    activateTab(savedTab);
+  } else {
+    activateTab('tab-dashboard');
   }
 
   // ==================== ACTIONS SUR LES RÉSERVATIONS ====================
 
+  // Mappings pour mise à jour instantanée du DOM
+  var statusLabels = {
+    pending: 'En attente',
+    confirmed: 'Confirmée',
+    cancelled: 'Annulée',
+    completed: 'Terminée',
+    no_show: 'Absent'
+  };
+  var statusColors = {
+    pending: 'warning',
+    confirmed: 'success',
+    cancelled: 'danger',
+    completed: 'info',
+    no_show: 'danger'
+  };
+  var statusIcons = {
+    pending: 'fa-clock',
+    confirmed: 'fa-check-circle',
+    cancelled: 'fa-times-circle',
+    completed: 'fa-flag-checkered',
+    no_show: 'fa-user-slash'
+  };
+
+  // Mise à jour instantanée d'une ligne du tableau
+  function updateRowInstantly(id, newStatus) {
+    var row = document.querySelector('tr[data-id="' + id + '"]');
+    if (!row) return;
+
+    // Mettre à jour la classe de la ligne
+    row.className = 'row-status-' + newStatus;
+
+    // Mettre à jour le badge de statut
+    var badge = row.querySelector('.status-badge');
+    if (badge) {
+      badge.className = 'status-badge badge-' + (statusColors[newStatus] || 'warning');
+      badge.innerHTML = '<i class="fas ' + (statusIcons[newStatus] || 'fa-clock') + '"></i> ' + (statusLabels[newStatus] || newStatus);
+    }
+
+    // Mettre à jour les boutons d'action
+    var actionsCell = row.querySelector('.actions-cell');
+    if (actionsCell) {
+      var dateVal = '';
+      var timeVal = '';
+      var editBtn = row.querySelector('.btn-edit-datetime');
+      if (editBtn) {
+        dateVal = editBtn.dataset.date || '';
+        timeVal = editBtn.dataset.time || '';
+      }
+
+      var html = '<div class="actions-wrapper">';
+      if (newStatus === 'confirmed') {
+        html += '<button class="btn small btn-complete-reservation" data-id="' + id + '" title="Terminée"><i class="fas fa-flag-checkered"></i></button>';
+        html += '<button class="btn small danger btn-noshow-reservation" data-id="' + id + '" title="Absent"><i class="fas fa-user-slash"></i></button>';
+      }
+      html += '<button class="btn small info btn-edit-datetime" data-id="' + id + '" data-date="' + dateVal + '" data-time="' + timeVal + '" title="Modifier date/heure"><i class="fas fa-calendar-alt"></i></button>';
+      html += '<button class="btn small danger btn-delete-reservation" data-id="' + id + '" title="Supprimer"><i class="fas fa-trash"></i></button>';
+      html += '</div>';
+      actionsCell.innerHTML = html;
+    }
+
+    // Mettre à jour la detail-row adjacente si elle existe
+    var nextRow = row.nextElementSibling;
+    if (nextRow && nextRow.classList.contains('reservation-detail-row')) {
+      nextRow.className = 'reservation-detail-row row-status-' + newStatus;
+    }
+
+    // Restaurer l'opacité
+    row.style.opacity = '1';
+    row.style.pointerEvents = '';
+    row.style.transition = 'opacity 0.3s ease';
+  }
+
+  // Suppression instantanée d'une ligne du tableau avec animation
+  function removeRowInstantly(id) {
+    var row = document.querySelector('tr[data-id="' + id + '"]');
+    if (!row) return;
+
+    // Vérifier s'il y a une detail-row adjacente
+    var nextRow = row.nextElementSibling;
+    var detailRow = (nextRow && nextRow.classList.contains('reservation-detail-row')) ? nextRow : null;
+
+    row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    row.style.opacity = '0';
+    row.style.transform = 'translateX(-20px)';
+    if (detailRow) {
+      detailRow.style.transition = 'opacity 0.3s ease';
+      detailRow.style.opacity = '0';
+    }
+
+    setTimeout(function() {
+      row.remove();
+      if (detailRow) detailRow.remove();
+    }, 300);
+  }
+
   function updateReservationStatus(id, status, extra) {
     extra = extra || {};
+    
+    // Ajouter un indicateur visuel sur la ligne immédiatement
+    var row = document.querySelector('tr[data-id="' + id + '"]');
+    if (row) {
+      row.style.opacity = '0.5';
+      row.style.pointerEvents = 'none';
+      var actionsCell = row.querySelector('.actions-cell');
+      if (actionsCell) {
+        actionsCell.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 1.2em; color: var(--color-primary);"></i>';
+      }
+    }
+    
     var data = new FormData();
-    // Récupérer le token CSRF dynamiquement à chaque appel
     var currentCsrfToken = document.getElementById("csrf-token")?.value || 
                            document.querySelector('input[name="csrf_token"]')?.value || "";
     data.append("csrf_token", currentCsrfToken);
@@ -124,27 +225,50 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (d.success) {
-          // Mettre à jour le token CSRF
           if (d.new_csrf_token) {
             var csrfInput = document.getElementById("csrf-token");
-            if (csrfInput) {
-              csrfInput.value = d.new_csrf_token;
-            }
+            if (csrfInput) csrfInput.value = d.new_csrf_token;
           }
           showToast(d.message, "success");
-          setTimeout(function () { location.reload(); }, 800);
+          
+          var dateInput = document.getElementById('dashboard-date');
+          if (dateInput && typeof window.loadReservationsForDate === 'function') {
+            window.loadReservationsForDate(dateInput.value);
+          } else {
+            // Mise à jour instantanée du DOM dans l'onglet liste
+            updateRowInstantly(id, status);
+          }
         } else {
           showToast(d.message || "Erreur", "error");
+          // Restaurer la ligne en cas d'erreur
+          if (row) {
+            row.style.opacity = '1';
+            row.style.pointerEvents = '';
+          }
         }
       })
       .catch(function () {
         showToast("Erreur de communication avec le serveur.", "error");
+        if (row) {
+          row.style.opacity = '1';
+          row.style.pointerEvents = '';
+        }
       });
   }
 
   function deleteReservation(id) {
+    // Ajouter un indicateur visuel sur la ligne immédiatement
+    var row = document.querySelector('tr[data-id="' + id + '"]');
+    if (row) {
+      row.style.opacity = '0.5';
+      row.style.pointerEvents = 'none';
+      var actionsCell = row.querySelector('.actions-cell');
+      if (actionsCell) {
+        actionsCell.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 1.2em; color: var(--color-primary);"></i>';
+      }
+    }
+    
     var data = new FormData();
-    // Récupérer le token CSRF dynamiquement à chaque appel
     var currentCsrfToken = document.getElementById("csrf-token")?.value || 
                            document.querySelector('input[name="csrf_token"]')?.value || "";
     data.append("csrf_token", currentCsrfToken);
@@ -157,27 +281,40 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(function (r) { return r.json(); })
       .then(function (d) {
         if (d.success) {
-          // Mettre à jour le token CSRF
           if (d.new_csrf_token) {
             var csrfInput = document.getElementById("csrf-token");
-            if (csrfInput) {
-              csrfInput.value = d.new_csrf_token;
-            }
+            if (csrfInput) csrfInput.value = d.new_csrf_token;
           }
           showToast(d.message, "success");
-          setTimeout(function () { location.reload(); }, 800);
+          
+          var dateInput = document.getElementById('dashboard-date');
+          if (dateInput && typeof window.loadReservationsForDate === 'function') {
+            window.loadReservationsForDate(dateInput.value);
+          } else {
+            // Suppression instantanée de la ligne avec animation
+            removeRowInstantly(id);
+          }
         } else {
           showToast(d.message || "Erreur", "error");
+          if (row) {
+            row.style.opacity = '1';
+            row.style.pointerEvents = '';
+          }
         }
       })
       .catch(function () {
         showToast("Erreur de communication avec le serveur.", "error");
+        if (row) {
+          row.style.opacity = '1';
+          row.style.pointerEvents = '';
+        }
       });
   }
 
-  // Confirmer
-  document.querySelectorAll(".btn-confirm-reservation").forEach(function (btn) {
-    btn.addEventListener("click", function () {
+  // Confirmer - Délégation d'événements
+  document.addEventListener("click", function(e) {
+    if (e.target.closest(".btn-confirm-reservation")) {
+      var btn = e.target.closest(".btn-confirm-reservation");
       var id = btn.dataset.id;
       Swal.fire({
         title: "Confirmer la réservation ?",
@@ -193,12 +330,13 @@ document.addEventListener("DOMContentLoaded", function () {
           updateReservationStatus(id, "confirmed");
         }
       });
-    });
+    }
   });
 
-  // Annuler/Refuser
-  document.querySelectorAll(".btn-cancel-reservation").forEach(function (btn) {
-    btn.addEventListener("click", function () {
+  // Annuler/Refuser - Délégation d'événements
+  document.addEventListener("click", function(e) {
+    if (e.target.closest(".btn-cancel-reservation")) {
+      var btn = e.target.closest(".btn-cancel-reservation");
       var id = btn.dataset.id;
       Swal.fire({
         title: "Refuser cette réservation ?",
@@ -217,12 +355,13 @@ document.addEventListener("DOMContentLoaded", function () {
           updateReservationStatus(id, "cancelled", { cancelled_reason: result.value || "" });
         }
       });
-    });
+    }
   });
 
-  // Terminée
-  document.querySelectorAll(".btn-complete-reservation").forEach(function (btn) {
-    btn.addEventListener("click", function () {
+  // Terminée - Délégation d'événements
+  document.addEventListener("click", function(e) {
+    if (e.target.closest(".btn-complete-reservation")) {
+      var btn = e.target.closest(".btn-complete-reservation");
       var id = btn.dataset.id;
       Swal.fire({
         title: "Marquer comme terminée ?",
@@ -238,12 +377,13 @@ document.addEventListener("DOMContentLoaded", function () {
           updateReservationStatus(id, "completed");
         }
       });
-    });
+    }
   });
 
-  // Absent (no show)
-  document.querySelectorAll(".btn-noshow-reservation").forEach(function (btn) {
-    btn.addEventListener("click", function () {
+  // Absent (no show) - Délégation d'événements
+  document.addEventListener("click", function(e) {
+    if (e.target.closest(".btn-noshow-reservation")) {
+      var btn = e.target.closest(".btn-noshow-reservation");
       var id = btn.dataset.id;
       Swal.fire({
         title: "Client absent ?",
@@ -259,12 +399,13 @@ document.addEventListener("DOMContentLoaded", function () {
           updateReservationStatus(id, "no_show");
         }
       });
-    });
+    }
   });
 
-  // Supprimer
-  document.querySelectorAll(".btn-delete-reservation").forEach(function (btn) {
-    btn.addEventListener("click", function () {
+  // Supprimer - Utiliser la délégation d'événements pour que ça fonctionne après rechargement
+  document.addEventListener("click", function(e) {
+    if (e.target.closest(".btn-delete-reservation")) {
+      var btn = e.target.closest(".btn-delete-reservation");
       var id = btn.dataset.id;
       Swal.fire({
         title: "Supprimer cette réservation ?",
@@ -280,7 +421,7 @@ document.addEventListener("DOMContentLoaded", function () {
           deleteReservation(id);
         }
       });
-    });
+    }
   });
 
   // ==================== PARAMÈTRES ====================
@@ -334,9 +475,16 @@ document.addEventListener("DOMContentLoaded", function () {
             
             // Mettre à jour le token CSRF si le serveur en renvoie un nouveau
             if (d.new_csrf_token) {
+              // Mettre à jour le token dans le formulaire de paramètres
               var csrfInput = settingsForm.querySelector('input[name="csrf_token"]');
               if (csrfInput) {
                 csrfInput.value = d.new_csrf_token;
+              }
+              
+              // Mettre à jour aussi le token global
+              var globalCsrfInput = document.getElementById("csrf-token");
+              if (globalCsrfInput) {
+                globalCsrfInput.value = d.new_csrf_token;
               }
             }
           } else {

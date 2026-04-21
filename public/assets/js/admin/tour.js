@@ -194,16 +194,39 @@ class Tour {
     if (!this.els.svg || !el) return;
 
     const rect = el.getBoundingClientRect();
-    const pad = 8;
-    const r = 8; // border-radius du trou
+    // Padding plus généreux pour mieux encadrer l'élément sur tous les écrans
+    const basePad = 16;
+    const r = 12; // border-radius du trou
     const vw = window.innerWidth;
     const vh = window.innerHeight;
 
     // Coordonnées du trou (en viewport, car le SVG est fixed)
-    const x = Math.max(0, rect.left - pad);
-    const y = Math.max(0, rect.top - pad);
-    const w = rect.width + pad * 2;
-    const h = rect.height + pad * 2;
+    // Ajouter un padding supplémentaire pour les petits éléments
+    const minWidth = 100;
+    const minHeight = 40;
+    const extraPadX = rect.width < minWidth ? (minWidth - rect.width) / 2 : 0;
+    const extraPadY = rect.height < minHeight ? (minHeight - rect.height) / 2 : 0;
+    
+    // Calculer le padding total pour chaque côté (symétrique)
+    const totalPadX = basePad + extraPadX;
+    const totalPadY = basePad + extraPadY;
+    
+    // Calculer à partir du centre de l'élément pour garantir la symétrie parfaite
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    // Largeur et hauteur finales du rectangle (élément + padding des deux côtés)
+    const finalWidth = rect.width + totalPadX * 2;
+    const finalHeight = rect.height + totalPadY * 2;
+    
+    // Position du rectangle (centré sur l'élément)
+    const x = Math.max(0, centerX - finalWidth / 2);
+    const y = Math.max(0, centerY - finalHeight / 2);
+    
+    // Ajuster la largeur si le rectangle dépasse à droite
+    const maxX = Math.min(vw, x + finalWidth);
+    const w = maxX - x;
+    const h = Math.min(vh, y + finalHeight) - y;
 
     this.els.svg.setAttribute('viewBox', `0 0 ${vw} ${vh}`);
     this.els.svg.innerHTML = `

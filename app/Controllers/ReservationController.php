@@ -367,6 +367,73 @@ class ReservationController extends BaseController
     }
 
     /**
+     * Mettre à jour la date et l'heure d'une réservation (AJAX)
+     */
+    public function updateDateTime()
+    {
+        $this->checkAccess();
+        $adminId = $_SESSION['admin_id'];
+
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Méthode non autorisée']);
+            exit;
+        }
+
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            echo json_encode(['success' => false, 'message' => 'Token CSRF invalide']);
+            exit;
+        }
+
+        $id = (int)($_POST['id'] ?? 0);
+        $reservationDate = $_POST['reservation_date'] ?? '';
+        $reservationTime = $_POST['reservation_time'] ?? '';
+
+        if (!$id || !$reservationDate || !$reservationTime) {
+            echo json_encode(['success' => false, 'message' => 'Paramètres invalides']);
+            exit;
+        }
+
+        // Valider le format de la date et de l'heure
+        $dateObj = \DateTime::createFromFormat('Y-m-d', $reservationDate);
+        $timeObj = \DateTime::createFromFormat('H:i', $reservationTime);
+        
+        if (!$dateObj || !$timeObj) {
+            echo json_encode(['success' => false, 'message' => 'Format de date ou heure invalide']);
+            exit;
+        }
+
+        $reservationModel = new Reservation($this->pdo);
+        
+        // Vérifier que la réservation appartient bien à cet admin
+        $reservation = $reservationModel->findById($id);
+        if (!$reservation || $reservation['admin_id'] != $adminId) {
+            echo json_encode(['success' => false, 'message' => 'Réservation introuvable']);
+            exit;
+        }
+
+        // Mettre à jour la date et l'heure
+        $stmt = $this->pdo->prepare("
+            UPDATE reservations 
+            SET reservation_date = ?, reservation_time = ?
+            WHERE id = ? AND admin_id = ?
+        ");
+        $result = $stmt->execute([$reservationDate, $reservationTime, $id, $adminId]);
+
+        if ($result) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Date et heure modifiées avec succès.',
+                'new_csrf_token' => $_SESSION['csrf_token'] ?? ''
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Erreur lors de la mise à jour.']);
+        }
+        exit;
+    }
+
+    /**
      * Mettre à jour le statut d'une réservation (AJAX)
      */
     public function updateStatus()
@@ -403,9 +470,9 @@ class ReservationController extends BaseController
             $extra['admin_notes'] = trim($_POST['admin_notes']);
         }
         
-        // Gérer l'attribution de table lors de la confirmation
-        if ($status === 'confirmed' && !empty($_POST['table_id'])) {
-            $extra['table_id'] = (int)$_POST['table_id'];
+        // Gérer l'attribution de table lors de la confirmation ou du changement de table
+        if ($status === 'confirmed' && isset($_POST['table_id'])) {
+            $extra['table_id'] = $_POST['table_id'] ? (int)$_POST['table_id'] : null;
         }
 
         $reservationModel = new Reservation($this->pdo);

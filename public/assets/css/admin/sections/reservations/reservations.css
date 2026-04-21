@@ -285,18 +285,24 @@
 
 .empty-state {
   text-align: center;
-  padding: 40px 20px;
+  padding: 60px 20px;
   color: var(--color-text-muted);
+  margin: 40px auto;
+  max-width: 600px;
+  background: var(--color-bg-alt);
+  border-radius: 12px;
+  border: 2px dashed var(--color-border);
 }
 
 .empty-state i {
-  font-size: 2.5rem;
-  margin-bottom: 12px;
+  font-size: 3rem;
+  margin-bottom: 16px;
   opacity: 0.4;
 }
 
 .empty-state p {
-  font-size: 0.95rem;
+  font-size: 1rem;
+  margin: 0;
 }
 
 .today-reservations-grid {
@@ -314,6 +320,8 @@
   padding: 16px;
   transition: all 0.2s;
   border-left: 4px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
 }
 
 .reservation-card.status-pending {
@@ -432,7 +440,7 @@
 .reservation-card-actions {
   display: flex;
   gap: 8px;
-  margin-top: 12px;
+  margin-top: auto;
   padding-top: 12px;
   border-top: 1px solid var(--color-border);
 }

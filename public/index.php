@@ -521,6 +521,11 @@ switch ($page) {
         $controller->updateStatus();
         break;
 
+    case 'reservation-update-datetime':
+        $controller = new ReservationController($pdo);
+        $controller->updateDateTime();
+        break;
+
     case 'reservation-delete':
         $controller = new ReservationController($pdo);
         $controller->deleteReservation();
