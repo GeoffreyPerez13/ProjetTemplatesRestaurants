@@ -336,6 +336,24 @@
 
 /* ==================== RESPONSIVE ==================== */
 
+@media (max-width: 500px) {
+  /* Réduire le padding gauche et droite de daily-menus-content */
+  #daily-menus-content {
+    padding-left: var(--spacing-xs);
+    padding-right: var(--spacing-xs);
+  }
+
+  /* Supprimer le margin de add-daily-menu-sub */
+  .add-daily-menu-sub {
+    margin: 0;
+  }
+
+  /* Mettre padding 0 pour add-daily-menu-content */
+  #add-daily-menu-content {
+    padding: 0;
+  }
+}
+
 @media (max-width: 600px) {
   .daily-menu-form .form-row {
     flex-direction: column;

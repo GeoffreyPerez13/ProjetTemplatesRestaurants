@@ -288,6 +288,15 @@
   }
 }
 
+/* Masquer les icônes des accordéons sur petits écrans (GLOBAL) */
+@media (max-width: 500px) {
+  .accordion-header h2 i,
+  .accordion-header h3 i,
+  .accordion-header h4 i {
+    display: none;
+  }
+}
+
 /* Animation smooth */
 .accordion-content,
 .dish-accordion-content {

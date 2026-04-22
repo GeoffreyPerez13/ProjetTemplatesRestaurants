@@ -171,7 +171,7 @@ body {
 /* ==================== HERO ==================== */
 .hero {
     position: relative;
-    padding: 140px 0 80px;
+    padding: 140px 0 40px;
     overflow: hidden;
     background: linear-gradient(180deg, var(--lp-bg-warm) 0%, var(--lp-bg) 100%);
 }
@@ -304,9 +304,7 @@ body {
 }
 
 .hero-trust {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    display: none;
 }
 
 .trust-avatars {
@@ -482,8 +480,7 @@ body {
 
 /* ==================== SOCIAL PROOF ==================== */
 .social-proof {
-    padding: 40px 0;
-    border-bottom: 1px solid var(--lp-border);
+    display: none;
 }
 
 .social-proof-label {
@@ -551,7 +548,7 @@ body {
 
 /* ==================== FEATURES ==================== */
 .features {
-    padding: 100px 0;
+    padding: 60px 0 100px;
 }
 
 .features-grid {
@@ -794,9 +791,7 @@ body {
 }
 
 .pricing-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: none;
     gap: 12px;
     margin-bottom: 48px;
 }
@@ -1567,7 +1562,7 @@ body {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 850px) {
     .nav-links,
     .nav-actions {
         display: none;
@@ -1689,7 +1684,7 @@ body {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 400px) {
     .hero {
         padding: 100px 0 40px;
     }
@@ -1722,6 +1717,10 @@ body {
         padding: 16px;
     }
 
+    .option-icon {
+        text-align: center;
+    }
+
     .option-price {
         text-align: center;
     }
@@ -1737,6 +1736,28 @@ body {
 
     .demo-card {
         padding: 20px 16px;
+    }
+
+    /* Masquer demo-visual */
+    .demo-visual {
+        display: none;
+    }
+
+    /* Centrer demo-actions et enlever les icônes */
+    .demo-actions {
+        justify-content: center;
+    }
+
+    .demo-actions .btn-demo-primary i,
+    .demo-actions .btn-demo-secondary i {
+        display: none;
+    }
+
+    .demo-actions .btn-demo-primary,
+    .demo-actions .btn-demo-secondary {
+        justify-content: center;
+        text-align: center;
+        width: 100%;
     }
 }
 

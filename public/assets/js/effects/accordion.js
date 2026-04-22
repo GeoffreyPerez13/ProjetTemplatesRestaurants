@@ -61,7 +61,7 @@
    * Configure les accordéons principaux
    */
   function setupMainAccordions() {
-    document.querySelectorAll(".accordion-header").forEach((header) => {
+    document.querySelectorAll(".accordion-header, .sub-header").forEach((header) => {
       const toggle = header.querySelector(".accordion-toggle");
       if (!toggle) return;
 

@@ -2,21 +2,33 @@
 $title = "Connexion Admin";
 $scripts = ["js/sections/login/login.js"];
 
+// Transférer les messages vers sessionStorage pour affichage en toast
+if (!empty($success_message)) {
+    ?>
+    <script>
+    sessionStorage.setItem('pendingToast', JSON.stringify({
+        message: <?= json_encode($success_message) ?>,
+        type: 'success'
+    }));
+    </script>
+    <?php
+}
+if (!empty($error_message)) {
+    ?>
+    <script>
+    sessionStorage.setItem('pendingToast', JSON.stringify({
+        message: <?= json_encode($error_message) ?>,
+        type: 'error'
+    }));
+    </script>
+    <?php
+}
+
 require __DIR__ . '/../partials/header.php';
 ?>
 
 <div class="login-container">
     <h2>Connexion administrateur</h2>
-
-    <!-- Message de succès après création de compte -->
-    <?php if (!empty($success_message)): ?>
-        <p class="message-success"><?= htmlspecialchars($success_message) ?></p>
-    <?php endif; ?>
-
-    <!-- Message d'erreur si identifiant ou mot de passe incorrect -->
-    <?php if (!empty($error_message)): ?>
-        <p class="message-error"><?= htmlspecialchars($error_message) ?></p>
-    <?php endif; ?>
 
     <!-- Formulaire de connexion -->
     <form method="post">

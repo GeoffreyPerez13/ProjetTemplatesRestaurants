@@ -1,6 +1,29 @@
 <?php
 $title = "Créer mon compte";
 $scripts = ["js/sections/register/register.js"];
+
+// Transférer les messages vers sessionStorage pour affichage en toast
+if (!empty($success_message)) {
+    ?>
+    <script>
+    sessionStorage.setItem('pendingToast', JSON.stringify({
+        message: <?= json_encode($success_message) ?>,
+        type: 'success'
+    }));
+    </script>
+    <?php
+}
+if (!empty($error_message)) {
+    ?>
+    <script>
+    sessionStorage.setItem('pendingToast', JSON.stringify({
+        message: <?= json_encode($error_message) ?>,
+        type: 'error'
+    }));
+    </script>
+    <?php
+}
+
 require __DIR__ . '/../partials/header.php';
 ?>
 
@@ -16,14 +39,6 @@ require __DIR__ . '/../partials/header.php';
         <i class="fas fa-check-circle"></i>
         <span>Abonnement <strong>Basique</strong> — Site vitrine complet, carte modifiable, templates, SEO</span>
     </div>
-
-    <?php if (!empty($success_message)): ?>
-        <p class="message-success"><?= $success_message ?></p>
-    <?php endif; ?>
-
-    <?php if (!empty($error_message)): ?>
-        <p class="message-error"><?= $error_message ?></p>
-    <?php endif; ?>
 
     <form method="post" action="?page=auto-register" id="register-form">
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">

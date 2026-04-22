@@ -198,6 +198,7 @@
   padding: 12px 20px;
   font-size: 1rem;
   font-weight: 500;
+  border-radius: var(--radius-md);
 }
 
 .upload-actions .btn i {
@@ -767,6 +768,15 @@
 }
 
 /* ==================== RESPONSIVE ==================== */
+
+/* Réduire largeur du bouton Supprimer dans les image-card */
+.image-card .btn.danger {
+  max-width: 120px;
+  padding: 8px 12px;
+  font-size: 0.9em;
+  margin: 8px auto 0;
+}
+
 @media (max-width: 1024px) {
   .categories-grid {
     gap: 20px;
@@ -797,10 +807,14 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 769px) {
   .edit-card-container {
-    padding: var(--spacing-md);
-    margin: 20px auto;
+    padding: var(--spacing-sm);
+    margin: 15px auto;
+  }
+
+  .edit-card-page {
+    padding: 15px;
   }
 
   .form-row {
@@ -895,6 +909,60 @@
   }
 }
 
+/* Optimisations pour écrans moyens */
+@media (max-width: 500px) {
+  /* Masquer les icônes des boutons */
+  .upload-actions .btn i,
+  #start-reorder-btn i,
+  #clearSelection i,
+  .daily-menu-form .btn i,
+  .add-daily-menu-sub .accordion-header i.fa-plus-circle {
+    display: none;
+  }
+
+  /* Masquer les icônes des accordéons */
+  .accordion-header h2 i,
+  .accordion-header h3 i {
+    display: none;
+  }
+
+  /* Réduire padding des contenus d'accordéon */
+  #images-list-content,
+  #upload-images-content,
+  #add-daily-menu-content {
+    padding-left: var(--spacing-sm);
+    padding-right: var(--spacing-sm);
+  }
+
+  /* Changer le texte du bouton Réorganiser */
+  #start-reorder-btn::after {
+    content: 'Réorganiser';
+  }
+  
+  #start-reorder-btn {
+    font-size: 0;
+  }
+  
+  #start-reorder-btn::after {
+    font-size: 1rem;
+  }
+
+  /* Ajuster les formulaires dans add-daily-menu */
+  .daily-menu-form {
+    padding: var(--spacing-sm);
+  }
+
+  .daily-menu-form .form-group {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .daily-menu-form input,
+  .daily-menu-form textarea,
+  .daily-menu-form select {
+    width: 100%;
+  }
+}
+
 @media (max-width: 600px) {
   .btn {
     width: 100%;
@@ -970,9 +1038,35 @@
   }
 }
 
+/* Optimisations pour très petits écrans */
+@media (max-width: 400px) {
+  /* Masquer le nombre d'images dans le bouton upload */
+  #uploadCount {
+    display: none;
+  }
+
+  #uploadButton::after {
+    content: '';
+  }
+
+  /* Masquer texte "Tout sélectionner" et centrer la checkbox */
+  .select-all-label span {
+    display: none;
+  }
+
+  .select-all-label {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .images-selection-bar {
+    justify-content: center;
+  }
+}
+
 @media (max-width: 480px) {
   .edit-card-container {
-    padding: var(--spacing-sm);
+    padding: var(--spacing-xs);
   }
 
   .accordion-header h2 {

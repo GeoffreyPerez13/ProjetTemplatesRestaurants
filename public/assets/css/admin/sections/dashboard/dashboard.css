@@ -612,6 +612,18 @@ html.dark-mode .dark-mode-toggle .fa-sun {
     }
 }
 
+/* Masquer les icônes et flèches du menu sur très petits écrans */
+@media (max-width: 400px) {
+    .menu-item-icon,
+    .menu-item-arrow {
+        display: none;
+    }
+    
+    .mobile-menu-item {
+        padding-left: 16px;
+    }
+}
+
 /* Desktop : à partir de 769px */
 @media (min-width: 769px) {
     .dashboard {
@@ -623,14 +635,6 @@ html.dark-mode .dark-mode-toggle .fa-sun {
     .dashboard-desktop .dashboard-top-buttons {
         grid-template-columns: repeat(4, 1fr);
         gap: 20px;
-    }
-    
-    /* Desktop : afficher la zone bottom */
-    .dashboard-bottom.desktop-bottom {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
     }
     
     /* Desktop : cacher le menu mobile */
@@ -651,6 +655,21 @@ html.dark-mode .dark-mode-toggle .fa-sun {
     /* Desktop : reset de la position du bouton settings */
     .settings-icon-btn {
         position: static;
+    }
+    
+    /* Desktop : afficher la zone bottom */
+    .dashboard-bottom.desktop-bottom {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+/* Entre 769px et 1000px : afficher 3 boutons par ligne */
+@media (min-width: 769px) and (max-width: 1000px) {
+    .dashboard-desktop .dashboard-top-buttons {
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 

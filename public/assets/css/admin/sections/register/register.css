@@ -236,8 +236,6 @@
   }
   
   .register-container .form-footer {
-    padding-left: var(--spacing-md) !important;
-    padding-right: var(--spacing-md) !important;
     text-align: center !important;
   }
   
@@ -265,8 +263,6 @@
 
 @media (max-width: 480px) {
   .register-container {
-    padding-left: var(--spacing-xs) !important;
-    padding-right: var(--spacing-xs) !important;
     max-width: 100% !important;
   }
   
@@ -290,8 +286,6 @@
   }
   
   .register-container .form-footer {
-    padding-left: var(--spacing-sm) !important;
-    padding-right: var(--spacing-sm) !important;
     text-align: center !important;
   }
 }

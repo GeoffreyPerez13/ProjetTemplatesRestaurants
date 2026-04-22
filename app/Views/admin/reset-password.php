@@ -5,6 +5,28 @@ $scripts = [
     "js/sections/reset-password/reset-password.js"
 ];
 
+// Transférer les messages vers sessionStorage pour affichage en toast
+if (!empty($success_message)) {
+    ?>
+    <script>
+    sessionStorage.setItem('pendingToast', JSON.stringify({
+        message: <?= json_encode($success_message) ?>,
+        type: 'success'
+    }));
+    </script>
+    <?php
+}
+if (!empty($error_message)) {
+    ?>
+    <script>
+    sessionStorage.setItem('pendingToast', JSON.stringify({
+        message: <?= json_encode($error_message) ?>,
+        type: 'error'
+    }));
+    </script>
+    <?php
+}
+
 require __DIR__ . '/../partials/header.php';
 ?>
 <div class="reset-password-container">

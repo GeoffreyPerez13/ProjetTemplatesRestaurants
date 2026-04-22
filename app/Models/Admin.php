@@ -551,6 +551,8 @@ class Admin
         $this->carte_mode = $data['carte_mode'] ?? 'editable';
         $this->reset_token = $data['reset_token'] ?? null;
         $this->reset_token_expiry = $data['reset_token_expiry'] ?? null;
+        $this->email_verified = $data['email_verified'] ?? 1;
+        $this->verification_token = $data['verification_token'] ?? null;
     }
 
     // --- RÉINITIALISATION DE MOT DE PASSE ---
