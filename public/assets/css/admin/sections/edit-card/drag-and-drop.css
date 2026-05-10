@@ -22,7 +22,7 @@
   gap: 15px !important;
   flex-wrap: nowrap !important;
   justify-content: center !important;
-  align-items: center !important;
+  align-items: stretch !important;
 }
 
 #reorder-buttons.active,
@@ -96,6 +96,7 @@
   border-radius: var(--radius-lg);
   border: 3px dashed var(--color-primary);
   animation: pulse-border 2s infinite;
+  margin-top: 10px;
 }
 
 .images-grid.reorder-mode .image-card {
@@ -362,7 +363,7 @@
 }
 
 /* Responsive pour les contrôles de réorganisation */
-@media (max-width: 768px) {
+@media (max-width: 769px) {
   .reorder-controls {
     flex-direction: column;
     gap: 8px;
@@ -374,12 +375,24 @@
   }
   
   #reorder-buttons {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: column !important;
+    flex-wrap: wrap !important;
+    align-items: stretch !important;
+  }
+  
+  #reorder-buttons.active,
+  #reorder-buttons[style*="display: flex"],
+  #reorder-buttons[style*="display: block"] {
+    flex-direction: column !important;
   }
   
   #reorder-buttons .btn {
-    width: 100%;
+    flex: unset !important;
+    width: calc(100% - 20px) !important;
+    min-width: unset !important;
+    max-width: calc(100% - 20px) !important;
+    margin-left: 10px;
+    margin-right: 10px;
   }
   
   .reorder-feedback {
@@ -420,4 +433,25 @@
     width: 100%;
     justify-content: center;
   }
+}
+
+@media (max-width: 500px) {
+  /* Masquer les icônes des boutons reorder */
+  #reorder-buttons .btn i {
+    display: none;
+  }
+
+  /* Pleine largeur pour les boutons reorder */
+  #reorder-buttons .btn {
+    width: calc(100% - 20px) !important;
+    min-width: unset !important;
+    max-width: calc(100% - 20px) !important;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+}
+
+/* Corriger le border-radius du bouton Annuler dans reorder-buttons */
+#cancel-order-btn {
+  border-radius: var(--radius-sm);
 }

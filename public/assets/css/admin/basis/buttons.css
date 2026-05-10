@@ -247,3 +247,11 @@ button,
     padding: 10px 16px;
   }
 }
+
+@media (max-width: 500px) {
+  .btn i,
+  .btn-primary i,
+  .btn-secondary i {
+    display: none;
+  }
+}

@@ -672,7 +672,7 @@ require __DIR__ . '/../partials/header.php';
                                 <!-- Allergènes pour le nouveau plat (accordéon) -->
                                 <div class="allergenes-accordion">
                                     <button type="button" class="allergenes-accordion-toggle" data-target="allergenes-add-<?= $cat['id'] ?>">
-                                        <span><i class="fas fa-exclamation-triangle"></i> Allergènes (optionnel)</span>
+                                        <span><i class="fas fa-exclamation-triangle"></i> Allergènes</span>
                                         <i class="fas fa-chevron-down"></i>
                                     </button>
                                     <div class="allergenes-accordion-content collapsed" id="allergenes-add-<?= $cat['id'] ?>">

@@ -527,10 +527,51 @@
     font-size: 0.85em;
   }
 
-  /* Stack categories on mobile : 4 colonnes correctes */
-  .quick-add-categories-accordion .quick-add-table-header,
+  /* Stack categories on mobile */
+  .quick-add-categories-accordion .quick-add-table-header {
+    display: none;
+  }
+
   .quick-add-categories-accordion .quick-add-row {
-    grid-template-columns: 1fr 70px 1fr 46px;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .quick-add-categories-accordion .quick-add-col-name::before {
+    content: "Nom : ";
+    font-weight: 600;
+    color: var(--color-text-light);
+  }
+
+  .quick-add-categories-accordion .quick-add-col-order::before {
+    content: "Ordre : ";
+    font-weight: 600;
+    color: var(--color-text-light);
+  }
+
+  .quick-add-categories-accordion .quick-add-col-image::before {
+    content: "Image : ";
+    font-weight: 600;
+    color: var(--color-text-light);
+  }
+
+  .quick-add-categories-accordion .quick-add-col-name,
+  .quick-add-categories-accordion .quick-add-col-order,
+  .quick-add-categories-accordion .quick-add-col-image {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .quick-add-categories-accordion .quick-add-col-name .quick-add-input,
+  .quick-add-categories-accordion .quick-add-col-order .quick-add-input-small,
+  .quick-add-categories-accordion .quick-add-col-image .quick-add-file {
+    flex: 1;
+  }
+
+  .quick-add-categories-accordion .quick-add-col-order .quick-add-input-small {
+    text-align: left;
   }
 
   /* Stack dishes on mobile */
@@ -570,36 +611,3 @@
   }
 }
 
-@media (max-width: 480px) {
-  .quick-add-categories-accordion .quick-add-table-header {
-    display: none;
-  }
-
-  /* Grille 2 lignes : [nom | ordre | btn] puis [image pleine largeur] */
-  .quick-add-categories-accordion .quick-add-row {
-    grid-template-columns: 1fr 70px 46px;
-    grid-template-rows: auto auto;
-    gap: 8px;
-  }
-
-  .quick-add-categories-accordion .quick-add-col-name {
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .quick-add-categories-accordion .quick-add-col-order {
-    grid-column: 2;
-    grid-row: 1;
-  }
-
-  .quick-add-categories-accordion .quick-add-col-actions {
-    grid-column: 3;
-    grid-row: 1;
-    justify-content: center;
-  }
-
-  .quick-add-categories-accordion .quick-add-col-image {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-}

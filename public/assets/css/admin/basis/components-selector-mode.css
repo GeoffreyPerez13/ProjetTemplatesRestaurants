@@ -522,6 +522,58 @@
   font-size: 0.8em;
 }
 
+/* ==================== INVALID FILES ==================== */
+.preview-item.invalid {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.preview-item.invalid:hover {
+  transform: none;
+}
+
+.preview-item.invalid .preview-image-container {
+  background: var(--color-bg-alt);
+  border-color: var(--color-danger);
+  border-style: dashed;
+}
+
+.invalid-file-icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  color: var(--color-danger);
+  font-size: 48px;
+}
+
+.invalid-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(220, 38, 38, 0.9);
+  color: white;
+  padding: 4px;
+  font-size: 0.7em;
+  font-weight: 600;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.preview-type.invalid-type {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+/* Dark mode support */
+body.dark-mode .invalid-file-icon {
+  background: linear-gradient(135deg, #450a0a 0%, #7f1d1d 100%);
+}
+
 /* ==================== EMPTY STATES ==================== */
 .no-images, .no-dishes {
   text-align: center;

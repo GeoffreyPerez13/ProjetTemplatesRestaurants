@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const imageCounter = document.getElementById("imageCounter");
 
   let selectedFiles = [];
+  let invalidFiles = [];
 
   // Gestion du drag & drop
   if (uploadArea && fileInput) {
@@ -64,16 +65,68 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Gérer les fichiers sélectionnés
   function handleFiles(files) {
-    selectedFiles = Array.from(files);
+    const allFiles = Array.from(files);
+    selectedFiles = [];
+    invalidFiles = [];
+
+    // Séparer les fichiers valides et invalides
+    allFiles.forEach(file => {
+      if (isValidFileType(file)) {
+        selectedFiles.push(file);
+      } else {
+        invalidFiles.push(file);
+      }
+    });
+
     updateFileList();
     updatePreview();
     updateCounter();
     updateUploadButton();
     updateSizeGauge();
 
+    // Afficher un message pour les fichiers invalides
+    if (invalidFiles.length > 0) {
+      showInvalidFilesWarning();
+    }
+
     // Afficher le bouton d'annulation
-    if (selectedFiles.length > 0) {
+    if (selectedFiles.length > 0 || invalidFiles.length > 0) {
       clearSelection.style.display = "inline-block";
+    }
+  }
+
+  // Vérifier si le type de fichier est valide
+  function isValidFileType(file) {
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "application/pdf"
+    ];
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf'];
+    const extension = file.name.split('.').pop().toLowerCase();
+    
+    return allowedTypes.includes(file.type) && allowedExtensions.includes(extension);
+  }
+
+  // Afficher un message d'avertissement pour les fichiers invalides
+  function showInvalidFilesWarning() {
+    const fileNames = invalidFiles.map(f => f.name).join(', ');
+    const count = invalidFiles.length;
+    const message = count === 1
+      ? `Le fichier "${fileNames}" n'est pas compatible. Formats acceptés : JPG, PNG, GIF, WebP, PDF.`
+      : `${count} fichiers ne sont pas compatibles : ${fileNames}. Formats acceptés : JPG, PNG, GIF, WebP, PDF.`;
+
+    if (typeof Swal !== 'undefined') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Fichiers non compatibles',
+        html: message,
+        confirmButtonText: 'Compris'
+      });
+    } else {
+      alert(message);
     }
   }
 
@@ -107,6 +160,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function updatePreview() {
     imagePreview.innerHTML = "";
 
+    // Afficher les fichiers valides
     selectedFiles.forEach((file, index) => {
       if (file.type.startsWith("image/")) {
         const reader = new FileReader();
@@ -174,6 +228,30 @@ document.addEventListener("DOMContentLoaded", function () {
           });
       }
     });
+
+    // Afficher les fichiers invalides (grisés)
+    invalidFiles.forEach((file, index) => {
+      const previewItem = document.createElement("div");
+      previewItem.className = "preview-item invalid";
+      previewItem.innerHTML = `
+        <div class="preview-image-container">
+          <div class="invalid-file-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <div class="invalid-overlay">Non compatible</div>
+        </div>
+        <div class="preview-info">
+          <span class="preview-name">${truncateFileName(file.name, 15)}</span>
+          <span class="preview-type invalid-type">${getFileExtension(file)}</span>
+        </div>
+      `;
+      imagePreview.appendChild(previewItem);
+    });
+  }
+
+  // Obtenir l'extension du fichier
+  function getFileExtension(file) {
+    return file.name.split('.').pop().toUpperCase();
   }
 
   // Mettre à jour le compteur
@@ -218,6 +296,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (clearSelection) {
     clearSelection.addEventListener("click", function () {
       selectedFiles = [];
+      invalidFiles = [];
       updateFileList();
       updatePreview();
       updateCounter();

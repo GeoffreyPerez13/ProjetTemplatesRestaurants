@@ -198,7 +198,7 @@
   padding: 12px 20px;
   font-size: 1rem;
   font-weight: 500;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
 }
 
 .upload-actions .btn i {
@@ -712,7 +712,7 @@
   font-size: 0.95em;
   border: none;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   transition: all 0.3s ease;
   font-weight: 500;
   text-decoration: none;
@@ -769,12 +769,12 @@
 
 /* ==================== RESPONSIVE ==================== */
 
-/* Réduire largeur du bouton Supprimer dans les image-card */
-.image-card .btn.danger {
-  max-width: 120px;
-  padding: 8px 12px;
-  font-size: 0.9em;
-  margin: 8px auto 0;
+/* Bouton Supprimer dans image-actions : pleine largeur avec marge latérale */
+.image-actions .btn.danger {
+  width: calc(100% - 20px);
+  margin-left: 10px;
+  margin-right: 10px;
+  border-radius: var(--radius-sm);
 }
 
 @media (max-width: 1024px) {
@@ -907,6 +907,15 @@
   .btn-allergens-toggle {
     width: 100% !important;
   }
+
+  /* Padding 0 pour les accordéons edit-dishes */
+  [id^="edit-dishes-"].accordion-content {
+    padding: 0 !important;
+  }
+
+  .dish-edit-container {
+    padding: 20px;
+  }
 }
 
 /* Optimisations pour écrans moyens */
@@ -920,9 +929,13 @@
     display: none;
   }
 
-  /* Masquer les icônes des accordéons */
+  /* Masquer les icônes des accordéons, noms de catégories et titres */
   .accordion-header h2 i,
-  .accordion-header h3 i {
+  .accordion-header h3 i,
+  .dish-accordion-header i,
+  .allergenes-accordion i,
+  .category-left strong i,
+  .template-header h2 i {
     display: none;
   }
 
