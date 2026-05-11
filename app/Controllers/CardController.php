@@ -914,9 +914,14 @@ class CardController extends BaseController
     {
         $carteImages = $carteImageModel->getAllByAdmin($admin_id);
 
+        // Récupération des allergènes (nécessaire même en mode images car la vue est partagée)
+        $allergeneModel = new Allergene($this->pdo);
+        $allergenes = $allergeneModel->getAll();
+
         return [
             'currentMode' => 'images',
             'carteImages' => $carteImages,
+            'allergenes' => $allergenes,
             'success_message' => $messages['success_message'] ?? null,
             'error_message' => $messages['error_message'] ?? null,
             'error_fields' => $error_fields,

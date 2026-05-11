@@ -11,6 +11,14 @@
     text-align: left;
 }
 
+/* Masquer les icônes des boutons SweetAlert à 500px ou moins */
+@media (max-width: 500px) {
+    .swal2-confirm i,
+    .swal2-cancel i {
+        display: none !important;
+    }
+}
+
 /* Dark mode support */
 body.dark-mode .swal2-popup {
     background: #1a1a1a;

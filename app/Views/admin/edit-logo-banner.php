@@ -46,7 +46,6 @@ require __DIR__ . '/../partials/header.php';
                 <div class="logo-display">
                     <div class="logo-image-container">
                         <img src="<?= htmlspecialchars($current_logo['public_url']) ?>" alt="Logo actuel" class="current-logo-image" id="current-logo-image">
-                        <div class="logo-overlay"><button type="button" class="btn-icon enlarge-logo" title="Agrandir"><i class="fas fa-search-plus"></i></button></div>
                     </div>
                     <div class="logo-info">
                         <p><strong>Nom du fichier :</strong> <?= htmlspecialchars($current_logo['filename']) ?></p>
@@ -105,7 +104,6 @@ require __DIR__ . '/../partials/header.php';
                 <div class="banner-display">
                     <div class="banner-image-container">
                         <img src="<?= htmlspecialchars($current_banner['public_url']) ?>" alt="Bannière actuelle" class="current-banner-image" id="current-banner-image">
-                        <div class="banner-overlay"><button type="button" class="btn-icon enlarge-banner" title="Agrandir"><i class="fas fa-search-plus"></i></button></div>
                     </div>
                     <div class="banner-info">
                         <p><strong>Nom du fichier :</strong> <?= htmlspecialchars($current_banner['filename']) ?></p>
@@ -228,19 +226,9 @@ require __DIR__ . '/../partials/header.php';
             <i class="fas fa-info-circle"></i> Ce bouton enregistre tous les formulaires actifs de la page en une seule fois.
         </p>
     </div>
-</div>
 
-<!-- Lightbox globale -->
-<div id="media-lightbox" class="media-lightbox">
-    <div class="lightbox-content">
-        <button class="lightbox-close" id="lightboxClose">&times;</button>
-        <img id="lightbox-image" src="" alt="">
-        <div class="lightbox-caption" id="lightbox-caption"></div>
-    </div>
-</div>
-
-<!-- Définition des étapes du tour guidé pour cette page -->
-<script>
+    <!-- Définition des étapes du tour guidé pour cette page -->
+    <script>
 const tourSteps = [
     {
         element: '.global-accordion-controls',
@@ -365,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     title: 'Tout enregistrer',
-                    html: `<p>Vous allez enregistrer :</p><ul style="text-align: left;">${formsToSubmit.map(f => '<li>' + f.name + '</li>').join('')}</ul><p>Continuer ?</p>`,
+                    html: `<div style="text-align: left; padding-left: 20px;"><p>Vous allez enregistrer :</p><ul style="margin: 10px 0; padding-left: 20px;">${formsToSubmit.map(f => '<li>' + f.name + '</li>').join('')}</ul><p style="margin-top: 15px;">Continuer ?</p></div>`,
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#10b981',

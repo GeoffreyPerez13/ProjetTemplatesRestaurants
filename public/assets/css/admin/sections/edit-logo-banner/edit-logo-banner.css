@@ -165,7 +165,7 @@
 .delete-banner-form .btn.danger {
     background: var(--color-danger);
     padding: 12px 25px;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     font-weight: 600;
     box-shadow: var(--shadow-sm);
     transition: all var(--transition-normal);
@@ -508,7 +508,7 @@
     background: var(--color-danger);
     border: none;
     padding: 12px 25px;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     color: white;
     font-weight: 600;
     cursor: pointer;
@@ -518,6 +518,7 @@
     gap: 8px;
     font-size: 14px;
     box-shadow: var(--shadow-sm);
+    margin: 0 10px;
 }
 
 .remove-file-btn:hover {
@@ -725,6 +726,10 @@
     display: flex;
     gap: 15px;
     margin-top: 20px;
+}
+
+.banner-text-form .form-actions .btn {
+    border-radius: var(--radius-sm);
 }
 
 @media (max-width: 480px) {
@@ -935,6 +940,95 @@
     .lightbox-caption {
         padding: 12px 15px;
         font-size: 13px;
+    }
+}
+
+@media (max-width: 500px) {
+    /* Masquer toutes les icônes des boutons */
+    .btn i,
+    .btn-icon i,
+    .select-file-btn i,
+    .remove-file-btn i {
+        display: none;
+    }
+
+    /* Masquer les fa-info-circle, fa-file-alt et fa-file-image */
+    .fa-info-circle,
+    .fa-file-alt,
+    .fa-file-image {
+        display: none !important;
+    }
+
+    /* Masquer les icônes des titres */
+    .current-logo-section h2 i,
+    .current-banner-section h2 i,
+    .upload-logo-section h2 i,
+    .upload-banner-section h2 i,
+    .template-header h2 i {
+        display: none;
+    }
+
+    /* Améliorer l'aperçu fichier : éviter dépassement */
+    .preview-side-by-side {
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .preview-image-column {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .preview-info-column {
+        width: 100%;
+        overflow: hidden;
+    }
+
+    /* Mettre le label (strong) au-dessus de la valeur (span) */
+    .file-info-name-side {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        word-break: break-all;
+        overflow-wrap: break-word;
+    }
+
+    .file-info-size-side,
+    .file-info-type-side,
+    .file-info-dimensions-side {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+
+    .file-info-side p {
+        word-break: break-all;
+        overflow-wrap: break-word;
+    }
+
+    /* Corriger affichage logo/bannière actuel */
+    .logo-info p,
+    .banner-info p {
+        word-break: break-all;
+        overflow-wrap: break-word;
+    }
+
+    .delete-logo-form .btn.danger,
+    .delete-banner-form .btn.danger {
+        width: calc(100% - 20px);
+        margin-left: 10px;
+        margin-right: 10px;
+        justify-content: center;
+    }
+
+    /* Border-radius correct pour boutons texte bannière */
+    .banner-text-form .form-actions .btn {
+        border-radius: var(--radius-sm);
+    }
+
+    .form-info {
+        margin-top: 0;
     }
 }
 

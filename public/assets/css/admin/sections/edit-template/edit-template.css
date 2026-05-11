@@ -588,7 +588,7 @@ html.dark-mode .active-badge {
 }
 
 /* ==================== RESPONSIVE ACTIONS ==================== */
-@media (max-width: 400px) {
+@media (max-width: 500px) {
     .template-actions {
         flex-direction: column;
         gap: var(--spacing-xs);
@@ -607,6 +607,11 @@ html.dark-mode .active-badge {
     .template-actions .template-badge {
         order: 1;
         width: 100%;
+    }
+
+    /* Garder l'icône fa-eye visible dans le bouton preview */
+    .template-actions .btn-outline i {
+        display: inline-block !important;
     }
 }
 

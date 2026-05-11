@@ -682,15 +682,17 @@ require __DIR__ . '/../partials/header.php';
                                             </button>
                                         </div>
                                         <div class="allergenes-grid">
-                                            <?php foreach ($allergenes as $allergene): ?>
-                                                <label class="allergene-checkbox">
-                                                    <input type="checkbox" name="allergenes[]" value="<?= $allergene['id'] ?>">
-                                                    <?php if (!empty($allergene['icone'])): ?>
-                                                        <i class="fas <?= htmlspecialchars($allergene['icone']) ?>"></i>
-                                                    <?php endif; ?>
-                                                    <?= htmlspecialchars($allergene['nom']) ?>
-                                                </label>
-                                            <?php endforeach; ?>
+                                            <?php if (isset($allergenes) && is_array($allergenes)): ?>
+                                                <?php foreach ($allergenes as $allergene): ?>
+                                                    <label class="allergene-checkbox">
+                                                        <input type="checkbox" name="allergenes[]" value="<?= $allergene['id'] ?>">
+                                                        <?php if (!empty($allergene['icone'])): ?>
+                                                            <i class="fas <?= htmlspecialchars($allergene['icone']) ?>"></i>
+                                                        <?php endif; ?>
+                                                        <?= htmlspecialchars($allergene['nom']) ?>
+                                                    </label>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
                                         </div>
                                         <small>Sélectionnez les allergènes présents dans ce plat.</small>
                                     </div>

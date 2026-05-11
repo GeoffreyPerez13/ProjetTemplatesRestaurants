@@ -326,6 +326,9 @@
   padding: var(--spacing-lg);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
+  overflow: hidden;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .info-row {
@@ -351,6 +354,9 @@
 .info-value {
   flex: 1;
   color: var(--color-text);
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 0;
 }
 
 /* Lien de réinitialisation de mot de passe */
@@ -571,6 +577,13 @@
 
   .settings-content {
     padding: 20px;
+    overflow: hidden;
+  }
+
+  .settings-content h1,
+  .settings-content h2 {
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 
   .info-row {
