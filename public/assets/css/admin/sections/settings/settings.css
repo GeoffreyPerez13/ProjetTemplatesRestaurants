@@ -376,47 +376,58 @@
 }
 
 /* ==================== STYLES PASSWORD (comme register) ==================== */
-.settings-section .password-toggle-btn {
-  border-left: none;
-}
-
 .password-input-group {
-  display: flex;
   position: relative;
   margin-bottom: 15px;
 }
 
 .password-input-wrapper {
-  flex: 1;
+  width: 100%;
 }
 
 .password-input-group input {
   width: 100%;
-  padding: 10px 12px;
+  padding: 10px 40px 10px 12px;
   border: 2px solid var(--color-border);
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+  border-radius: var(--radius-sm);
   font-size: 0.875rem;
   transition: border-color var(--transition-fast);
 }
 
 .password-toggle-btn {
-  padding: 10px 12px;
-  background: var(--color-bg-alt);
-  border: 2px solid var(--color-border);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
   cursor: pointer;
   color: var(--color-text-muted);
-  transition: all var(--transition-fast);
-  font-size: 0.875rem;
+  transition: color var(--transition-fast);
+  font-size: 0.95rem;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .password-toggle-btn:hover {
-  background: var(--color-bg-warm);
+  color: var(--color-primary);
 }
 
 .password-toggle-btn:focus {
   outline: none;
-  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+@media (max-width: 500px) {
+  .password-input-group input::placeholder {
+    color: transparent !important;
+  }
+
+  .help-text .fa-lightbulb {
+    display: none;
+  }
 }
 
 /* Indicateur de force du mot de passe */
@@ -569,6 +580,10 @@
   /* Afficher le menu mobile et cacher la sidebar */
   .settings-mobile-menu {
     display: block;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 10px 0;
   }
 
   .settings-sidebar {
@@ -595,10 +610,17 @@
     margin-bottom: 5px;
   }
 
-  .tooltip-content {
-    width: 250px;
-    right: auto;
-    left: 0;
+  .option-tooltip {
+    display: none;
+  }
+
+  .options-list {
+    padding: 0;
+  }
+
+  .options-actions {
+    margin-left: 0;
+    margin-right: 0;
   }
 
   .option-buttons {

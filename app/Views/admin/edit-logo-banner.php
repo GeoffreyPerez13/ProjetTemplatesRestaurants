@@ -1,4 +1,11 @@
 <?php
+
+/** @var string $csrf_token */
+/** @var array|null $current_logo */
+/** @var array|null $current_banner */
+/** @var string $closeAccordion */
+/** @var string $openAccordion */
+
 $title = "Modifier les médias";
 $scripts = [
     "js/sections/edit-logo-banner/edit-logo-banner.js",

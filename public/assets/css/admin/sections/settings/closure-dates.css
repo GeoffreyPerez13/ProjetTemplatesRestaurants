@@ -297,12 +297,38 @@
 }
 
 @media (max-width: 768px) {
+  #closure-dates-content {
+    padding: 0;
+  }
+
   .closure-dates-container {
     padding: 16px;
+    overflow: hidden;
+  }
+
+  .closure-dates-header {
+    flex-direction: column;
+    text-align: center;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .closure-dates-info {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .closure-dates-info i {
+    display: none;
+  }
+
+  .closure-calendar-container {
+    overflow-x: auto;
   }
 
   .calendar-grid {
     gap: 4px;
+    min-width: 280px;
   }
 
   .calendar-day {
@@ -325,17 +351,20 @@
   .closure-dates-actions .btn {
     width: 100%;
   }
-
 }
 
 /* Contrer la règle globale edit-card.css : .btn { width:100% } sous 600px */
 @media (max-width: 600px) {
   .calendar-header .btn.small {
     width: auto;
-    min-width: 36px;
-    height: 36px;
-    padding: 0 10px;
-    font-size: inherit;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    font-size: 0.75rem;
+  }
+
+  .calendar-header .btn.small i {
+    display: inline-block !important;
   }
 
   .btn-clear-dates {
