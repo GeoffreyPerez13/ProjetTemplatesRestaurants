@@ -1,4 +1,8 @@
 <?php
+
+/** @var string $csrf_token */
+/** @var string $current_section */
+
 $title = $title ?? "Paramètres";
 $scripts = [
     "js/sections/settings/settings.js",
@@ -548,10 +552,10 @@ if (!empty($_SESSION['pendingToast'])) {
                     </div>
                 <?php elseif ($hasPremiumSubscription): ?>
                     <div class="subscription-badge">
-                        <i class="fas fa-crown"></i>
+                        <i class="fas fa-crown subscription-badge-icon"></i>
                         <span>Abonnement <strong><?= htmlspecialchars(ucfirst($subscription['plan_type'])) ?></strong> actif
                         <?php if ($subscription['expires_at']): ?>
-                            — expire le <?= (new DateTime($subscription['expires_at']))->format('d/m/Y') ?>
+                            <span class="subscription-badge-separator"> — </span><span class="subscription-badge-expiry">expire le <?= (new DateTime($subscription['expires_at']))->format('d/m/Y') ?></span>
                         <?php endif; ?>
                         </span>
                     </div>

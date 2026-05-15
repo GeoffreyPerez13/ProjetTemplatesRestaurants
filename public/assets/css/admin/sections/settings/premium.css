@@ -1918,3 +1918,216 @@ body.dark-mode .api-test-result {
   color: var(--color-text-muted);
   font-size: 0.8rem;
 }
+
+/* ==================== RESPONSIVE MOBILE PREMIUM ==================== */
+@media (max-width: 768px) {
+
+  /* --- Partie 1 : Subscription badge --- */
+  .subscription-badge-icon {
+    display: none;
+  }
+
+  .subscription-badge {
+    flex-direction: column;
+    text-align: center;
+    gap: 4px;
+  }
+
+  .subscription-badge-separator {
+    display: none;
+  }
+
+  .subscription-badge-expiry {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+  }
+
+  /* --- Partie 1 : Basique sub card --- */
+  .basique-sub-icon {
+    display: none;
+  }
+
+  .basique-sub-header {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+
+  .basique-sub-info {
+    text-align: center;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .basique-sub-info h3 {
+    font-size: 1rem;
+  }
+
+  .basique-sub-price {
+    font-size: 1.2rem;
+    word-break: break-word;
+  }
+
+  .basique-sub-price small {
+    display: block;
+    margin-left: 0;
+    margin-top: 2px;
+  }
+
+  .basique-sub-card {
+    padding: var(--spacing-md);
+  }
+
+  .basique-sub-features {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .basique-sub-features li {
+    font-size: 0.82rem;
+  }
+
+  .basique-sub-actions {
+    text-align: center;
+  }
+
+  .basique-select-label {
+    max-width: 100%;
+    width: 100%;
+    justify-content: center;
+    font-size: 0.82rem;
+  }
+
+  .basique-sub-note {
+    justify-content: center;
+    text-align: center;
+    font-size: 0.78rem;
+  }
+
+  /* --- Partie 2 : Options premium accordion --- */
+  #premium-options-content {
+    padding: 0;
+  }
+
+  .premium-features-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm);
+  }
+
+  .premium-feature-card {
+    padding: var(--spacing-md);
+    text-align: center;
+  }
+
+  .feature-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--spacing-sm);
+  }
+
+  .feature-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.2rem;
+    margin: 0 auto;
+  }
+
+  .feature-info {
+    text-align: center;
+  }
+
+  .feature-info h3 {
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .feature-info p {
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  .feature-price {
+    text-align: center;
+    align-items: center;
+  }
+
+  .feature-status {
+    text-align: center;
+  }
+
+  .feature-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .feature-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .feature-select-label {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* --- Partie 3 : Total abonnement --- */
+  #subscription-total-content {
+    padding: var(--spacing-sm);
+  }
+
+  .breakdown-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: var(--spacing-sm);
+  }
+
+  .breakdown-item.premium-item i {
+    display: none;
+  }
+
+  .breakdown-price {
+    font-size: 0.85rem;
+    color: var(--color-primary);
+  }
+
+  .subscription-total-amount {
+    flex-direction: column;
+    text-align: center;
+    gap: 4px;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .subscription-total-amount span:first-child {
+    font-size: 0.95em;
+  }
+
+  .total-price {
+    font-size: 1.5em;
+  }
+
+  /* --- Partie 4 : Comment ça marche --- */
+  .info-card {
+    padding: var(--spacing-md);
+    overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .info-card ul {
+    padding-left: var(--spacing-md);
+  }
+
+  .info-card li {
+    font-size: 0.85rem;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .info-card h4 {
+    font-size: 0.95rem;
+  }
+}

@@ -646,8 +646,108 @@ html.dark-mode .gr-warning-banner .warning-content i {
 }
 
 @media (max-width: 768px) {
+    /* --- Masquer les icônes --- */
+    .settings-section > h2 > i,
+    .gr-status-card > i,
+    .gr-config-section h3 > i,
+    .gr-config-form label > i,
+    .gr-config-form .help-text a > i,
+    .gr-preview-section h3 > i,
+    .gr-guide-section h3 > i {
+        display: none;
+    }
+
+    /* --- Status cards --- */
+    .gr-status-cards {
+        gap: 10px;
+    }
+
+    .gr-status-card {
+        padding: 12px;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .gr-status-card > div {
+        text-align: center;
+    }
+
+    .gr-status-card strong {
+        font-size: 0.85rem;
+    }
+
+    .gr-status-card small {
+        display: block;
+        text-align: center;
+    }
+
+    /* --- Textes généraux centrés --- */
+    .settings-section > h2 {
+        text-align: center;
+    }
+
+    .section-description {
+        text-align: center;
+    }
+
+    /* --- Configuration section --- */
+    .gr-config-section {
+        padding: 16px;
+    }
+
+    .gr-config-section h3 {
+        text-align: center;
+    }
+
+    .gr-config-form .help-text {
+        text-align: center;
+    }
+
     .gr-config-grid {
         grid-template-columns: 1fr;
+    }
+
+    /* --- Aperçu / Guide titres centrés --- */
+    .gr-preview-section h3,
+    .gr-guide-section h3 {
+        text-align: center;
+    }
+
+    .gr-preview-info {
+        text-align: center;
+    }
+
+    /* --- Checkbox label : empiler checkmark et texte --- */
+    .gr-config-form .checkbox-label {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 10px;
+        padding: 14px 16px;
+        width: 100%;
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    .gr-config-form .checkbox-label .checkmark {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* --- Boutons d'actions --- */
+    .gr-config-actions {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .gr-config-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* --- Aperçu avis --- */
+    .gr-preview-section {
+        padding: 16px;
     }
 
     .gr-reviews-grid {
@@ -659,6 +759,7 @@ html.dark-mode .gr-warning-banner .warning-content i {
         gap: 8px;
     }
 
+    /* --- Table responsive --- */
     .table-header,
     .table-row {
         grid-template-columns: 1fr;
@@ -666,7 +767,7 @@ html.dark-mode .gr-warning-banner .warning-content i {
     }
 
     .table-header {
-        display: none; /* Cacher les headers en mobile */
+        display: none;
     }
 
     .table-row {
@@ -681,6 +782,20 @@ html.dark-mode .gr-warning-banner .warning-content i {
 
     .col-link {
         margin-top: 8px;
+    }
+
+    /* --- Guide section --- */
+    .gr-guide-section {
+        padding: 16px;
+    }
+
+    .gr-step {
+        gap: 10px;
+    }
+
+    .gr-step-content p {
+        word-break: break-word;
+        overflow-wrap: break-word;
     }
 }
 
