@@ -638,6 +638,40 @@
   .options-actions .btn {
     width: 100%;
   }
+
+  /* --- Online-booking & sections premium générales --- */
+  .settings-section > h2 {
+    text-align: center;
+  }
+
+  .settings-section > h2 > i {
+    display: none;
+  }
+
+  .settings-section .section-description {
+    text-align: center;
+  }
+
+  .premium-section-cta > i {
+    display: none !important;
+  }
+
+  .premium-section-cta {
+    padding: 24px 12px !important;
+  }
+
+  .premium-section-cta p {
+    text-align: center;
+  }
+
+  .premium-section-cta .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .premium-section-cta .btn > i {
+    display: none;
+  }
 }
 
 @media (min-width: 769px) {

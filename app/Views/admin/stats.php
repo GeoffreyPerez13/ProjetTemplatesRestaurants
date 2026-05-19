@@ -15,12 +15,12 @@ require __DIR__ . '/../partials/header.php';
                 <h1><i class="fas fa-chart-line"></i> Statistiques avancées</h1>
                 <p class="stats-subtitle">
                     <?= htmlspecialchars($restaurant_name ?? '') ?>
-                    <?php if (!empty($slug)): ?>
-                        — <a href="?page=display&slug=<?= htmlspecialchars($slug) ?>" target="_blank" class="stats-site-link">
-                            <i class="fas fa-external-link-alt"></i> Voir le site
-                        </a>
-                    <?php endif; ?>
                 </p>
+                <?php if (!empty($slug)): ?>
+                    <a href="?page=display&slug=<?= htmlspecialchars($slug) ?>" target="_blank" class="stats-site-link">
+                        Voir le site
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
         <div class="stats-header-right">

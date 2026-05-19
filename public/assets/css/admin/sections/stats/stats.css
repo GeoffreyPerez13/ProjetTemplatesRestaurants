@@ -93,7 +93,7 @@
 /* KPI Cards */
 .stats-kpi-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 16px;
     margin-bottom: 24px;
 }
@@ -376,16 +376,51 @@
 
 @media (max-width: 768px) {
     .stats-page {
-        padding: 16px;
+        padding: 8px;
     }
 
+    .settings-section {
+        padding: 0 !important;
+    }
+
+    /* --- Masquer toutes les icônes des titres --- */
+    .stats-header-left h2 > i,
+    .stats-header-left h1 > i,
+    .chart-card-header h3 > i {
+        display: none;
+    }
+
+    /* --- Header --- */
     .stats-header {
         flex-direction: column;
         gap: 12px;
+        text-align: center;
     }
 
-    .stats-header-left h1 {
+    .stats-header-left {
+        justify-content: center;
+    }
+
+    .stats-header-left h1,
+    .stats-header-left h2 {
         font-size: 1.25rem;
+        text-align: center;
+    }
+
+    .stats-subtitle {
+        text-align: center;
+    }
+
+    .stats-site-link {
+        display: block;
+        margin-top: 4px;
+        font-size: 0.85rem;
+    }
+
+    .stats-header-right {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
     }
 
     .stats-period-selector {
@@ -395,10 +430,63 @@
     .period-btn {
         flex: 1;
         text-align: center;
+        padding: 8px 10px;
+        font-size: 0.8rem;
     }
 
+    /* --- KPI Cards : enlever icônes, empiler textes --- */
+    .kpi-icon {
+        display: none;
+    }
+
+    .kpi-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 16px;
+        gap: 4px;
+    }
+
+    .kpi-content {
+        align-items: center;
+        text-align: center;
+    }
+
+    .kpi-value {
+        font-size: 1.8rem;
+    }
+
+    .kpi-label {
+        font-size: 0.85rem;
+    }
+
+    .kpi-trend {
+        position: static;
+        margin-top: 6px;
+    }
+
+    /* --- Charts : scroll horizontal si trop petit --- */
     .stats-charts-row {
         grid-template-columns: 1fr;
+    }
+
+    .chart-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 12px;
+    }
+
+    .chart-card-header {
+        justify-content: center;
+    }
+
+    .chart-card-header h3 {
+        text-align: center;
+    }
+
+    .chart-container canvas {
+        min-width: 500px;
+        height: 100% !important;
     }
 
     .chart-container-main {
@@ -409,8 +497,36 @@
         height: 220px;
     }
 
+    /* --- Référents : enlever bar + icône, affichage propre --- */
+    .referrer-source i {
+        display: none;
+    }
+
+    .referrer-source span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: calc(100vw - 120px);
+    }
+
     .referrer-bar {
-        width: 80px;
+        display: none;
+    }
+
+    .referrer-row {
+        padding: 12px 16px;
+        gap: 8px;
+    }
+
+    .referrer-bar-wrapper {
+        flex-shrink: 0;
+    }
+
+    .referrer-count {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: var(--color-primary);
+        min-width: 30px;
     }
 }
 
@@ -420,11 +536,11 @@
     }
 
     .kpi-card {
-        padding: 16px;
+        padding: 12px;
     }
 
     .kpi-value {
-        font-size: 1.3rem;
+        font-size: 1.5rem;
     }
 
     .chart-container-main {
@@ -435,12 +551,9 @@
         height: 200px;
     }
 
-    .stats-header-left h1 {
+    .stats-header-left h1,
+    .stats-header-left h2 {
         font-size: 1.1rem;
-    }
-
-    .referrer-bar {
-        width: 60px;
     }
 }
 

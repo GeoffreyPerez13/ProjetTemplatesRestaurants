@@ -2,6 +2,7 @@
 
 /** @var string $csrf_token */
 /** @var string $current_section */
+/** @var array $user */
 
 $title = $title ?? "Paramètres";
 $scripts = [
@@ -1544,12 +1545,12 @@ if (!empty($_SESSION['pendingToast'])) {
                                 <h2><i class="fas fa-chart-line"></i> Statistiques avancées</h2>
                                 <p class="stats-subtitle">
                                     <?= htmlspecialchars($restaurant_name_display ?? '') ?>
-                                    <?php if (!empty($slug)): ?>
-                                        — <a href="?page=display&slug=<?= htmlspecialchars($slug) ?>" target="_blank" class="stats-site-link">
-                                            <i class="fas fa-external-link-alt"></i> Voir le site
-                                        </a>
-                                    <?php endif; ?>
                                 </p>
+                                <?php if (!empty($slug)): ?>
+                                    <a href="?page=display&slug=<?= htmlspecialchars($slug) ?>" target="_blank" class="stats-site-link">
+                                        Voir le site
+                                    </a>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="stats-header-right">

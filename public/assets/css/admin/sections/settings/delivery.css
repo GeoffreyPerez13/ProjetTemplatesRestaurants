@@ -422,29 +422,63 @@
 /* Responsive */
 @media (max-width: 768px) {
     .delivery-section {
-        padding: 0 16px;
+        padding: 8px 12px !important;
     }
 
-    .delivery-header {
-        flex-wrap: wrap;
-        padding: 16px;
+    /* Centrer les titres et enlever les icônes */
+    .delivery-section > h2 {
+        text-align: center;
     }
-    
+
+    .delivery-section > h2 > i {
+        display: none;
+    }
+
+    .delivery-section .section-description {
+        text-align: center;
+    }
+
+    /* Bouton tour guidé centré */
+    .delivery-section > div[style*="text-align: right"] {
+        text-align: center !important;
+    }
+
+    /* Delivery cards : empiler verticalement */
+    .delivery-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 16px;
+        gap: 12px;
+    }
+
     .delivery-info {
-        flex: 1;
-        min-width: 0;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .delivery-info > div {
+        text-align: center;
+    }
+
+    .delivery-logo {
+        display: none;
     }
 
     .delivery-info h3 {
         font-size: 16px;
     }
 
-    .delivery-logo {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
+    .delivery-status {
+        justify-content: center;
     }
-    
+
+    .delivery-toggle {
+        margin-top: 4px;
+    }
+
+    /* Config */
     .delivery-config {
         padding: 16px;
     }
@@ -452,26 +486,18 @@
     .config-group {
         margin-bottom: 16px;
     }
-    
+
     .config-actions {
         flex-direction: column;
         gap: 10px;
     }
-    
+
     .config-actions button {
         width: 100%;
         justify-content: center;
     }
-    
-    .stats-grid {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
 
-    .stat-item {
-        padding: 12px;
-    }
-
+    /* Statistiques */
     .delivery-stats {
         padding: 16px;
         margin-top: 24px;
@@ -480,6 +506,42 @@
     .delivery-stats h3 {
         font-size: 16px;
         margin-bottom: 16px;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .delivery-stats h3:before {
+        display: none;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .stat-item {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 16px;
+        gap: 10px;
+    }
+
+    .stat-item > i {
+        display: none;
+    }
+
+    .stat-item > div {
+        align-items: center;
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+        word-break: break-word;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
     }
 }
 
