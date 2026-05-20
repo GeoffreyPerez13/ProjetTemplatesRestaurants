@@ -254,4 +254,16 @@ button,
   .btn-secondary i {
     display: none;
   }
+
+  /* Garder les chevrons de navigation jour visibles */
+  #prev-day i,
+  #next-day i {
+    display: inline-block !important;
+  }
+
+  /* Garder les icônes des boutons icon-only et actions réservations */
+  .btn-icon i,
+  .actions-wrapper .btn i {
+    display: inline-block !important;
+  }
 }

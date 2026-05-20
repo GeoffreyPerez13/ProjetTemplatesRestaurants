@@ -946,8 +946,15 @@
   font-size: 0.85rem;
   color: #d97706;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
+  flex-wrap: wrap;
+}
+
+.setting-warning .info-link {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
 }
 
 .setting-warning i {
@@ -1110,6 +1117,45 @@
     grid-template-columns: 1fr;
   }
 
+  /* Masquer les icônes des titres sur mobile */
+  .reservations-header h2 > i,
+  #pending-reservations-section h4 > i,
+  .today-date-display h3 > i {
+    display: none;
+  }
+
+  /* Empêcher le débordement */
+  .today-section {
+    overflow: hidden;
+  }
+
+  .reservation-card {
+    max-width: 100%;
+    overflow: hidden;
+    word-break: break-word;
+  }
+
+  /* Header card : empiler heure + badge */
+  .reservation-card-header {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  /* Badge "heure dépassée" : sous l'heure au lieu de top-right absolu */
+  .pending-reservation-card.past-reservation::before {
+    position: static;
+    display: block;
+    width: fit-content;
+    margin-bottom: 8px;
+  }
+
+  /* Info réservation : empiler nom et nb personnes */
+  .reservation-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
   .today-date-selector {
     flex-wrap: wrap;
     gap: 12px;
@@ -1134,14 +1180,11 @@
     grid-column: auto;
     display: flex;
     gap: 8px;
-  }
-
-  .filter-actions {
     flex-wrap: wrap;
   }
 
   .filter-actions .btn.small {
-    flex: 1;
+    flex: 1 1 100%;
     justify-content: center;
   }
 
@@ -1150,23 +1193,81 @@
   }
 
   .filter-actions .btn-icon {
+    flex: 0 0 auto;
     width: 40px;
     height: 40px;
   }
 
   /* Settings */
+  .settings-section {
+    padding: 16px;
+  }
+
+  .settings-section h3 {
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .settings-section h3 i,
+  .setting-warning i,
+  .setting-info-extra i {
+    display: none;
+  }
+
   .setting-row {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
+    padding: 14px 0;
+  }
+
+  .setting-info label {
+    font-size: 0.9rem;
+  }
+
+  .setting-desc {
+    font-size: 0.8rem;
   }
 
   .setting-control {
     width: 100%;
   }
 
+  .setting-control input[type="number"] {
+    width: 100%;
+  }
+
+  .setting-control textarea {
+    font-size: 0.85rem;
+    word-break: break-all;
+  }
+
   .setting-inline {
-    justify-content: flex-start;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .setting-inline .input-group-mini {
+    margin-left: 0 !important;
+  }
+
+  .input-group-mini {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .input-group-mini input[type="number"] {
+    width: 100% !important;
+  }
+
+  .settings-actions {
+    justify-content: stretch;
+  }
+
+  .settings-actions .btn {
+    width: 100%;
+    justify-content: center;
   }
 
   /* Table responsive : cartes */
@@ -1191,25 +1292,61 @@
   }
 
   .reservations-table td {
-    padding: 6px 0;
+    padding: 8px 0;
     border: none;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    min-width: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+  }
+
+  .reservations-table td:last-child {
+    border-bottom: none;
   }
 
   .reservations-table td::before {
     content: attr(data-label);
-    font-weight: 600;
-    font-size: 0.8rem;
+    font-weight: 700;
+    font-size: 0.7rem;
     color: var(--color-text-muted);
     text-transform: uppercase;
-    margin-right: 10px;
+    letter-spacing: 0.5px;
+  }
+
+  .reservations-table td small {
+    display: block;
+    word-break: break-all;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-top: 2px;
   }
 
   .actions-cell {
-    justify-content: flex-end;
-    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: stretch;
+    padding-top: 12px !important;
+  }
+
+  .actions-cell::before {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .actions-cell .actions-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+
+  .actions-cell .btn.small {
+    padding: 10px;
+    justify-content: center;
+    width: 100%;
   }
 
   .reservation-detail-row {
@@ -1326,6 +1463,7 @@
   .days-checkboxes {
     flex-direction: column;
   }
+
 }
 
 /* ==================== DARK MODE ==================== */

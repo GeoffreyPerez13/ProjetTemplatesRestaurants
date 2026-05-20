@@ -500,6 +500,27 @@ html.dark-mode .dark-mode-toggle-floating .fa-sun {
     width: auto;
     max-width: calc(100vw - 20px);
   }
+
+  .notification-dropdown-header h4 i {
+    display: none;
+  }
+
+  .notification-item.past-reservation::before {
+    position: static;
+    display: block;
+    width: fit-content;
+    margin-bottom: 8px;
+  }
+
+  .notification-item {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .notification-item-header {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
 }
 
 /* SweetAlert au premier plan */

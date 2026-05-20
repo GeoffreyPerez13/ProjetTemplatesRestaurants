@@ -667,6 +667,7 @@ html.dark-mode .rotation-handle:hover {
 
     .floor-actions {
         justify-content: center;
+        flex-wrap: wrap;
     }
 
     .canvas-grid {
