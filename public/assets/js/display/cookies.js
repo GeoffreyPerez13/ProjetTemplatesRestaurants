@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Analytics ---
     function loadAnalytics() {
-        if (getCookie('cookie_analytics') === 'true') {
+        if (getCookie('display_cookie_analytics') === 'true') {
             // Insérer ici le code Google Analytics ou autre outil d'analyse
             /*
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- État initial ---
-    const consent = getCookie('cookie_consent');
+    const consent = getCookie('display_cookie_consent');
 
     cookieModal.style.setProperty('display', 'none', 'important');
 
@@ -80,9 +80,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (acceptAllBtn) {
         acceptAllBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            setCookie('cookie_consent', 'accepted', 180);
-            setCookie('cookie_analytics', 'true', 180);
-            setCookie('cookie_marketing', 'false', 180);
+            setCookie('display_cookie_consent', 'accepted', 180);
+            setCookie('display_cookie_analytics', 'true', 180);
+            setCookie('display_cookie_marketing', 'false', 180);
             cookieBanner.classList.remove('show');
             cookieModal.style.setProperty('display', 'none', 'important');
             loadAnalytics();
@@ -92,9 +92,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (rejectAllBtn) {
         rejectAllBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            setCookie('cookie_consent', 'rejected', 180);
-            setCookie('cookie_analytics', 'false', 180);
-            setCookie('cookie_marketing', 'false', 180);
+            setCookie('display_cookie_consent', 'rejected', 180);
+            setCookie('display_cookie_analytics', 'false', 180);
+            setCookie('display_cookie_marketing', 'false', 180);
             cookieBanner.classList.remove('show');
             cookieModal.style.setProperty('display', 'none', 'important');
         });
@@ -103,9 +103,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (acceptAllFromModal) {
         acceptAllFromModal.addEventListener('click', function(e) {
             e.preventDefault();
-            setCookie('cookie_consent', 'accepted', 180);
-            setCookie('cookie_analytics', 'true', 180);
-            setCookie('cookie_marketing', 'false', 180);
+            setCookie('display_cookie_consent', 'accepted', 180);
+            setCookie('display_cookie_analytics', 'true', 180);
+            setCookie('display_cookie_marketing', 'false', 180);
             cookieBanner.classList.remove('show');
             cookieModal.style.setProperty('display', 'none', 'important');
             loadAnalytics();
@@ -118,9 +118,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const analytics = document.getElementById('cookies-analytics')?.checked ? 'true' : 'false';
             const marketing = document.getElementById('cookies-marketing')?.checked ? 'true' : 'false';
 
-            setCookie('cookie_consent', 'custom', 180);
-            setCookie('cookie_analytics', analytics, 180);
-            setCookie('cookie_marketing', marketing, 180);
+            setCookie('display_cookie_consent', 'custom', 180);
+            setCookie('display_cookie_analytics', analytics, 180);
+            setCookie('display_cookie_marketing', marketing, 180);
 
             cookieBanner.classList.remove('show');
             cookieModal.style.setProperty('display', 'none', 'important');

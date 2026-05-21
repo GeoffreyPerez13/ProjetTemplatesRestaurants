@@ -43,6 +43,10 @@ class BaseController
             header('X-Frame-Options: DENY');
             header('X-XSS-Protection: 1; mode=block');
             header('Referrer-Policy: strict-origin-when-cross-origin');
+            // HSTS : force HTTPS pendant 1 an (actif uniquement si la requête est en HTTPS)
+            if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+                header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+            }
         }
     }
 

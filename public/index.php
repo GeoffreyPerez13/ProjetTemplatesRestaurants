@@ -1,4 +1,11 @@
 <?php
+// Configuration sécurisée des cookies de session
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_samesite', 'Lax');
+ini_set('session.use_strict_mode', 1);
+// En production HTTPS, décommenter la ligne suivante :
+// ini_set('session.cookie_secure', 1);
+
 // Démarrer la session
 session_start();
 
@@ -30,6 +37,7 @@ require_once __DIR__ . '/../app/Models/DemoToken.php';
 require_once __DIR__ . '/../app/Helpers/FormHelper.php';
 require_once __DIR__ . '/../app/Helpers/Validator.php';
 require_once __DIR__ . '/../app/Helpers/old.php';
+require_once __DIR__ . '/../app/Helpers/RateLimiter.php';
 
 // Si l'admin est déjà connecté, redirection automatique vers le dashboard
 if (isset($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true && !isset($_GET['page'])) {
@@ -47,6 +55,19 @@ switch ($page) {
         break;
 
     case 'seed-reviews':
+        // Protection : SUPER_ADMIN uniquement
+        if (!isset($_SESSION['admin_logged']) || $_SESSION['admin_logged'] !== true) {
+            header('Location: ?page=login');
+            exit;
+        }
+        $adminModel = new Admin($pdo);
+        $currentAdmin = $adminModel->findById($_SESSION['admin_id']);
+        if (!$currentAdmin || $currentAdmin->role !== 'SUPER_ADMIN') {
+            $_SESSION['error_message'] = "Accès refusé.";
+            header('Location: ?page=dashboard');
+            exit;
+        }
+
         $action = $_GET['action'] ?? 'replace';
         $settingsController = new SettingsController($pdo);
         
@@ -206,6 +227,14 @@ switch ($page) {
                 $controller->updateGoogleReviews();
                 break;
             case 'seed-reviews':
+                // Protection : SUPER_ADMIN uniquement
+                $adminModel = new Admin($pdo);
+                $currentAdmin = $adminModel->findById($_SESSION['admin_id'] ?? 0);
+                if (!$currentAdmin || $currentAdmin->role !== 'SUPER_ADMIN') {
+                    header('Content-Type: application/json');
+                    echo json_encode(['success' => false, 'message' => 'Accès refusé']);
+                    exit;
+                }
                 require_once __DIR__ . '/../seed-reviews.php';
                 break;
             case 'toggle-premium':

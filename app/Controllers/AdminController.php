@@ -326,21 +326,12 @@ class AdminController extends BaseController
 
         // Traitement du formulaire
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Rate limiting : max 5 tentatives par 15 minutes
-            if (!isset($_SESSION['login_attempts'])) {
-                $_SESSION['login_attempts'] = 0;
-                $_SESSION['login_first_attempt'] = time();
-            }
-            if ($_SESSION['login_attempts'] >= 5 && (time() - $_SESSION['login_first_attempt']) < 900) {
-                $remaining = ceil((900 - (time() - $_SESSION['login_first_attempt'])) / 60);
+            // Rate limiting basé sur IP : max 5 tentatives par 15 minutes
+            $rateLimiter = new RateLimiter();
+            if (!$rateLimiter->attempt('login', 5, 900)) {
+                $remaining = ceil($rateLimiter->retryAfter('login', 900) / 60);
                 $error = "Trop de tentatives de connexion. Réessayez dans {$remaining} minute(s).";
             } else {
-                // Reset du compteur si 15 minutes écoulées
-                if (isset($_SESSION['login_first_attempt']) && (time() - $_SESSION['login_first_attempt']) >= 900) {
-                    $_SESSION['login_attempts'] = 0;
-                    $_SESSION['login_first_attempt'] = time();
-                }
-
                 $username = trim($_POST['username'] ?? '');
                 $password = $_POST['password'] ?? '';
 
@@ -351,11 +342,10 @@ class AdminController extends BaseController
                     $user = $adminModel->login($username, $password);
 
                     if ($user === 'NOT_VERIFIED') {
-                        $_SESSION['login_attempts']++;
                         $error = "Veuillez confirmer votre adresse email avant de vous connecter. Vérifiez votre boîte mail (et vos spams).";
                     } elseif ($user) {
-                        // Reset rate limiting
-                        unset($_SESSION['login_attempts'], $_SESSION['login_first_attempt']);
+                        // Reset rate limiting après succès
+                        $rateLimiter->reset('login');
 
                         // Régénération de l'ID de session (anti session fixation)
                         session_regenerate_id(true);
@@ -370,7 +360,6 @@ class AdminController extends BaseController
                         header('Location: ?page=dashboard');
                         exit;
                     } else {
-                        $_SESSION['login_attempts']++;
                         $error = "Identifiant ou mot de passe incorrect.";
                     }
                 }

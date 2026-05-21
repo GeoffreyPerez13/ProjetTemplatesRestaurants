@@ -794,6 +794,15 @@ class ReservationController extends BaseController
             exit;
         }
 
+        // Rate limiting : max 5 réservations par IP par heure
+        $rateLimiter = new RateLimiter();
+        if (!$rateLimiter->attempt('booking', 5, 3600)) {
+            $retryAfter = $rateLimiter->retryAfter('booking', 3600);
+            $minutes = ceil($retryAfter / 60);
+            echo json_encode(['success' => false, 'message' => "Trop de réservations. Réessayez dans {$minutes} minute(s)."]);
+            exit;
+        }
+
         date_default_timezone_set('Europe/Paris');
 
         $adminId = (int)($_POST['admin_id'] ?? 0);
