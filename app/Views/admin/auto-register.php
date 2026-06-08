@@ -32,7 +32,7 @@ require __DIR__ . '/../partials/header.php';
 
     <h2>Créez votre compte restaurant</h2>
     <p class="register-subtitle">
-        Votre site vitrine en ligne en quelques minutes. Abonnement Basique à 9€/mois.
+        Votre site vitrine en ligne en quelques minutes. Abonnement Basique à 11,99€/mois.
     </p>
 
     <div class="plan-badge">

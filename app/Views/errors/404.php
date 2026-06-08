@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page introuvable — MenuMiam</title>
+    <title>Page introuvable — MenuCraft</title>
     <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

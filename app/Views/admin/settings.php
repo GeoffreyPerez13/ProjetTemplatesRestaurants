@@ -8,6 +8,7 @@ $title = $title ?? "Paramètres";
 $scripts = [
     "js/sections/settings/settings.js",
     "js/sections/settings/premium-cart.js",
+    "js/sections/settings/pack-full.js",
     "js/sections/settings/combined-checkout.js",
     "js/effects/accordion.js",
     "js/sections/settings/closure-dates.js",
@@ -531,6 +532,7 @@ if (!empty($_SESSION['pendingToast'])) {
                 $isSuperAdmin = ($currentAdmin && $currentAdmin->role === 'SUPER_ADMIN');
 
                 $availableFeatures = $premiumFeature->getAvailableFeatures();
+                $packFull = $premiumFeature->getPackFull();
                 $userFeatures = $premiumFeature->getAllFeatures($_SESSION['admin_id']);
                 $userFeaturesMap = array_column($userFeatures, 'is_active', 'feature_name');
                 $subscription = $premiumFeature->hasActiveSubscription($_SESSION['admin_id']);
@@ -543,7 +545,8 @@ if (!empty($_SESSION['pendingToast'])) {
                     $stmtB->execute([$_SESSION['admin_id']]);
                     $basicSub = $stmtB->fetch(PDO::FETCH_ASSOC);
                 } catch (Exception $e) { $basicSub = null; }
-                $hasActiveSub = $basicSub && $basicSub['status'] === 'active';
+                $hasActiveSub = $basicSub && in_array($basicSub['status'], ['active', 'cancelled']) && (empty($basicSub['expires_at']) || strtotime($basicSub['expires_at']) > time());
+                $isCancelled = $basicSub && $basicSub['status'] === 'cancelled';
                 ?>
 
                 <?php if ($isSuperAdmin): ?>
@@ -571,7 +574,7 @@ if (!empty($_SESSION['pendingToast'])) {
                         </div>
                         <div class="basique-sub-info">
                             <h3>Abonnement Basique</h3>
-                            <p class="basique-sub-price">9€<span>/mois</span> <small>ou 7€/mois en annuel</small></p>
+                            <p class="basique-sub-price">11,99€<span>/mois</span> <small>ou 9,99€/mois en annuel</small></p>
                         </div>
                         <span class="status-badge <?= $hasActiveSub ? 'active' : 'locked' ?>">
                             <i class="fas <?= $hasActiveSub ? 'fa-check-circle' : 'fa-lock' ?>"></i>
@@ -592,7 +595,7 @@ if (!empty($_SESSION['pendingToast'])) {
                             <input type="checkbox" name="include_basique" value="1" class="basique-checkbox" id="basique-checkbox">
                             <span class="basique-checkmark"></span>
                             <span class="basique-select-text">
-                                <i class="fas fa-store"></i> Sélectionner l'abonnement Basique — 9€/mois
+                                <i class="fas fa-store"></i> Sélectionner l'abonnement Basique — 11,99€/mois
                             </span>
                         </label>
                         <p class="basique-sub-note">
@@ -602,6 +605,91 @@ if (!empty($_SESSION['pendingToast'])) {
                     </div>
                     <?php endif; ?>
                 </div>
+
+                <?php if (!$isSuperAdmin): ?>
+                <!-- Pack Full -->
+                <?php
+                    $allPremiumActive = true;
+                    foreach ($packFull['includes'] as $fk) {
+                        if (empty($userFeaturesMap[$fk]) || (int)$userFeaturesMap[$fk] !== 1) {
+                            $allPremiumActive = false;
+                            break;
+                        }
+                    }
+                    $packFullActive = $hasActiveSub && $allPremiumActive;
+                ?>
+                <div class="pack-full-card <?= $packFullActive ? 'active' : '' ?>" id="pack-full-card">
+                    <div class="pack-full-badge">
+                        <i class="fas fa-fire"></i> Meilleure offre
+                    </div>
+                    <div class="pack-full-header">
+                        <div class="pack-full-icon">
+                            <i class="fas <?= $packFull['icon'] ?>"></i>
+                        </div>
+                        <div class="pack-full-info">
+                            <h3><?= $packFull['name'] ?></h3>
+                            <p><?= $packFull['description'] ?></p>
+                        </div>
+                        <?php if ($packFullActive): ?>
+                        <span class="status-badge active">
+                            <i class="fas fa-check-circle"></i> Actif
+                        </span>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="pack-full-includes">
+                        <p class="pack-full-includes-title"><i class="fas fa-check-double"></i> Inclus dans le pack :</p>
+                        <ul>
+                            <li><i class="fas fa-store"></i> Abonnement Basique (site vitrine complet)</li>
+                            <?php foreach ($availableFeatures as $fk => $fv): ?>
+                            <li><i class="fas <?= $fv['icon'] ?>"></i> <?= htmlspecialchars($fv['name']) ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+
+                    <?php if (!$packFullActive): ?>
+                    <div class="pack-full-pricing">
+                        <div class="pack-full-savings">
+                            <span class="savings-old">Au lieu de <?= number_format($packFull['individual_total'], 2, ',', '') ?>€/mois en individuel</span>
+                        </div>
+                        <div class="pack-full-duration-selector" id="pack-full-duration-selector">
+                            <?php foreach ($packFull['prices'] as $durationKey => $priceInfo): ?>
+                            <?php
+                                $savingsPercent = round((1 - ($priceInfo['price'] / $packFull['individual_total'])) * 100);
+                                $isDefault = ($durationKey === '1_month');
+                            ?>
+                            <label class="duration-option <?= $isDefault ? 'selected' : '' ?>" data-duration="<?= $durationKey ?>">
+                                <input type="radio" name="pack_duration" value="<?= $durationKey ?>" <?= $isDefault ? 'checked' : '' ?>>
+                                <div class="duration-content">
+                                    <span class="duration-label"><?= $priceInfo['label'] ?></span>
+                                    <span class="duration-price"><?= number_format($priceInfo['price'], 2, ',', '') ?>€<small>/mois</small></span>
+                                    <?php if ($savingsPercent > 0): ?>
+                                    <span class="duration-savings">-<?= $savingsPercent ?>%</span>
+                                    <?php endif; ?>
+                                    <?php if (isset($priceInfo['total'])): ?>
+                                    <span class="duration-total">soit <?= number_format($priceInfo['total'], 2, ',', '') ?>€</span>
+                                    <?php endif; ?>
+                                </div>
+                            </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <form method="POST" action="?page=stripe-checkout" id="pack-full-form">
+                        <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                        <input type="hidden" name="pack_full" value="1">
+                        <input type="hidden" name="pack_duration" value="1_month" id="pack-full-duration-input">
+                        <button type="submit" class="btn btn-primary pack-full-checkout-btn" id="pack-full-checkout-btn">
+                            <i class="fab fa-stripe-s"></i> Souscrire au Pack Full <span id="pack-full-price-display">29,99€</span>
+                        </button>
+                    </form>
+                    <?php endif; ?>
+                </div>
+
+                <div class="pack-separator">
+                    <span>ou choisissez vos options individuellement</span>
+                </div>
+                <?php endif; ?>
 
                 <div class="accordion-section premium-options-accordion">
                     <div class="accordion-header">
@@ -623,7 +711,7 @@ if (!empty($_SESSION['pendingToast'])) {
                                     $cardClass          = $isActive ? 'active' : ($isSelectable ? 'selectable' : '');
                                     ?>
                                     <div class="premium-feature-card <?= $cardClass ?>"
-                                         <?= $isSelectable ? 'data-price="' . (int)$feature['price_monthly'] . '" data-feature="' . htmlspecialchars($featureKey) . '"' : '' ?>>
+                                         <?= $isSelectable ? 'data-price="' . $feature['price_monthly'] . '" data-feature="' . htmlspecialchars($featureKey) . '"' : '' ?>>
                                         <div class="feature-header">
                                             <div class="feature-icon">
                                                 <i class="fas <?= $feature['icon'] ?>"></i>
@@ -635,20 +723,8 @@ if (!empty($_SESSION['pendingToast'])) {
                                         </div>
 
                                         <div class="feature-price">
-                                            <span class="feature-price-monthly">+<?= (int)$feature['price_monthly'] ?>€<small>/mois</small></span>
-                                            <span class="feature-price-annual">+<?= (int)$feature['price_annual'] ?>€<small>/mois en annuel</small></span>
-                                            <?php if (!$isActive): ?>
-                                            <?php
-                                                $now = new DateTime();
-                                                $daysInMonth = (int)$now->format('t');
-                                                $currentDay = (int)$now->format('j');
-                                                $targetMonth = $currentDay > 15 ? (int)$now->format('m') + 1 : (int)$now->format('m');
-                                                $targetDate = new DateTime($now->format('Y') . '-' . $targetMonth . '-15');
-                                                $daysRemaining = (int)$targetDate->diff($now)->days;
-                                                $prorataPrice = round(($daysRemaining / $daysInMonth) * (int)$feature['price_monthly'], 2);
-                                            ?>
-                                            <span class="feature-price-prorata">Prorata : <?= number_format($prorataPrice, 2) ?>€ <small>ce mois</small></span>
-                                            <?php endif; ?>
+                                            <span class="feature-price-monthly">+<?= number_format($feature['price_monthly'], 2, ',', '') ?>€<small>/mois</small></span>
+                                            <span class="feature-price-annual">+<?= number_format($feature['price_annual'], 2, ',', '') ?>€<small>/mois en annuel</small></span>
                                         </div>
 
                                         <div class="feature-status">
@@ -706,6 +782,16 @@ if (!empty($_SESSION['pendingToast'])) {
                             </div>
 
                             <?php if ($hasActiveSub && !$isSuperAdmin): ?>
+                            <div class="cart-warning premium-basique-warning" id="premium-basique-warning">
+                                <div class="warning-content">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <p><strong>Rappel :</strong> Vos options premium nécessitent un abonnement Basique actif. 
+                                    <?php if ($basicSub && !empty($basicSub['expires_at'])): ?>
+                                    Votre abonnement Basique expire le <strong><?= (new DateTime($basicSub['expires_at']))->format('d/m/Y') ?></strong>. 
+                                    <?php endif; ?>
+                                    Si votre abonnement Basique expire avant vos options premium, celles-ci seront suspendues jusqu'au renouvellement.</p>
+                                </div>
+                            </div>
                             <div class="premium-cart-bar" id="premium-cart-bar">
                                 <div class="cart-info">
                                     <i class="fas fa-shopping-cart"></i>
@@ -749,27 +835,87 @@ if (!empty($_SESSION['pendingToast'])) {
                 <?php if ($hasActiveSub): ?>
                 <!-- Total de l'abonnement en cours -->
                 <?php
-                $totalMonthly = 9; // Abonnement basique
                 $activePremiumFeatures = array_filter($userFeaturesMap, fn($v) => (int)$v === 1);
+                $isPackFullPremium = ($basicSub['plan_type'] ?? '') === 'pack_full';
+                $packPricePremium = (float)($basicSub['price_per_month'] ?? 0);
+                ?>
+
+                <?php if ($isPackFullPremium): ?>
+                <?php
+                    $packStartP = new DateTime($basicSub['started_at']);
+                    $packEndP = new DateTime($basicSub['expires_at']);
+                    $packMonthsP = (int)$packStartP->diff($packEndP)->m + ((int)$packStartP->diff($packEndP)->y * 12);
+                    $packDurLabelP = match(true) {
+                        $packMonthsP >= 12 => '1 an',
+                        $packMonthsP >= 3 => '3 mois',
+                        default => '1 mois',
+                    };
+                    $individualTotalP = 34.95;
+                    $savingsPercentP = round((1 - ($packPricePremium / $individualTotalP)) * 100);
+                ?>
+                <div class="accordion-section premium-total-accordion">
+                    <div class="accordion-header">
+                        <h2><i class="fas fa-calculator"></i> Total de votre abonnement</h2>
+                        <button type="button" class="accordion-toggle" data-target="premium-subscription-total-content">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div id="premium-subscription-total-content" class="accordion-content expanded prevent-auto-close">
+                        <div class="subscription-total-breakdown">
+                            <div class="breakdown-item pack-full-label">
+                                <span><i class="fas fa-gem"></i> <strong>Pack Full</strong> <?= $packDurLabelP ?></span>
+                                <span class="breakdown-price pack-full-badge-price">
+                                    <?php if ($savingsPercentP > 0): ?>
+                                    <small class="savings-tag">-<?= $savingsPercentP ?>%</small>
+                                    <?php endif; ?>
+                                </span>
+                            </div>
+                            <div class="breakdown-item sub-item">
+                                <span><i class="fas fa-store"></i> Abonnement Basique</span>
+                                <span class="breakdown-price included-tag">inclus</span>
+                            </div>
+                            <?php foreach ($activePremiumFeatures as $featureKey => $_ignore): ?>
+                                <?php $featureDef = $availableFeatures[$featureKey] ?? null; if (!$featureDef) continue; ?>
+                                <div class="breakdown-item sub-item">
+                                    <span><i class="fas <?= $featureDef['icon'] ?>"></i> <?= htmlspecialchars($featureDef['name']) ?></span>
+                                    <span class="breakdown-price included-tag">inclus</span>
+                                </div>
+                            <?php endforeach; ?>
+                            <?php if ($savingsPercentP > 0): ?>
+                            <div class="breakdown-item savings-line">
+                                <span><i class="fas fa-piggy-bank"></i> Économie vs prix individuels (<?= number_format($individualTotalP, 2, ',', '') ?>€/mois)</span>
+                                <span class="breakdown-price savings-amount">-<?= number_format($individualTotalP - $packPricePremium, 2, ',', '') ?>€/mois</span>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="subscription-total-amount">
+                            <span>Total mensuel</span>
+                            <span class="total-price"><?= number_format($packPricePremium, 2, ',', '') ?>€<small>/mois</small></span>
+                        </div>
+                    </div>
+                </div>
+                <?php else: ?>
+                <?php
+                $totalMonthly = 11.99;
                 foreach ($activePremiumFeatures as $featureKey => $_ignore) {
                     $featureDef = $availableFeatures[$featureKey] ?? null;
                     if ($featureDef) {
-                        $totalMonthly += (int)$featureDef['price_monthly'];
+                        $totalMonthly += $featureDef['price_monthly'];
                     }
                 }
                 ?>
                 <div class="accordion-section premium-total-accordion">
                     <div class="accordion-header">
                         <h2><i class="fas fa-calculator"></i> Total de votre abonnement</h2>
-                        <button type="button" class="accordion-toggle" data-target="subscription-total-content">
+                        <button type="button" class="accordion-toggle" data-target="premium-subscription-total-content">
                             <i class="fas fa-chevron-down"></i>
                         </button>
                     </div>
-                    <div id="subscription-total-content" class="accordion-content expanded prevent-auto-close">
+                    <div id="premium-subscription-total-content" class="accordion-content expanded prevent-auto-close">
                         <div class="subscription-total-breakdown">
                             <div class="breakdown-item">
                                 <span>Abonnement Basique</span>
-                                <span class="breakdown-price">9€/mois</span>
+                                <span class="breakdown-price">11,99€/mois</span>
                             </div>
                             <?php foreach ($activePremiumFeatures as $featureKey => $_ignore): ?>
                                 <?php $featureDef = $availableFeatures[$featureKey] ?? null; if (!$featureDef) continue; ?>
@@ -778,16 +924,17 @@ if (!empty($_SESSION['pendingToast'])) {
                                         <i class="fas <?= $featureDef['icon'] ?>"></i>
                                         <?= htmlspecialchars($featureDef['name']) ?>
                                     </span>
-                                    <span class="breakdown-price">+<?= (int)$featureDef['price_monthly'] ?>€/mois</span>
+                                    <span class="breakdown-price">+<?= number_format($featureDef['price_monthly'], 2, ',', '') ?>€/mois</span>
                                 </div>
                             <?php endforeach; ?>
                         </div>
                         <div class="subscription-total-amount">
                             <span>Total mensuel</span>
-                            <span class="total-price"><?= $totalMonthly ?>€<small>/mois</small></span>
+                            <span class="total-price"><?= number_format($totalMonthly, 2, ',', '') ?>€<small>/mois</small></span>
                         </div>
                     </div>
                 </div>
+                <?php endif; ?>
                 <?php endif; ?>
                 <?php endif; ?>
 
@@ -808,7 +955,7 @@ if (!empty($_SESSION['pendingToast'])) {
                                     <i class="fas fa-store"></i>
                                     <span>Abonnement Basique</span>
                                 </div>
-                                <span class="item-price">9€/mois</span>
+                                <span class="item-price">11,99€/mois</span>
                             </div>
                             
                             <div class="premium-items" id="premium-items">
@@ -821,9 +968,14 @@ if (!empty($_SESSION['pendingToast'])) {
                                 <span>Total mensuel</span>
                                 <span class="total-price" id="combined-total">0€/mois</span>
                             </div>
-                            <div class="cart-prorata">
-                                <span>Paiement initial</span>
-                                <span class="prorata-price" id="combined-prorata">0€ à payer maintenant</span>
+                        </div>
+
+                        <!-- Avertissement abonnement basique nécessaire -->
+                        <div class="cart-warning" id="basique-warning" style="display: none;">
+                            <div class="warning-content">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p><strong>Attention :</strong> Un abonnement Basique actif est nécessaire pour utiliser les options premium. 
+                                Si votre abonnement Basique expire, vos options premium seront suspendues jusqu'au renouvellement.</p>
                             </div>
                         </div>
                         
@@ -916,7 +1068,7 @@ if (!empty($_SESSION['pendingToast'])) {
                         <ul>
                             <li>Souscrivez un abonnement Premium pour débloquer les fonctionnalités proposées par notre service.</li>
                             <li>Activez et configurez les fonctionnalités directement depuis cette page.</li>
-                            <li>Contactez-nous à <a href="mailto:premium@menumiam.fr">premium@menumiam.fr</a> pour souscrire ou pour toute question.</li>
+                            <li>Contactez-nous à <a href="mailto:premium@menucraft.fr">premium@menucraft.fr</a> pour souscrire ou pour toute question.</li>
                         </ul>
                     </div>
                 </div>
@@ -960,7 +1112,8 @@ if (!empty($_SESSION['pendingToast'])) {
                     $stmtB->execute([$_SESSION['admin_id']]);
                     $basicSub = $stmtB->fetch(PDO::FETCH_ASSOC);
                 } catch (Exception $e) { $basicSub = null; }
-                $hasActiveSub = $basicSub && $basicSub['status'] === 'active';
+                $hasActiveSub = $basicSub && in_array($basicSub['status'], ['active', 'cancelled']) && (empty($basicSub['expires_at']) || strtotime($basicSub['expires_at']) > time());
+                $isCancelled = $basicSub && $basicSub['status'] === 'cancelled';
                 $basicStartedAt = !empty($basicSub['started_at']) ? (new DateTime($basicSub['started_at']))->format('d/m/Y') : null;
                 ?>
 
@@ -973,15 +1126,75 @@ if (!empty($_SESSION['pendingToast'])) {
 
                 <?php if (!$isSuperAdmin && $hasActiveSub): ?>
                 <!-- Gestion des abonnements actifs -->
-                <?php $activePremiumFeatures = array_filter($userFeaturesMap, fn($v) => (int)$v === 1); ?>
+                <?php
+                $activePremiumFeatures = array_filter($userFeaturesMap, fn($v) => (int)$v === 1);
+                $isPackFull = ($basicSub['plan_type'] ?? '') === 'pack_full';
+                $packPricePerMonth = (float)($basicSub['price_per_month'] ?? 0);
+                ?>
                 
                 <!-- Total de l'abonnement en cours -->
+                <?php if ($isPackFull): ?>
                 <?php
-                $totalMonthly = 9; // Abonnement basique
+                    // Calculer la durée du pack à partir des dates
+                    $packStart = new DateTime($basicSub['started_at']);
+                    $packEnd = new DateTime($basicSub['expires_at']);
+                    $packMonths = (int)$packStart->diff($packEnd)->m + ((int)$packStart->diff($packEnd)->y * 12);
+                    $packDurationLabel = match(true) {
+                        $packMonths >= 12 => '1 an',
+                        $packMonths >= 3 => '3 mois',
+                        default => '1 mois',
+                    };
+                    $individualTotal = 34.95;
+                    $savingsPercent = round((1 - ($packPricePerMonth / $individualTotal)) * 100);
+                ?>
+                <div class="accordion-section premium-total-accordion" id="subscription-total">
+                    <div class="accordion-header">
+                        <h2><i class="fas fa-calculator"></i> Total de votre abonnement</h2>
+                        <button type="button" class="accordion-toggle" data-target="subscription-total-content">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div id="subscription-total-content" class="accordion-content expanded prevent-auto-close">
+                        <div class="subscription-total-breakdown">
+                            <div class="breakdown-item pack-full-label">
+                                <span><i class="fas fa-gem"></i> <strong>Pack Full</strong> <?= $packDurationLabel ?></span>
+                                <span class="breakdown-price pack-full-badge-price">
+                                    <?php if ($savingsPercent > 0): ?>
+                                    <small class="savings-tag">-<?= $savingsPercent ?>%</small>
+                                    <?php endif; ?>
+                                </span>
+                            </div>
+                            <div class="breakdown-item sub-item">
+                                <span><i class="fas fa-store"></i> Abonnement Basique</span>
+                                <span class="breakdown-price included-tag">inclus</span>
+                            </div>
+                            <?php foreach ($activePremiumFeatures as $featureKey => $_ignore): ?>
+                                <?php $featureDef = $availableFeatures[$featureKey] ?? null; if (!$featureDef) continue; ?>
+                                <div class="breakdown-item sub-item">
+                                    <span><i class="fas <?= $featureDef['icon'] ?>"></i> <?= htmlspecialchars($featureDef['name']) ?></span>
+                                    <span class="breakdown-price included-tag">inclus</span>
+                                </div>
+                            <?php endforeach; ?>
+                            <?php if ($savingsPercent > 0): ?>
+                            <div class="breakdown-item savings-line">
+                                <span><i class="fas fa-piggy-bank"></i> Économie vs prix individuels (<?= number_format($individualTotal, 2, ',', '') ?>€/mois)</span>
+                                <span class="breakdown-price savings-amount">-<?= number_format($individualTotal - $packPricePerMonth, 2, ',', '') ?>€/mois</span>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="subscription-total-amount">
+                            <span>Total mensuel</span>
+                            <span class="total-price"><?= number_format($packPricePerMonth, 2, ',', '') ?>€<small>/mois</small></span>
+                        </div>
+                    </div>
+                </div>
+                <?php else: ?>
+                <?php
+                $totalMonthly = 11.99;
                 foreach ($activePremiumFeatures as $featureKey => $_ignore) {
                     $featureDef = $availableFeatures[$featureKey] ?? null;
                     if ($featureDef) {
-                        $totalMonthly += (int)$featureDef['price_monthly'];
+                        $totalMonthly += $featureDef['price_monthly'];
                     }
                 }
                 ?>
@@ -996,7 +1209,7 @@ if (!empty($_SESSION['pendingToast'])) {
                         <div class="subscription-total-breakdown">
                             <div class="breakdown-item">
                                 <span>Abonnement Basique</span>
-                                <span class="breakdown-price">9€/mois</span>
+                                <span class="breakdown-price">11,99€/mois</span>
                             </div>
                             <?php foreach ($activePremiumFeatures as $featureKey => $_ignore): ?>
                                 <?php $featureDef = $availableFeatures[$featureKey] ?? null; if (!$featureDef) continue; ?>
@@ -1005,16 +1218,35 @@ if (!empty($_SESSION['pendingToast'])) {
                                         <i class="fas <?= $featureDef['icon'] ?>"></i>
                                         <?= htmlspecialchars($featureDef['name']) ?>
                                     </span>
-                                    <span class="breakdown-price">+<?= (int)$featureDef['price_monthly'] ?>€/mois</span>
+                                    <span class="breakdown-price">+<?= number_format($featureDef['price_monthly'], 2, ',', '') ?>€/mois</span>
                                 </div>
                             <?php endforeach; ?>
                         </div>
                         <div class="subscription-total-amount">
                             <span>Total mensuel</span>
-                            <span class="total-price"><?= $totalMonthly ?>€<small>/mois</small></span>
+                            <span class="total-price"><?= number_format($totalMonthly, 2, ',', '') ?>€<small>/mois</small></span>
                         </div>
                     </div>
                 </div>
+                <?php endif; ?>
+
+                <?php if ($isCancelled): ?>
+                <div class="cancellation-notice">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Abonnement résilié</strong>
+                        <?php if (!empty($basicSub['expires_at'])): ?>
+                        <p>Vous conservez l'accès à toutes vos fonctionnalités jusqu'au <strong><?= (new DateTime($basicSub['expires_at']))->format('d/m/Y') ?></strong>.</p>
+                        <?php endif; ?>
+                    </div>
+                    <form method="POST" action="?page=reactivate-subscription" class="reactivate-form" id="reactivate-form">
+                        <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                        <button type="button" class="btn btn-sm btn-success" id="btn-reactivate">
+                            <i class="fas fa-redo"></i> Réactiver
+                        </button>
+                    </form>
+                </div>
+                <?php endif; ?>
                 
                 <?php
                 // Préparer les données d'abonnement pour la section subscriptions
@@ -1032,8 +1264,7 @@ if (!empty($_SESSION['pendingToast'])) {
                     foreach ($subscription_data['premium'] as $featureName => $premium) {
                         $activatedAt = !empty($premium['activated_at']) ? (new DateTime($premium['activated_at']))->format('d/m/Y H:i') : null;
                         $premiumData[$featureName] = [
-                            'activated_at' => $activatedAt,
-                            'prorata_amount' => $premium['prorata_amount'] ?? 0
+                            'activated_at' => $activatedAt
                         ];
                     }
                 }
@@ -1065,6 +1296,60 @@ if (!empty($_SESSION['pendingToast'])) {
 
                         <!-- Liste des abonnements en cards -->
                         <div class="subscriptions-list">
+                            <?php if ($isPackFull): ?>
+                            <!-- Pack Full -->
+                            <div class="sub-card sub-card-pack-full subscription-row">
+                                <div class="sub-card-check">
+                                    <input type="checkbox" class="sub-checkbox" data-type="basique" data-name="Pack Full" id="sub-pack-full">
+                                    <label for="sub-pack-full" class="sub-checkbox-label"></label>
+                                </div>
+                                <div class="sub-card-body">
+                                    <div class="sub-card-top">
+                                        <div class="sub-card-info">
+                                            <span class="sub-type-badge pack-full-badge-sub">
+                                                <i class="fas fa-gem"></i> Pack Full
+                                            </span>
+                                            <h4 class="sub-card-name">Pack Full MenuCraft <?= $packDurationLabel ?></h4>
+                                        </div>
+                                        <span class="sub-card-price"><?= number_format($packPricePerMonth, 2, ',', '') ?>€<small>/mois</small></span>
+                                    </div>
+                                    <div class="sub-card-details-pack">
+                                        <span><i class="fas fa-store"></i> Basique</span>
+                                        <?php foreach ($activePremiumFeatures as $fk => $_i): ?>
+                                            <?php $fd = $availableFeatures[$fk] ?? null; if (!$fd) continue; ?>
+                                            <span><i class="fas <?= $fd['icon'] ?>"></i> <?= htmlspecialchars($fd['name']) ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <div class="sub-card-bottom">
+                                        <div class="sub-card-meta">
+                                            <span class="status-badge active">
+                                                <i class="fas fa-check-circle"></i> Actif
+                                            </span>
+                                            <?php if ($basicStartedAt): ?>
+                                            <span class="sub-card-date">
+                                                <i class="fas fa-calendar-alt"></i> Depuis le <?= $basicStartedAt ?>
+                                            </span>
+                                            <?php endif; ?>
+                                            <?php if ($basicTimeLeft): ?>
+                                            <span class="sub-card-time-left">
+                                                <i class="fas fa-hourglass-half"></i> <?= $basicTimeLeft ?>
+                                            </span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <form method="POST" action="?page=cancel-subscription"
+                                              class="cancel-form"
+                                              data-subscription-type="basique"
+                                              data-feature-name="Pack Full">
+                                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                                            <input type="hidden" name="type" value="basique">
+                                            <button type="submit" class="btn btn-sm btn-danger-outline">
+                                                <i class="fas fa-times-circle"></i> Résilier tout le pack
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php else: ?>
                             <!-- Abonnement Basique -->
                             <div class="sub-card sub-card-basique subscription-row">
                                 <div class="sub-card-check">
@@ -1077,9 +1362,9 @@ if (!empty($_SESSION['pendingToast'])) {
                                             <span class="sub-type-badge basique-badge">
                                                 <i class="fas fa-store"></i> Basique
                                             </span>
-                                            <h4 class="sub-card-name">Abonnement Basique MenuMiam</h4>
+                                            <h4 class="sub-card-name">Abonnement Basique MenuCraft</h4>
                                         </div>
-                                        <span class="sub-card-price">9€<small>/mois</small></span>
+                                        <span class="sub-card-price">11,99€<small>/mois</small></span>
                                     </div>
                                     <div class="sub-card-bottom">
                                         <div class="sub-card-meta">
@@ -1127,7 +1412,7 @@ if (!empty($_SESSION['pendingToast'])) {
                                             </span>
                                             <h4 class="sub-card-name"><?= htmlspecialchars($featureDef['name']) ?></h4>
                                         </div>
-                                        <span class="sub-card-price">+<?= (int)$featureDef['price_monthly'] ?>€<small>/mois</small></span>
+                                        <span class="sub-card-price">+<?= number_format($featureDef['price_monthly'], 2, ',', '') ?>€<small>/mois</small></span>
                                     </div>
                                     <div class="sub-card-bottom">
                                         <div class="sub-card-meta">
@@ -1137,11 +1422,6 @@ if (!empty($_SESSION['pendingToast'])) {
                                             <?php if (!empty($premiumData[$featureKey]['activated_at'])): ?>
                                             <span class="sub-card-date">
                                                 <i class="fas fa-calendar-alt"></i> Activé le <?= $premiumData[$featureKey]['activated_at'] ?>
-                                            </span>
-                                            <?php endif; ?>
-                                            <?php if (!empty($premiumData[$featureKey]['prorata_amount']) && $premiumData[$featureKey]['prorata_amount'] > 0): ?>
-                                            <span class="sub-card-prorata">
-                                                <i class="fas fa-calculator"></i> Prorata : <?= $premiumData[$featureKey]['prorata_amount'] ?>€ ce mois
                                             </span>
                                             <?php endif; ?>
                                         </div>
@@ -1167,6 +1447,7 @@ if (!empty($_SESSION['pendingToast'])) {
                                 <span>Aucune option premium active pour le moment.</span>
                             </div>
                             <?php endif; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -1180,6 +1461,77 @@ if (!empty($_SESSION['pendingToast'])) {
                             <i class="fas fa-crown"></i> Voir les fonctionnalités
                         </a>
                     </div>
+                <?php endif; ?>
+
+                <!-- Historique des achats -->
+                <?php
+                $purchaseHistory = [];
+                try {
+                    $stmtH = $pdo->prepare("SELECT * FROM purchase_history WHERE admin_id = ? ORDER BY purchased_at DESC LIMIT 50");
+                    $stmtH->execute([$_SESSION['admin_id']]);
+                    $purchaseHistory = $stmtH->fetchAll(PDO::FETCH_ASSOC);
+                } catch (Exception $e) { $purchaseHistory = []; }
+                ?>
+                <?php if (!empty($purchaseHistory)): ?>
+                <div class="accordion-section purchase-history-accordion">
+                    <div class="accordion-header">
+                        <h2><i class="fas fa-receipt"></i> Historique des achats</h2>
+                        <button type="button" class="accordion-toggle" data-target="purchase-history-content">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div id="purchase-history-content" class="accordion-content">
+                        <div class="purchase-history-list">
+                            <?php foreach ($purchaseHistory as $purchase): ?>
+                            <div class="purchase-row">
+                                <div class="purchase-info">
+                                    <div class="purchase-label">
+                                        <?php
+                                        $typeIcon = match($purchase['type']) {
+                                            'pack_full' => 'fa-gem',
+                                            'premium' => 'fa-star',
+                                            default => 'fa-store',
+                                        };
+                                        $typeBadgeClass = match($purchase['type']) {
+                                            'pack_full' => 'badge-pack-full',
+                                            'premium' => 'badge-premium',
+                                            default => 'badge-basique',
+                                        };
+                                        ?>
+                                        <span class="purchase-type-badge <?= $typeBadgeClass ?>">
+                                            <i class="fas <?= $typeIcon ?>"></i>
+                                        </span>
+                                        <div>
+                                            <strong><?= htmlspecialchars($purchase['label']) ?></strong>
+                                            <?php if ($purchase['duration_months'] > 1): ?>
+                                            <small class="purchase-duration"><?= $purchase['duration_months'] ?> mois</small>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <div class="purchase-meta">
+                                        <span class="purchase-date">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <?= (new DateTime($purchase['purchased_at']))->format('d/m/Y à H:i') ?>
+                                        </span>
+                                        <?php if (!empty($purchase['expires_at'])): ?>
+                                        <span class="purchase-expires">
+                                            <i class="fas fa-hourglass-end"></i>
+                                            Expire le <?= (new DateTime($purchase['expires_at']))->format('d/m/Y') ?>
+                                        </span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div class="purchase-amount">
+                                    <span class="purchase-total"><?= number_format((float)$purchase['amount'], 2, ',', '') ?>€</span>
+                                    <?php if ($purchase['price_per_month'] && $purchase['duration_months'] > 1): ?>
+                                    <small><?= number_format((float)$purchase['price_per_month'], 2, ',', '') ?>€/mois</small>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
                 <?php endif; ?>
             </div>
 
@@ -1453,6 +1805,7 @@ if (!empty($_SESSION['pendingToast'])) {
                 </script>
 
                 <!-- Gestion des avis de test (uniquement pour développement) -->
+                <?php if ($_SESSION['role'] === 'SUPER_ADMIN'): ?>
                 <div class="gr-test-management-section">
                     <div class="gr-warning-banner">
                         <div class="warning-content">
@@ -1524,6 +1877,7 @@ if (!empty($_SESSION['pendingToast'])) {
                         </div>
                     </div>
                 </div>
+                <?php endif; ?>
             </div>
 
         <?php elseif ($current_section === 'stats' && !empty($has_advanced_stats)): ?>

@@ -1,3 +1,14 @@
+<?php
+/** @var object $restaurant */
+/** @var array|null $contact */
+/** @var string $carteMode */
+/** @var array|null $banner */
+/** @var array|null $logo */
+/** @var string $templateName */
+/** @var string $layoutName */
+/** @var array $categories */
+/** @var bool $bookingEnabled */
+?>
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -5,6 +16,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#b45309">
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
     <title><?= htmlspecialchars($restaurant->name) ?> — Restaurant</title>
 
     <?php
@@ -49,7 +61,7 @@
         <meta property="og:image" content="<?= htmlspecialchars($ogImage) ?>">
     <?php endif; ?>
     <meta property="og:locale" content="fr_FR">
-    <meta property="og:site_name" content="MenuMiam">
+    <meta property="og:site_name" content="MenuCraft">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
@@ -180,7 +192,7 @@
             {
                 "@type": "ListItem",
                 "position": 1,
-                "name": "MenuMiam",
+                "name": "MenuCraft",
                 "item": <?= json_encode(SITE_URL) ?>
             },
             {

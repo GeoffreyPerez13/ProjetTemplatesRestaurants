@@ -1,61 +1,244 @@
 /**
  * Gestion du dropdown de notifications pour les réservations en attente
+ * Utilise Server-Sent Events (SSE) pour les notifications instantanées
+ * avec polling en fallback
  */
 (function() {
     'use strict';
 
-    const notificationToggle = document.getElementById('notification-toggle');
-    const notificationDropdown = document.getElementById('notification-dropdown');
-    const notificationList = document.getElementById('notification-list');
-    const notificationCount = document.getElementById('notification-count');
+    let notificationToggle = document.getElementById('notification-toggle');
+    let notificationDropdown = document.getElementById('notification-dropdown');
+    let notificationList = document.getElementById('notification-list');
+    let notificationCount = document.getElementById('notification-count');
     
     // Flag pour empêcher la fermeture pendant le traitement d'une action
     let isProcessingAction = false;
     
     // Compteur de notifications précédent pour détecter les changements
-    let previousCount = 0;
-    let isFirstCheck = true; // Flag pour la première vérification
+    // -1 signifie "pas encore initialisé" (premier check = sync sans notification)
+    let previousCount = notificationCount ? (parseInt(notificationCount.textContent, 10) || 0) : -1;
     
     // Préférence son de notification (localStorage)
     let soundEnabled = localStorage.getItem('notificationSoundEnabled') !== 'false'; // true par défaut
 
-    if (!notificationToggle || !notificationDropdown) {
-        return; // Pas de notifications sur cette page
-    }
-    
-    // Polling optimisé toutes les 10 secondes pour notifications quasi temps réel
-    setInterval(function() {
-        checkForNewReservations();
-    }, 10000); // 10 secondes
-    
-    // Vérification initiale après 2 secondes pour initialiser le compteur
-    setTimeout(function() {
-        checkForNewReservations();
-    }, 2000);
-    
-    // Initialiser l'état du bouton son au chargement
-    setTimeout(function() {
-        updateSoundButtonState();
-    }, 100);
+    // SSE connection
+    let eventSource = null;
+    let sseConnected = false;
+    let sseReconnectTimeout = null;
+    let pollingInterval = null;
 
-    // Toggle dropdown au clic sur le bouton
-    notificationToggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const isVisible = notificationDropdown.style.display === 'block';
+    /**
+     * Créer dynamiquement les éléments de notification si absents du DOM
+     */
+    function ensureNotificationElements() {
+        if (notificationToggle) return true;
+
+        const floatingButtons = document.querySelector('.floating-buttons');
+        if (!floatingButtons) return false;
+
+        // Créer le bouton cloche
+        notificationToggle = document.createElement('button');
+        notificationToggle.type = 'button';
+        notificationToggle.className = 'notification-toggle-floating';
+        notificationToggle.id = 'notification-toggle';
+        notificationToggle.title = 'Réservations en attente';
+        notificationToggle.style.display = 'none'; // Caché par défaut
+        notificationToggle.innerHTML = '<i class="fas fa-bell"></i><span class="notification-badge" id="notification-count">0</span>';
+
+        // Créer le dropdown
+        notificationDropdown = document.createElement('div');
+        notificationDropdown.className = 'notification-dropdown';
+        notificationDropdown.id = 'notification-dropdown';
+        notificationDropdown.style.display = 'none';
+        notificationDropdown.innerHTML = `
+            <div class="notification-dropdown-header">
+                <h4><i class="fas fa-bell"></i> Réservations en attente</h4>
+                <button type="button" id="toggle-notification-sound" class="notification-sound-btn" title="Son activé - Cliquer pour désactiver">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+                <a href="?page=reservations" class="notification-view-all">Tout voir</a>
+            </div>
+            <div class="notification-dropdown-body" id="notification-list">
+                <div class="notification-loading">
+                    <i class="fas fa-spinner fa-spin"></i> Chargement...
+                </div>
+            </div>
+        `;
+
+        floatingButtons.insertBefore(notificationDropdown, floatingButtons.firstChild);
+        floatingButtons.insertBefore(notificationToggle, floatingButtons.firstChild);
+
+        // Mettre à jour les références
+        notificationList = document.getElementById('notification-list');
+        notificationCount = document.getElementById('notification-count');
+
+        // Attacher les événements
+        attachToggleEvents();
         
-        if (isVisible) {
-            notificationDropdown.style.display = 'none';
-        } else {
-            notificationDropdown.style.display = 'block';
-            loadPendingReservations();
+        // Bouton son
+        const soundBtn = document.getElementById('toggle-notification-sound');
+        if (soundBtn) {
+            soundBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                toggleNotificationSound(e);
+            });
         }
-    });
+
+        return true;
+    }
+
+    /**
+     * Attacher les événements toggle/click au bouton et dropdown
+     */
+    function attachToggleEvents() {
+        if (!notificationToggle || notificationToggle._eventsAttached) return;
+        notificationToggle._eventsAttached = true;
+
+        notificationToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const isVisible = notificationDropdown.style.display === 'block';
+            if (isVisible) {
+                notificationDropdown.style.display = 'none';
+            } else {
+                notificationDropdown.style.display = 'block';
+                loadPendingReservations();
+            }
+        });
+    }
+
+    // Si les éléments existent déjà, attacher les événements
+    if (notificationToggle) {
+        attachToggleEvents();
+    }
+
+    // ==================== SSE (Server-Sent Events) ====================
+
+    /**
+     * Connexion SSE pour notifications instantanées
+     */
+    function connectSSE() {
+        if (eventSource) {
+            eventSource.close();
+        }
+
+        try {
+            eventSource = new EventSource('?page=notification-stream');
+            
+            eventSource.onopen = function() {
+                sseConnected = true;
+                console.log('[Notifications] SSE connecté - notifications en temps réel actives');
+                
+                // Stopper le polling rapide si SSE fonctionne
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                    pollingInterval = null;
+                }
+                // Garder un polling lent comme filet de sécurité (60s)
+                startSlowPolling();
+            };
+
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    handleSSEData(data);
+                } catch (e) {
+                    console.error('[Notifications] Erreur parsing SSE:', e);
+                }
+            };
+
+            eventSource.onerror = function() {
+                sseConnected = false;
+                eventSource.close();
+                eventSource = null;
+                console.warn('[Notifications] SSE déconnecté - bascule sur polling');
+                
+                // Basculer sur polling rapide
+                startFastPolling();
+                
+                // Tenter de reconnecter SSE après 30 secondes
+                if (sseReconnectTimeout) clearTimeout(sseReconnectTimeout);
+                sseReconnectTimeout = setTimeout(connectSSE, 30000);
+            };
+        } catch (e) {
+            console.error('[Notifications] Erreur SSE:', e);
+            startFastPolling();
+        }
+    }
+
+    /**
+     * Traiter les données reçues via SSE
+     */
+    function handleSSEData(data) {
+        const currentCount = data.count || 0;
+
+        // Premier sync via SSE (previousCount === -1) : initialiser sans notifier
+        if (previousCount === -1) {
+            previousCount = currentCount;
+            if (currentCount > 0) {
+                ensureNotificationElements();
+                if (notificationToggle) {
+                    notificationToggle.style.display = '';
+                }
+            }
+            updateBadgeCount(currentCount);
+            return;
+        }
+
+        // Nouvelle(s) réservation(s) détectée(s)
+        if (data.hasNew && currentCount > previousCount) {
+            const newCount = currentCount - previousCount;
+            
+            // S'assurer que les éléments UI existent
+            ensureNotificationElements();
+            
+            // Notification visuelle
+            showToast(`🔔 ${newCount} nouvelle${newCount > 1 ? 's' : ''} réservation${newCount > 1 ? 's' : ''} !`, 'success');
+            
+            // Notification sonore
+            playNotificationSound();
+            
+            // Afficher le bouton cloche
+            if (notificationToggle) {
+                notificationToggle.style.display = '';
+            }
+            
+            // Rafraîchir le dropdown s'il est ouvert
+            if (notificationDropdown && notificationDropdown.style.display === 'block') {
+                loadPendingReservations();
+            }
+        }
+
+        // Mettre à jour le compteur
+        previousCount = currentCount;
+        updateBadgeCount(currentCount);
+    }
+
+    // ==================== POLLING (fallback) ====================
+
+    function startFastPolling() {
+        if (pollingInterval) clearInterval(pollingInterval);
+        pollingInterval = setInterval(checkForNewReservations, 8000); // 8 secondes
+    }
+
+    function startSlowPolling() {
+        if (pollingInterval) clearInterval(pollingInterval);
+        pollingInterval = setInterval(checkForNewReservations, 60000); // 60 secondes (filet de sécurité)
+    }
+
+    // ==================== INITIALISATION ====================
+
+    // Vérification immédiate au chargement (pas de délai)
+    checkForNewReservations();
+    
+    // Tenter la connexion SSE immédiatement
+    connectSSE();
+    
+    // Initialiser l'état du bouton son
+    setTimeout(updateSoundButtonState, 100);
 
     // Fermer le dropdown si on clique ailleurs
     document.addEventListener('click', function(e) {
-        // Ne pas fermer si on clique sur le bouton (géré par le toggle) ou dans le dropdown
-        // Ne pas fermer non plus si une action est en cours de traitement
-        // Ne pas fermer si on clique sur le bouton de son
+        if (!notificationDropdown || !notificationToggle) return;
         const soundButton = document.getElementById('toggle-notification-sound');
         const clickedOnSoundButton = soundButton && (e.target === soundButton || soundButton.contains(e.target));
         
@@ -401,16 +584,17 @@
     function updateBadgeCount(count) {
         if (notificationCount) {
             notificationCount.textContent = count;
-            
-            // Cacher le bouton si count = 0
-            if (count === 0) {
-                if (notificationToggle) {
-                    notificationToggle.style.display = 'none';
-                }
-                if (notificationDropdown) {
-                    notificationDropdown.style.display = 'none';
-                }
+        }
+        
+        if (count === 0) {
+            if (notificationToggle) {
+                notificationToggle.style.display = 'none';
             }
+            if (notificationDropdown) {
+                notificationDropdown.style.display = 'none';
+            }
+        } else if (count > 0 && notificationToggle) {
+            notificationToggle.style.display = '';
         }
     }
 
@@ -460,9 +644,26 @@
                 if (data.success && data.reservations) {
                     const currentCount = data.reservations.length;
                     
-                    // Nouvelle réservation détectée (mais pas lors de la première vérification)
-                    if (!isFirstCheck && currentCount > previousCount) {
+                    // Premier sync (previousCount === -1) : initialiser sans notifier
+                    if (previousCount === -1) {
+                        previousCount = currentCount;
+                        // Si des réservations existent, s'assurer que la cloche est visible
+                        if (currentCount > 0) {
+                            ensureNotificationElements();
+                            if (notificationToggle) {
+                                notificationToggle.style.display = '';
+                            }
+                        }
+                        updateBadgeCount(currentCount);
+                        return;
+                    }
+                    
+                    // Nouvelle réservation détectée
+                    if (currentCount > previousCount) {
                         const newCount = currentCount - previousCount;
+                        
+                        // S'assurer que les éléments UI existent
+                        ensureNotificationElements();
                         
                         // Notification visuelle avec icône
                         showToast(`🔔 ${newCount} nouvelle${newCount > 1 ? 's' : ''} réservation${newCount > 1 ? 's' : ''} !`, 'success');
@@ -474,11 +675,6 @@
                         if (notificationToggle && notificationToggle.style.display === 'none') {
                             notificationToggle.style.display = '';
                         }
-                    }
-                    
-                    // Marquer que la première vérification est terminée
-                    if (isFirstCheck) {
-                        isFirstCheck = false;
                     }
                     
                     // Mettre à jour le compteur

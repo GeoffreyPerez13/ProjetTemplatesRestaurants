@@ -15,7 +15,7 @@ class DemoSeeder
     private $restaurantId;
 
     /** @var string Slug du restaurant de démo */
-    const DEMO_SLUG = 'demo-menumiam';
+    const DEMO_SLUG = 'demo-menucraft';
 
     public function __construct($pdo)
     {
@@ -153,7 +153,7 @@ class DemoSeeder
     private function createRestaurant()
     {
         $stmt = $this->pdo->prepare("INSERT INTO restaurants (name, slug, created_at, updated_at) VALUES (?, ?, NOW(), NOW())");
-        $stmt->execute(['Le Bistrot MenuMiam', self::DEMO_SLUG]);
+        $stmt->execute(['Le Bistrot MenuCraft', self::DEMO_SLUG]);
         $this->restaurantId = $this->pdo->lastInsertId();
     }
 
@@ -164,7 +164,7 @@ class DemoSeeder
             INSERT INTO admins (username, email, password, restaurant_name, restaurant_id, carte_mode, role, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, 'editable', 'ADMIN', NOW(), NOW())
         ");
-        $stmt->execute(['demo_menumiam', 'demo@menumiam.com', $hash, 'Le Bistrot MenuMiam', $this->restaurantId]);
+        $stmt->execute(['demo_menucraft', 'demo@menucraft.com', $hash, 'Le Bistrot MenuCraft', $this->restaurantId]);
         $this->adminId = $this->pdo->lastInsertId();
     }
 
@@ -177,7 +177,7 @@ class DemoSeeder
         $stmt->execute([
             $this->adminId,
             '01 23 45 67 89',
-            'contact@bistrot-menumiam.fr',
+            'contact@bistrot-menucraft.fr',
             '42 Rue de la Gastronomie, 75001 Paris',
             "Lundi - Vendredi : 12h00 - 14h30 / 19h00 - 22h30\nSamedi : 12h00 - 15h00 / 19h00 - 23h00\nDimanche : Fermé"
         ]);
@@ -311,7 +311,7 @@ class DemoSeeder
         $white = imagecolorallocate($img, 255, 255, 255);
         $fontFile = $this->getFont();
         if ($fontFile) {
-            $text = 'Le Bistrot MenuMiam';
+            $text = 'Le Bistrot MenuCraft';
             $bbox = imagettfbbox(36, 0, $fontFile, $text);
             $x = (1200 - ($bbox[2] - $bbox[0])) / 2;
             imagettftext($img, 36, 0, (int)$x, 180, $white, $fontFile, $text);
@@ -322,7 +322,7 @@ class DemoSeeder
             $semi = imagecolorallocatealpha($img, 255, 255, 255, 40);
             imagettftext($img, 18, 0, (int)$x2, 230, $semi, $fontFile, $sub);
         } else {
-            imagestring($img, 5, 480, 180, 'Le Bistrot MenuMiam', $white);
+            imagestring($img, 5, 480, 180, 'Le Bistrot MenuCraft', $white);
         }
 
         imagepng($img, $path);
@@ -434,8 +434,8 @@ class DemoSeeder
             'payment_cb'                       => '1',
             'payment_especes'                  => '1',
             'payment_cheques'                  => '0',
-            'social_instagram'                 => 'https://instagram.com/menumiam',
-            'social_facebook'                  => 'https://facebook.com/menumiam',
+            'social_instagram'                 => 'https://instagram.com/menucraft',
+            'social_facebook'                  => 'https://facebook.com/menucraft',
         ];
 
         $stmt = $this->pdo->prepare("

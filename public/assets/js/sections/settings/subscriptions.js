@@ -201,6 +201,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Réactivation avec confirmation Swal
+    const btnReactivate = document.getElementById('btn-reactivate');
+    if (btnReactivate) {
+        btnReactivate.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Réactiver votre abonnement ?',
+                html: 'Votre abonnement sera remis en état <strong>actif</strong>. Vous conserverez l\'accès à toutes vos fonctionnalités jusqu\'à la date d\'expiration prévue.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Oui, réactiver',
+                cancelButtonText: 'Annuler'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('reactivate-form').submit();
+                }
+            });
+        });
+    }
+
     // Initialisation
     updateSelectAllCheckbox();
     updateBulkActionButton();

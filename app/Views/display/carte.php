@@ -1,3 +1,10 @@
+<?php
+// Initialiser les variables pour éviter les warnings IDE
+$lastUpdated = $lastUpdated ?? '';
+$carteMode = $carteMode ?? '';
+$categories = $categories ?? [];
+$restaurant = $restaurant ?? null;
+?>
 <?php if (!empty($dailyMenus)): ?>
 <section id="menus-du-jour" class="daily-menus-display">
     <div class="container">
@@ -35,31 +42,31 @@
     <div class="container">
         <h2>Notre Carte</h2>
 
-        <?php if ($lastUpdated): ?>
+        <?php if (!empty($lastUpdated ?? '')): ?>
             <p class="last-updated">Dernière mise à jour de la carte : <strong><?= htmlspecialchars($lastUpdated) ?></strong>.</p>
         <?php endif; ?>
 
-        <?php if ($carteMode === 'editable'): ?>
-            <?php if (!empty($categories)): ?>
+        <?php if (($carteMode ?? '') === 'editable'): ?>
+            <?php if (!empty($categories ?? [])): ?>
                 <!-- Navigation rapide des catégories -->
                 <nav class="category-nav">
-                    <?php foreach ($categories as $index => $cat): ?>
+                    <?php foreach (($categories ?? []) as $index => $cat): ?>
                         <a href="#category-<?= $index ?>" class="category-nav-link"><?= htmlspecialchars($cat['name']) ?></a>
                     <?php endforeach; ?>
                 </nav>
             <?php endif; ?>
 
             <div class="categories">
-                <?php foreach ($categories as $index => $category): ?>
+                <?php foreach (($categories ?? []) as $index => $category): ?>
                     <div class="category" id="category-<?= $index ?>">
                         <div class="category-header" data-toggle="category-body-<?= $index ?>">
                             <?php if (!empty($category['image_url'])): ?>
-                                <img src="<?= htmlspecialchars($category['image_url']) ?>" alt="<?= htmlspecialchars($category['name']) ?> — <?= htmlspecialchars($restaurant->name) ?>" loading="lazy" class="lightbox-image">
+                                <img src="<?= htmlspecialchars($category['image_url']) ?>" alt="<?= htmlspecialchars($category['name']) ?> — <?= htmlspecialchars($restaurant->name ?? '') ?>" loading="lazy" class="lightbox-image">
                             <?php endif; ?>
                             <h3><?= htmlspecialchars($category['name']) ?></h3>
                             <span class="category-toggle"><i class="fas fa-chevron-down"></i></span>
                         </div>
-                        <div class="category-body" id="category-body-<?= $index ?>">
+                        <div class="category-body<?= empty($category['plats']) ? ' collapsed' : '' ?>" id="category-body-<?= $index ?>">
                             <?php if (!empty($category['plats'])): ?>
                                 <div class="plats-grid">
                                     <?php foreach ($category['plats'] as $plat): ?>
@@ -103,7 +110,7 @@
                             <?php if ($isPdf): ?>
                                 <div class="pdf-preview"><i class="fas fa-file-pdf"></i></div>
                             <?php else: ?>
-                                <img src="<?= htmlspecialchars($image['url']) ?>" alt="Carte <?= htmlspecialchars($restaurant->name) ?> — <?= htmlspecialchars($displayName) ?>" loading="lazy" class="lightbox-image">
+                                <img src="<?= htmlspecialchars($image['url']) ?>" alt="Carte <?= htmlspecialchars($restaurant->name ?? '') ?> — <?= htmlspecialchars($displayName) ?>" loading="lazy" class="lightbox-image">
                             <?php endif; ?>
                             <div class="image-info">
                                 <p><?= htmlspecialchars($displayName) ?></p>

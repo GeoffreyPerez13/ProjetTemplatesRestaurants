@@ -141,8 +141,7 @@
 }
 
 .plat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 0 0 2px var(--color-primary-light), var(--shadow-md);
   border-color: var(--color-primary-light);
 }
 

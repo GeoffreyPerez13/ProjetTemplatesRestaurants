@@ -233,7 +233,7 @@ class BaseController
         try {
             $stmt = $this->pdo->prepare("
                 SELECT id FROM client_subscriptions 
-                WHERE admin_id = ? AND status = 'active' 
+                WHERE admin_id = ? AND status IN ('active', 'cancelled') 
                 AND (expires_at IS NULL OR expires_at > NOW())
             ");
             $stmt->execute([$adminId]);

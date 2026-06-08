@@ -149,7 +149,7 @@ class ReservationController extends BaseController
                     $adviceHtml
                 </div>
                 <div class='footer'>
-                    <p>Cet email a été envoyé automatiquement par MenuMiam</p>
+                    <p>Cet email a été envoyé automatiquement par MenuCraft</p>
                     <p style='margin: 5px 0;'>Vous recevez cet email car vous gérez $restaurantName</p>
                 </div>
             </div>
@@ -250,7 +250,7 @@ class ReservationController extends BaseController
                 $detailsHtml
             </div>
             <div style='background:#f9fafb; padding:16px 32px; text-align:center; font-size:0.8rem; color:#9ca3af; border-top:1px solid #e5e7eb;'>
-                Cet email a été envoyé automatiquement par <strong>$restaurant</strong> via MenuMiam.
+                Cet email a été envoyé automatiquement par <strong>$restaurant</strong> via MenuCraft.
             </div>
         </div>";
 
@@ -979,14 +979,34 @@ class ReservationController extends BaseController
         $settings = $this->getSettings($adminId);
         $allSlots = array_map('trim', explode(',', $settings['booking_time_slots']));
 
-        // Vérifier jour de fermeture
+        // Vérifier jour de fermeture hebdomadaire
         if (!empty($settings['booking_closed_days'])) {
             $closedDays = array_map('trim', explode(',', $settings['booking_closed_days']));
             $dayOfWeek = (string)date('w', strtotime($date));
             if (in_array($dayOfWeek, $closedDays)) {
-                echo json_encode(['success' => true, 'slots' => [], 'closed' => true]);
+                echo json_encode(['success' => true, 'slots' => [], 'closed' => true, 'reason' => 'weekly_closure']);
                 exit;
             }
+        }
+
+        // Vérifier fermeture exceptionnelle
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT option_value 
+                FROM admin_options 
+                WHERE admin_id = ? AND option_name = 'closure_dates'
+            ");
+            $stmt->execute([$adminId]);
+            $closureDatesValue = $stmt->fetchColumn();
+            if ($closureDatesValue) {
+                $closureDates = json_decode($closureDatesValue, true) ?: [];
+                if (in_array($date, $closureDates)) {
+                    echo json_encode(['success' => true, 'slots' => [], 'closed' => true, 'reason' => 'exceptional_closure']);
+                    exit;
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Erreur vérification dates fermeture exceptionnelles: " . $e->getMessage());
         }
 
         // Récupérer les créneaux complets
@@ -1019,8 +1039,27 @@ class ReservationController extends BaseController
     public function getPendingReservations()
     {
         header('Content-Type: application/json');
-        $this->checkAccess();
-        
+
+        // Vérifier la connexion sans redirection HTML
+        if (!isset($_SESSION['admin_logged']) || !$_SESSION['admin_logged']) {
+            echo json_encode(['success' => false, 'reservations' => [], 'count' => 0]);
+            exit;
+        }
+
+        // Vérifier l'accès premium sans redirection HTML
+        $adminModel = new Admin($this->pdo);
+        $admin = $adminModel->findById($_SESSION['admin_id']);
+        if (!$admin) {
+            echo json_encode(['success' => false, 'reservations' => [], 'count' => 0]);
+            exit;
+        }
+        $isSuperAdmin = ($admin->role === 'SUPER_ADMIN');
+        $premiumFeature = new PremiumFeature($this->pdo);
+        if (!$isSuperAdmin && !$premiumFeature->isEnabled($_SESSION['admin_id'], 'online_booking')) {
+            echo json_encode(['success' => true, 'reservations' => [], 'count' => 0]);
+            exit;
+        }
+
         $adminId = $_SESSION['admin_id'];
         $reservationModel = new Reservation($this->pdo);
         

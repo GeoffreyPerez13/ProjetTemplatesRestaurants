@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MenuMiam — Créez le site vitrine de votre restaurant en quelques clics</title>
-    <meta name="description" content="MenuMiam est la solution clé en main pour créer et gérer le site vitrine de votre restaurant. Carte en ligne, avis Google, réservations et plus encore.">
-    <meta name="keywords" content="site restaurant, carte en ligne, menu digital, vitrine restaurant, MenuMiam">
+    <title>MenuCraft — Créez le site vitrine de votre restaurant en quelques clics</title>
+    <meta name="description" content="MenuCraft est la solution clé en main pour créer et gérer le site vitrine de votre restaurant. Carte en ligne, avis Google, réservations et plus encore.">
+    <meta name="keywords" content="site restaurant, carte en ligne, menu digital, vitrine restaurant, MenuCraft">
     
     <!-- Open Graph -->
-    <meta property="og:title" content="MenuMiam — Le site vitrine de votre restaurant">
+    <meta property="og:title" content="MenuCraft — Le site vitrine de votre restaurant">
     <meta property="og:description" content="Créez votre site vitrine professionnel en quelques minutes. Gérez votre carte, vos horaires, vos avis Google et bien plus.">
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#b45309">
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,7 +38,7 @@
     <div class="nav-container">
         <a href="?page=landing" class="nav-logo">
             <i class="fas fa-utensils"></i>
-            <span>MenuMiam</span>
+            <span>MenuCraft</span>
         </a>
         <div class="nav-links" id="nav-links">
             <a href="#features">Fonctionnalités</a>
@@ -76,7 +77,7 @@
             <h1>Créez le <span class="text-gradient">site vitrine</span> de votre restaurant en quelques clics</h1>
             <p class="hero-subtitle">
                 Gérez votre carte en ligne, vos horaires, vos avis Google et bien plus. 
-                Sans compétence technique, à partir de <strong>9€/mois</strong>.
+                Sans compétence technique, à partir de <strong>11,99€/mois</strong>.
             </p>
             <div class="hero-actions">
                 <a href="?page=auto-register" class="btn-hero-primary">
@@ -105,7 +106,7 @@
                         <div class="browser-dots">
                             <span></span><span></span><span></span>
                         </div>
-                        <div class="browser-url">menumiam.fr/mon-restaurant</div>
+                        <div class="browser-url">menucraft.fr/mon-restaurant</div>
                     </div>
                     <div class="browser-content">
                         <div class="mockup-header">
@@ -138,7 +139,7 @@
 <!-- ========== LOGOS / SOCIAL PROOF ========== -->
 <section class="social-proof">
     <div class="container">
-        <p class="social-proof-label">Ils proposent leur carte en ligne avec MenuMiam</p>
+        <p class="social-proof-label">Ils proposent leur carte en ligne avec MenuCraft</p>
         <div class="social-proof-logos">
             <div class="proof-item">🍕 Pizzeria Roma</div>
             <div class="proof-item">🍣 Sushi Palace</div>
@@ -324,7 +325,7 @@
                             <p class="pricing-subtitle">Tout pour mettre votre restaurant en ligne</p>
                         </div>
                         <div class="pricing-price">
-                            <span class="price-amount" data-monthly="9" data-yearly="7">9</span>
+                            <span class="price-amount" data-monthly="11.99" data-yearly="9.99">11,99</span>
                             <span class="price-currency">€</span>
                             <span class="price-period">/mois</span>
                         </div>
@@ -346,6 +347,65 @@
             </div>
         </div>
 
+        <!-- Pack Full — Meilleure offre -->
+        <div class="pricing-pack-full" id="pricing-pack-full">
+            <div class="pack-full-landing-card">
+                <div class="pack-full-landing-badge"><i class="fas fa-fire"></i> Meilleure offre</div>
+                <div class="pack-full-landing-inner">
+                    <div class="pack-full-landing-left">
+                        <div class="pack-full-landing-header">
+                            <h3><i class="fas fa-gem"></i> Pack Full</h3>
+                            <p class="pack-full-landing-subtitle">Tout MenuCraft, sans compromis</p>
+                        </div>
+                        <div class="pack-full-landing-price">
+                            <div class="pack-full-price-old">
+                                <span class="strikethrough">34,95€</span>/mois en individuel
+                            </div>
+                            <div class="pack-full-price-main">
+                                <span class="price-amount pack-full-amount" data-1month="29.99" data-3months="26.99" data-1year="22.99">29,99</span>
+                                <span class="price-currency">€</span>
+                                <span class="price-period">/mois</span>
+                            </div>
+                        </div>
+                        <div class="pack-full-duration-toggle">
+                            <button class="pack-duration-btn active" data-duration="1month">1 mois</button>
+                            <button class="pack-duration-btn" data-duration="3months">
+                                3 mois <span class="pack-duration-badge">-23%</span>
+                            </button>
+                            <button class="pack-duration-btn" data-duration="1year">
+                                1 an <span class="pack-duration-badge">-34%</span>
+                            </button>
+                        </div>
+                        <div class="pack-full-total-line" id="pack-full-total-line" style="display: none;">
+                            <span>Soit <strong id="pack-full-total-amount"></strong> pour la période</span>
+                        </div>
+                        <a href="?page=auto-register" class="pricing-btn primary pack-full-cta">
+                            <i class="fas fa-rocket"></i> Commencer avec le Pack Full
+                        </a>
+                    </div>
+                    <div class="pack-full-landing-right">
+                        <p class="pack-full-includes-label"><i class="fas fa-check-double"></i> Tout est inclus :</p>
+                        <ul class="pricing-features pack-full-features">
+                            <li class="included highlight"><i class="fas fa-store"></i> Abonnement Basique complet</li>
+                            <li class="included"><i class="fas fa-star"></i> Avis Google <span class="feature-value">3,99€/mois</span></li>
+                            <li class="included"><i class="fas fa-chart-line"></i> Statistiques avancées <span class="feature-value">3,99€/mois</span></li>
+                            <li class="included"><i class="fas fa-calendar-check"></i> Réservations en ligne <span class="feature-value">10,99€/mois</span></li>
+                            <li class="included"><i class="fas fa-motorcycle"></i> Intégration livraison <span class="feature-value">3,99€/mois</span></li>
+                        </ul>
+                        <div class="pack-full-savings-banner">
+                            <i class="fas fa-piggy-bank"></i>
+                            <span>Économisez jusqu'à <strong>143,52€/an</strong> avec le Pack Full annuel</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Séparateur -->
+        <div class="pricing-separator">
+            <span>ou composez votre offre à la carte</span>
+        </div>
+
         <!-- Options Premium à la carte -->
         <div class="pricing-options-header">
             <h3><i class="fas fa-puzzle-piece"></i> Options premium à la carte</h3>
@@ -360,7 +420,7 @@
                     <p>Affichez vos avis Google et votre note directement sur votre site.</p>
                 </div>
                 <div class="option-price">
-                    <span class="option-amount" data-monthly="5" data-yearly="4">+5</span>
+                    <span class="option-amount" data-monthly="3.99" data-yearly="2.99">+3,99</span>
                     <span>€/mois</span>
                 </div>
             </div>
@@ -372,7 +432,7 @@
                     <p>Analysez le trafic, les pages vues et le comportement de vos visiteurs.</p>
                 </div>
                 <div class="option-price">
-                    <span class="option-amount" data-monthly="5" data-yearly="4">+5</span>
+                    <span class="option-amount" data-monthly="3.99" data-yearly="2.99">+3,99</span>
                     <span>€/mois</span>
                 </div>
             </div>
@@ -384,7 +444,7 @@
                     <p>Vos clients réservent directement depuis votre site vitrine.</p>
                 </div>
                 <div class="option-price">
-                    <span class="option-amount" data-monthly="8" data-yearly="6">+8</span>
+                    <span class="option-amount" data-monthly="10.99" data-yearly="8.99">+10,99</span>
                     <span>€/mois</span>
                 </div>
             </div>
@@ -396,19 +456,19 @@
                     <p>Connectez Uber Eats, Deliveroo et autres plateformes.</p>
                 </div>
                 <div class="option-price">
-                    <span class="option-amount" data-monthly="7" data-yearly="6">+7</span>
+                    <span class="option-amount" data-monthly="3.99" data-yearly="2.99">+3,99</span>
                     <span>€/mois</span>
                 </div>
             </div>
         </div>
 
         <div class="pricing-example">
-            <p><i class="fas fa-lightbulb"></i> <strong>Exemple :</strong> Abonnement Basique (9€) + Avis Google (5€) = <strong>14€/mois</strong>. Vous ne payez que ce que vous utilisez.</p>
+            <p><i class="fas fa-lightbulb"></i> <strong>Exemple :</strong> Abonnement Basique (11,99€) + Avis Google (3,99€) = <strong>15,98€/mois</strong>. Vous ne payez que ce que vous utilisez.</p>
         </div>
 
         <div class="pricing-note">
             <p><i class="fas fa-info-circle"></i> Besoin d'une solution sur-mesure pour plusieurs établissements ? 
-            <a href="mailto:contact@menumiam.fr">Contactez-nous pour un devis personnalisé</a>.</p>
+            <a href="mailto:contact@menucraft.fr">Contactez-nous pour un devis personnalisé</a>.</p>
         </div>
     </div>
 </section>
@@ -419,7 +479,7 @@
         <div class="demo-card">
             <div class="demo-content">
                 <span class="section-badge">Démo live</span>
-                <h2>Testez MenuMiam en conditions réelles</h2>
+                <h2>Testez MenuCraft en conditions réelles</h2>
                 <p>Explorez notre restaurant de démonstration pour voir à quoi ressemblera votre site. 
                    Modifiez la carte, changez le template, testez toutes les fonctionnalités.</p>
                 <div class="demo-actions">
@@ -427,7 +487,7 @@
                         <i class="fas fa-external-link-alt"></i>
                         Voir le site démo
                     </a>
-                    <a href="mailto:contact@menumiam.fr?subject=Demande de démo personnalisée" class="btn-demo-secondary">
+                    <a href="mailto:contact@menucraft.fr?subject=Demande de démo personnalisée" class="btn-demo-secondary">
                         <i class="fas fa-envelope"></i>
                         Demander une démo privée
                     </a>
@@ -469,8 +529,8 @@
                     <i class="fas fa-chevron-down"></i>
                 </button>
                 <div class="faq-answer">
-                    <p>Absolument pas ! MenuMiam est conçu pour les restaurateurs, pas les développeurs. 
-                    Tout se fait via une interface simple et intuitive. Si vous savez utiliser un ordinateur, vous savez utiliser MenuMiam.</p>
+                    <p>Absolument pas ! MenuCraft est conçu pour les restaurateurs, pas les développeurs. 
+                    Tout se fait via une interface simple et intuitive. Si vous savez utiliser un ordinateur, vous savez utiliser MenuCraft.</p>
                 </div>
             </div>
 
@@ -491,7 +551,7 @@
                     <i class="fas fa-chevron-down"></i>
                 </button>
                 <div class="faq-answer">
-                    <p>Avec l'option Avis Google (+5€/mois), vos avis s'affichent automatiquement sur votre site vitrine. 
+                    <p>Avec l'option Avis Google (+3,99€/mois), vos avis s'affichent automatiquement sur votre site vitrine. 
                     Il vous suffit de renseigner votre Google Place ID dans les paramètres. Les avis sont mis à jour automatiquement.</p>
                 </div>
             </div>
@@ -537,13 +597,13 @@
     <div class="container">
         <div class="cta-card">
             <h2>Prêt à mettre votre restaurant en ligne ?</h2>
-            <p>Rejoignez les restaurateurs qui utilisent MenuMiam pour développer leur activité en ligne.</p>
+            <p>Rejoignez les restaurateurs qui utilisent MenuCraft pour développer leur activité en ligne.</p>
             <div class="cta-actions">
                 <a href="?page=auto-register" class="btn-cta-primary">
                     <i class="fas fa-rocket"></i>
                     Créer mon site maintenant
                 </a>
-                <a href="mailto:contact@menumiam.fr" class="btn-cta-secondary">
+                <a href="mailto:contact@menucraft.fr" class="btn-cta-secondary">
                     <i class="fas fa-envelope"></i>
                     Nous contacter
                 </a>
@@ -559,7 +619,7 @@
             <div class="footer-brand">
                 <div class="footer-logo">
                     <i class="fas fa-utensils"></i>
-                    <span>MenuMiam</span>
+                    <span>MenuCraft</span>
                 </div>
                 <p>La solution clé en main pour créer et gérer le site vitrine de votre restaurant.</p>
                 <div class="footer-socials">
@@ -580,9 +640,9 @@
             <div class="footer-links-group">
                 <h4>Ressources</h4>
                 <ul>
-                    <li><a href="mailto:contact@menumiam.fr">Contact</a></li>
-                    <li><a href="mailto:support@menumiam.fr">Support</a></li>
-                    <li><a href="?page=display&slug=demo-menumiam" target="_blank">Démo en ligne</a></li>
+                    <li><a href="mailto:contact@menucraft.fr">Contact</a></li>
+                    <li><a href="mailto:support@menucraft.fr">Support</a></li>
+                    <li><a href="?page=display&slug=demo-menucraft" target="_blank">Démo en ligne</a></li>
                 </ul>
             </div>
             <div class="footer-links-group">
@@ -596,7 +656,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; <?= date('Y') ?> MenuMiam. Tous droits réservés.</p>
+            <p>&copy; <?= date('Y') ?> MenuCraft. Tous droits réservés.</p>
         </div>
     </div>
 </footer>
@@ -701,6 +761,46 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <script src="assets/js/landing/scroll-arrows.js"></script>
+
+<script>
+// Pack Full duration toggle on landing page
+(function() {
+    const packPrices = {
+        '1month':  { perMonth: 29.99, total: 29.99 },
+        '3months': { perMonth: 26.99, total: 80.97 },
+        '1year':   { perMonth: 22.99, total: 275.88 }
+    };
+
+    const buttons = document.querySelectorAll('.pack-duration-btn');
+    const priceEl = document.querySelector('.pack-full-amount');
+    const totalLine = document.getElementById('pack-full-total-line');
+    const totalAmount = document.getElementById('pack-full-total-amount');
+
+    if (!buttons.length || !priceEl) return;
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const duration = this.dataset.duration;
+            const info = packPrices[duration];
+            if (!info) return;
+
+            buttons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            priceEl.textContent = info.perMonth.toFixed(2).replace('.', ',');
+
+            if (duration === '1month') {
+                if (totalLine) totalLine.style.display = 'none';
+            } else {
+                if (totalLine) {
+                    totalLine.style.display = 'block';
+                    if (totalAmount) totalAmount.textContent = info.total.toFixed(2).replace('.', ',') + '€';
+                }
+            }
+        });
+    });
+})();
+</script>
 
 </body>
 </html>

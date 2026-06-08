@@ -14,7 +14,7 @@ try {
     $sql = "CREATE TABLE IF NOT EXISTS client_subscriptions (
         id INT AUTO_INCREMENT PRIMARY KEY,
         admin_id INT NOT NULL,
-        plan_type ENUM('basique') NOT NULL DEFAULT 'basique',
+        plan_type ENUM('basique', 'pack_full') NOT NULL DEFAULT 'basique',
         status ENUM('active', 'inactive', 'cancelled', 'expired') NOT NULL DEFAULT 'inactive',
         price_per_month DECIMAL(10,2) DEFAULT 0.00,
         features_enabled JSON DEFAULT NULL,

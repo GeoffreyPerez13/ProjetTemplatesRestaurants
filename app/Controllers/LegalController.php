@@ -54,13 +54,13 @@ class LegalController extends BaseController
         <p><strong>Date de dernière mise à jour :</strong> ' . date('d/m/Y') . '</p>
         
         <h3>1. Objet</h3>
-        <p>Les présentes conditions générales d\'utilisation (ci-après « CGU ») ont pour objet de définir les modalités et conditions dans lesquelles la plateforme MenuMiam (ci-après « le Service ») est mise à disposition des utilisateurs (ci-après « l\'Utilisateur »). Toute utilisation du Service implique l\'acceptation pleine et entière des présentes CGU.</p>
+        <p>Les présentes conditions générales d\'utilisation (ci-après « CGU ») ont pour objet de définir les modalités et conditions dans lesquelles la plateforme MenuCraft (ci-après « le Service ») est mise à disposition des utilisateurs (ci-après « l\'Utilisateur »). Toute utilisation du Service implique l\'acceptation pleine et entière des présentes CGU.</p>
         
         <h3>2. Acceptation des CGU</h3>
-        <p>L\'accès au Service et son utilisation sont subordonnés à l\'acceptation et au respect des présentes CGU. En accédant au Service, l\'Utilisateur reconnaît avoir pris connaissance de l\'ensemble des présentes CGU et les accepter sans réserve. MenuMiam se réserve le droit de modifier les CGU à tout moment. Les modifications prennent effet dès leur publication sur le site.</p>
+        <p>L\'accès au Service et son utilisation sont subordonnés à l\'acceptation et au respect des présentes CGU. En accédant au Service, l\'Utilisateur reconnaît avoir pris connaissance de l\'ensemble des présentes CGU et les accepter sans réserve. MenuCraft se réserve le droit de modifier les CGU à tout moment. Les modifications prennent effet dès leur publication sur le site.</p>
         
         <h3>3. Description des services</h3>
-        <p>MenuMiam est une plateforme en ligne permettant aux restaurateurs de :</p>
+        <p>MenuCraft est une plateforme en ligne permettant aux restaurateurs de :</p>
         <ul>
             <li>Créer et gérer leur carte de restaurant (mode éditable ou mode images)</li>
             <li>Personnaliser leur site vitrine (template, logo, bannière, informations de contact)</li>
@@ -72,7 +72,7 @@ class LegalController extends BaseController
         <p>L\'accès au Service nécessite la création d\'un compte via une invitation envoyée par l\'administrateur de la plateforme. L\'Utilisateur s\'engage à fournir des informations exactes et à maintenir la confidentialité de ses identifiants de connexion. Toute utilisation du compte est réputée faite par l\'Utilisateur lui-même.</p>
         
         <h3>5. Responsabilités</h3>
-        <p>MenuMiam met tout en œuvre pour assurer la disponibilité et la qualité du Service. Toutefois, MenuMiam ne saurait être tenu responsable :</p>
+        <p>MenuCraft met tout en œuvre pour assurer la disponibilité et la qualité du Service. Toutefois, MenuCraft ne saurait être tenu responsable :</p>
         <ul>
             <li>Des interruptions temporaires du Service pour maintenance ou mise à jour</li>
             <li>De la perte de données résultant d\'une utilisation non conforme</li>
@@ -82,7 +82,7 @@ class LegalController extends BaseController
         <p>L\'Utilisateur est seul responsable du contenu qu\'il publie (textes, images, prix) et s\'engage à ne pas publier de contenu illicite, diffamatoire ou portant atteinte aux droits de tiers.</p>
         
         <h3>6. Propriété intellectuelle</h3>
-        <p>L\'ensemble des éléments du Service (code source, design, logos, textes, images) sont la propriété exclusive de MenuMiam et sont protégés par les lois relatives à la propriété intellectuelle. Toute reproduction, représentation ou exploitation non autorisée est strictement interdite. Les contenus publiés par l\'Utilisateur restent sa propriété.</p>
+        <p>L\'ensemble des éléments du Service (code source, design, logos, textes, images) sont la propriété exclusive de MenuCraft et sont protégés par les lois relatives à la propriété intellectuelle. Toute reproduction, représentation ou exploitation non autorisée est strictement interdite. Les contenus publiés par l\'Utilisateur restent sa propriété.</p>
         
         <h3>7. Droit de rétractation</h3>
         <p id="cgu-retractation">Conformément à la législation européenne (Directive 2011/83/UE relative aux droits des consommateurs), l\'Utilisateur dispose d\'un délai de 14 jours à compter de la souscription pour exercer son droit de rétractation sans avoir à justifier de motifs ni à payer de pénalités.</p>
@@ -90,7 +90,7 @@ class LegalController extends BaseController
         <h4>Conditions d\'exercice</h4>
         <p>Le droit de rétractation s\'applique aux contrats à distance conclus hors établissement. Pour l\'exercer, l\'Utilisateur doit :</p>
         <ul>
-            <li>Notifier sa décision de rétracter par écrit (email à <a href="mailto:support@menumiam.dev">support@menumiam.dev</a>)</li>
+            <li>Notifier sa décision de rétracter par écrit (email à <a href="mailto:support@menucraft.dev">support@menucraft.dev</a>)</li>
             <li>Fournir les informations nécessaires à l\'identification (nom, email, adresse)</li>
             <li>Indiquer la date de souscription de l\'abonnement</li>
         </ul>
@@ -118,7 +118,7 @@ class LegalController extends BaseController
         <p>Les présentes CGU sont régies par le droit français. Tout litige relatif à leur interprétation ou exécution relève de la compétence exclusive des tribunaux français.</p>
         
         <h3>10. Contact</h3>
-        <p>Pour toute question concernant les CGU : <a href="mailto:contact@menumiam.dev">contact@menumiam.dev</a></p>
+        <p>Pour toute question concernant les CGU : <a href="mailto:contact@menucraft.dev">contact@menucraft.dev</a></p>
         ';
     }
 
@@ -132,8 +132,8 @@ class LegalController extends BaseController
         <p><strong>Date de dernière mise à jour :</strong> ' . date('d/m/Y') . '</p>
         
         <h3>1. Responsable du traitement</h3>
-        <p><strong>MenuMiam</strong><br>
-        Email : <a href="mailto:dpo@menumiam.dev">dpo@menumiam.dev</a></p>
+        <p><strong>MenuCraft</strong><br>
+        Email : <a href="mailto:dpo@menucraft.dev">dpo@menucraft.dev</a></p>
         
         <h3>2. Données collectées</h3>
         <p>Dans le cadre de l\'utilisation du Service, nous collectons les données suivantes :</p>
@@ -167,7 +167,7 @@ class LegalController extends BaseController
             <li><strong>Droit d\'opposition :</strong> vous opposer au traitement de vos données pour des motifs légitimes</li>
             <li><strong>Droit à la limitation :</strong> demander la limitation du traitement dans certains cas</li>
         </ul>
-        <p>Pour exercer ces droits, contactez-nous à : <a href="mailto:rgpd@menumiam.dev">rgpd@menumiam.dev</a>. Nous répondrons dans un délai de 30 jours.</p>
+        <p>Pour exercer ces droits, contactez-nous à : <a href="mailto:rgpd@menucraft.dev">rgpd@menucraft.dev</a>. Nous répondrons dans un délai de 30 jours.</p>
         <p>Vous pouvez également introduire une réclamation auprès de la CNIL (<a href="https://www.cnil.fr" target="_blank" rel="noopener">www.cnil.fr</a>).</p>
         
         <h3>6. Conservation des données</h3>
@@ -199,7 +199,7 @@ class LegalController extends BaseController
         <p>Un cookie est un petit fichier texte déposé sur votre terminal (ordinateur, smartphone, tablette) lors de la visite d\'un site web. Il permet au site de mémoriser des informations sur votre visite, comme vos préférences, afin de faciliter votre navigation ultérieure.</p>
         
         <h3>2. Cookies utilisés</h3>
-        <p>Voici la liste exhaustive des cookies utilisés par MenuMiam :</p>
+        <p>Voici la liste exhaustive des cookies utilisés par MenuCraft :</p>
         <table class="cookies-table">
             <thead>
                 <tr>
@@ -257,7 +257,7 @@ class LegalController extends BaseController
         <p>Nous n\'utilisons actuellement aucun cookie tiers (pas de Google Analytics, pas de pixels publicitaires). Si des outils tiers sont ajoutés à l\'avenir, cette politique sera mise à jour et votre consentement sera à nouveau sollicité.</p>
         
         <h3>6. Contact</h3>
-        <p>Pour toute question relative aux cookies : <a href="mailto:contact@menumiam.dev">contact@menumiam.dev</a></p>
+        <p>Pour toute question relative aux cookies : <a href="mailto:contact@menucraft.dev">contact@menucraft.dev</a></p>
         ';
     }
 
@@ -271,9 +271,9 @@ class LegalController extends BaseController
         <p><strong>Date de dernière mise à jour :</strong> ' . date('d/m/Y') . '</p>
         
         <h3>1. Éditeur du site</h3>
-        <p><strong>MenuMiam</strong><br>
+        <p><strong>MenuCraft</strong><br>
         Plateforme de création de cartes de restaurant en ligne<br>
-        Email : <a href="mailto:contact@menumiam.dev">contact@menumiam.dev</a></p>
+        Email : <a href="mailto:contact@menucraft.dev">contact@menucraft.dev</a></p>
         <p><em>Note : les coordonnées complètes de l\'éditeur (adresse, téléphone, SIRET) seront ajoutées lors de la mise en production.</em></p>
         
         <h3>2. Directeur de publication</h3>
@@ -283,16 +283,16 @@ class LegalController extends BaseController
         <p><em>Environnement actuel : serveur de développement local (WAMP). Les informations de l\'hébergeur de production seront ajoutées lors du déploiement.</em></p>
         
         <h3>4. Propriété intellectuelle</h3>
-        <p>L\'ensemble du contenu du site MenuMiam (structure, design, code source, logos, textes, graphismes) est protégé par les dispositions du Code de la Propriété Intellectuelle. Toute reproduction, représentation, modification, publication, transmission ou exploitation de tout ou partie du site, par quelque procédé que ce soit, sans l\'autorisation écrite préalable de MenuMiam, est strictement interdite et constitue un délit de contrefaçon.</p>
+        <p>L\'ensemble du contenu du site MenuCraft (structure, design, code source, logos, textes, graphismes) est protégé par les dispositions du Code de la Propriété Intellectuelle. Toute reproduction, représentation, modification, publication, transmission ou exploitation de tout ou partie du site, par quelque procédé que ce soit, sans l\'autorisation écrite préalable de MenuCraft, est strictement interdite et constitue un délit de contrefaçon.</p>
         <p>Les contenus publiés par les utilisateurs (textes, images de plats, logos de restaurants) restent la propriété de leurs auteurs respectifs.</p>
         
         <h3>5. Limitations de responsabilité</h3>
-        <p>MenuMiam s\'efforce de fournir un service fiable et disponible. Toutefois :</p>
+        <p>MenuCraft s\'efforce de fournir un service fiable et disponible. Toutefois :</p>
         <ul>
             <li>Le Service est fourni « en l\'état » sans garantie d\'aucune sorte</li>
-            <li>MenuMiam ne peut garantir l\'absence d\'interruptions, d\'erreurs ou de bugs</li>
-            <li>MenuMiam décline toute responsabilité quant au contenu publié par les utilisateurs</li>
-            <li>MenuMiam ne saurait être tenu responsable des dommages indirects résultant de l\'utilisation du Service</li>
+            <li>MenuCraft ne peut garantir l\'absence d\'interruptions, d\'erreurs ou de bugs</li>
+            <li>MenuCraft décline toute responsabilité quant au contenu publié par les utilisateurs</li>
+            <li>MenuCraft ne saurait être tenu responsable des dommages indirects résultant de l\'utilisation du Service</li>
         </ul>
         
         <h3>6. Protection des données</h3>

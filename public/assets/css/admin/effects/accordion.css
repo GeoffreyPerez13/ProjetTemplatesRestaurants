@@ -288,12 +288,32 @@
   }
 }
 
-/* Masquer les icônes des accordéons sur petits écrans (GLOBAL) */
+/* Accordéons sur petits écrans (GLOBAL) */
+@media (max-width: 768px) {
+  .accordion-toggle {
+    font-size: 1em;
+    padding: 4px 8px;
+    flex-shrink: 0;
+  }
+
+  .accordion-header h2 {
+    font-size: 1.05em;
+  }
+}
+
 @media (max-width: 500px) {
   .accordion-header h2 i,
   .accordion-header h3 i,
   .accordion-header h4 i {
     display: none;
+  }
+
+  .accordion-toggle {
+    display: none;
+  }
+
+  .accordion-header h2 {
+    font-size: 1em;
   }
 }
 

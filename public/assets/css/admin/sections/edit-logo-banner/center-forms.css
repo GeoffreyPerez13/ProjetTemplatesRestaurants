@@ -1,0 +1,22 @@
+/* ==================== CENTRAGE DES FORMULAIRES EDIT-LOGO-BANNER ==================== */
+/* Centrer le formulaire de texte de bannière */
+.banner-text-form {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Centrer les sections d'upload logo et bannière */
+.upload-logo-section,
+.upload-banner-section {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Centrer le contenu des accordéons */
+.accordion-content form {
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}

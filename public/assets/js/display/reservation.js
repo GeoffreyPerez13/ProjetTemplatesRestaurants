@@ -41,7 +41,10 @@
         }
 
         if (data.closed) {
-          slotsContainer.innerHTML = '<div class="slots-closed"><i class="fas fa-times-circle"></i> Le restaurant est fermé ce jour-là.</div>';
+          var closureMessage = data.reason === 'exceptional_closure' 
+            ? '<div class="slots-closed"><i class="fas fa-calendar-times"></i> Fermeture exceptionnelle ce jour-là.</div>'
+            : '<div class="slots-closed"><i class="fas fa-times-circle"></i> Le restaurant est fermé ce jour-là.</div>';
+          slotsContainer.innerHTML = closureMessage;
           return;
         }
 

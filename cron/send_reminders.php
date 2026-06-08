@@ -45,7 +45,7 @@ try {
             <p>Nous vous rappelons de mettre à jour la carte de votre restaurant <strong>" . htmlspecialchars($admin['restaurant_name']) . "</strong>.</p>
             <p>Pour garantir une expérience optimale à vos clients, pensez à vérifier régulièrement vos plats, prix et descriptions.</p>
             <p>Accédez à la modification : <a href='$editLink'>$editLink</a></p>
-            <p>Merci de votre confiance,<br>L'équipe Menumiam</p>
+            <p>Merci de votre confiance,<br>L'équipe MenuCraft</p>
         </body>
         </html>
         ";

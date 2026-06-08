@@ -29,7 +29,7 @@
     <footer class="admin-footer">
         <div class="footer-content">
             <div class="footer-left">
-                <p>&copy; <?= date('Y') ?> MenuMiam - Interface d'administration</p>
+                <p>&copy; <?= date('Y') ?> MenuCraft - Interface d'administration</p>
             </div>
             <div class="footer-right">
                 <nav class="footer-links">
@@ -41,7 +41,7 @@
                     <span class="separator">|</span>
                     <a href="?page=legal&section=legal" target="_blank">Mentions légales</a>
                     <span class="separator">|</span>
-                    <a href="mailto:contact@menumiam.dev">Contact</a>
+                    <a href="mailto:contact@menucraft.dev">Contact</a>
                 </nav>
             </div>
         </div>

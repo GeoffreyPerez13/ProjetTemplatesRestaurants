@@ -261,18 +261,33 @@
     color: var(--color-warning);
 }
 
-.sub-card-prorata {
-    display: inline-flex;
+
+
+/* Notice résiliation */
+.cancellation-notice {
+    display: flex;
     align-items: center;
-    gap: 5px;
-    font-size: 0.82rem;
-    color: var(--color-info);
-    font-weight: 500;
+    gap: 12px;
+    padding: var(--spacing-md);
+    background: rgba(234, 179, 8, 0.08);
+    border: 1px solid rgba(234, 179, 8, 0.3);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
 }
 
-.sub-card-prorata i {
-    font-size: 0.78rem;
-    color: var(--color-info);
+.cancellation-notice > i {
+    font-size: 1.3em;
+    color: #eab308;
+}
+
+.cancellation-notice strong {
+    color: #eab308;
+}
+
+.cancellation-notice p {
+    margin: 4px 0 0;
+    font-size: 0.88rem;
+    color: var(--color-text-light);
 }
 
 /* Badges de statut */
@@ -495,4 +510,232 @@ body.dark-mode .btn-danger-outline {
 body.dark-mode .btn-danger-outline:hover {
     background: #ef4444;
     color: white;
+}
+
+/* ==================== HISTORIQUE DES ACHATS ==================== */
+.purchase-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.purchase-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-border);
+    transition: background 0.15s;
+}
+
+.purchase-row:last-child {
+    border-bottom: none;
+}
+
+.purchase-row:hover {
+    background: rgba(180, 83, 9, 0.03);
+}
+
+.purchase-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.purchase-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.purchase-label strong {
+    font-size: 0.92rem;
+    color: var(--color-text);
+}
+
+.purchase-label .purchase-duration {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+    padding: 1px 7px;
+    border-radius: 10px;
+}
+
+.purchase-type-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+}
+
+.purchase-type-badge.badge-pack-full {
+    background: linear-gradient(135deg, var(--color-primary), #d97706);
+    color: white;
+}
+
+.purchase-type-badge.badge-premium {
+    background: rgba(180, 83, 9, 0.12);
+    color: var(--color-primary);
+}
+
+.purchase-type-badge.badge-basique {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.purchase-meta {
+    display: flex;
+    gap: 16px;
+    padding-left: 40px;
+}
+
+.purchase-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+}
+
+.purchase-meta i {
+    font-size: 0.72rem;
+}
+
+.purchase-amount {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.purchase-total {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.purchase-amount small {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+/* Notice résiliation - form réactivation */
+.cancellation-notice {
+    flex-wrap: wrap;
+}
+
+.reactivate-form {
+    margin-left: auto;
+}
+
+.btn-success {
+    background: #16a34a;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: var(--radius-md);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-success:hover {
+    background: #15803d;
+}
+
+/* Responsive historique */
+@media (max-width: 768px) {
+    .purchase-row {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 8px;
+        padding: 14px 10px;
+    }
+
+    .purchase-label {
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .purchase-type-badge {
+        display: none;
+    }
+
+    .purchase-label strong {
+        font-size: 0.9rem;
+        word-break: break-word;
+    }
+
+    .purchase-label small {
+        font-size: 0.78rem;
+    }
+
+    .purchase-meta {
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding-left: 0;
+    }
+
+    .purchase-meta span i {
+        display: none;
+    }
+
+    .purchase-amount {
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        padding-left: 0;
+    }
+
+    .purchase-total {
+        font-size: 1rem;
+    }
+
+    .cancellation-notice {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .reactivate-form {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .reactivate-form .btn-success {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Dark mode */
+body.dark-mode .purchase-row:hover {
+    background: rgba(180, 83, 9, 0.06);
+}
+
+body.dark-mode .purchase-type-badge.badge-basique {
+    background: rgba(59, 130, 246, 0.15);
+    color: #60a5fa;
+}
+
+body.dark-mode .cancellation-notice {
+    background: rgba(234, 179, 8, 0.05);
+    border-color: rgba(234, 179, 8, 0.2);
+}
+
+body.dark-mode .btn-success {
+    background: #15803d;
+}
+
+body.dark-mode .btn-success:hover {
+    background: #16a34a;
 }

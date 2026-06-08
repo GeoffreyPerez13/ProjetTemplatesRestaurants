@@ -59,7 +59,7 @@ $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
                     <li><i class="fas fa-check-circle"></i> Une fiche Google My Business active et vérifiée</li>
                     <li><i class="fas fa-check-circle"></i> Un compte Google Cloud Platform (gratuit)</li>
                     <li><i class="fas fa-check-circle"></i> Une carte bancaire pour activer l'API (aucun frais si quota gratuit respecté)</li>
-                    <li><i class="fas fa-check-circle"></i> L'option premium "Avis Google" activée sur MenuMiam</li>
+                    <li><i class="fas fa-check-circle"></i> L'option premium "Avis Google" activée sur MenuCraft</li>
                 </ul>
             </div>
             <div class="step-note warning">
@@ -226,16 +226,16 @@ $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
         </div>
     </div>
 
-    <!-- Étape 6 : Configuration dans MenuMiam -->
+    <!-- Étape 6 : Configuration dans MenuCraft -->
     <div class="roadmap-step">
         <div class="step-number">6</div>
         <div class="step-content">
-            <h2><i class="fas fa-cog"></i> Configuration dans MenuMiam</h2>
+            <h2><i class="fas fa-cog"></i> Configuration dans MenuCraft</h2>
             <div class="step-description">
                 <ol class="step-list">
                     <li>
                         <strong>Se connecter en tant que restaurant</strong>
-                        <p>Connectez-vous au compte du restaurant client sur MenuMiam</p>
+                        <p>Connectez-vous au compte du restaurant client sur MenuCraft</p>
                     </li>
                     <li>
                         <strong>Accéder aux paramètres Google Reviews</strong>
@@ -392,7 +392,7 @@ $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
                     </ul>
                 </div>
 
-                <h3>Facturation MenuMiam</h3>
+                <h3>Facturation MenuCraft</h3>
                 <p>Ce service peut être facturé en supplément :</p>
                 <ul>
                     <li><strong>Configuration initiale :</strong> Frais uniques (à définir)</li>
@@ -429,7 +429,7 @@ $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
                 <ul class="checklist">
                     <li><i class="fas fa-check-circle"></i> Le restaurant a des comptes actifs sur les plateformes (Uber Eats, Deliveroo, Just Eat)</li>
                     <li><i class="fas fa-check-circle"></i> Le restaurant a accès aux espaces partenaires de chaque plateforme</li>
-                    <li><i class="fas fa-check-circle"></i> L'option premium "Intégration livraison" est activée sur MenuMiam (7€/mois)</li>
+                    <li><i class="fas fa-check-circle"></i> L'option premium "Intégration livraison" est activée sur MenuCraft (7€/mois)</li>
                 </ul>
             </div>
             <div class="step-note info">
@@ -462,7 +462,7 @@ $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
                         <strong>Générer une clé API</strong>
                         <ul>
                             <li>Cliquez sur "Générer une nouvelle clé"</li>
-                            <li>Nommez-la "MenuMiam Integration"</li>
+                            <li>Nommez-la "MenuCraft Integration"</li>
                             <li><strong>Copiez immédiatement la clé</strong> (format : <code>ue_live_...</code>)</li>
                         </ul>
                     </li>
@@ -472,7 +472,7 @@ $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
                     </li>
                 </ol>
 
-                <h3>Configuration dans MenuMiam</h3>
+                <h3>Configuration dans MenuCraft</h3>
                 <ol class="step-list">
                     <li>Allez dans Paramètres → Intégration livraison</li>
                     <li>Activez le toggle "Uber Eats"</li>
@@ -488,7 +488,7 @@ $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
 
                 <h3>Configurer le Webhook</h3>
                 <ol class="step-list">
-                    <li>Dans MenuMiam, copiez l'URL Webhook générée automatiquement</li>
+                    <li>Dans MenuCraft, copiez l'URL Webhook générée automatiquement</li>
                     <li>Retournez dans l'espace partenaire Uber Eats</li>
                     <li>Paramètres → Intégrations → Webhooks</li>
                     <li>Ajoutez l'URL copiée</li>
@@ -521,7 +521,7 @@ $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
                         <ul>
                             <li>Contactez le support Deliveroo via l'espace partenaire</li>
                             <li>Demandez l'activation de l'API Partner</li>
-                            <li>Précisez que c'est pour une intégration avec MenuMiam</li>
+                            <li>Précisez que c'est pour une intégration avec MenuCraft</li>
                         </ul>
                     </li>
                     <li>
@@ -534,7 +534,7 @@ $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
                     </li>
                 </ol>
 
-                <h3>Configuration dans MenuMiam</h3>
+                <h3>Configuration dans MenuCraft</h3>
                 <p>Même processus qu'Uber Eats :</p>
                 <ol class="step-list">
                     <li>Activez le toggle "Deliveroo"</li>
@@ -584,7 +584,7 @@ $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
                     </li>
                 </ol>
 
-                <h3>Configuration dans MenuMiam</h3>
+                <h3>Configuration dans MenuCraft</h3>
                 <p>Même processus que les autres plateformes :</p>
                 <ol class="step-list">
                     <li>Activez le toggle "Just Eat"</li>
@@ -615,7 +615,7 @@ $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
                         <strong>Tester avec une commande réelle</strong>
                         <ul>
                             <li>Passez une commande de test sur chaque plateforme</li>
-                            <li>Vérifiez que la commande apparaît dans MenuMiam</li>
+                            <li>Vérifiez que la commande apparaît dans MenuCraft</li>
                             <li>Testez la mise à jour du statut</li>
                         </ul>
                     </li>
@@ -700,7 +700,7 @@ $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
                         <p><strong>Solutions :</strong></p>
                         <ul>
                             <li>Générez une nouvelle clé API</li>
-                            <li>Mettez à jour la configuration dans MenuMiam</li>
+                            <li>Mettez à jour la configuration dans MenuCraft</li>
                             <li>Testez à nouveau la connexion</li>
                         </ul>
                     </div>
@@ -725,7 +725,7 @@ $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
                     </ul>
                 </div>
 
-                <h3>Facturation MenuMiam</h3>
+                <h3>Facturation MenuCraft</h3>
                 <ul>
                     <li><strong>Configuration initiale :</strong> Frais uniques (à définir selon le nombre de plateformes)</li>
                     <li><strong>Abonnement mensuel :</strong> Inclus dans l'option premium "Intégration livraison" (7€/mois)</li>
@@ -753,7 +753,7 @@ $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
             </button>
         </div>
         <div class="footer-info">
-            <p><i class="fas fa-info-circle"></i> Cette feuille de route est réservée aux super administrateurs MenuMiam.</p>
+            <p><i class="fas fa-info-circle"></i> Cette feuille de route est réservée aux super administrateurs MenuCraft.</p>
             <p>Pour toute question ou assistance, contactez le support technique.</p>
         </div>
     </div>

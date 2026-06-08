@@ -115,6 +115,11 @@ switch ($page) {
         $stripeController->cancelSubscription();  // Résilier un abonnement ou une option premium
         break;
 
+    case 'reactivate-subscription':
+        $stripeController = new StripeController($pdo);
+        $stripeController->reactivateSubscription();  // Réactiver un abonnement résilié (période de grâce)
+        break;
+
     case 'send-invitation':
         $adminController = new AdminController($pdo);
         $adminController->sendInvitation();  // Affiche le formulaire et gère l'envoi
@@ -147,7 +152,7 @@ switch ($page) {
             header('Location: ?page=dashboard');
             exit;
         }
-        require_once APP_PATH . '/Views/admin/google-reviews-roadmap.php';
+        require_once __DIR__ . '/../app/Views/admin/google-reviews-roadmap.php';
         break;
 
     case 'edit-card':
@@ -313,7 +318,7 @@ switch ($page) {
 
     case 'demo':
         // Redirige vers la vitrine du restaurant de démo
-        header('Location: ?page=display&slug=demo-menumiam');
+        header('Location: ?page=display&slug=demo-menucraft');
         exit;
 
     case 'demo-access':

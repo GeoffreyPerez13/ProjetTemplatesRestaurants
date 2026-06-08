@@ -12,7 +12,10 @@ $scripts = [
     "js/effects/accordion.js",
     "js/effects/lightbox.js"
 ];
-$styles = ["css/admin/shared/sweetalert-custom.css"];
+$styles = [
+    "css/admin/shared/sweetalert-custom.css",
+    "css/admin/sections/edit-logo-banner/center-forms.css"
+];
 require __DIR__ . '/../partials/header.php';
 ?>
 

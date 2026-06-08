@@ -12,39 +12,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Prix des options premium
     const premiumPrices = {
-        'google_reviews': 5,
-        'advanced_analytics': 5,
-        'online_booking': 8,
-        'delivery_integration': 7
+        'google_reviews': 3.99,
+        'advanced_analytics': 3.99,
+        'online_booking': 10.99,
+        'delivery_integration': 3.99
     };
+
+    const BASIQUE_PRICE = 11.99;
 
     // État du panier
     let selectedFeatures = new Set();
     let basiqueSelected = false;
 
-    // Calculer le prorata pour une option premium
-    function calculateProrata(priceMonthly) {
-        const now = new Date();
-        const currentDay = now.getDate();
-        const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-        
-        // Si on est avant le 15, prorata jusqu'au 15 du mois en cours
-        // Si on est après le 15, prorata jusqu'au 15 du mois prochain
-        let targetDay = 15;
-        let targetMonth = now.getMonth();
-        
-        if (currentDay > 15) {
-            targetMonth++;
-        }
-        
-        const targetDate = new Date(now.getFullYear(), targetMonth, targetDay);
-        const daysRemaining = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
-        
-        // Calcul prorata : (jours restants / jours total) * prix mensuel
-        const prorata = Math.round((daysRemaining / daysInMonth) * priceMonthly * 100) / 100;
-        
-        return prorata;
-    }
 
     // Noms des features en français
     const featureNames = {
@@ -61,17 +40,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // --- Calculs ---
         let premiumMonthly = 0;
-        let premiumProrata = 0;
         selectedFeatures.forEach(feature => {
             const price = premiumPrices[feature] || 0;
             premiumMonthly += price;
-            premiumProrata += calculateProrata(price);
         });
-        premiumProrata = Math.round(premiumProrata * 100) / 100;
+        premiumMonthly = Math.round(premiumMonthly * 100) / 100;
 
-        const basiqueProrata = Math.round(calculateProrata(9) * 100) / 100;
-        const totalMonthly = (basiqueSelected ? 9 : 0) + premiumMonthly;
-        const totalProrata = Math.round(((basiqueSelected ? basiqueProrata : 0) + premiumProrata) * 100) / 100;
+        const totalMonthly = (basiqueSelected ? BASIQUE_PRICE : 0) + premiumMonthly;
+        const totalMonthlyRounded = Math.round(totalMonthly * 100) / 100;
 
         const hasSelections = basiqueSelected || selectedFeatures.size > 0;
 
@@ -88,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Mettre à jour le compteur et le total du panier premium
         if (cartCount) cartCount.textContent = selectedFeatures.size;
-        if (cartTotal) cartTotal.textContent = `${premiumProrata.toFixed(2)}€`;
+        if (cartTotal) cartTotal.textContent = `${premiumMonthly.toFixed(2).replace('.', ',')}€`;
 
         // Récapitulatif détaillé dans le panier premium (pour utilisateur avec basique)
         if (hasBasiqueSubscription && selectedFeatures.size > 0) {
@@ -102,32 +78,27 @@ document.addEventListener('DOMContentLoaded', function() {
             let itemsHtml = '';
             selectedFeatures.forEach(feature => {
                 const price = premiumPrices[feature] || 0;
-                const prorata = calculateProrata(price);
                 itemsHtml += `
                     <div class="summary-item">
                         <span>${featureNames[feature] || feature}</span>
-                        <span>${prorata.toFixed(2)}€ <small>(${price}€/mois)</small></span>
+                        <span>${price.toFixed(2).replace('.', ',')}€/mois</span>
                     </div>`;
             });
 
             totalSummary.innerHTML = `
                 <div class="summary-items">${itemsHtml}</div>
                 <div class="summary-separator"></div>
-                <div class="summary-line summary-prorata">
-                    <span>À payer maintenant (prorata)</span>
-                    <strong>${premiumProrata.toFixed(2)}€</strong>
-                </div>
                 <div class="summary-line summary-monthly">
                     <span>Abonnement basique</span>
-                    <span>9€/mois</span>
+                    <span>${BASIQUE_PRICE.toFixed(2).replace('.', ',')}€/mois</span>
                 </div>
                 <div class="summary-line summary-monthly">
                     <span>Options premium</span>
-                    <span>+${premiumMonthly}€/mois</span>
+                    <span>+${premiumMonthly.toFixed(2).replace('.', ',')}€/mois</span>
                 </div>
                 <div class="summary-line summary-total">
                     <span>Total mensuel</span>
-                    <strong>${9 + premiumMonthly}€/mois</strong>
+                    <strong>${(BASIQUE_PRICE + premiumMonthly).toFixed(2).replace('.', ',')}€/mois</strong>
                 </div>
             `;
         } else {
@@ -148,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (basiqueSelected) {
                         const priceEl = basiqueCartItem.querySelector('.item-price');
                         if (priceEl) {
-                            priceEl.innerHTML = `<span class="item-prorata-price">${basiqueProrata.toFixed(2)}€</span> <small>(9€/mois)</small>`;
+                            priceEl.textContent = `${BASIQUE_PRICE.toFixed(2).replace('.', ',')}€/mois`;
                         }
                     }
                 }
@@ -161,7 +132,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else {
                         const html = Array.from(selectedFeatures).map(feature => {
                             const price = premiumPrices[feature] || 0;
-                            const prorata = calculateProrata(price);
                             return `
                                 <div class="premium-item">
                                     <div class="item-info">
@@ -169,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         <span>${featureNames[feature] || feature}</span>
                                     </div>
                                     <div class="item-price">
-                                        <span class="item-prorata-price">${prorata.toFixed(2)}€</span> <small>(${price}€/mois)</small>
+                                        ${price.toFixed(2).replace('.', ',')}€/mois
                                     </div>
                                 </div>`;
                         }).join('');
@@ -179,9 +149,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Totaux
                 const combinedTotal = document.getElementById('combined-total');
-                const combinedProrata = document.getElementById('combined-prorata');
-                if (combinedTotal) combinedTotal.textContent = `${totalMonthly}€/mois`;
-                if (combinedProrata) combinedProrata.textContent = `${totalProrata.toFixed(2)}€`;
+                if (combinedTotal) combinedTotal.textContent = `${totalMonthlyRounded.toFixed(2).replace('.', ',')}€/mois`;
+
+                // Afficher l'avertissement basique si premium sélectionné sans basique
+                const basiqueWarning = document.getElementById('basique-warning');
+                if (basiqueWarning) {
+                    basiqueWarning.style.display = (selectedFeatures.size > 0 && !basiqueSelected) ? 'block' : 'none';
+                }
             } else {
                 combinedCartSection.style.display = 'none';
             }
@@ -223,10 +197,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 premiumContent.classList.add('expanded');
                 premiumContent.style.display = 'block';
                 
-                // Scroller vers l'accordéon premium
+                // Scroller vers la première carte premium de la grille
                 setTimeout(() => {
-                    premiumAccordion.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 100);
+                    const firstCard = premiumContent.querySelector('.premium-feature-card');
+                    if (firstCard) {
+                        firstCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else {
+                        premiumAccordion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 150);
             }
         } else {
             label.classList.remove('selected');

@@ -55,7 +55,7 @@ try {
         INSERT INTO admins (username, email, password, restaurant_name, restaurant_id, carte_mode, role, email_verified, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, 'editable', 'SUPER_ADMIN', 1, NOW(), NOW())
     ");
-    $stmt->execute(['superadmin', 'admin@menumiam.fr', $password, 'Mon Restaurant', $restaurantId]);
+    $stmt->execute(['superadmin', 'admin@menucraft.fr', $password, 'Mon Restaurant', $restaurantId]);
     $adminId = $pdo->lastInsertId();
     echo "  ✅ SUPER_ADMIN créé (id: $adminId)\n";
     echo "     → Username: superadmin\n";

@@ -6,8 +6,10 @@
   padding: 12px 20px;
   font-size: 0.95rem;
   font-weight: 500;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 1100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
@@ -39,9 +41,11 @@
   text-align: center;
   padding: 10px 20px;
   font-size: 0.9rem;
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 1100;
+  left: 0;
+  right: 0;
+  z-index: 1101;
   box-shadow: 0 2px 12px rgba(124, 58, 237, 0.3);
   display: flex;
   align-items: center;
@@ -81,13 +85,17 @@
   color: white;
 }
 
-/* Décaler le header quand le bandeau démo est visible */
-.demo-banner-vitrine + .preview-banner + header {
-  top: 88px;
+/* Décaler les bandeaux et header quand empilés (fixed positioning) */
+body:has(.demo-banner-vitrine):has(.preview-banner) .preview-banner {
+  top: 44px; /* Hauteur du bandeau démo */
 }
 
-.demo-banner-vitrine + header {
-  top: 44px;
+body:has(.demo-banner-vitrine):has(.preview-banner) header {
+  top: 88px; /* Démo (44px) + Preview (44px) */
+}
+
+body:has(.demo-banner-vitrine):not(:has(.preview-banner)) header {
+  top: 44px; /* Seulement démo */
 }
 
 @media (max-width: 600px) {

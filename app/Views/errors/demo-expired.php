@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Démo expirée — MenuMiam</title>
+    <title>Démo expirée — MenuCraft</title>
     <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -120,11 +121,11 @@
         <h1>Démo expirée ou invalide</h1>
         <p>Le lien de démonstration que vous avez utilisé n'est plus valide. Les liens de démo expirent après 3 jours pour des raisons de sécurité.</p>
         <div class="highlight">
-            <strong>Intéressé par MenuMiam ?</strong><br>
+            <strong>Intéressé par MenuCraft ?</strong><br>
             Contactez-nous pour obtenir un nouveau lien de démonstration ou pour créer votre propre site vitrine de restaurant.
         </div>
         <a href="/" class="error-link"><i class="fas fa-home"></i> Retour à l'accueil</a>
-        <p class="brand">Propulsé par <a href="/">MenuMiam</a></p>
+        <p class="brand">Propulsé par <a href="/">MenuCraft</a></p>
     </div>
 </body>
 

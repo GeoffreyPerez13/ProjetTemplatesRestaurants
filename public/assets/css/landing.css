@@ -1,4 +1,4 @@
-/* ==================== LANDING PAGE — MenuMiam ==================== */
+/* ==================== LANDING PAGE — MenuCraft ==================== */
 
 /* Reset & Base */
 *, *::before, *::after {
@@ -984,6 +984,243 @@ body {
     color: var(--lp-text-muted);
 }
 
+/* ==================== Pack Full Landing ==================== */
+.pricing-pack-full {
+    margin-bottom: 48px;
+}
+
+.pack-full-landing-card {
+    position: relative;
+    background: var(--lp-bg);
+    border: 2px solid var(--lp-primary);
+    border-radius: var(--lp-radius-lg);
+    padding: 40px;
+    box-shadow: 0 8px 32px rgba(180, 83, 9, 0.15), 0 0 0 1px rgba(180, 83, 9, 0.1);
+    overflow: hidden;
+}
+
+.pack-full-landing-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: linear-gradient(135deg, var(--lp-primary), #d97706);
+    color: white;
+    padding: 8px 24px 8px 36px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%);
+}
+
+.pack-full-landing-badge i {
+    margin-right: 6px;
+}
+
+.pack-full-landing-inner {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 40px;
+    align-items: start;
+}
+
+.pack-full-landing-header h3 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    color: var(--lp-text);
+}
+
+.pack-full-landing-header h3 i {
+    color: var(--lp-primary);
+    margin-right: 8px;
+}
+
+.pack-full-landing-subtitle {
+    font-size: 0.95rem;
+    color: var(--lp-text-muted);
+    margin-bottom: 20px;
+}
+
+.pack-full-landing-price {
+    margin-bottom: 20px;
+}
+
+.pack-full-price-old {
+    font-size: 0.9rem;
+    color: var(--lp-text-muted);
+    margin-bottom: 4px;
+}
+
+.pack-full-price-old .strikethrough {
+    text-decoration: line-through;
+    color: var(--lp-text-light);
+}
+
+.pack-full-price-main {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+}
+
+.pack-full-price-main .price-amount {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--lp-primary);
+    line-height: 1;
+}
+
+.pack-full-price-main .price-currency {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--lp-primary);
+}
+
+.pack-full-price-main .price-period {
+    font-size: 1rem;
+    color: var(--lp-text-muted);
+    margin-left: 4px;
+}
+
+/* Duration toggle buttons */
+.pack-full-duration-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.pack-duration-btn {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1.5px solid var(--lp-border);
+    border-radius: var(--lp-radius);
+    background: var(--lp-bg);
+    color: var(--lp-text);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.pack-duration-btn:hover {
+    border-color: var(--lp-primary);
+    color: var(--lp-primary);
+}
+
+.pack-duration-btn.active {
+    border-color: var(--lp-primary);
+    background: rgba(180, 83, 9, 0.08);
+    color: var(--lp-primary);
+    box-shadow: 0 2px 8px rgba(180, 83, 9, 0.15);
+}
+
+.pack-duration-badge {
+    display: inline-block;
+    background: var(--lp-success);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+.pack-full-total-line {
+    font-size: 0.88rem;
+    color: var(--lp-text-light);
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    background: var(--lp-bg-warm);
+    border-radius: var(--lp-radius);
+    text-align: center;
+}
+
+.pack-full-total-line strong {
+    color: var(--lp-primary);
+}
+
+.pack-full-cta {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 1rem;
+}
+
+/* Right column - features */
+.pack-full-includes-label {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--lp-primary);
+    margin-bottom: 12px;
+}
+
+.pack-full-includes-label i {
+    margin-right: 6px;
+}
+
+.pack-full-features li {
+    justify-content: space-between;
+}
+
+.feature-value {
+    font-size: 0.8rem;
+    color: var(--lp-text-muted);
+    font-weight: 400;
+    margin-left: auto;
+    padding-left: 12px;
+    white-space: nowrap;
+}
+
+.pack-full-savings-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.04));
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: var(--lp-radius);
+    margin-top: 16px;
+    font-size: 0.88rem;
+    color: var(--lp-text);
+}
+
+.pack-full-savings-banner i {
+    color: var(--lp-success);
+    font-size: 1.2em;
+    flex-shrink: 0;
+}
+
+.pack-full-savings-banner strong {
+    color: var(--lp-success);
+}
+
+/* Pricing separator */
+.pricing-separator {
+    display: flex;
+    align-items: center;
+    margin: 0 0 40px;
+    gap: 16px;
+}
+
+.pricing-separator::before,
+.pricing-separator::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--lp-border);
+}
+
+.pricing-separator span {
+    color: var(--lp-text-muted);
+    font-size: 0.9rem;
+    font-style: italic;
+    white-space: nowrap;
+}
+
 .pricing-example {
     text-align: center;
     padding: 16px 24px;
@@ -1542,6 +1779,23 @@ body {
     .pricing-card.wide .pricing-card-inner {
         grid-template-columns: 1fr;
         gap: 24px;
+    }
+
+    .pack-full-landing-inner {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .pack-full-landing-card {
+        padding: 24px;
+    }
+
+    .pack-full-duration-toggle {
+        flex-direction: column;
+    }
+
+    .pack-full-price-main .price-amount {
+        font-size: 2.4rem;
     }
 
     .pricing-options-grid {

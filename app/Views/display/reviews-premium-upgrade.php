@@ -29,7 +29,7 @@
                         Activer Premium
                     </button>
                     <p class="premium-note">
-                        Contactez-nous à <a href="mailto:premium@menumiam.fr">premium@menumiam.fr</a> pour activer cette fonctionnalité
+                        Contactez-nous à <a href="mailto:premium@menucraft.fr">premium@menucraft.fr</a> pour activer cette fonctionnalité
                     </p>
                 </div>
             </div>

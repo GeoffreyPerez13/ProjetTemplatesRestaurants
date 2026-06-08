@@ -160,7 +160,7 @@
 }
 
 .accordion-content {
-  padding: 25px 0;
+  padding: 25px 10px;
   transition:
     max-height 0.3s ease,
     opacity 0.3s ease,

@@ -42,9 +42,12 @@ body:has(.closure-banner:not(.hidden)) header {
 }
 
 .logo-area img {
-  max-height: var(--img-logo-max-height);
-  max-width: 150px;
-  object-fit: contain;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-border);
+  background: white;
 }
 
 .logo-area h1 {
@@ -246,7 +249,7 @@ html.dark-mode .dark-mode-toggle-fixed .fa-sun {
 }
 
 /* ---- Mobile nav ---- */
-@media (max-width: 768px) {
+@media (max-width: 950px) {
   .header-content {
     padding: 0 var(--spacing-md);
   }
@@ -260,7 +263,7 @@ html.dark-mode .dark-mode-toggle-fixed .fa-sun {
     top: var(--header-height);
     right: 0;
     width: 280px;
-    height: calc(100vh - var(--header-height));
+    max-height: calc(100vh - var(--header-height));
     background: var(--color-bg);
     box-shadow: var(--shadow-xl);
     flex-direction: column;
@@ -270,6 +273,7 @@ html.dark-mode .dark-mode-toggle-fixed .fa-sun {
     transform: translateX(100%);
     visibility: hidden;
     transition: transform var(--transition-normal), visibility var(--transition-normal);
+    overflow-y: auto;
   }
 
   .nav-menu.active {
@@ -309,7 +313,22 @@ html.dark-mode .dark-mode-toggle-fixed .fa-sun {
     font-size: 1.1rem;
   }
 
-  /* Header et nav-menu décalés si bannière de fermeture présente (mobile) */
+  /* Header et nav-menu décalés si bandeaux présents (mobile) */
+  body:has(.demo-banner-vitrine) .nav-menu {
+    top: calc(var(--header-height) + 44px);
+    height: calc(100vh - var(--header-height) - 44px);
+  }
+
+  body:has(.preview-banner) .nav-menu {
+    top: calc(var(--header-height) + 44px);
+    height: calc(100vh - var(--header-height) - 44px);
+  }
+
+  body:has(.demo-banner-vitrine):has(.preview-banner) .nav-menu {
+    top: calc(var(--header-height) + 88px);
+    height: calc(100vh - var(--header-height) - 88px);
+  }
+
   body:has(.closure-banner:not(.hidden)) header {
     top: 60px;
   }
@@ -317,5 +336,20 @@ html.dark-mode .dark-mode-toggle-fixed .fa-sun {
   body:has(.closure-banner:not(.hidden)) .nav-menu {
     top: calc(var(--header-height) + 60px);
     height: calc(100vh - var(--header-height) - 60px);
+  }
+
+  body:has(.preview-banner):has(.closure-banner:not(.hidden)) .nav-menu {
+    top: calc(var(--header-height) + 44px + 60px);
+    height: calc(100vh - var(--header-height) - 44px - 60px);
+  }
+
+  body:has(.demo-banner-vitrine):has(.closure-banner:not(.hidden)) .nav-menu {
+    top: calc(var(--header-height) + 44px + 60px);
+    height: calc(100vh - var(--header-height) - 44px - 60px);
+  }
+
+  body:has(.demo-banner-vitrine):has(.preview-banner):has(.closure-banner:not(.hidden)) .nav-menu {
+    top: calc(var(--header-height) + 88px + 60px);
+    height: calc(100vh - var(--header-height) - 88px - 60px);
   }
 }

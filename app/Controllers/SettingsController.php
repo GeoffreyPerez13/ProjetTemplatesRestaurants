@@ -961,7 +961,7 @@ class SettingsController extends BaseController
                 if (!$premiumFeature->isFeatureInSubscription($adminId, $featureName)) {
                     echo json_encode([
                         'success' => false,
-                        'message' => 'Cette fonctionnalité nécessite un abonnement Premium. Contactez-nous à premium@menumiam.fr pour souscrire.'
+                        'message' => 'Cette fonctionnalité nécessite un abonnement Premium. Contactez-nous à premium@menucraft.fr pour souscrire.'
                     ]);
                     exit;
                 }
@@ -1088,10 +1088,18 @@ class SettingsController extends BaseController
 
     /**
      * Insère des avis de test pour Google Reviews
+     * Réservé aux SUPER_ADMIN uniquement
      */
     public function seedReviews()
     {
         $this->requireLogin();
+
+        // Bloquer l'accès aux non-SUPER_ADMIN
+        if ($_SESSION['role'] !== 'SUPER_ADMIN') {
+            http_response_code(403);
+            echo "❌ Accès refusé : cette fonctionnalité est réservée aux super-administrateurs.";
+            exit;
+        }
 
         $adminId = $_SESSION['admin_id'];
 
@@ -1108,7 +1116,7 @@ class SettingsController extends BaseController
 
         // Données de test
         $testData = [
-            'name' => 'Restaurant Test MenuMiam',
+            'name' => 'Restaurant Test MenuCraft',
             'rating' => 4.5,
             'total_reviews' => 12,
             'reviews' => [
@@ -1167,7 +1175,7 @@ class SettingsController extends BaseController
             echo "<br><br>";
             echo "<strong>Actions suivantes :</strong><br>";
             echo "→ <a href='?page=settings&section=google-reviews'>Voir les avis dans l'admin</a><br>";
-            echo "→ <a href='?page=display&slug=demo-menumiam'>Voir l'affichage sur le site vitrine</a><br>";
+            echo "→ <a href='?page=display&slug=demo-menucraft'>Voir l'affichage sur le site vitrine</a><br>";
             echo "<br><small>Note : Les avis resteront en cache 1 heure. Après ça, ils seront remplacés par les vrais avis Google si votre API fonctionne.</small>";
         } else {
             echo "❌ Erreur lors de l'insertion : " . print_r($stmt->errorInfo(), true);
@@ -1285,7 +1293,7 @@ class SettingsController extends BaseController
 
         // Mettre à jour le cache
         $updatedData = [
-            'name' => 'Restaurant Test MenuMiam',
+            'name' => 'Restaurant Test MenuCraft',
             'rating' => 4.6, // Légèrement amélioré avec les nouveaux avis
             'total_reviews' => count($allReviews),
             'reviews' => $allReviews
@@ -1307,7 +1315,7 @@ class SettingsController extends BaseController
             echo "<br><br>";
             echo "<strong>Actions suivantes :</strong><br>";
             echo "→ <a href='?page=settings&section=google-reviews'>Voir les avis dans l'admin</a><br>";
-            echo "→ <a href='?page=display&slug=demo-menumiam'>Voir sur le site vitrine</a><br>";
+            echo "→ <a href='?page=display&slug=demo-menucraft'>Voir sur le site vitrine</a><br>";
             echo "→ <a href='?page=seed-reviews&action=clear'>Vider tous les avis</a><br>";
         } else {
             echo "❌ Erreur lors de l'ajout : " . print_r($stmt->errorInfo(), true);

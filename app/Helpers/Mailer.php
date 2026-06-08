@@ -15,7 +15,7 @@ class Mailer
      * @param string $fromEmail Adresse d'expédition par défaut
      * @param string $fromName  Nom d'expéditeur par défaut
      */
-    public function __construct($fromEmail = 'no-reply@menumiam.com', $fromName = 'Menumiam')
+    public function __construct($fromEmail = 'no-reply@menucraft.com', $fromName = 'MenuCraft')
     {
         $this->fromEmail = $fromEmail;
         $this->fromName = $fromName;

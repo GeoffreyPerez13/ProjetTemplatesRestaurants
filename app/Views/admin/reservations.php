@@ -126,11 +126,11 @@ $statusColors = [
                 </div>
             </div>
             <?php 
-            $nonPendingReservations = array_filter($todayReservations, function($r) {
+            $nonPendingReservations = array_filter($todayReservations ?? [], function($r) {
                 return $r['status'] !== 'pending';
             });
             
-            if (empty($nonPendingReservations) && empty($todayReservations)): ?>
+            if (empty($nonPendingReservations) && empty($todayReservations ?? [])): ?>
                 <div class="empty-state">
                     <i class="fas fa-calendar-times"></i>
                     <p>Aucune réservation pour aujourd'hui.</p>
@@ -322,7 +322,7 @@ $statusColors = [
             <h3><i class="fas fa-cog"></i> Paramètres des réservations</h3>
 
             <form id="reservation-settings-form" class="reservation-settings-form">
-                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">
 
                 <!-- Activation -->
                 <div class="setting-row" id="setting-booking-enabled">
@@ -357,7 +357,7 @@ $statusColors = [
                 <div class="setting-row<?= ($settings['booking_auto_confirm'] ?? false) ? ' disabled' : '' ?>" id="assign-table-setting">
                     <div class="setting-info">
                         <label>Attribution de table lors de la confirmation</label>
-                        <p class="setting-desc">Lors de la confirmation d'une réservation, attribuer automatiquement une table du plan de salle.</p>
+                        <p class="setting-desc">Lors de la confirmation d'une réservation, attribuer une table du plan de salle.</p>
                         
                         <?php if ($settings['booking_auto_confirm'] ?? false): ?>
                             <p class="setting-warning" id="assign-table-disabled-message">
@@ -505,7 +505,7 @@ $statusColors = [
 </div>
 
 <!-- Token CSRF pour les appels AJAX -->
-<input type="hidden" id="csrf-token" value="<?= htmlspecialchars($csrf_token) ?>">
+<input type="hidden" id="csrf-token" value="<?= htmlspecialchars($csrf_token ?? '') ?>">
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

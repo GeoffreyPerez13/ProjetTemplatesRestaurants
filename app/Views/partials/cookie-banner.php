@@ -5,8 +5,11 @@
  * Le JS est externalisé dans /assets/js/admin/cookies.js
  */
 $cookieConsent = $_COOKIE['cookie_consent'] ?? null;
+$currentPage = $_GET['page'] ?? '';
+$authPages = ['login', 'register', 'auto-register', 'reset-password', 'verify-email', 'forgot-password'];
+$isAuthPage = in_array($currentPage, $authPages);
 ?>
-<?php if (!$cookieConsent): ?>
+<?php if (!$cookieConsent && !$isAuthPage): ?>
 <div id="cookie-banner" class="cookie-banner">
     <div class="cookie-content">
         <p>

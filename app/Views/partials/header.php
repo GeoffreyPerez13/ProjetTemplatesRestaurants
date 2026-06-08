@@ -7,9 +7,10 @@
     <title><?= htmlspecialchars($title ?? 'Administration') ?></title>
     
     <!-- Meta description pour le SEO -->
-    <meta name="description" content="Interface d'administration MenuMiam - Gérez votre carte de restaurant en ligne">
+    <meta name="description" content="Interface d'administration MenuCraft - Gérez votre carte de restaurant en ligne">
     
     <!-- Favicon -->
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="/assets/favicon.ico" type="image/x-icon">
     
     <!-- CSS principal -->
@@ -66,7 +67,7 @@
             <div class="demo-banner-content">
                 <i class="fas fa-flask"></i>
                 <span>
-                    <strong>Mode démonstration</strong> — Vous explorez MenuMiam librement.
+                    <strong>Mode démonstration</strong> — Vous explorez MenuCraft librement.
                     <?php if (!empty($_SESSION['demo_expires_at'])): ?>
                         Expire le <?= (new DateTime($_SESSION['demo_expires_at']))->format('d/m/Y à H:i') ?>.
                     <?php endif; ?>
@@ -132,4 +133,4 @@
     <div class="container">
     
     <!-- Bannière cookies (partial réutilisable) -->
-    <?php include __DIR__ . '/cookie-banner.php'; ?>
+    <!-- Cookie banner disabled: admin uses only essential session cookies -->

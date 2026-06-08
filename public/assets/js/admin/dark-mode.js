@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    const STORAGE_KEY = 'menumiam-dark-mode';
+    const STORAGE_KEY = 'menucraft-dark-mode';
 
     /**
      * Applique le mode sombre sans transition (au chargement)

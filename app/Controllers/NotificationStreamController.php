@@ -22,6 +22,9 @@ class NotificationStreamController
 
         $adminId = $_SESSION['admin_id'];
 
+        // IMPORTANT: Libérer la session pour ne pas bloquer les autres requêtes AJAX
+        session_write_close();
+
         // Configuration pour SSE
         header('Content-Type: text/event-stream');
         header('Cache-Control: no-cache');
@@ -29,10 +32,22 @@ class NotificationStreamController
         header('X-Accel-Buffering: no'); // Désactiver le buffering nginx
 
         // Désactiver le buffering PHP
-        if (ob_get_level()) ob_end_clean();
+        while (ob_get_level()) ob_end_clean();
         
-        // Garder une trace du dernier compteur de réservations
+        // Désactiver la limite de temps d'exécution
+        set_time_limit(0);
+        
+        // Envoyer immédiatement l'état actuel (pour que le client ait les données dès la connexion)
         $lastCount = $this->getPendingReservationsCount($adminId);
+        $initialData = [
+            'count' => $lastCount,
+            'hasNew' => false,
+            'timestamp' => time()
+        ];
+        echo "data: " . json_encode($initialData) . "\n\n";
+        flush();
+
+        $heartbeatCounter = 0;
 
         // Boucle infinie pour envoyer des événements
         while (true) {
@@ -40,6 +55,9 @@ class NotificationStreamController
             if (connection_aborted()) {
                 break;
             }
+
+            // Attendre 3 secondes avant la prochaine vérification (plus réactif)
+            sleep(3);
 
             // Récupérer le nombre actuel de réservations en attente
             $currentCount = $this->getPendingReservationsCount($adminId);
@@ -63,14 +81,16 @@ class NotificationStreamController
                 flush();
 
                 $lastCount = $currentCount;
+                $heartbeatCounter = 0;
             }
 
-            // Envoyer un heartbeat toutes les 15 secondes pour maintenir la connexion
-            echo ": heartbeat\n\n";
-            flush();
-
-            // Attendre 5 secondes avant la prochaine vérification
-            sleep(5);
+            // Envoyer un heartbeat toutes les 15 secondes (~5 itérations de 3s) pour maintenir la connexion
+            $heartbeatCounter++;
+            if ($heartbeatCounter >= 5) {
+                echo ": heartbeat " . time() . "\n\n";
+                flush();
+                $heartbeatCounter = 0;
+            }
         }
     }
 

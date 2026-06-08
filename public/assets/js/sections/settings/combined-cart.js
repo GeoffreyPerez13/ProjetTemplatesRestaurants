@@ -11,11 +11,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Prix des options premium
     const premiumPrices = {
-        'google_reviews': 5,
-        'advanced_analytics': 5,
-        'online_booking': 8,
-        'delivery_integration': 7
+        'google_reviews': 3.99,
+        'advanced_analytics': 3.99,
+        'online_booking': 10.99,
+        'delivery_integration': 3.99
     };
+
+    const BASIQUE_PRICE = 11.99;
 
     // État du panier
     let selectedFeatures = new Set();
@@ -41,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <i class="fas ${icon}"></i>
                             <span>${name}</span>
                         </div>
-                        <span class="item-price">+${price}€/mois</span>
+                        <span class="item-price">+${price.toFixed(2).replace('.', ',')}€/mois</span>
                     </div>
                 `;
             });
@@ -49,11 +51,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Mettre à jour le total
-        let total = 9; // Prix de base basique
+        let total = BASIQUE_PRICE;
         selectedFeatures.forEach(feature => {
             total += premiumPrices[feature] || 0;
         });
-        combinedTotal.textContent = `${total}€/mois`;
+        total = Math.round(total * 100) / 100;
+        combinedTotal.textContent = `${total.toFixed(2).replace('.', ',')}€/mois`;
     }
 
     // Obtenir le nom affiché d'une fonctionnalité

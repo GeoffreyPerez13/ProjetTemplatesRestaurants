@@ -84,7 +84,7 @@
     <!-- Barre de crédits -->
     <div class="footer-credits">
         <div class="container footer-credits-content">
-            <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($restaurant->name) ?> — Propulsé par <a href="<?= SITE_URL ?>" rel="noopener">MenuMiam</a></p>
+            <p>&copy; <?= date('Y') ?> <?= htmlspecialchars($restaurant->name) ?> — Propulsé par <a href="<?= SITE_URL ?>" rel="noopener">MenuCraft</a></p>
             <nav class="footer-legal-links">
                 <a href="?page=legal&section=cgu">CGU</a>
                 <a href="?page=legal&section=privacy">RGPD</a>

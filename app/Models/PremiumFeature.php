@@ -13,42 +13,75 @@ class PremiumFeature
 
     /**
      * Vérifier si une fonctionnalité premium est activée pour un admin
+     * Prend en compte expires_at : si expiré, la feature n'est plus active
      */
     public function isEnabled($adminId, $featureName)
     {
         $stmt = $this->pdo->prepare("
-            SELECT is_active 
+            SELECT is_active, expires_at 
             FROM premium_features 
             WHERE admin_id = ? AND feature_name = ?
         ");
         $stmt->execute([$adminId, $featureName]);
-        $result = $stmt->fetchColumn();
-        return (int)$result === 1;
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+        if (!$row || (int)$row['is_active'] !== 1) {
+            return false;
+        }
+        // Si expires_at est défini et dépassé, la feature est expirée
+        if (!empty($row['expires_at']) && strtotime($row['expires_at']) < time()) {
+            return false;
+        }
+        return true;
     }
 
     /**
      * Activer une fonctionnalité premium pour un admin
+     * @param int|null $durationMonths Durée en mois (null = pas d'expiration)
      */
-    public function enable($adminId, $featureName)
+    public function enable($adminId, $featureName, $durationMonths = null)
     {
         $this->ensureFeatureExists($adminId, $featureName);
-        $stmt = $this->pdo->prepare("
-            UPDATE premium_features 
-            SET is_active = 1, activated_at = NOW() 
-            WHERE admin_id = ? AND feature_name = ?
-        ");
-        return $stmt->execute([$adminId, $featureName]);
+        if ($durationMonths) {
+            $stmt = $this->pdo->prepare("
+                UPDATE premium_features 
+                SET is_active = 1, activated_at = NOW(), cancelled_at = NULL,
+                    expires_at = DATE_ADD(NOW(), INTERVAL ? MONTH)
+                WHERE admin_id = ? AND feature_name = ?
+            ");
+            return $stmt->execute([$durationMonths, $adminId, $featureName]);
+        } else {
+            $stmt = $this->pdo->prepare("
+                UPDATE premium_features 
+                SET is_active = 1, activated_at = NOW(), cancelled_at = NULL, expires_at = NULL
+                WHERE admin_id = ? AND feature_name = ?
+            ");
+            return $stmt->execute([$adminId, $featureName]);
+        }
     }
 
     /**
-     * Désactiver une fonctionnalité premium pour un admin
+     * Désactiver une fonctionnalité premium pour un admin (immédiat)
      */
     public function disable($adminId, $featureName)
     {
         $this->ensureFeatureExists($adminId, $featureName);
         $stmt = $this->pdo->prepare("
             UPDATE premium_features 
-            SET is_active = 0, activated_at = NULL 
+            SET is_active = 0, activated_at = NULL, expires_at = NULL, cancelled_at = NULL
+            WHERE admin_id = ? AND feature_name = ?
+        ");
+        return $stmt->execute([$adminId, $featureName]);
+    }
+
+    /**
+     * Marquer une fonctionnalité comme résiliée (garde l'accès jusqu'à expires_at)
+     */
+    public function markCancelled($adminId, $featureName)
+    {
+        $this->ensureFeatureExists($adminId, $featureName);
+        $stmt = $this->pdo->prepare("
+            UPDATE premium_features 
+            SET cancelled_at = NOW()
             WHERE admin_id = ? AND feature_name = ?
         ");
         return $stmt->execute([$adminId, $featureName]);
@@ -92,7 +125,7 @@ class PremiumFeature
         $stmt = $this->pdo->prepare("
             SELECT status, plan_type, features_enabled, expires_at
             FROM client_subscriptions 
-            WHERE admin_id = ? AND status = 'active' AND (expires_at IS NULL OR expires_at > NOW())
+            WHERE admin_id = ? AND status IN ('active', 'cancelled') AND (expires_at IS NULL OR expires_at > NOW())
         ");
         $stmt->execute([$adminId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -160,29 +193,55 @@ class PremiumFeature
                 'name'          => 'Avis Google',
                 'description'   => 'Afficher les avis Google sur votre site vitrine',
                 'icon'          => 'fa-star',
-                'price_monthly' => 5,
-                'price_annual'  => 4,
+                'price_monthly' => 3.99,
+                'price_annual'  => 2.99,
             ],
             'advanced_analytics' => [
                 'name'          => 'Statistiques avancées',
                 'description'   => 'Analyse détaillée du trafic et des performances',
                 'icon'          => 'fa-chart-line',
-                'price_monthly' => 5,
-                'price_annual'  => 4,
+                'price_monthly' => 3.99,
+                'price_annual'  => 2.99,
             ],
             'online_booking' => [
                 'name'          => 'Réservations en ligne',
                 'description'   => 'Système de réservation intégré',
                 'icon'          => 'fa-calendar-check',
-                'price_monthly' => 8,
-                'price_annual'  => 6,
+                'price_monthly' => 10.99,
+                'price_annual'  => 8.99,
             ],
             'delivery_integration' => [
                 'name'          => 'Intégration livraison',
                 'description'   => 'Connectez Uber Eats, Deliveroo, etc.',
                 'icon'          => 'fa-motorcycle',
-                'price_monthly' => 7,
-                'price_annual'  => 6,
+                'price_monthly' => 3.99,
+                'price_annual'  => 2.99,
+            ],
+        ];
+    }
+
+    /**
+     * Retourne les packs disponibles (tout inclus : basique + toutes les options premium)
+     */
+    public function getPackFull()
+    {
+        $features = $this->getAvailableFeatures();
+        $individualTotal = 11.99; // basique
+        foreach ($features as $f) {
+            $individualTotal += $f['price_monthly'];
+        }
+        $individualTotal = round($individualTotal, 2);
+
+        return [
+            'name'             => 'Pack Full',
+            'description'      => 'Abonnement Basique + toutes les options premium',
+            'icon'             => 'fa-gem',
+            'includes'         => array_keys($features),
+            'individual_total' => $individualTotal,
+            'prices' => [
+                '1_month'  => ['price' => 29.99, 'duration_months' => 1,  'label' => '1 mois'],
+                '3_months' => ['price' => 26.99, 'duration_months' => 3,  'label' => '3 mois',  'total' => 80.97],
+                '1_year'   => ['price' => 22.99, 'duration_months' => 12, 'label' => '1 an',    'total' => 275.88],
             ],
         ];
     }

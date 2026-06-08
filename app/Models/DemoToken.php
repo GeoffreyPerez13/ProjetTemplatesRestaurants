@@ -14,7 +14,7 @@ class DemoToken
     const EXPIRY_DAYS = 3;
 
     /** @var string Slug du restaurant template de démo */
-    const DEMO_SLUG = 'demo-menumiam';
+    const DEMO_SLUG = 'demo-menucraft';
 
     /**
      * @param PDO $pdo Connexion à la base de données
@@ -70,7 +70,7 @@ class DemoToken
             ");
             $stmt->execute([
                 $cloneUsername,
-                'demo_' . $suffix . '@menumiam.com',
+                'demo_' . $suffix . '@menucraft.com',
                 $srcAdmin['password'],
                 $srcAdmin['restaurant_name'],
                 $cloneRestaurantId,
