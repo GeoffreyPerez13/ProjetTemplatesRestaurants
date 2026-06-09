@@ -1068,7 +1068,7 @@ if (!empty($_SESSION['pendingToast'])) {
                         <ul>
                             <li>Souscrivez un abonnement Premium pour débloquer les fonctionnalités proposées par notre service.</li>
                             <li>Activez et configurez les fonctionnalités directement depuis cette page.</li>
-                            <li>Contactez-nous à <a href="mailto:premium@menucraft.fr">premium@menucraft.fr</a> pour souscrire ou pour toute question.</li>
+                            <li>Contactez-nous à <a href="mailto:contact.menucraft@gmail.com">contact.menucraft@gmail.com</a> pour souscrire ou pour toute question.</li>
                         </ul>
                     </div>
                 </div>

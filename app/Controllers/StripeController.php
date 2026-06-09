@@ -633,7 +633,7 @@ class StripeController extends BaseController
 
         if (!$session || ($session['payment_status'] ?? '') !== 'paid') {
             $this->addErrorMessage(
-                'Paiement non confirmé. Si vous avez été débité, contactez contact@menucraft.fr.'
+                'Paiement non confirmé. Si vous avez été débité, contactez contact.menucraft@gmail.com.'
             );
             header('Location: ?page=settings&section=premium');
             exit;

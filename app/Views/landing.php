@@ -468,7 +468,7 @@
 
         <div class="pricing-note">
             <p><i class="fas fa-info-circle"></i> Besoin d'une solution sur-mesure pour plusieurs établissements ? 
-            <a href="mailto:contact@menucraft.fr">Contactez-nous pour un devis personnalisé</a>.</p>
+            <a href="mailto:contact.menucraft@gmail.com">Contactez-nous pour un devis personnalisé</a>.</p>
         </div>
     </div>
 </section>
@@ -487,7 +487,7 @@
                         <i class="fas fa-external-link-alt"></i>
                         Voir le site démo
                     </a>
-                    <a href="mailto:contact@menucraft.fr?subject=Demande de démo personnalisée" class="btn-demo-secondary">
+                    <a href="mailto:contact.menucraft@gmail.com?subject=Demande de démo personnalisée" class="btn-demo-secondary">
                         <i class="fas fa-envelope"></i>
                         Demander une démo privée
                     </a>
@@ -603,7 +603,7 @@
                     <i class="fas fa-rocket"></i>
                     Créer mon site maintenant
                 </a>
-                <a href="mailto:contact@menucraft.fr" class="btn-cta-secondary">
+                <a href="mailto:contact.menucraft@gmail.com" class="btn-cta-secondary">
                     <i class="fas fa-envelope"></i>
                     Nous contacter
                 </a>
@@ -640,8 +640,8 @@
             <div class="footer-links-group">
                 <h4>Ressources</h4>
                 <ul>
-                    <li><a href="mailto:contact@menucraft.fr">Contact</a></li>
-                    <li><a href="mailto:support@menucraft.fr">Support</a></li>
+                    <li><a href="mailto:contact.menucraft@gmail.com">Contact</a></li>
+                    <li><a href="mailto:contact.menucraft@gmail.com">Support</a></li>
                     <li><a href="?page=display&slug=demo-menucraft" target="_blank">Démo en ligne</a></li>
                 </ul>
             </div>

@@ -227,6 +227,11 @@
 
     // ==================== INITIALISATION ====================
 
+    // Ne pas initialiser les notifications sur les pages non authentifiées
+    const currentPage = new URLSearchParams(window.location.search).get('page');
+    const publicPages = ['login', 'register', 'reset-password', 'reset-password-confirm'];
+    if (publicPages.includes(currentPage)) return;
+
     // Vérification immédiate au chargement (pas de délai)
     checkForNewReservations();
     

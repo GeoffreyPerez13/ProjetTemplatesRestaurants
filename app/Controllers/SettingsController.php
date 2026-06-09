@@ -961,7 +961,7 @@ class SettingsController extends BaseController
                 if (!$premiumFeature->isFeatureInSubscription($adminId, $featureName)) {
                     echo json_encode([
                         'success' => false,
-                        'message' => 'Cette fonctionnalité nécessite un abonnement Premium. Contactez-nous à premium@menucraft.fr pour souscrire.'
+                        'message' => 'Cette fonctionnalité nécessite un abonnement Premium. Contactez-nous à contact.menucraft@gmail.com pour souscrire.'
                     ]);
                     exit;
                 }

@@ -1,7 +1,11 @@
 <?php
+/** @var string $csrf_token */
+/** @var array $services */
+/** @var array $payments */
+/** @var array $socials */
 $title = "Gestion des services et options";
 $styles = [
-    "css/sections/edit-services.css"
+    "css/admin/sections/edit-services/edit-services.css"
 ];
 $scripts = [
     "js/effects/accordion.js",

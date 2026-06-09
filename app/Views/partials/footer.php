@@ -41,7 +41,7 @@
                     <span class="separator">|</span>
                     <a href="?page=legal&section=legal" target="_blank">Mentions légales</a>
                     <span class="separator">|</span>
-                    <a href="mailto:contact@menucraft.dev">Contact</a>
+                    <a href="mailto:contact.menucraft@gmail.com">Contact</a>
                 </nav>
             </div>
         </div>

@@ -30,53 +30,60 @@
 }
 
 /* ==================== PASSWORD INPUT GROUP ==================== */
+/* Le conteneur gère la bordure extérieure et le border-radius.
+   Les enfants (input + toggle) n'ont PAS de bordure extérieure. */
 .password-input-group {
   display: flex;
   align-items: stretch;
   width: 100%;
   margin: 8px 0 15px;
   position: relative;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .password-input-wrapper {
   flex: 1;
   display: flex;
+  min-width: 0;
 }
 
 .password-input-with-toggle {
   width: 100%;
-  padding-right: 15px;
+  flex: 1;
+  min-width: 0;
   box-sizing: border-box;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  border-right: none;
-  margin: 0;
-  /* Réinitialiser les styles généraux d'input */
+  margin: 0 !important;
   padding: 10px !important;
-  border: 1px solid var(--color-border) !important;
-  border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
-  height: auto !important;
+  border: none !important;
+  border-radius: 0 !important;
+  height: 42px !important;
+  outline: none;
+  background: transparent;
 }
 
 .password-toggle-btn {
-  background: none;
-  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-alt);
+  border: none !important;
+  border-left: 1px solid var(--color-border) !important;
   cursor: pointer;
-  padding: 0 15px;
+  padding: 0 15px !important;
   color: var(--color-text-muted);
   font-size: 16px;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border-radius: 0 !important;
   transition: all var(--transition-fast);
   min-width: 45px;
-  background-color: var(--color-bg-alt);
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* Réinitialiser les styles généraux de button */
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   width: auto !important;
   height: auto !important;
   line-height: normal !important;
+  flex-shrink: 0;
+  align-self: stretch;
 }
 
 .password-toggle-btn:hover {
@@ -103,7 +110,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s;
+  transition: transform 0.3s ease;
 }
 
 /* Quand le mot de passe est visible */
@@ -116,57 +123,20 @@
   background-color: #fde9c8;
 }
 
-/* Pour les écrans très petits */
-@media (max-width: 480px) {
-  .password-toggle-btn {
-    padding: 0 12px;
-    min-width: 40px;
-  }
-  
-  .password-toggle-btn i {
-    font-size: 1em;
-  }
-}
-
-/* Animation pour le changement d'icône */
-.password-toggle-btn i {
-  transition: transform 0.3s ease;
-}
-
 .password-toggle-btn:active i {
   transform: scale(0.9);
 }
 
-/* IMPORTANT: Surcharger les styles généraux d'input pour le groupe mot de passe */
-.password-input-group .password-input-with-toggle {
-  margin: 0 !important;
-  border-right: none !important;
-  border-top-right-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
-  flex: 1;
-}
+/* Pour les écrans très petits */
+@media (max-width: 480px) {
+  .password-toggle-btn {
+    padding: 0 12px !important;
+    min-width: 40px;
+  }
 
-/* S'assurer que le bouton a la bonne hauteur */
-.password-input-group .password-input-with-toggle,
-.password-input-group .password-toggle-btn {
-  height: 42px;
-  box-sizing: border-box;
-}
-
-/* Correction pour l'alignement vertical */
-.password-input-group {
-  align-items: center;
-}
-
-/* Éviter les conflits avec les styles généraux de bouton */
-.password-input-group .password-toggle-btn {
-  align-self: stretch;
-  margin-top: 0 !important;
-  width: auto !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 0 15px !important;
+  .password-toggle-btn i {
+    font-size: 1em;
+  }
 }
 
 /* Styles spécifiques pour le formulaire de login */
@@ -175,45 +145,32 @@
   flex-direction: column;
 }
 
-.login-container .password-input-group {
-  display: flex;
-  align-items: center;
-}
-
-.login-container .password-input-with-toggle {
-  flex: 1;
-  min-width: 0; /* Important pour flex */
-}
-
-.login-container .password-toggle-btn {
-  flex-shrink: 0;
-  align-self: stretch;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* ==================== RESPONSIVE LOGIN ==================== */
 @media (max-width: 600px) {
   .login-container {
     max-width: 100% !important;
   }
-  
+
   .login-container h1,
   .login-container h2 {
     padding-left: var(--spacing-md) !important;
     padding-right: var(--spacing-md) !important;
     text-align: center !important;
   }
-  
+
   .login-container input[type="text"],
   .login-container input[type="email"],
-  .login-container input[type="password"],
-  .login-container .password-input-with-toggle {
+  .login-container input[type="password"] {
     width: 100% !important;
     box-sizing: border-box !important;
   }
-  
+
+  .login-container .password-input-with-toggle {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box !important;
+  }
+
   .login-container .btn {
     width: 100% !important;
     box-sizing: border-box !important;
@@ -224,7 +181,7 @@
   .login-container {
     max-width: 100% !important;
   }
-  
+
   .login-container h1,
   .login-container h2 {
     padding-left: var(--spacing-sm) !important;

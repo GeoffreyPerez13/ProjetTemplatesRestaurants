@@ -90,7 +90,7 @@ class LegalController extends BaseController
         <h4>Conditions d\'exercice</h4>
         <p>Le droit de rétractation s\'applique aux contrats à distance conclus hors établissement. Pour l\'exercer, l\'Utilisateur doit :</p>
         <ul>
-            <li>Notifier sa décision de rétracter par écrit (email à <a href="mailto:support@menucraft.dev">support@menucraft.dev</a>)</li>
+            <li>Notifier sa décision de rétracter par écrit (email à <a href="mailto:contact.menucraft@gmail.com">contact.menucraft@gmail.com</a>)</li>
             <li>Fournir les informations nécessaires à l\'identification (nom, email, adresse)</li>
             <li>Indiquer la date de souscription de l\'abonnement</li>
         </ul>
@@ -118,7 +118,7 @@ class LegalController extends BaseController
         <p>Les présentes CGU sont régies par le droit français. Tout litige relatif à leur interprétation ou exécution relève de la compétence exclusive des tribunaux français.</p>
         
         <h3>10. Contact</h3>
-        <p>Pour toute question concernant les CGU : <a href="mailto:contact@menucraft.dev">contact@menucraft.dev</a></p>
+        <p>Pour toute question concernant les CGU : <a href="mailto:contact.menucraft@gmail.com">contact.menucraft@gmail.com</a></p>
         ';
     }
 
@@ -133,7 +133,7 @@ class LegalController extends BaseController
         
         <h3>1. Responsable du traitement</h3>
         <p><strong>MenuCraft</strong><br>
-        Email : <a href="mailto:dpo@menucraft.dev">dpo@menucraft.dev</a></p>
+        Email : <a href="mailto:contact.menucraft@gmail.com">contact.menucraft@gmail.com</a></p>
         
         <h3>2. Données collectées</h3>
         <p>Dans le cadre de l\'utilisation du Service, nous collectons les données suivantes :</p>
@@ -167,7 +167,7 @@ class LegalController extends BaseController
             <li><strong>Droit d\'opposition :</strong> vous opposer au traitement de vos données pour des motifs légitimes</li>
             <li><strong>Droit à la limitation :</strong> demander la limitation du traitement dans certains cas</li>
         </ul>
-        <p>Pour exercer ces droits, contactez-nous à : <a href="mailto:rgpd@menucraft.dev">rgpd@menucraft.dev</a>. Nous répondrons dans un délai de 30 jours.</p>
+        <p>Pour exercer ces droits, contactez-nous à : <a href="mailto:contact.menucraft@gmail.com">contact.menucraft@gmail.com</a>. Nous répondrons dans un délai de 30 jours.</p>
         <p>Vous pouvez également introduire une réclamation auprès de la CNIL (<a href="https://www.cnil.fr" target="_blank" rel="noopener">www.cnil.fr</a>).</p>
         
         <h3>6. Conservation des données</h3>
@@ -257,7 +257,7 @@ class LegalController extends BaseController
         <p>Nous n\'utilisons actuellement aucun cookie tiers (pas de Google Analytics, pas de pixels publicitaires). Si des outils tiers sont ajoutés à l\'avenir, cette politique sera mise à jour et votre consentement sera à nouveau sollicité.</p>
         
         <h3>6. Contact</h3>
-        <p>Pour toute question relative aux cookies : <a href="mailto:contact@menucraft.dev">contact@menucraft.dev</a></p>
+        <p>Pour toute question relative aux cookies : <a href="mailto:contact.menucraft@gmail.com">contact.menucraft@gmail.com</a></p>
         ';
     }
 
@@ -273,7 +273,7 @@ class LegalController extends BaseController
         <h3>1. Éditeur du site</h3>
         <p><strong>MenuCraft</strong><br>
         Plateforme de création de cartes de restaurant en ligne<br>
-        Email : <a href="mailto:contact@menucraft.dev">contact@menucraft.dev</a></p>
+        Email : <a href="mailto:contact.menucraft@gmail.com">contact.menucraft@gmail.com</a></p>
         <p><em>Note : les coordonnées complètes de l\'éditeur (adresse, téléphone, SIRET) seront ajoutées lors de la mise en production.</em></p>
         
         <h3>2. Directeur de publication</h3>
