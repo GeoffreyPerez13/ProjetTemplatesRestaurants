@@ -130,6 +130,17 @@ switch ($page) {
         $adminController->register();  // Formulaire de création de compte via invitation
         break;
 
+    case 'feedback':
+        require_once __DIR__ . '/../app/Controllers/FeedbackController.php';
+        $feedbackController = new FeedbackController($pdo);
+        $action = $_GET['action'] ?? '';
+        if ($action === 'submit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+            $feedbackController->submit();
+        } else {
+            $feedbackController->show();
+        }
+        break;
+
     case 'login':
         $controller = new AdminController($pdo);
         $controller->login();  // Page de connexion

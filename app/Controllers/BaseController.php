@@ -211,6 +211,11 @@ class BaseController
             return false;
         }
 
+        // BETA MODE : acces complet pour tous
+        if (defined('BETA_MODE') && BETA_MODE === true) {
+            return false;
+        }
+
         $adminId = $_SESSION['admin_id'] ?? null;
         if (!$adminId) {
             return true;

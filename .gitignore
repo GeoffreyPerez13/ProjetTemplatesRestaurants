@@ -47,6 +47,9 @@ public/assets/images/tmp/
 public/uploads/
 uploads/
 
+# --- Stockage feedback beta
+storage/
+
 # --- Sauvegardes de base de données
 *.sql
 *.sql.gz

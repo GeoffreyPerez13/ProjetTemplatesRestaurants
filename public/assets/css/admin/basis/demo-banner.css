@@ -1,3 +1,77 @@
+/* ==================== Bandeau mode beta ==================== */
+.beta-banner {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: white;
+    text-align: center;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    box-shadow: 0 2px 12px rgba(5, 150, 105, 0.3);
+}
+
+.beta-banner-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.beta-banner-content i {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.beta-banner-content span {
+    line-height: 1.4;
+}
+
+.beta-banner-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.beta-banner-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: white;
+}
+
+body.dark-mode .beta-banner {
+    background: linear-gradient(135deg, #047857, #065f46);
+}
+
+@media (max-width: 600px) {
+    .beta-banner {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+
+    .beta-banner-content {
+        gap: 6px;
+    }
+
+    .beta-banner-btn {
+        padding: 5px 12px;
+        font-size: 0.75rem;
+    }
+}
+
 /* ==================== Bandeau mode démonstration ==================== */
 .demo-banner {
     background: linear-gradient(135deg, #7c3aed, #6d28d9);

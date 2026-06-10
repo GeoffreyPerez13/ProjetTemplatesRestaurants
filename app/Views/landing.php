@@ -295,6 +295,40 @@
     </div>
 </section>
 
+<?php if (defined('BETA_MODE') && BETA_MODE === true): ?>
+<!-- ========== BETA GRATUITE ========== -->
+<section class="pricing" id="pricing">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge" style="background: #059669;">Beta Gratuite</span>
+            <h2>Testez MenuCraft gratuitement pendant 3 mois</h2>
+            <p>Accès complet à toutes les fonctionnalités, sans engagement et sans carte bancaire.</p>
+        </div>
+
+        <div style="max-width: 600px; margin: 0 auto; text-align: center;">
+            <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border: 2px solid #86efac; border-radius: 16px; padding: 40px; margin-bottom: 24px;">
+                <div style="font-size: 3rem; margin-bottom: 16px;">🎁</div>
+                <h3 style="font-size: 1.5rem; color: #065f46; margin: 0 0 8px;">100% Gratuit</h3>
+                <p style="color: #047857; font-size: 1.1rem; margin: 0 0 24px;">Toutes les fonctionnalités premium incluses jusqu'au <?= defined('BETA_EXPIRES') ? date('d/m/Y', strtotime(BETA_EXPIRES)) : '' ?></p>
+                <ul style="list-style: none; padding: 0; margin: 0 0 24px; text-align: left; display: inline-block;">
+                    <li style="padding: 6px 0; color: #1f2937;"><i class="fas fa-check" style="color: #059669; margin-right: 8px;"></i> Site vitrine professionnel</li>
+                    <li style="padding: 6px 0; color: #1f2937;"><i class="fas fa-check" style="color: #059669; margin-right: 8px;"></i> Carte en ligne modifiable</li>
+                    <li style="padding: 6px 0; color: #1f2937;"><i class="fas fa-check" style="color: #059669; margin-right: 8px;"></i> Réservations en ligne</li>
+                    <li style="padding: 6px 0; color: #1f2937;"><i class="fas fa-check" style="color: #059669; margin-right: 8px;"></i> Statistiques avancées</li>
+                    <li style="padding: 6px 0; color: #1f2937;"><i class="fas fa-check" style="color: #059669; margin-right: 8px;"></i> Avis Google</li>
+                    <li style="padding: 6px 0; color: #1f2937;"><i class="fas fa-check" style="color: #059669; margin-right: 8px;"></i> Menus du jour</li>
+                </ul>
+                <a href="?page=auto-register" class="pricing-btn primary" style="background: #059669; font-size: 1.1rem; padding: 14px 32px;">
+                    <i class="fas fa-rocket"></i> Créer mon compte gratuitement
+                </a>
+            </div>
+            <p style="color: #6b7280; font-size: 0.9rem;">
+                <i class="fas fa-info-circle"></i> En échange, nous vous demanderons simplement un retour d'expérience à la fin de la période.
+            </p>
+        </div>
+    </div>
+</section>
+<?php else: ?>
 <!-- ========== TARIFS ========== -->
 <section class="pricing" id="pricing">
     <div class="container">
@@ -472,6 +506,7 @@
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- ========== DÉMO ========== -->
 <section class="demo-section" id="demo">

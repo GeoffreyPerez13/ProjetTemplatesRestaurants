@@ -196,6 +196,11 @@ class Admin
                 throw new Exception("Erreur lors de la mise à jour de l'invitation");
             }
 
+            // 5. BETA MODE : créer abonnement premium gratuit + activer toutes les features
+            if (defined('BETA_MODE') && BETA_MODE === true) {
+                $this->createBetaSubscription($adminId);
+            }
+
             $this->pdo->commit();
 
             // Log de succès
@@ -269,6 +274,11 @@ class Admin
 
             // 3. Créer les options par défaut
             $this->createDefaultOptions($adminId);
+
+            // 3b. BETA MODE : créer abonnement premium gratuit + activer toutes les features
+            if (defined('BETA_MODE') && BETA_MODE === true) {
+                $this->createBetaSubscription($adminId);
+            }
 
             $this->pdo->commit();
 
@@ -731,5 +741,31 @@ class Admin
         $this->restaurant_name = $restaurant_name;
 
         return $this;
+    }
+
+    /**
+     * Crée un abonnement premium gratuit pour le mode beta
+     * Expire à la date définie dans BETA_EXPIRES
+     */
+    private function createBetaSubscription($adminId)
+    {
+        $expiresAt = defined('BETA_EXPIRES') ? BETA_EXPIRES : date('Y-m-d', strtotime('+3 months'));
+
+        // Créer l'abonnement premium gratuit
+        $stmt = $this->pdo->prepare("
+            INSERT INTO client_subscriptions (admin_id, plan_type, status, price_per_month, started_at, expires_at, created_at)
+            VALUES (?, 'premium', 'active', 0.00, NOW(), ?, NOW())
+        ");
+        $stmt->execute([$adminId, $expiresAt]);
+
+        // Activer toutes les features premium
+        $features = ['google_reviews', 'advanced_analytics', 'online_booking', 'delivery_integration'];
+        $stmt = $this->pdo->prepare("
+            INSERT INTO premium_features (admin_id, feature_name, is_active, activated_at, expires_at, created_at)
+            VALUES (?, ?, 1, NOW(), ?, NOW())
+        ");
+        foreach ($features as $feature) {
+            $stmt->execute([$adminId, $feature, $expiresAt]);
+        }
     }
 }

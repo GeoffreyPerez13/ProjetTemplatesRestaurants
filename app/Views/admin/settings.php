@@ -102,12 +102,14 @@ if (!empty($_SESSION['pendingToast'])) {
                     <?php endif; ?>
                 </li>
                 <?php endforeach; ?>
+                <?php if (!defined('BETA_MODE') || BETA_MODE !== true): ?>
                 <li>
                     <a href="?page=settings&section=subscriptions" class="<?= $current_section === 'subscriptions' ? 'active' : '' ?>">
                         <i class="fas fa-credit-card"></i>
                         <span>Abonnements</span>
                     </a>
                 </li>
+                <?php endif; ?>
             </ul>
         </div>
     </div>
@@ -167,6 +169,7 @@ if (!empty($_SESSION['pendingToast'])) {
                 <?php endif; ?>
             </li>
             <?php endforeach; ?>
+            <?php if (!defined('BETA_MODE') || BETA_MODE !== true): ?>
             <li>
                 <a href="?page=settings&section=subscriptions"
                     class="<?= $current_section === 'subscriptions' ? 'active' : '' ?>">
@@ -174,6 +177,7 @@ if (!empty($_SESSION['pendingToast'])) {
                     Abonnements
                 </a>
             </li>
+            <?php endif; ?>
         </ul>
     </div>
 

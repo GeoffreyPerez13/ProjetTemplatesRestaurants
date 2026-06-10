@@ -17,6 +17,11 @@ class PremiumFeature
      */
     public function isEnabled($adminId, $featureName)
     {
+        // BETA MODE : toutes les features sont actives
+        if (defined('BETA_MODE') && BETA_MODE === true) {
+            return true;
+        }
+
         $stmt = $this->pdo->prepare("
             SELECT is_active, expires_at 
             FROM premium_features 
