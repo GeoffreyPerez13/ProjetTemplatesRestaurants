@@ -86,6 +86,12 @@ switch ($page) {
         break;
 
     case 'auto-register':
+        // En mode beta, l'inscription publique est désactivée (sur invitation uniquement)
+        if (defined('BETA_MODE') && BETA_MODE === true) {
+            $_SESSION['error_message'] = "L'inscription est actuellement sur invitation uniquement. Contactez-nous pour obtenir un accès.";
+            header('Location: ?page=landing');
+            exit;
+        }
         $adminController = new AdminController($pdo);
         $adminController->autoRegister();  // Inscription libre depuis la page vitrine
         break;
@@ -136,6 +142,8 @@ switch ($page) {
         $action = $_GET['action'] ?? '';
         if ($action === 'submit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $feedbackController->submit();
+        } elseif ($action === 'dashboard') {
+            $feedbackController->dashboard();
         } else {
             $feedbackController->show();
         }

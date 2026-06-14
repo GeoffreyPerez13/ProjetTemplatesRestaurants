@@ -2,7 +2,10 @@
 $title = "Feuille de route - Configuration Services Premium";
 $scripts = [];
 $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
+require __DIR__ . '/../partials/header.php';
 ?>
+
+<a class="btn-back" href="?page=dashboard">Retour</a>
 
 <div class="roadmap-container">
     <div class="roadmap-header">
@@ -758,3 +761,5 @@ $styles = ["css/admin/sections/settings/google-reviews-roadmap.css"];
         </div>
     </div>
 </div>
+
+<?php require __DIR__ . '/../partials/footer.php'; ?>

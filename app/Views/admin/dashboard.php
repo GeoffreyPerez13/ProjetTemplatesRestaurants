@@ -82,6 +82,7 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
 
         <div class="mobile-menu-content" id="mobile-menu-content">
             <div class="mobile-menu-items">
+                <?php if ($role !== 'SUPER_ADMIN'): ?>
                 <a href="<?= $ro ? '#' : '?page=edit-card' ?>" class="mobile-menu-item<?= $ro ? ' readonly-link' : '' ?>" <?= $ro ? $roTitle : '' ?>>
                     <div class="menu-item-icon">
                         <i class="fas fa-edit"></i>
@@ -147,7 +148,9 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                         <i class="fas fa-chevron-right"></i>
                     </div>
                 </a>
+                <?php endif; ?>
 
+                <?php if ($role !== 'SUPER_ADMIN'): ?>
                 <?php if (!empty($has_advanced_stats)): ?>
                 <a href="?page=stats" class="mobile-menu-item premium">
                     <div class="menu-item-icon">
@@ -190,6 +193,7 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                         <i class="fas fa-external-link-alt"></i>
                     </div>
                 </a>
+                <?php endif; ?>
 
                 <?php if ($role === 'SUPER_ADMIN'): ?>
                     <a href="?page=send-invitation" class="mobile-menu-item admin">
@@ -217,6 +221,19 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </a>
+
+                    <a href="?page=feedback&action=dashboard" class="mobile-menu-item" style="border-left: 3px solid #059669;">
+                        <div class="menu-item-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="menu-item-content">
+                            <span class="menu-item-title">Dashboard Feedbacks</span>
+                            <span class="menu-item-desc">Statistiques des retours beta</span>
+                        </div>
+                        <div class="menu-item-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </a>
                 <?php endif; ?>
             </div>
 
@@ -230,6 +247,7 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
 
     <!-- Boutons normaux pour desktop -->
     <div class="dashboard-desktop">
+        <?php if ($role !== 'SUPER_ADMIN'): ?>
         <div class="dashboard-top-buttons">
             <a href="<?= $ro ? '#' : '?page=edit-card' ?>" class="btn<?= $ro ? ' readonly-link' : '' ?>" <?= $ro ? $roTitle : '' ?>>Modifier la carte</a>
             <a href="<?= $ro ? '#' : '?page=edit-contact' ?>" class="btn<?= $ro ? ' readonly-link' : '' ?>" <?= $ro ? $roTitle : '' ?>>Modifier le contact</a>
@@ -237,6 +255,7 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
             <a href="<?= $ro ? '#' : '?page=edit-services' ?>" class="btn<?= $ro ? ' readonly-link' : '' ?>" <?= $ro ? $roTitle : '' ?>>Services, paiements &amp; réseaux</a>
             <a href="<?= $ro ? '#' : '?page=edit-template' ?>" class="btn<?= $ro ? ' readonly-link' : '' ?>" <?= $ro ? $roTitle : '' ?>>Choisir un template</a>
         </div>
+        <?php endif; ?>
 
         <!-- Zone du bas pour les boutons d'action desktop -->
         <div class="dashboard-bottom desktop-bottom">
@@ -246,10 +265,14 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                     <a href="?page=manage-clients" class="btn premium-btn">
                         <i class="fas fa-crown"></i> Gérer les clients Premium
                     </a>
+                    <a href="?page=feedback&action=dashboard" class="btn" style="background: linear-gradient(135deg, #059669, #047857); color: white;">
+                        <i class="fas fa-chart-bar"></i> Dashboard Feedbacks Beta
+                    </a>
                     <a href="?page=google-reviews-roadmap" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                         <i class="fab fa-google"></i> Feuille de route Google Reviews
                     </a>
                 <?php endif; ?>
+                <?php if ($role !== 'SUPER_ADMIN'): ?>
                 <?php if (!empty($has_advanced_stats)): ?>
                     <a href="?page=stats" class="btn premium-btn">
                         <i class="fas fa-chart-line"></i> Statistiques avancées
@@ -261,6 +284,7 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
                     </a>
                 <?php endif; ?>
                 <a href="?page=view-card" class="btn success">Aperçu de la carte</a>
+                <?php endif; ?>
             </div>
             <div class="bottom-right">
                 <a href="?page=<?= !empty($is_demo) ? 'demo-logout' : 'logout' ?>" class="btn danger">Se déconnecter</a>

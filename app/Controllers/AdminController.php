@@ -212,6 +212,15 @@ class AdminController extends BaseController
             UPDATE admins SET email_verified = 1, verification_token = NULL WHERE id = ?
         ")->execute([$admin['id']]);
 
+        // Récupérer l'email de l'utilisateur pour lui envoyer la confirmation
+        $stmtEmail = $this->pdo->prepare("SELECT email FROM admins WHERE id = ?");
+        $stmtEmail->execute([$admin['id']]);
+        $adminEmail = $stmtEmail->fetchColumn();
+
+        if ($adminEmail) {
+            $this->sendEmailVerifiedConfirmation($adminEmail, $admin['username']);
+        }
+
         $this->addSuccessMessage('Votre email a été confirmé ! Vous pouvez maintenant vous connecter.');
         header('Location: ?page=login');
         exit;
@@ -715,5 +724,45 @@ class AdminController extends BaseController
             'token' => $token,
             'csrf_token' => $this->getCsrfToken()
         ]);
+    }
+
+    /**
+     * Envoie un email de confirmation à l'utilisateur après la vérification de son adresse
+     */
+    private function sendEmailVerifiedConfirmation($email, $username)
+    {
+        try {
+            require_once __DIR__ . '/../Helpers/Mailer.php';
+            $mailer = new Mailer();
+
+            $subject = 'Votre compte MenuCraft est vérifié et activé !';
+            $body = "
+            <div style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;\">
+                <div style=\"background: linear-gradient(135deg, #059669, #047857); padding: 24px; border-radius: 12px 12px 0 0; text-align: center;\">
+                    <h1 style=\"color: white; margin: 0; font-size: 24px;\">🎉 Compte vérifié !</h1>
+                </div>
+                <div style=\"background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;\">
+                    <p style=\"color: #1f2937; font-size: 16px; margin: 0 0 16px;\">Bonjour <strong>{$username}</strong>,</p>
+                    <p style=\"color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 16px;\">
+                        Votre adresse email a bien été confirmée. Votre compte MenuCraft est maintenant <strong>actif et opérationnel</strong>.
+                    </p>
+                    <p style=\"color: #4b5563; font-size: 15px; line-height: 1.6; margin: 0 0 24px;\">
+                        Vous pouvez dès à présent vous connecter et commencer à créer votre site vitrine.
+                    </p>
+                    <div style=\"text-align: center; margin: 24px 0;\">
+                        <a href=\"" . (defined('APP_URL') ? APP_URL : 'http://localhost') . "?page=login\" style=\"display: inline-block; background: #059669; color: white; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-size: 15px; font-weight: 600;\">
+                            Se connecter
+                        </a>
+                    </div>
+                    <p style=\"color: #6b7280; font-size: 13px; line-height: 1.5; margin: 16px 0 0; border-top: 1px solid #e5e7eb; padding-top: 16px;\">
+                        Si vous avez des questions, n'hésitez pas à nous contacter à <a href=\"mailto:contact.menucraft@gmail.com\" style=\"color: #059669;\">contact.menucraft@gmail.com</a>.
+                    </p>
+                </div>
+            </div>";
+
+            $mailer->send($email, $subject, $body);
+        } catch (Exception $e) {
+            error_log('[sendEmailVerifiedConfirmation] Erreur: ' . $e->getMessage());
+        }
     }
 }

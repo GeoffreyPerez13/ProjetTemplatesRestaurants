@@ -1,3 +1,10 @@
+<?php
+// En mode beta, l'inscription est sur invitation uniquement
+$isBeta = defined('BETA_MODE') && BETA_MODE === true;
+$registerUrl = $isBeta ? 'mailto:contact.menucraft@gmail.com' : '?page=auto-register';
+$registerLabel = $isBeta ? 'Demander un accès' : 'Créer mon site';
+$registerIcon = $isBeta ? 'fas fa-envelope' : 'fas fa-bolt';
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -46,11 +53,11 @@
             <a href="#demo">Démo</a>
             <a href="#faq">FAQ</a>
             <a href="?page=login" class="nav-btn-outline nav-mobile-only">Se connecter</a>
-            <a href="?page=auto-register" class="nav-btn-primary nav-mobile-only">Créer mon site</a>
+            <a href="<?= $registerUrl ?>" class="nav-btn-primary nav-mobile-only"><?= $registerLabel ?></a>
         </div>
         <div class="nav-actions">
             <a href="?page=login" class="nav-btn-outline">Se connecter</a>
-            <a href="?page=auto-register" class="nav-btn-primary">Créer mon site</a>
+            <a href="<?= $registerUrl ?>" class="nav-btn-primary"><?= $registerLabel ?></a>
         </div>
         <button class="nav-mobile-toggle" id="nav-mobile-toggle" aria-label="Menu">
             <i class="fas fa-bars"></i>
@@ -77,12 +84,12 @@
             <h1>Créez le <span class="text-gradient">site vitrine</span> de votre restaurant en quelques clics</h1>
             <p class="hero-subtitle">
                 Gérez votre carte en ligne, vos horaires, vos avis Google et bien plus. 
-                Sans compétence technique, à partir de <strong>11,99€/mois</strong>.
+                Sans compétence technique<?php if (!$isBeta): ?>, à partir de <strong>11,99€/mois</strong><?php else: ?>, <strong>gratuit pendant 3 mois</strong> sur invitation<?php endif; ?>.
             </p>
             <div class="hero-actions">
-                <a href="?page=auto-register" class="btn-hero-primary">
-                    <i class="fas fa-bolt"></i>
-                    Créer mon site
+                <a href="<?= $registerUrl ?>" class="btn-hero-primary">
+                    <i class="<?= $registerIcon ?>"></i>
+                    <?= $registerLabel ?>
                 </a>
                 <a href="#demo" class="btn-hero-secondary">
                     <i class="fas fa-play-circle"></i>
@@ -318,8 +325,8 @@
                     <li style="padding: 6px 0; color: #1f2937;"><i class="fas fa-check" style="color: #059669; margin-right: 8px;"></i> Avis Google</li>
                     <li style="padding: 6px 0; color: #1f2937;"><i class="fas fa-check" style="color: #059669; margin-right: 8px;"></i> Menus du jour</li>
                 </ul>
-                <a href="?page=auto-register" class="pricing-btn primary" style="background: #059669; font-size: 1.1rem; padding: 14px 32px;">
-                    <i class="fas fa-rocket"></i> Créer mon compte gratuitement
+                <a href="<?= $registerUrl ?>" class="pricing-btn primary" style="background: #059669; font-size: 1.1rem; padding: 14px 32px;">
+                    <i class="<?= $registerIcon ?>"></i> <?= $isBeta ? 'Demander un accès gratuit' : 'Créer mon compte gratuitement' ?>
                 </a>
             </div>
             <p style="color: #6b7280; font-size: 0.9rem;">
@@ -634,9 +641,9 @@
             <h2>Prêt à mettre votre restaurant en ligne ?</h2>
             <p>Rejoignez les restaurateurs qui utilisent MenuCraft pour développer leur activité en ligne.</p>
             <div class="cta-actions">
-                <a href="?page=auto-register" class="btn-cta-primary">
-                    <i class="fas fa-rocket"></i>
-                    Créer mon site maintenant
+                <a href="<?= $registerUrl ?>" class="btn-cta-primary">
+                    <i class="<?= $registerIcon ?>"></i>
+                    <?= $isBeta ? 'Demander un accès' : 'Créer mon site maintenant' ?>
                 </a>
                 <a href="mailto:contact.menucraft@gmail.com" class="btn-cta-secondary">
                     <i class="fas fa-envelope"></i>

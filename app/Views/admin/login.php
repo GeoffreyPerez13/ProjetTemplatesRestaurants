@@ -41,6 +41,12 @@ require __DIR__ . '/../partials/header.php';
     <div class="password-reset">
         <a href="?page=reset-password">Mot de passe oublié ?</a>
     </div>
+
+    <!-- Liens supplementaires -->
+    <div class="login-extra-links" style="text-align: center; margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+        <a href="?page=auto-register" target="_blank" style="color: var(--color-primary); font-size: 0.9rem;">Pas encore de compte ? Créer un compte</a>
+        <a href="?page=landing" target="_blank" style="color: var(--color-text-muted); font-size: 0.85rem;"><i class="fas fa-arrow-left"></i> Retour à la page d'accueil</a>
+    </div>
 </div>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

@@ -467,7 +467,15 @@ html.dark-mode .dark-mode-toggle .fa-sun {
 
 .bottom-left {
     display: flex;
-    gap: 15px;
+    flex-wrap: wrap;
+    gap: 12px;
+    max-width: 75%;
+}
+
+.bottom-left .btn {
+    flex: 0 1 calc(33.333% - 8px);
+    min-width: 180px;
+    box-sizing: border-box;
 }
 
 .bottom-right {
@@ -475,8 +483,7 @@ html.dark-mode .dark-mode-toggle .fa-sun {
     gap: 15px;
 }
 
-.bottom-right .btn,
-.bottom-left .btn {
+.bottom-right .btn {
     padding: 10px 20px;
     font-size: 14px;
 }
@@ -986,5 +993,22 @@ tr:has(.demo-row-check:checked) {
     .demo-bulk-actions .btn {
         width: 100%;
         justify-content: center;
+    }
+}
+
+/* Responsive bottom-left buttons */
+@media (max-width: 1024px) {
+    .bottom-left {
+        max-width: 100%;
+    }
+    .bottom-left .btn {
+        flex: 0 1 calc(50% - 8px);
+    }
+}
+
+@media (max-width: 600px) {
+    .bottom-left .btn {
+        flex: 0 1 100%;
+        min-width: unset;
     }
 }

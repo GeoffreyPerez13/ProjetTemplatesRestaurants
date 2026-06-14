@@ -14,12 +14,17 @@ class FeedbackController extends BaseController
     {
         $this->requireLogin();
 
+        $limitReached = $this->hasReachedMonthlyLimit($_SESSION['admin_id']);
+        $remaining = $this->getRemainingFeedbacks($_SESSION['admin_id']);
+
         $this->render('admin/feedback', [
             'csrf_token' => $this->getCsrfToken(),
-            'success_message' => $_SESSION['feedback_success'] ?? null
+            'feedback_swal' => $_SESSION['feedback_swal'] ?? null,
+            'limit_reached' => $limitReached,
+            'remaining' => $remaining
         ]);
 
-        unset($_SESSION['feedback_success']);
+        unset($_SESSION['feedback_swal']);
     }
 
     /**
@@ -32,6 +37,17 @@ class FeedbackController extends BaseController
         $token = $_POST['csrf_token'] ?? '';
         if (!$this->verifyCsrfToken($token)) {
             $_SESSION['error_message'] = 'Token CSRF invalide.';
+            header('Location: ?page=feedback');
+            exit;
+        }
+
+        // Limiter à 3 soumissions par mois par restaurant
+        if ($this->hasReachedMonthlyLimit($_SESSION['admin_id'])) {
+            $_SESSION['feedback_swal'] = [
+                'icon' => 'warning',
+                'title' => 'Limite atteinte',
+                'text' => 'Vous avez déjà envoyé 3 retours ce mois-ci. Merci pour votre implication ! Vous pourrez en soumettre à nouveau le mois prochain.'
+            ];
             header('Location: ?page=feedback');
             exit;
         }
@@ -61,9 +77,155 @@ class FeedbackController extends BaseController
         // Envoyer une notification par mail au SUPER_ADMIN
         $this->sendFeedbackNotification($data);
 
-        $_SESSION['feedback_success'] = 'Merci pour votre retour ! Votre avis nous est précieux pour améliorer MenuCraft.';
+        $_SESSION['feedback_swal'] = [
+            'icon' => 'success',
+            'title' => 'Merci !',
+            'text' => 'Votre avis a bien été envoyé. Merci pour votre retour, il nous est précieux pour améliorer MenuCraft.'
+        ];
         header('Location: ?page=feedback');
         exit;
+    }
+
+    /**
+     * Dashboard SUPER_ADMIN : affiche les stats et la liste de tous les feedbacks
+     */
+    public function dashboard()
+    {
+        $this->requireLogin();
+
+        // Vérifier que c'est le SUPER_ADMIN
+        require_once __DIR__ . '/../Models/Admin.php';
+        $adminModel = new Admin($this->pdo);
+        $currentAdmin = $adminModel->findById($_SESSION['admin_id']);
+        if (!$currentAdmin || $currentAdmin->role !== 'SUPER_ADMIN') {
+            $_SESSION['error_message'] = "Accès refusé.";
+            header('Location: ?page=dashboard');
+            exit;
+        }
+
+        // Charger tous les feedbacks
+        $feedbacks = $this->loadAllFeedbacks();
+
+        // Calculer les statistiques
+        $stats = $this->computeStats($feedbacks);
+
+        $this->render('admin/feedback-dashboard', [
+            'feedbacks' => $feedbacks,
+            'stats' => $stats,
+            'csrf_token' => $this->getCsrfToken()
+        ]);
+    }
+
+    /**
+     * Charge tous les fichiers JSON de feedback
+     */
+    private function loadAllFeedbacks()
+    {
+        $feedbackDir = __DIR__ . '/../../storage/feedback';
+        if (!is_dir($feedbackDir)) {
+            return [];
+        }
+
+        $files = glob($feedbackDir . '/feedback_*.json');
+        if (!$files) {
+            return [];
+        }
+
+        $feedbacks = [];
+        foreach ($files as $file) {
+            $data = json_decode(file_get_contents($file), true);
+            if ($data) {
+                $feedbacks[] = $data;
+            }
+        }
+
+        // Trier par date décroissante
+        usort($feedbacks, function ($a, $b) {
+            return strtotime($b['submitted_at'] ?? '0') - strtotime($a['submitted_at'] ?? '0');
+        });
+
+        return $feedbacks;
+    }
+
+    /**
+     * Calcule les statistiques globales à partir de tous les feedbacks
+     */
+    private function computeStats($feedbacks)
+    {
+        $stats = [
+            'total' => count($feedbacks),
+            'avg_rating' => 0,
+            'ease_of_use' => [],
+            'liked_features' => [],
+            'recommendations' => [],
+        ];
+
+        if (empty($feedbacks)) {
+            return $stats;
+        }
+
+        $totalRating = 0;
+        foreach ($feedbacks as $fb) {
+            // Note
+            $totalRating += (int)($fb['rating'] ?? 0);
+
+            // Facilité d'utilisation
+            $ease = $fb['ease_of_use'] ?? '';
+            if ($ease) {
+                $stats['ease_of_use'][$ease] = ($stats['ease_of_use'][$ease] ?? 0) + 1;
+            }
+
+            // Features appréciées
+            $features = $fb['liked_features'] ?? '';
+            if ($features) {
+                $featureList = array_map('trim', explode(',', $features));
+                foreach ($featureList as $f) {
+                    if ($f) {
+                        $stats['liked_features'][$f] = ($stats['liked_features'][$f] ?? 0) + 1;
+                    }
+                }
+            }
+
+            // Recommandations
+            $rec = $fb['would_recommend'] ?? '';
+            if ($rec) {
+                $stats['recommendations'][$rec] = ($stats['recommendations'][$rec] ?? 0) + 1;
+            }
+        }
+
+        $stats['avg_rating'] = round($totalRating / $stats['total'], 1);
+
+        // Trier par fréquence décroissante
+        arsort($stats['ease_of_use']);
+        arsort($stats['liked_features']);
+        arsort($stats['recommendations']);
+
+        return $stats;
+    }
+
+    /**
+     * Retourne le nombre de feedbacks restants pour le mois en cours
+     */
+    private function getRemainingFeedbacks($adminId)
+    {
+        $feedbackDir = __DIR__ . '/../../storage/feedback';
+        if (!is_dir($feedbackDir)) {
+            return 3;
+        }
+
+        $currentMonth = date('Y-m');
+        $files = glob($feedbackDir . '/feedback_' . $currentMonth . '*_' . $adminId . '.json');
+        $count = is_array($files) ? count($files) : 0;
+
+        return max(0, 3 - $count);
+    }
+
+    /**
+     * Vérifie si un admin a atteint la limite de 3 feedbacks par mois
+     */
+    private function hasReachedMonthlyLimit($adminId)
+    {
+        return $this->getRemainingFeedbacks($adminId) === 0;
     }
 
     /**
