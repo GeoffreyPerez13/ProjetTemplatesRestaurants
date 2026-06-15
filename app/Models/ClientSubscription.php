@@ -12,7 +12,7 @@ class ClientSubscription
     }
 
     /**
-     * Obtenir l'abonnement d'un client
+     * Obtenir l'abonnement d'un client par admin_id
      */
     public function getClientSubscription($adminId)
     {
@@ -23,6 +23,26 @@ class ClientSubscription
             WHERE cs.admin_id = ?
         ");
         $stmt->execute([$adminId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Obtenir un abonnement par son ID (clé primaire)
+     */
+    public function getSubscriptionById($subscriptionId)
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT cs.*, a.username, a.restaurant_name, a.email,
+                   COALESCE(cs.features_enabled,
+                       (SELECT CONCAT('[', GROUP_CONCAT(CONCAT('\"', pf.feature_name, '\"')), ']')
+                        FROM premium_features pf
+                        WHERE pf.admin_id = cs.admin_id AND pf.is_active = 1)
+                   ) as features_enabled
+            FROM client_subscriptions cs
+            JOIN admins a ON cs.admin_id = a.id
+            WHERE cs.id = ?
+        ");
+        $stmt->execute([$subscriptionId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
@@ -76,12 +96,17 @@ class ClientSubscription
     /**
      * Désactiver l'abonnement d'un client
      */
-    public function deactivateSubscription($adminId, $cancelledBy = null)
+    public function deactivateSubscription($subscriptionId, $cancelledBy = null)
     {
         $pdo = $this->pdo;
         
         try {
             $pdo->beginTransaction();
+
+            // Récupérer l'admin_id avant de modifier
+            $stmtInfo = $pdo->prepare("SELECT admin_id FROM client_subscriptions WHERE id = ?");
+            $stmtInfo->execute([$subscriptionId]);
+            $adminId = $stmtInfo->fetchColumn();
 
             // Mettre à jour le statut de l'abonnement
             $stmt = $pdo->prepare("
@@ -89,12 +114,16 @@ class ClientSubscription
                 SET status = 'cancelled', 
                     updated_at = CURRENT_TIMESTAMP,
                     notes = CONCAT(IFNULL(notes, ''), '\nAnnulé le ', NOW(), ' par admin ID ', ?)
-                WHERE admin_id = ?
+                WHERE id = ?
             ");
-            $stmt->execute([$cancelledBy, $adminId]);
+            $stmt->execute([$cancelledBy, $subscriptionId]);
 
-            // Désactiver toutes les fonctionnalités premium
-            $this->syncPremiumFeatures($adminId, []);
+            // Désactiver toutes les fonctionnalités premium si plus aucun abo actif
+            $stmtCheck = $pdo->prepare("SELECT COUNT(*) FROM client_subscriptions WHERE admin_id = ? AND status = 'active'");
+            $stmtCheck->execute([$adminId]);
+            if ($stmtCheck->fetchColumn() == 0) {
+                $this->syncPremiumFeatures($adminId, []);
+            }
 
             $pdo->commit();
             return true;
@@ -110,13 +139,20 @@ class ClientSubscription
     public function getAllClients($status = null)
     {
         $sql = "
-            SELECT cs.*, a.username, a.restaurant_name, a.email, a.created_at as client_since
+            SELECT cs.*, a.username, a.restaurant_name, a.email, a.created_at as client_since,
+                   a.role,
+                   COALESCE(cs.features_enabled, 
+                       (SELECT CONCAT('[', GROUP_CONCAT(CONCAT('\"', pf.feature_name, '\"')), ']')
+                        FROM premium_features pf 
+                        WHERE pf.admin_id = cs.admin_id AND pf.is_active = 1)
+                   ) as features_enabled
             FROM client_subscriptions cs
             JOIN admins a ON cs.admin_id = a.id
+            WHERE a.role != 'SUPER_ADMIN'
         ";
 
         if ($status) {
-            $sql .= " WHERE cs.status = ?";
+            $sql .= " AND cs.status = ?";
         }
 
         $sql .= " ORDER BY cs.created_at DESC";
@@ -152,11 +188,13 @@ class ClientSubscription
     {
         $plans = [
             'free' => [],
-            'premium' => ['google_reviews'],
-            'pro' => ['google_reviews', 'advanced_analytics', 'online_booking']
+            'basique' => ['google_reviews', 'advanced_analytics', 'online_booking', 'delivery_integration'],
+            'pack_full' => ['google_reviews', 'advanced_analytics', 'online_booking', 'delivery_integration'],
+            'premium' => ['google_reviews', 'advanced_analytics', 'online_booking', 'delivery_integration'],
+            'pro' => ['google_reviews', 'advanced_analytics', 'online_booking', 'delivery_integration']
         ];
 
-        return $plans[$planType] ?? [];
+        return $plans[$planType] ?? ['google_reviews', 'advanced_analytics', 'online_booking', 'delivery_integration'];
     }
 
     /**
@@ -203,4 +241,101 @@ class ClientSubscription
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    /**
+     * Suspendre l'abonnement d'un client
+     */
+    public function suspendSubscription($subscriptionId, $suspendedBy = null)
+    {
+        $stmt = $this->pdo->prepare("
+            UPDATE client_subscriptions 
+            SET status = 'inactive', 
+                updated_at = CURRENT_TIMESTAMP,
+                notes = CONCAT(IFNULL(notes, ''), '\nSuspendu le ', NOW(), ' par admin ID ', ?)
+            WHERE id = ?
+        ");
+        $stmt->execute([$suspendedBy, $subscriptionId]);
+        return true;
+    }
+
+    /**
+     * Reactiver l'abonnement d'un client
+     */
+    public function reactivateSubscription($subscriptionId, $reactivatedBy = null)
+    {
+        $pdo = $this->pdo;
+        try {
+            $pdo->beginTransaction();
+
+            // Récupérer l'admin_id
+            $stmtInfo = $pdo->prepare("SELECT admin_id FROM client_subscriptions WHERE id = ?");
+            $stmtInfo->execute([$subscriptionId]);
+            $adminId = $stmtInfo->fetchColumn();
+
+            $stmt = $pdo->prepare("
+                UPDATE client_subscriptions 
+                SET status = 'active',
+                    expires_at = CASE 
+                        WHEN expires_at IS NULL OR expires_at < NOW() THEN DATE_ADD(NOW(), INTERVAL 1 MONTH)
+                        ELSE expires_at
+                    END,
+                    updated_at = CURRENT_TIMESTAMP,
+                    notes = CONCAT(IFNULL(notes, ''), '\nReactive le ', NOW(), ' par admin ID ', ?)
+                WHERE id = ?
+            ");
+            $stmt->execute([$reactivatedBy, $subscriptionId]);
+
+            // Reactiver toutes les features existantes pour cet admin
+            $stmtFeatures = $pdo->prepare("SELECT feature_name FROM premium_features WHERE admin_id = ?");
+            $stmtFeatures->execute([$adminId]);
+            $existingFeatures = $stmtFeatures->fetchAll(PDO::FETCH_COLUMN);
+
+            if (!empty($existingFeatures)) {
+                // Réactiver les features existantes
+                $this->syncPremiumFeatures($adminId, $existingFeatures);
+            } else {
+                // Aucune feature existante, utiliser les defaults du plan
+                $sub = $this->getClientSubscription($adminId);
+                if ($sub) {
+                    $features = $this->getDefaultFeatures($sub['plan_type']);
+                    $this->syncPremiumFeatures($adminId, $features);
+                }
+            }
+
+            $pdo->commit();
+            return true;
+        } catch (Exception $e) {
+            $pdo->rollback();
+            throw $e;
+        }
+    }
+
+    /**
+     * Supprimer un client et toutes ses donnees associees
+     */
+    public function deleteClient($adminId)
+    {
+        $pdo = $this->pdo;
+        try {
+            $pdo->beginTransaction();
+
+            // Supprimer les features premium
+            $stmt = $pdo->prepare("DELETE FROM premium_features WHERE admin_id = ?");
+            $stmt->execute([$adminId]);
+
+            // Supprimer l'abonnement
+            $stmt = $pdo->prepare("DELETE FROM client_subscriptions WHERE admin_id = ?");
+            $stmt->execute([$adminId]);
+
+            // Supprimer le compte admin
+            $stmt = $pdo->prepare("DELETE FROM admins WHERE id = ? AND role != 'SUPER_ADMIN'");
+            $stmt->execute([$adminId]);
+
+            $pdo->commit();
+            return true;
+        } catch (Exception $e) {
+            $pdo->rollback();
+            throw $e;
+        }
+    }
+
 }

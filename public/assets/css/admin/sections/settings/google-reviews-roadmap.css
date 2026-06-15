@@ -140,6 +140,7 @@
 
 .intro-card {
     background: #f8f9fa;
+    color: #333;
     padding: 30px;
     border-radius: 12px;
     border-left: 4px solid #667eea;
@@ -159,6 +160,7 @@
     margin-top: 20px;
     padding: 15px;
     background: #fff3cd;
+    color: #333;
     border-radius: 8px;
     border-left: 4px solid #ffc107;
 }

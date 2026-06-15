@@ -50,6 +50,7 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
     <!-- Affichage du message de bienvenue personnalisé -->
     <div class="welcome-message">
         <p>Bienvenue <strong><?= htmlspecialchars($username) ?></strong>.</p>
+        <?php if ($role !== 'SUPER_ADMIN'): ?>
         <p>Vous gérez le restaurant : <strong><?= htmlspecialchars($restaurant_name) ?></strong>.</p>
 
         <?php if (!empty($slug) && !($is_read_only ?? false)): ?>
@@ -70,6 +71,7 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
             <p class="last-updated">Dernière modification de la carte le : <em><strong><?= htmlspecialchars($formatted_date) ?></strong></em>.</p>
         <?php else: ?>
             <p class="last-updated">La carte n'a pas encore été modifiée.</p>
+        <?php endif; ?>
         <?php endif; ?>
     </div>
 

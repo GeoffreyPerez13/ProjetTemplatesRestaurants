@@ -329,6 +329,15 @@ switch ($page) {
             case 'get-client-details':
                 $controller->getClientDetails();
                 break;
+            case 'suspend-subscription':
+                $controller->suspendSubscription();
+                break;
+            case 'reactivate-subscription':
+                $controller->reactivateSubscription();
+                break;
+            case 'delete-client':
+                $controller->deleteClient();
+                break;
             default:
                 $controller->show();
                 break;

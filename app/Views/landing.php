@@ -37,6 +37,17 @@ $registerIcon = $isBeta ? 'fas fa-envelope' : 'fas fa-bolt';
     
     <!-- Cookies -->
     <script src="assets/js/display/cookies.js"></script>
+
+<!-- Blink effect for register redirect -->
+<style>
+@keyframes pulse-highlight {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.7); }
+    50% { box-shadow: 0 0 18px 6px rgba(5, 150, 105, 0.5); }
+}
+.blink-access {
+    animation: pulse-highlight 0.8s ease-in-out 6;
+}
+</style>
 </head>
 <body>
 
@@ -844,5 +855,24 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 </script>
 
+
+<script>
+// Blink "Demander un acces" buttons when coming from login
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("from") === "register") {
+        // Target nav-btn-primary in header and btn-hero-primary in hero
+        const targets = document.querySelectorAll(".nav-btn-primary, .btn-hero-primary");
+        targets.forEach(function(el) {
+            el.classList.add("blink-access");
+            el.addEventListener("animationend", function() {
+                el.classList.remove("blink-access");
+            });
+        });
+        // Also scroll to top to make hero visible
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+})();
+</script>
 </body>
 </html>

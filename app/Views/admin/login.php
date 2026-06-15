@@ -43,9 +43,9 @@ require __DIR__ . '/../partials/header.php';
     </div>
 
     <!-- Liens supplementaires -->
-    <div class="login-extra-links" style="text-align: center; margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
-        <a href="?page=auto-register" target="_blank" style="color: var(--color-primary); font-size: 0.9rem;">Pas encore de compte ? Créer un compte</a>
-        <a href="?page=landing" target="_blank" style="color: var(--color-text-muted); font-size: 0.85rem;"><i class="fas fa-arrow-left"></i> Retour à la page d'accueil</a>
+    <div class="login-extra-links" style="text-align: center; margin-top: 16px;">
+        <p style="margin: 0 0 6px 0;"><a href="?page=landing&from=register" target="_blank" style="color: var(--color-primary); font-size: 0.9rem; text-decoration: none;">Pas encore de compte ? Créer un compte</a></p>
+        <p style="margin: 0;"><a href="?page=landing" target="_blank" style="color: var(--color-text-muted); font-size: 0.85rem; text-decoration: none;"><i class="fas fa-arrow-left"></i> Retour à la page d'accueil</a></p>
     </div>
 </div>
 

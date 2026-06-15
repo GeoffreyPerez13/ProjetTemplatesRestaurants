@@ -39,6 +39,10 @@ class ClientManagementController extends BaseController
             exit;
         }
 
+        // Rendre $pdo et csrf_token accessibles dans la vue
+        $pdo = $this->pdo;
+        $csrf_token = $this->getCsrfToken();
+
         // Charger la vue
         require_once __DIR__ . '/../Views/admin/manage-clients.php';
     }
@@ -84,7 +88,7 @@ class ClientManagementController extends BaseController
                 $stmt = $this->pdo->prepare("
                     UPDATE client_subscriptions 
                     SET expires_at = DATE_ADD(expires_at, INTERVAL ? MONTH)
-                    WHERE admin_id = ?
+                    WHERE id = ?
                 ");
                 $stmt->execute([$duration - 1, $clientId]);
             }
@@ -172,7 +176,7 @@ class ClientManagementController extends BaseController
                 SET expires_at = DATE_ADD(COALESCE(expires_at, NOW()), INTERVAL ? MONTH),
                     status = 'active',
                     updated_at = CURRENT_TIMESTAMP
-                WHERE admin_id = ?
+                WHERE id = ?
             ");
             $stmt->execute([$months, $clientId]);
 
@@ -206,7 +210,7 @@ class ClientManagementController extends BaseController
         }
 
         try {
-            $subscription = $this->subscriptionModel->getClientSubscription($clientId);
+            $subscription = $this->subscriptionModel->getSubscriptionById($clientId);
             
             if (!$subscription) {
                 $this->jsonResponse(['success' => false, 'message' => 'Client non trouvé']);
@@ -224,6 +228,87 @@ class ClientManagementController extends BaseController
     }
 
     /**
+     * Suspendre l'abonnement d'un client
+     */
+    public function suspendSubscription()
+    {
+        $this->requireLogin();
+        if (!$this->isSuperAdmin()) {
+            $this->jsonResponse(['success' => false, 'message' => 'Accès non autorisé']);
+            return;
+        }
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            $this->jsonResponse(['success' => false, 'message' => 'Token de sécurité invalide']);
+            return;
+        }
+        $clientId = $_POST['client_id'] ?? '';
+        if (empty($clientId)) {
+            $this->jsonResponse(['success' => false, 'message' => 'ID client non spécifié']);
+            return;
+        }
+        try {
+            $this->subscriptionModel->suspendSubscription($clientId, $_SESSION['admin_id']);
+            $this->jsonResponse(['success' => true, 'message' => 'Abonnement suspendu avec succès']);
+        } catch (Exception $e) {
+            $this->jsonResponse(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Reactiver l'abonnement d'un client
+     */
+    public function reactivateSubscription()
+    {
+        $this->requireLogin();
+        if (!$this->isSuperAdmin()) {
+            $this->jsonResponse(['success' => false, 'message' => 'Accès non autorisé']);
+            return;
+        }
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            $this->jsonResponse(['success' => false, 'message' => 'Token de sécurité invalide']);
+            return;
+        }
+        $clientId = $_POST['client_id'] ?? '';
+        if (empty($clientId)) {
+            $this->jsonResponse(['success' => false, 'message' => 'ID client non spécifié']);
+            return;
+        }
+        try {
+            $this->subscriptionModel->reactivateSubscription($clientId, $_SESSION['admin_id']);
+            $this->jsonResponse(['success' => true, 'message' => 'Abonnement réactivé avec succès']);
+        } catch (Exception $e) {
+            $this->jsonResponse(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Supprimer un client
+     */
+    public function deleteClient()
+    {
+        $this->requireLogin();
+        if (!$this->isSuperAdmin()) {
+            $this->jsonResponse(['success' => false, 'message' => 'Accès non autorisé']);
+            return;
+        }
+        if (!$this->verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+            $this->jsonResponse(['success' => false, 'message' => 'Token de sécurité invalide']);
+            return;
+        }
+        $clientId = $_POST['client_id'] ?? '';
+        if (empty($clientId)) {
+            $this->jsonResponse(['success' => false, 'message' => 'ID client non spécifié']);
+            return;
+        }
+        try {
+            $this->subscriptionModel->deleteClient($clientId);
+            $this->jsonResponse(['success' => true, 'message' => 'Client supprimé avec succès']);
+        } catch (Exception $e) {
+            $this->jsonResponse(['success' => false, 'message' => $e->getMessage()]);
+        }
+    }
+
+        /**
      * Réponse JSON
      */
     private function jsonResponse($data)

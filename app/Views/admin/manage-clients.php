@@ -14,7 +14,7 @@ $stats = $subscriptionModel->getSubscriptionStats();
 
 <a class="btn-back" href="?page=dashboard">Retour</a>
 
-<div class="manage-clients-container">
+<div class="manage-clients-container" data-csrf-token="<?= htmlspecialchars($csrf_token ?? '') ?>">
     <div class="page-header">
         <h1><i class="fas fa-crown"></i> Gestion des clients Premium</h1>
         <p>Activez et gérez les abonnements premium de vos clients</p>
@@ -55,9 +55,9 @@ $stats = $subscriptionModel->getSubscriptionStats();
     <div class="filters-section">
         <div class="filter-tabs">
             <button class="filter-tab active" data-filter="all">Tous (<?= count($clients) ?>)</button>
-            <button class="filter-tab" data-filter="free">Free (<?= count(array_filter($clients, fn($c) => $c['plan_type'] === 'free')) ?>)</button>
-            <button class="filter-tab" data-filter="premium">Premium (<?= count(array_filter($clients, fn($c) => $c['plan_type'] === 'premium')) ?>)</button>
-            <button class="filter-tab" data-filter="pro">Pro (<?= count(array_filter($clients, fn($c) => $c['plan_type'] === 'pro')) ?>)</button>
+            <button class="filter-tab" data-filter="basique">Basique (<?= count(array_filter($clients, fn($c) => $c['plan_type'] === 'basique')) ?>)</button>
+            <button class="filter-tab" data-filter="pack_full">Pack Full (<?= count(array_filter($clients, fn($c) => $c['plan_type'] === 'pack_full')) ?>)</button>
+            <button class="filter-tab" data-filter="beta">Beta (<?= count(array_filter($clients, fn($c) => empty($c['plan_type']) || !in_array($c['plan_type'], ['basique', 'pack_full']))) ?>)</button>
         </div>
     </div>
 
@@ -78,7 +78,7 @@ $stats = $subscriptionModel->getSubscriptionStats();
             </thead>
             <tbody>
                 <?php foreach ($clients as $client): ?>
-                    <tr class="client-row" data-plan="<?= $client['plan_type'] ?>" data-status="<?= $client['status'] ?>">
+                    <tr class="client-row" data-client-id="<?= $client['admin_id'] ?>" data-sub-id="<?= $client['id'] ?>" data-plan="<?= $client['plan_type'] ?: 'beta' ?>" data-status="<?= $client['status'] ?>">
                         <td>
                             <div class="client-info">
                                 <div class="client-avatar">
@@ -92,13 +92,14 @@ $stats = $subscriptionModel->getSubscriptionStats();
                         </td>
                         <td><?= htmlspecialchars($client['restaurant_name'] ?? 'Non défini') ?></td>
                         <td>
-                            <span class="plan-badge plan-<?= $client['plan_type'] ?>">
-                                <?= strtoupper($client['plan_type']) ?>
+                            <?php $planLabel = $client['plan_type'] ?: 'beta'; ?>
+                            <span class="plan-badge plan-<?= $planLabel ?>">
+                                <?= strtoupper($planLabel) ?>
                             </span>
                         </td>
                         <td>
                             <span class="status-badge status-<?= $client['status'] ?>">
-                                <?= ucfirst($client['status']) ?>
+                                <?= ['active' => 'Actif', 'inactive' => 'Inactif', 'cancelled' => 'Annulé', 'expired' => 'Expiré'][$client['status']] ?? ucfirst($client['status']) ?>
                             </span>
                         </td>
                         <td>
@@ -127,33 +128,36 @@ $stats = $subscriptionModel->getSubscriptionStats();
                         </td>
                         <td>
                             <div class="actions-dropdown">
-                                <button class="actions-btn" data-client="<?= $client['admin_id'] ?>">
+                                <button class="actions-btn" data-client="<?= $client['id'] ?>">
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
-                                <div class="dropdown-menu" id="dropdown-<?= $client['admin_id'] ?>">
-                                    <?php if ($client['plan_type'] === 'free'): ?>
-                                        <button class="dropdown-item activate-premium" data-client="<?= $client['admin_id'] ?>" data-plan="premium">
-                                            <i class="fas fa-crown"></i>
-                                            Activer Premium
+                                <div class="dropdown-menu" id="dropdown-<?= $client['id'] ?>">
+                                    <button class="dropdown-item view-details" data-client="<?= $client['id'] ?>">
+                                        <i class="fas fa-eye"></i> Voir détails
+                                    </button>
+                                    <?php if ($client['status'] === 'active'): ?>
+                                        <button class="dropdown-item extend-subscription" data-client="<?= $client['id'] ?>">
+                                            <i class="fas fa-calendar-plus"></i> Prolonger
                                         </button>
-                                        <button class="dropdown-item activate-pro" data-client="<?= $client['admin_id'] ?>" data-plan="pro">
-                                            <i class="fas fa-star"></i>
-                                            Activer Pro
+                                        <button class="dropdown-item warning suspend-subscription" data-client="<?= $client['id'] ?>">
+                                            <i class="fas fa-pause-circle"></i> Suspendre
                                         </button>
-                                    <?php else: ?>
-                                        <button class="dropdown-item view-details" data-client="<?= $client['admin_id'] ?>">
-                                            <i class="fas fa-eye"></i>
-                                            Voir détails
+                                        <button class="dropdown-item danger cancel-subscription" data-client="<?= $client['id'] ?>">
+                                            <i class="fas fa-times-circle"></i> Désactiver
                                         </button>
-                                        <button class="dropdown-item extend-subscription" data-client="<?= $client['admin_id'] ?>">
-                                            <i class="fas fa-calendar-plus"></i>
-                                            Prolonger
+                                    <?php elseif ($client['status'] === 'inactive'): ?>
+                                        <button class="dropdown-item success reactivate-subscription" data-client="<?= $client['id'] ?>">
+                                            <i class="fas fa-play-circle"></i> Réactiver
                                         </button>
-                                        <button class="dropdown-item danger cancel-subscription" data-client="<?= $client['admin_id'] ?>">
-                                            <i class="fas fa-times"></i>
-                                            Annuler
+                                    <?php elseif ($client['status'] === 'cancelled'): ?>
+                                        <button class="dropdown-item success reactivate-subscription" data-client="<?= $client['id'] ?>">
+                                            <i class="fas fa-redo"></i> Réactiver
                                         </button>
                                     <?php endif; ?>
+                                    <div class="dropdown-divider"></div>
+                                    <button class="dropdown-item danger delete-client" data-client="<?= $client['admin_id'] ?>" data-sub-id="<?= $client['id'] ?>">
+                                        <i class="fas fa-trash-alt"></i> Supprimer
+                                    </button>
                                 </div>
                             </div>
                         </td>
@@ -365,7 +369,7 @@ $stats = $subscriptionModel->getSubscriptionStats();
     background: var(--color-bg-alt);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    overflow: hidden;
+    overflow: visible;
 }
 
 .clients-table {
@@ -487,6 +491,7 @@ $stats = $subscriptionModel->getSubscriptionStats();
 
 .actions-dropdown {
     position: relative;
+    z-index: 10;
 }
 
 .actions-btn {
@@ -504,9 +509,9 @@ $stats = $subscriptionModel->getSubscriptionStats();
     background: var(--color-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    min-width: 180px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
+    min-width: 200px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
     display: none;
 }
 
@@ -534,6 +539,38 @@ $stats = $subscriptionModel->getSubscriptionStats();
 
 .dropdown-item.danger {
     color: var(--color-danger);
+}
+
+.dropdown-item.warning {
+    color: #f59e0b;
+}
+
+.dropdown-item.warning:hover {
+    background: #fffbeb;
+}
+
+.dropdown-item.success {
+    color: #059669;
+}
+
+.dropdown-item.success:hover {
+    background: #ecfdf5;
+}
+
+.dropdown-divider {
+    height: 1px;
+    margin: 4px 0;
+    background: var(--color-border, #e5e7eb);
+}
+
+.plan-badge.plan-beta {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: white;
+}
+
+.status-badge.status-suspended {
+    background: #fef3c7;
+    color: #92400e;
 }
 
 .modal {
@@ -760,6 +797,5 @@ $stats = $subscriptionModel->getSubscriptionStats();
 }
 </style>
 
-<script src="assets/js/admin/manage-clients.js"></script>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

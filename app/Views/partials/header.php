@@ -61,18 +61,6 @@
 </head>
 
 <body data-page="<?= htmlspecialchars($_GET['page'] ?? '') ?>" data-section="<?= htmlspecialchars($_GET['section'] ?? '') ?>">
-    <!-- Bandeau mode beta (visible si BETA_MODE actif) -->
-    <?php if (defined('BETA_MODE') && BETA_MODE === true && !empty($_SESSION['admin_id']) && ($_SESSION['role'] ?? '') !== 'SUPER_ADMIN' && !in_array(($_GET['page'] ?? ''), ['feedback', 'login', 'auto-register', 'landing'])): ?>
-        <div class="beta-banner">
-            <div class="beta-banner-content">
-                <i class="fas fa-gift beta-icon"></i>
-                <span class="beta-text">
-                    <strong>Version Beta Gratuite</strong> <span class="beta-dash">—</span> Accès complet offert jusqu'au <?= defined('BETA_EXPIRES') ? date('d/m/Y', strtotime(BETA_EXPIRES)) : '?' ?>.
-                </span>
-                <a href="?page=feedback" target="_blank" class="beta-banner-btn"><i class="fas fa-comment-dots"></i> Donner mon avis</a>
-            </div>
-        </div>
-    <?php endif; ?>
 
     <!-- Bandeau mode démo (visible uniquement en session démo) -->
     <?php if (!empty($_SESSION['demo_mode']) && $_SESSION['demo_mode'] === true): ?>
