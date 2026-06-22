@@ -53,6 +53,10 @@ $restaurant = $restaurant ?? null;
                     <?php foreach (($categories ?? []) as $index => $cat): ?>
                         <a href="#category-<?= $index ?>" class="category-nav-link"><?= htmlspecialchars($cat['name']) ?></a>
                     <?php endforeach; ?>
+                    <div class="category-nav-actions">
+                        <button type="button" class="category-nav-btn" id="categories-expand-all"><i class="fas fa-expand-alt"></i> Tout ouvrir</button>
+                        <button type="button" class="category-nav-btn" id="categories-collapse-all"><i class="fas fa-compress-alt"></i> Tout fermer</button>
+                    </div>
                 </nav>
             <?php endif; ?>
 
@@ -64,9 +68,9 @@ $restaurant = $restaurant ?? null;
                                 <img src="<?= htmlspecialchars($category['image_url']) ?>" alt="<?= htmlspecialchars($category['name']) ?> — <?= htmlspecialchars($restaurant->name ?? '') ?>" loading="lazy" class="lightbox-image">
                             <?php endif; ?>
                             <h3><?= htmlspecialchars($category['name']) ?></h3>
-                            <span class="category-toggle"><i class="fas fa-chevron-down"></i></span>
+                            <span class="category-toggle"><i class="fas fa-chevron-down rotated"></i></span>
                         </div>
-                        <div class="category-body<?= empty($category['plats']) ? ' collapsed' : '' ?>" id="category-body-<?= $index ?>">
+                        <div class="category-body collapsed" id="category-body-<?= $index ?>">
                             <?php if (!empty($category['plats'])): ?>
                                 <div class="plats-grid">
                                     <?php foreach ($category['plats'] as $plat): ?>
@@ -146,6 +150,30 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Tout ouvrir / Tout fermer
+    var expandAllBtn = document.getElementById('categories-expand-all');
+    var collapseAllBtn = document.getElementById('categories-collapse-all');
+    if (expandAllBtn) {
+        expandAllBtn.addEventListener('click', function() {
+            document.querySelectorAll('.category-body').forEach(function(body) {
+                body.classList.remove('collapsed');
+            });
+            document.querySelectorAll('.category-toggle i').forEach(function(icon) {
+                icon.classList.remove('rotated');
+            });
+        });
+    }
+    if (collapseAllBtn) {
+        collapseAllBtn.addEventListener('click', function() {
+            document.querySelectorAll('.category-body').forEach(function(body) {
+                body.classList.add('collapsed');
+            });
+            document.querySelectorAll('.category-toggle i').forEach(function(icon) {
+                icon.classList.add('rotated');
+            });
+        });
+    }
 
     // Navigation rapide : scroll smooth vers la catégorie
     document.querySelectorAll('.category-nav-link').forEach(function(link) {

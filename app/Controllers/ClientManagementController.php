@@ -308,7 +308,7 @@ class ClientManagementController extends BaseController
         }
     }
 
-        /**
+    /**
      * Réponse JSON
      */
     private function jsonResponse($data)

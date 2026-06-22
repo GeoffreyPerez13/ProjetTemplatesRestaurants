@@ -5,11 +5,8 @@ $scripts = [
 ];
 
 require __DIR__ . '/../partials/header.php';
-require_once __DIR__ . '/../../Models/ClientSubscription.php';
-
 $subscriptionModel = new ClientSubscription($pdo);
 $clients = $subscriptionModel->getAllClients();
-$stats = $subscriptionModel->getSubscriptionStats();
 ?>
 
 <a class="btn-back" href="?page=dashboard">Retour</a>
@@ -36,8 +33,8 @@ $stats = $subscriptionModel->getSubscriptionStats();
                 <i class="fas fa-crown"></i>
             </div>
             <div class="stat-info">
-                <h3><?= array_sum(array_column(array_filter($stats, fn($s) => $s['status'] === 'active' && $s['plan_type'] !== 'free'), 'active_count')) ?></h3>
-                <p>Clients Premium actifs</p>
+                <h3><?= count(array_filter($clients, fn($c) => $c['status'] === 'active')) ?></h3>
+                <p>Clients actifs</p>
             </div>
         </div>
         <div class="stat-card revenue">
@@ -45,8 +42,8 @@ $stats = $subscriptionModel->getSubscriptionStats();
                 <i class="fas fa-euro-sign"></i>
             </div>
             <div class="stat-info">
-                <h3><?= number_format(array_sum(array_column(array_filter($stats, fn($s) => $s['status'] === 'active' && $s['plan_type'] !== 'free'), 'active_count')) * 19, 0, ',', ' ') ?></h3>
-                <p>Revenue mensuel estimé</p>
+                <h3><?= number_format(array_sum(array_map(fn($c) => $c['status'] === 'active' ? floatval($c['price_per_month'] ?? 0) : 0, $clients)), 0, ',', ' ') ?> €</h3>
+                <p>Revenu mensuel estimé</p>
             </div>
         </div>
     </div>
@@ -168,87 +165,6 @@ $stats = $subscriptionModel->getSubscriptionStats();
     </div>
 </div>
 
-<!-- Modal d'activation Premium -->
-<div id="activateModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Activer l'abonnement Premium</h3>
-            <button class="modal-close">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="client-preview">
-                <div class="client-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="client-details">
-                    <h4 id="modal-client-name"></h4>
-                    <p id="modal-client-restaurant"></p>
-                </div>
-            </div>
-            
-            <div class="plan-selection">
-                <h4>Choisir un plan</h4>
-                <div class="plan-options">
-                    <div class="plan-option" data-plan="premium">
-                        <div class="plan-header">
-                            <h5>Premium</h5>
-                            <span class="plan-price">19€/mois</span>
-                        </div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i> Avis Google</li>
-                            <li><i class="fas fa-check"></i> Support prioritaire</li>
-                            <li><i class="fas fa-check"></i> Analytics de base</li>
-                        </ul>
-                    </div>
-                    <div class="plan-option" data-plan="pro">
-                        <div class="plan-header">
-                            <h5>Pro</h5>
-                            <span class="plan-price">39€/mois</span>
-                        </div>
-                        <ul class="plan-features">
-                            <li><i class="fas fa-check"></i> Tout le plan Premium</li>
-                            <li><i class="fas fa-check"></i> Statistiques avancées</li>
-                            <li><i class="fas fa-check"></i> Réservations en ligne</li>
-                            <li><i class="fas fa-check"></i> Intégration livraison</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="subscription-duration">
-                <label for="duration">Durée de l'abonnement</label>
-                <select id="duration" name="duration">
-                    <option value="1">1 mois</option>
-                    <option value="3">3 mois (-10%)</option>
-                    <option value="6">6 mois (-15%)</option>
-                    <option value="12">12 mois (-20%)</option>
-                </select>
-            </div>
-            
-            <div class="price-summary">
-                <div class="price-row">
-                    <span>Prix de base:</span>
-                    <span id="base-price">19€</span>
-                </div>
-                <div class="price-row discount">
-                    <span>Réduction:</span>
-                    <span id="discount">0€</span>
-                </div>
-                <div class="price-row total">
-                    <span>Total:</span>
-                    <span id="total-price">19€</span>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn secondary modal-close">Annuler</button>
-            <button class="btn premium-btn" id="confirm-activation">
-                <i class="fas fa-crown"></i>
-                Activer l'abonnement
-            </button>
-        </div>
-    </div>
-</div>
 
 <style>
 .manage-clients-container {
@@ -573,216 +489,12 @@ $stats = $subscriptionModel->getSubscriptionStats();
     color: #92400e;
 }
 
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 2000;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal.show {
-    display: flex;
-}
-
-.modal-content {
-    background: var(--color-bg);
-    border-radius: var(--radius-lg);
-    max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-.modal-header {
-    padding: var(--spacing-lg);
-    border-bottom: 1px solid var(--color-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.modal-header h3 {
-    margin: 0;
-    color: var(--color-text);
-}
-
-.modal-close {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--color-text-light);
-}
-
-.modal-body {
-    padding: var(--spacing-lg);
-}
-
-.client-preview {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md);
-    background: var(--color-bg-alt);
-    border-radius: var(--radius-md);
-    margin-bottom: var(--spacing-lg);
-}
-
-.client-preview .client-avatar {
-    width: 50px;
-    height: 50px;
-    font-size: 1.2rem;
-}
-
-.client-details h4 {
-    margin: 0;
-    color: var(--color-text);
-}
-
-.client-details p {
-    margin: 0;
-    color: var(--color-text-light);
-}
-
-.plan-selection h4 {
-    margin: 0 0 var(--spacing-md) 0;
-    color: var(--color-text);
-}
-
-.plan-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
-}
-
-.plan-option {
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-md);
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.plan-option:hover {
-    border-color: var(--color-primary);
-}
-
-.plan-option.selected {
-    border-color: var(--color-primary);
-    background: rgba(212, 168, 83, 0.1);
-}
-
-.plan-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-md);
-}
-
-.plan-header h5 {
-    margin: 0;
-    color: var(--color-text);
-}
-
-.plan-price {
-    font-weight: 700;
-    color: var(--color-primary);
-}
-
-.plan-features {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.plan-features li {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-xs);
-    color: var(--color-text-light);
-    font-size: 0.9rem;
-}
-
-.plan-features i {
-    color: var(--color-success);
-}
-
-.subscription-duration {
-    margin-bottom: var(--spacing-lg);
-}
-
-.subscription-duration label {
-    display: block;
-    margin-bottom: var(--spacing-sm);
-    color: var(--color-text);
-    font-weight: 500;
-}
-
-.subscription-duration select {
-    width: 100%;
-    padding: var(--spacing-sm);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-bg);
-    color: var(--color-text);
-}
-
-.price-summary {
-    background: var(--color-bg-alt);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-md);
-}
-
-.price-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: var(--spacing-sm);
-}
-
-.price-row.discount {
-    color: var(--color-success);
-}
-
-.price-row.total {
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: var(--color-text);
-    padding-top: var(--spacing-sm);
-    border-top: 1px solid var(--color-border);
-}
-
-.modal-footer {
-    padding: var(--spacing-lg);
-    border-top: 1px solid var(--color-border);
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--spacing-sm);
-}
-
-.premium-btn {
-    background: linear-gradient(135deg, var(--color-primary), #d4a853);
-    color: white;
-    border: none;
-}
-
 @media (max-width: 768px) {
     .manage-clients-container {
         padding: var(--spacing-md);
     }
     
     .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .plan-options {
         grid-template-columns: 1fr;
     }
     

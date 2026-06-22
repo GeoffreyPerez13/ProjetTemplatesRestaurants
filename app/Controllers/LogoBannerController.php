@@ -472,13 +472,24 @@ class LogoBannerController extends BaseController
         if (!in_array($table, $allowedTables)) {
             throw new \InvalidArgumentException("Table non autorisée: $table");
         }
-        $stmt = $this->pdo->prepare("
-            INSERT INTO $table (admin_id, filename, uploaded_at)
-            VALUES (?, ?, NOW())
-            ON DUPLICATE KEY UPDATE
-                filename = VALUES(filename),
-                uploaded_at = NOW()
-        ");
+        if ($table === 'banners') {
+            $stmt = $this->pdo->prepare("
+                INSERT INTO $table (admin_id, filename, text, uploaded_at)
+                VALUES (?, ?, NULL, NOW())
+                ON DUPLICATE KEY UPDATE
+                    filename = VALUES(filename),
+                    text = NULL,
+                    uploaded_at = NOW()
+            ");
+        } else {
+            $stmt = $this->pdo->prepare("
+                INSERT INTO $table (admin_id, filename, uploaded_at)
+                VALUES (?, ?, NOW())
+                ON DUPLICATE KEY UPDATE
+                    filename = VALUES(filename),
+                    uploaded_at = NOW()
+            ");
+        }
         return $stmt->execute([$admin_id, $filename]);
     }
 

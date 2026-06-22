@@ -38,15 +38,6 @@ $roTitle = 'title="Activez votre abonnement pour accéder à cette section"';
         </div>
     <?php endif; ?>
 
-    <!-- Messages flash (HTML autorisé pour les liens de démo) -->
-    <?php if (!empty($success_message)): ?>
-        <div class="message-success"><?= $success_message ?></div>
-    <?php endif; ?>
-
-    <?php if (!empty($error_message)): ?>
-        <div class="message-error"><?= $error_message ?></div>
-    <?php endif; ?>
-
     <!-- Affichage du message de bienvenue personnalisé -->
     <div class="welcome-message">
         <p>Bienvenue <strong><?= htmlspecialchars($username) ?></strong>.</p>

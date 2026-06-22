@@ -3,7 +3,6 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('[manage-clients] JS loaded, attaching events...');
     const csrfToken = document.querySelector('.manage-clients-container')?.dataset?.csrfToken || 
                       document.querySelector('meta[name="csrf-token"]')?.content || '';
 
@@ -232,96 +231,4 @@ document.addEventListener('DOMContentLoaded', function() {
             } catch(err) { Swal.fire('Erreur', err.message, 'error'); }
         });
     });
-
-    // ==================== MODAL ACTIVATION (si existe) ====================
-    const modal = document.getElementById('activateModal');
-    if (modal) {
-        const modalClose = document.querySelectorAll('.modal-close');
-        const activateButtons = document.querySelectorAll('.activate-premium, .activate-pro');
-        const durationSelect = document.getElementById('duration');
-        
-        activateButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const clientId = this.dataset.client;
-                const planType = this.dataset.plan;
-                const clientRow = document.querySelector(`.client-row[data-client-id="${clientId}"]`);
-                
-                document.getElementById('modal-client-name').textContent = clientRow?.querySelector('.client-name')?.textContent || '';
-                document.getElementById('modal-client-restaurant').textContent = clientRow?.querySelector('.client-email')?.textContent || '';
-                
-                document.querySelectorAll('.plan-option').forEach(opt => opt.classList.remove('selected'));
-                document.querySelector(`.plan-option[data-plan="${planType}"]`)?.classList.add('selected');
-                
-                modal.dataset.clientId = clientId;
-                modal.dataset.planType = planType;
-                if (durationSelect) updatePrice();
-                modal.classList.add('show');
-            });
-        });
-        
-        modalClose.forEach(button => {
-            button.addEventListener('click', () => modal.classList.remove('show'));
-        });
-        
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) modal.classList.remove('show');
-        });
-
-        document.querySelectorAll('.plan-option').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.plan-option').forEach(opt => opt.classList.remove('selected'));
-                this.classList.add('selected');
-                modal.dataset.planType = this.dataset.plan;
-                if (durationSelect) updatePrice();
-            });
-        });
-
-        if (durationSelect) {
-            durationSelect.addEventListener('change', updatePrice);
-
-            function updatePrice() {
-                const planType = modal.dataset.planType || 'premium';
-                const duration = parseInt(durationSelect.value);
-                const basePrices = { premium: 19, pro: 39 };
-                const discounts = { 1: 0, 3: 10, 6: 15, 12: 20 };
-                const basePrice = basePrices[planType] || 19;
-                const discountPercent = discounts[duration] || 0;
-                const discount = Math.round(basePrice * duration * discountPercent / 100);
-                const total = basePrice * duration - discount;
-                const bp = document.getElementById('base-price');
-                const dp = document.getElementById('discount');
-                const tp = document.getElementById('total-price');
-                if (bp) bp.textContent = `${basePrice * duration}\u20AC`;
-                if (dp) dp.textContent = `-${discount}\u20AC`;
-                if (tp) tp.textContent = `${total}\u20AC`;
-            }
-        }
-
-        const confirmButton = document.getElementById('confirm-activation');
-        if (confirmButton) {
-            confirmButton.addEventListener('click', async function() {
-                const clientId = modal.dataset.clientId;
-                const planType = modal.dataset.planType;
-                const duration = durationSelect ? parseInt(durationSelect.value) : 1;
-                if (!clientId || !planType) return;
-                
-                this.disabled = true;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
-                try {
-                    const data = await postAction('?page=manage-clients&action=activate-subscription', {
-                        client_id: clientId, plan_type: planType, duration: duration
-                    });
-                    if (!data.success) throw new Error(data.message);
-                    modal.classList.remove('show');
-                    await Swal.fire({ icon: 'success', title: data.message, timer: 1500, showConfirmButton: false });
-                    location.reload();
-                } catch(err) {
-                    Swal.fire('Erreur', err.message, 'error');
-                } finally {
-                    this.disabled = false;
-                    this.innerHTML = '<i class="fas fa-crown"></i> Activer l\'abonnement';
-                }
-            });
-        }
-    }
 });

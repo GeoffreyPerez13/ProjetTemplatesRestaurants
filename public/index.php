@@ -251,16 +251,9 @@ switch ($page) {
                 $controller->updateGoogleReviews();
                 break;
             case 'seed-reviews':
-                // Protection : SUPER_ADMIN uniquement
-                $adminModel = new Admin($pdo);
-                $currentAdmin = $adminModel->findById($_SESSION['admin_id'] ?? 0);
-                if (!$currentAdmin || $currentAdmin->role !== 'SUPER_ADMIN') {
-                    header('Content-Type: application/json');
-                    echo json_encode(['success' => false, 'message' => 'Accès refusé']);
-                    exit;
-                }
-                require_once __DIR__ . '/../seed-reviews.php';
-                break;
+                // Redirige vers la route top-level seed-reviews
+                header('Location: ?page=seed-reviews');
+                exit;
             case 'toggle-premium':
                 $controller->togglePremium();
                 break;
@@ -382,23 +375,23 @@ switch ($page) {
         $adminModel = new Admin($pdo);
         $currentAdmin = $adminModel->findById($_SESSION['admin_id']);
         if (!$currentAdmin || $currentAdmin->role !== 'SUPER_ADMIN') {
-            $_SESSION['error_message'] = "Accès refusé.";
+            $_SESSION['pendingToast'] = json_encode(['message' => 'Accès refusé.', 'type' => 'error']);
             header('Location: ?page=dashboard');
             exit;
         }
         $demoTokenModel = new DemoToken($pdo);
         // Vérifier que la démo existe
         if (!$demoTokenModel->getDemoAdminId()) {
-            $_SESSION['error_message'] = "Le restaurant de démo n'existe pas. <a href='?page=seed-demo'>Créer la démo d'abord</a>.";
+            $_SESSION['pendingToast'] = json_encode(['message' => "Le restaurant de démo n'existe pas.", 'type' => 'error']);
             header('Location: ?page=dashboard');
             exit;
         }
         $result = $demoTokenModel->generate($_SESSION['admin_id']);
         if ($result) {
             $demoLink = SITE_URL . '/index.php?page=demo-access&token=' . $result['token'];
-            $_SESSION['success_message'] = "Lien de démo généré (valide 3 jours) :<br><code style='user-select:all;padding:4px 8px;border-radius:4px;font-size:0.85em;word-break:break-all'>" . htmlspecialchars($demoLink) . "</code>";
+            $_SESSION['pendingToast'] = json_encode(['message' => 'Lien de démo généré avec succès (valide 3 jours).', 'type' => 'success']);
         } else {
-            $_SESSION['error_message'] = "Erreur lors de la génération du lien.";
+            $_SESSION['pendingToast'] = json_encode(['message' => 'Erreur lors de la génération du lien.', 'type' => 'error']);
         }
         // Nettoyer les tokens expirés au passage
         $demoTokenModel->cleanExpired();
@@ -448,14 +441,14 @@ switch ($page) {
         $adminModel = new Admin($pdo);
         $currentAdmin = $adminModel->findById($_SESSION['admin_id']);
         if (!$currentAdmin || $currentAdmin->role !== 'SUPER_ADMIN') {
-            $_SESSION['error_message'] = "Accès refusé.";
+            $_SESSION['pendingToast'] = json_encode(['message' => 'Accès refusé.', 'type' => 'error']);
             header('Location: ?page=dashboard');
             exit;
         }
         // Vérification CSRF
         $baseController = new BaseController($pdo);
         if (!$baseController->verifyCsrfTokenPublic($_POST['csrf_token'] ?? null)) {
-            $_SESSION['error_message'] = "Token de sécurité invalide.";
+            $_SESSION['pendingToast'] = json_encode(['message' => 'Token de sécurité invalide.', 'type' => 'error']);
             header('Location: ?page=dashboard');
             exit;
         }
@@ -463,7 +456,7 @@ switch ($page) {
         if ($tokenId) {
             $demoTokenModel = new DemoToken($pdo);
             $demoTokenModel->delete(intval($tokenId));
-            $_SESSION['success_message'] = "Lien de démo révoqué.";
+            $_SESSION['pendingToast'] = json_encode(['message' => 'Lien de démo révoqué.', 'type' => 'success']);
         }
         header('Location: ?page=dashboard');
         exit;
@@ -481,14 +474,14 @@ switch ($page) {
         $adminModel = new Admin($pdo);
         $currentAdmin = $adminModel->findById($_SESSION['admin_id']);
         if (!$currentAdmin || $currentAdmin->role !== 'SUPER_ADMIN') {
-            $_SESSION['error_message'] = "Accès refusé.";
+            $_SESSION['pendingToast'] = json_encode(['message' => 'Accès refusé.', 'type' => 'error']);
             header('Location: ?page=dashboard');
             exit;
         }
         // Vérification CSRF
         $baseController = new BaseController($pdo);
         if (!$baseController->verifyCsrfTokenPublic($_POST['csrf_token'] ?? null)) {
-            $_SESSION['error_message'] = "Token de sécurité invalide.";
+            $_SESSION['pendingToast'] = json_encode(['message' => 'Token de sécurité invalide.', 'type' => 'error']);
             header('Location: ?page=dashboard');
             exit;
         }
@@ -501,7 +494,7 @@ switch ($page) {
                 $demoTokenModel->delete($id);
                 $count++;
             }
-            $_SESSION['success_message'] = "$count lien(s) de démo révoqué(s).";
+            $_SESSION['pendingToast'] = json_encode(['message' => "$count lien(s) de démo révoqué(s).", 'type' => 'success']);
         }
         header('Location: ?page=dashboard');
         exit;
@@ -540,7 +533,7 @@ switch ($page) {
         $adminModel = new Admin($pdo);
         $currentAdmin = $adminModel->findById($_SESSION['admin_id']);
         if (!$currentAdmin || $currentAdmin->role !== 'SUPER_ADMIN') {
-            $_SESSION['error_message'] = "Accès refusé.";
+            $_SESSION['pendingToast'] = json_encode(['message' => 'Accès refusé.', 'type' => 'error']);
             header('Location: ?page=dashboard');
             exit;
         }
@@ -549,14 +542,14 @@ switch ($page) {
         $action = $_GET['action'] ?? 'run';
         if ($action === 'clean') {
             $seeder->clean();
-            $_SESSION['success_message'] = "Démo supprimée avec succès.";
+            $_SESSION['pendingToast'] = json_encode(['message' => 'Démo supprimée avec succès.', 'type' => 'success']);
         } else {
             if ($seeder->demoExists()) {
-                $_SESSION['error_message'] = "La démo existe déjà.";
+                $_SESSION['pendingToast'] = json_encode(['message' => 'La démo existe déjà.', 'type' => 'error']);
             } elseif ($seeder->run()) {
-                $_SESSION['success_message'] = "Démo créée ! Voir : <a href='?page=demo'>?page=demo</a>";
+                $_SESSION['pendingToast'] = json_encode(['message' => 'Démo créée avec succès !', 'type' => 'success']);
             } else {
-                $_SESSION['error_message'] = "Erreur lors de la création de la démo.";
+                $_SESSION['pendingToast'] = json_encode(['message' => 'Erreur lors de la création de la démo.', 'type' => 'error']);
             }
         }
         header('Location: ?page=dashboard');

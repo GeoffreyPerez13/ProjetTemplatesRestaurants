@@ -61,9 +61,16 @@ class DisplayController extends BaseController
 
         $adminId = $admin->id;
 
+        // Détecter si le visiteur connecté est SUPER_ADMIN
+        $viewerIsSuperAdmin = false;
+        if (isset($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true && isset($_SESSION['admin_id'])) {
+            $loggedAdmin = $adminModel->findById($_SESSION['admin_id']);
+            $viewerIsSuperAdmin = $loggedAdmin && $loggedAdmin->role === 'SUPER_ADMIN';
+        }
+
         // Vérifier l'abonnement Basique (sauf pour SUPER_ADMIN et démo)
         $hasActiveBasique = false;
-        if ($admin->role !== 'SUPER_ADMIN' && !isset($_SESSION['demo_mode'])) {
+        if ($admin->role !== 'SUPER_ADMIN' && !$viewerIsSuperAdmin && !isset($_SESSION['demo_mode'])) {
             try {
                 $stmt = $this->pdo->prepare(
                     "SELECT status FROM client_subscriptions WHERE admin_id = ? LIMIT 1"
@@ -215,15 +222,23 @@ class DisplayController extends BaseController
             }
         }
 
+        // SUPER_ADMIN : le site est toujours considéré en ligne
+        if ($viewerIsSuperAdmin) {
+            $siteOnline = true;
+        }
+
         // Si pas d'abonnement Basique actif, forcer le site hors ligne
-        if (!$hasActiveBasique) {
+        if (!$hasActiveBasique && !$viewerIsSuperAdmin) {
             $siteOnline = false;
         }
 
-        // Mode preview : l'admin connecté propriétaire du restaurant peut voir son site même en maintenance
+        // Mode preview : l'admin connecté propriétaire peut voir son site même en maintenance
         $isPreview = false;
         if (!$siteOnline && isset($_SESSION['admin_logged']) && $_SESSION['admin_logged'] === true) {
-            if (isset($_SESSION['admin_id']) && $_SESSION['admin_id'] == $adminId) {
+            $isOwner = isset($_SESSION['admin_id']) && $_SESSION['admin_id'] == $adminId;
+            $isDemo = !empty($_SESSION['demo_mode']);
+
+            if ($isOwner || $isDemo) {
                 $siteOnline = true;
                 $isPreview = true;
             }

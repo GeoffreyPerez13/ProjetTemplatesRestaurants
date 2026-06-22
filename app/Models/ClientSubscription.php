@@ -241,6 +241,7 @@ class ClientSubscription
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     /**
      * Suspendre l'abonnement d'un client
      */

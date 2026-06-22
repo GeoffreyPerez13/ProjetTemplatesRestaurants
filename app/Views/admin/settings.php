@@ -23,6 +23,8 @@ $styles = [
 
 require __DIR__ . '/../partials/header.php';
 
+$isSuperAdmin = ($user['role'] ?? '') === 'SUPER_ADMIN';
+
 // Formatage des dates
 $created_at = !empty($user['created_at']) ? (new \DateTime($user['created_at']))->format('d/m/Y') : 'N/A';
 $last_card_update = !empty($user['last_card_update']) ? (new \DateTime($user['last_card_update']))->format('d/m/Y') : 'Jamais modifiée';
@@ -65,17 +67,6 @@ if (!empty($_SESSION['pendingToast'])) {
                         Mot de passe
                     </a>
                 </li>
-                <li>
-                    <a href="?page=settings&section=options" class="<?= $current_section === 'options' ? 'active' : '' ?>">
-                        Options
-                    </a>
-                </li>
-                <li>
-                    <a href="?page=settings&section=premium" class="<?= $current_section === 'premium' ? 'active' : '' ?>">
-                        <i class="fas fa-crown"></i>
-                        <span>Fonctionnalités</span>
-                    </a>
-                </li>
                 <?php
                 $premiumSections = [
                     ['section' => 'google-reviews',  'key' => 'google_reviews',       'icon' => 'fa-star',           'label' => 'Avis Google'],
@@ -83,6 +74,20 @@ if (!empty($_SESSION['pendingToast'])) {
                     ['section' => 'online-booking',  'key' => 'online_booking',       'icon' => 'fa-calendar-check', 'label' => 'Réservations en ligne'],
                     ['section' => 'delivery',        'key' => 'delivery_integration', 'icon' => 'fa-motorcycle',     'label' => 'Intégration livraison'],
                 ];
+                ?>
+                <li>
+                    <a href="?page=settings&section=options" class="<?= $current_section === 'options' ? 'active' : '' ?>">
+                        Options
+                    </a>
+                </li>
+                <?php if (!$isSuperAdmin): ?>
+                <li>
+                    <a href="?page=settings&section=premium" class="<?= $current_section === 'premium' ? 'active' : '' ?>">
+                        <i class="fas fa-crown"></i>
+                        <span>Fonctionnalités</span>
+                    </a>
+                </li>
+                <?php
                 foreach ($premiumSections as $ps):
                     $enabled = !empty($premium_statuses[$ps['key']]);
                     $isActive = $current_section === $ps['section'];
@@ -107,6 +112,33 @@ if (!empty($_SESSION['pendingToast'])) {
                     <a href="?page=settings&section=subscriptions" class="<?= $current_section === 'subscriptions' ? 'active' : '' ?>">
                         <i class="fas fa-credit-card"></i>
                         <span>Abonnements</span>
+                    </a>
+                </li>
+                <?php endif; ?>
+                <?php endif; ?>
+                <?php if ($isSuperAdmin): ?>
+                <li>
+                    <a href="?page=send-invitation">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>Envoyer une invitation</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="?page=manage-clients">
+                        <i class="fas fa-users-cog"></i>
+                        <span>Gestion des clients</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="?page=feedback&action=dashboard">
+                        <i class="fas fa-comments"></i>
+                        <span>Feedbacks</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="?page=google-reviews-roadmap">
+                        <i class="fas fa-road"></i>
+                        <span>Roadmap Avis Google</span>
                     </a>
                 </li>
                 <?php endif; ?>
@@ -142,6 +174,7 @@ if (!empty($_SESSION['pendingToast'])) {
                     Options
                 </a>
             </li>
+            <?php if (!$isSuperAdmin): ?>
             <li>
                 <a href="?page=settings&section=premium"
                     class="<?= $current_section === 'premium' ? 'active' : '' ?>">
@@ -175,6 +208,33 @@ if (!empty($_SESSION['pendingToast'])) {
                     class="<?= $current_section === 'subscriptions' ? 'active' : '' ?>">
                     <i class="fas fa-credit-card"></i>
                     Abonnements
+                </a>
+            </li>
+            <?php endif; ?>
+            <?php endif; ?>
+            <?php if ($isSuperAdmin): ?>
+            <li>
+                <a href="?page=send-invitation">
+                    <i class="fas fa-paper-plane"></i>
+                    Envoyer une invitation
+                </a>
+            </li>
+            <li>
+                <a href="?page=manage-clients">
+                    <i class="fas fa-users-cog"></i>
+                    Gestion des clients
+                </a>
+            </li>
+            <li>
+                <a href="?page=feedback&action=dashboard">
+                    <i class="fas fa-comments"></i>
+                    Feedbacks
+                </a>
+            </li>
+            <li>
+                <a href="?page=google-reviews-roadmap">
+                    <i class="fas fa-road"></i>
+                    Roadmap Avis Google
                 </a>
             </li>
             <?php endif; ?>
@@ -384,7 +444,13 @@ if (!empty($_SESSION['pendingToast'])) {
 
                     <div id="account-options-content" class="accordion-content expanded prevent-auto-close">
                         <div class="options-list">
-                            <?php foreach (['site_online', 'mail_reminder', 'hide_dark_mode', 'hide_tour_button', 'email_notifications'] as $option): ?>
+                            <?php
+                            $accountOptions = ['site_online', 'mail_reminder', 'hide_dark_mode', 'hide_tour_button', 'email_notifications'];
+                            if ($isSuperAdmin) {
+                                $accountOptions = array_diff($accountOptions, ['mail_reminder', 'email_notifications']);
+                            }
+                            ?>
+                            <?php foreach ($accountOptions as $option): ?>
                                 <div class="option-item">
                                     <div class="option-header">
                                         <span class="option-label">
@@ -452,6 +518,7 @@ if (!empty($_SESSION['pendingToast'])) {
                     </div>
                 </div>
 
+                <?php if (!$isSuperAdmin): ?>
                 <!-- Accordéon Fermetures Exceptionnelles -->
                 <div class="accordion-section" id="closure-dates-section">
                     <div class="accordion-header">
@@ -507,6 +574,7 @@ if (!empty($_SESSION['pendingToast'])) {
                         </div>
                     </div>
                 </div>
+                <?php endif; ?>
             </div>
 
         <?php elseif ($current_section === 'premium'): ?>
@@ -1134,6 +1202,7 @@ if (!empty($_SESSION['pendingToast'])) {
                 $activePremiumFeatures = array_filter($userFeaturesMap, fn($v) => (int)$v === 1);
                 $isPackFull = ($basicSub['plan_type'] ?? '') === 'pack_full';
                 $packPricePerMonth = (float)($basicSub['price_per_month'] ?? 0);
+                $packDurationLabel = '1 mois';
                 ?>
                 
                 <!-- Total de l'abonnement en cours -->

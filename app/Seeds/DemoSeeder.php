@@ -307,28 +307,10 @@ class DemoSeeder
             imageline($img, 0, $y, 1199, $y, $color);
         }
 
-        // Texte centré
-        $white = imagecolorallocate($img, 255, 255, 255);
-        $fontFile = $this->getFont();
-        if ($fontFile) {
-            $text = 'Le Bistrot MenuCraft';
-            $bbox = imagettfbbox(36, 0, $fontFile, $text);
-            $x = (1200 - ($bbox[2] - $bbox[0])) / 2;
-            imagettftext($img, 36, 0, (int)$x, 180, $white, $fontFile, $text);
-
-            $sub = 'Cuisine francaise traditionnelle';
-            $bbox2 = imagettfbbox(18, 0, $fontFile, $sub);
-            $x2 = (1200 - ($bbox2[2] - $bbox2[0])) / 2;
-            $semi = imagecolorallocatealpha($img, 255, 255, 255, 40);
-            imagettftext($img, 18, 0, (int)$x2, 230, $semi, $fontFile, $sub);
-        } else {
-            imagestring($img, 5, 480, 180, 'Le Bistrot MenuCraft', $white);
-        }
-
         imagepng($img, $path);
         imagedestroy($img);
 
-        $stmt = $this->pdo->prepare("INSERT INTO banners (admin_id, filename, uploaded_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE filename = VALUES(filename), uploaded_at = NOW()");
+        $stmt = $this->pdo->prepare("INSERT INTO banners (admin_id, filename, text, uploaded_at) VALUES (?, ?, NULL, NOW()) ON DUPLICATE KEY UPDATE filename = VALUES(filename), text = NULL, uploaded_at = NOW()");
         $stmt->execute([$this->adminId, $filename]);
     }
 

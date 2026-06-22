@@ -43,6 +43,9 @@
 
     <!-- Utilitaire toast global -->
     <script src="/assets/js/admin/toast.js"></script>
+    <?php if (!empty($_SESSION['pendingToast'])): ?>
+    <script>sessionStorage.setItem('pendingToast', <?= json_encode($_SESSION['pendingToast']) ?>);</script>
+    <?php unset($_SESSION['pendingToast']); endif; ?>
 
     <!-- Gestion des notifications -->
     <script src="/assets/js/admin/notifications.js" defer></script>

@@ -1,5 +1,8 @@
 <section id="accueil">
-    <?php if ($banner): ?>
+    <?php
+    $isDemoBanner = $banner && strpos($banner['filename'] ?? '', 'banner_demo_') === 0;
+    ?>
+    <?php if ($banner && !$isDemoBanner): ?>
         <div class="banner" style="background-image: url('<?= htmlspecialchars($banner['url']) ?>');">
             <div class="banner-content">
                 <h2><?= htmlspecialchars($restaurant->name) ?></h2>

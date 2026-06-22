@@ -91,6 +91,16 @@ class SettingsController extends BaseController
         // Section par défaut
         $section = $_GET['section'] ?? 'profile';
 
+        // SUPER_ADMIN : rediriger si section client inaccessible
+        $adminModel = new Admin($this->pdo);
+        $currentAdmin = $adminModel->findById($_SESSION['admin_id']);
+        $isSuperAdmin = $currentAdmin && ($currentAdmin->role === 'SUPER_ADMIN');
+        $clientOnlySections = ['premium', 'google-reviews', 'stats', 'online-booking', 'delivery', 'subscriptions'];
+        if ($isSuperAdmin && in_array($section, $clientOnlySections)) {
+            header('Location: ?page=settings&section=profile');
+            exit;
+        }
+
         // Récupérer les messages flash en utilisant la méthode du BaseController
         $messages = $this->getFlashMessages();
         $success_message = $messages['success_message'];
@@ -102,18 +112,15 @@ class SettingsController extends BaseController
         $slug = null;
         try {
             $pf = new PremiumFeature($this->pdo);
-            $adminModel = new Admin($this->pdo);
-            $admin = $adminModel->findById($_SESSION['admin_id']);
-            $isSuperAdmin = $admin && ($admin->role === 'SUPER_ADMIN');
 
             $featureKeys = ['google_reviews', 'advanced_analytics', 'online_booking', 'delivery_integration'];
             foreach ($featureKeys as $key) {
                 $premiumFeatureStatuses[$key] = $isSuperAdmin || $pf->isEnabled($_SESSION['admin_id'], $key);
             }
 
-            if ($admin && $admin->restaurant_id) {
+            if ($currentAdmin && $currentAdmin->restaurant_id) {
                 $stmtSlug = $this->pdo->prepare("SELECT slug FROM restaurants WHERE id = ?");
-                $stmtSlug->execute([$admin->restaurant_id]);
+                $stmtSlug->execute([$currentAdmin->restaurant_id]);
                 $slug = $stmtSlug->fetchColumn() ?: null;
             }
         } catch (Exception $e) {
