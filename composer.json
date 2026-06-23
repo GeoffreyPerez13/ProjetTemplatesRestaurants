@@ -1,0 +1,27 @@
+{
+    "name": "menucraft/projet-templates-restaurants",
+    "description": "MenuCraft - Gestion de cartes de restaurants en ligne",
+    "type": "project",
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
+    },
+    "autoload": {
+        "classmap": [
+            "app/Controllers/",
+            "app/Models/",
+            "app/Helpers/",
+            "app/Services/"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:unit": "phpunit --testsuite=Unit",
+        "test:functional": "phpunit --testsuite=Functional",
+        "test:security": "phpunit --testsuite=Security"
+    }
+}

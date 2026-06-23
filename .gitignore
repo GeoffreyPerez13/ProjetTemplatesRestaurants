@@ -22,6 +22,8 @@ error_log
 # --- Dossiers de dépendances
 /vendor/
 node_modules/
+.phpunit.cache/
+composer.phar
 
 # --- Fichiers système ou IDE
 .DS_Store

@@ -1,3 +1,7 @@
+<?php
+/** @var array|null $banner */
+/** @var object $restaurant */
+?>
 <section id="accueil">
     <?php
     $isDemoBanner = $banner && strpos($banner['filename'] ?? '', 'banner_demo_') === 0;
