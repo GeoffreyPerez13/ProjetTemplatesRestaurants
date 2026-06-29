@@ -1,0 +1,3 @@
+# Interdire l'accès direct aux scripts CRON
+# Ces scripts doivent être exécutés uniquement via le planificateur de tâches
+Require all denied

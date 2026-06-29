@@ -1,0 +1,2 @@
+# Interdire l'accès direct aux fichiers SQL
+Require all denied

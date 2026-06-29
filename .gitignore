@@ -50,13 +50,17 @@ public/uploads/
 uploads/
 
 # --- Stockage feedback beta
-storage/
+storage/*
+!storage/.htaccess
 
 # --- Sauvegardes de base de données
 *.sql
 *.sql.gz
 *.sqlite
 *.db
+
+# Exception : schéma SQL versionné pour l'installation
+!database/schema.sql
 
 # --- Fichiers générés ou compilés
 *.zip

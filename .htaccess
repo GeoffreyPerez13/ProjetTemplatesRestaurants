@@ -5,7 +5,7 @@ RewriteEngine On
 RewriteBase /
 
 # Empêcher l'accès direct aux fichiers sensibles
-<FilesMatch "(\.htaccess|config\.php)">
+<FilesMatch "(\.htaccess|config\.php|config\.example\.php|composer\.json|composer\.lock|phpunit\.xml)">
     Require all denied
 </FilesMatch>
 

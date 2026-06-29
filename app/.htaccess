@@ -1,0 +1,3 @@
+# Interdire l'accès direct aux fichiers PHP de l'application
+# Seul public/index.php doit être accessible via le navigateur
+Require all denied
